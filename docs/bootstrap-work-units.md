@@ -46,7 +46,28 @@ Branch: `feat/runtime-identity-tree`
 
 Exit: no recycled slot can alias a retired logical identity.
 
-## WU-0003: Transactions and invalidation
+## WU-0003: Provisional typed IR
+
+Branch: `feat/provisional-typed-ir`
+
+- Research: map the shared schema, specialized construction, source-anchor,
+  keyed-region, value-type, and declared invalidation constraints from the
+  baseline without selecting authoring syntax.
+- Planning: define format and identity scope, validation domains and limits,
+  validation order, immutable output, error anchors, explicit non-goals, and the
+  runtime replacement seam.
+- Implementation: write failing schema, graph, region, value, span, format,
+  identity, limit, and invalidation tests before adding the smallest
+  hand-authored fixture IR.
+- Verification: prove deterministic validation and iteration, dependency
+  direction, unpublished status, and rejection of every invariant class in the
+  versioned malformed-fixture corpus.
+
+Exit: the IR exposes one validated typed construction contract suitable for
+later runtime consumption without a parser, DOM-like representation, or mutable
+runtime state.
+
+## WU-0004: Transactions and invalidation
 
 Branch: `feat/runtime-transactions`
 
@@ -57,11 +78,13 @@ Branch: `feat/runtime-transactions`
 - Implementation: write failing direct-update, keyed-operation, invalidation,
   rollback, and no-op tests before adding transaction behavior.
 - Verification: compare every incremental result with clean reconstruction;
-  prove failed or panicked transactions leave the committed generation intact.
+  use a narrow local reference model, and prove failed or panicked transactions
+  leave the committed generation intact. WU-0005 generalizes the model into the
+  reusable clean-rebuild oracle, seeds, traces, and minimization artifacts.
 
 Exit: all mutation routes produce one validated typed log and one atomic result.
 
-## WU-0004: Test oracles and failure artifacts
+## WU-0005: Test oracles and failure artifacts
 
 Branch: `test/runtime-oracles`
 
@@ -76,7 +99,7 @@ Branch: `test/runtime-oracles`
 
 Exit: an incremental correctness failure is reproducible without private logs.
 
-## WU-0005: Bounded scheduler and fake adapters
+## WU-0006: Bounded scheduler and fake adapters
 
 Branch: `feat/runtime-scheduler`
 
@@ -91,7 +114,25 @@ Branch: `feat/runtime-scheduler`
 
 Exit: no fake workload can create unbounded queued or retired state.
 
-## WU-0006: Headless EXP-0001 spine
+## WU-0007: Provisional typed style program
+
+Branch: `feat/provisional-style-ir`
+
+- Research: map typed properties, exact-target fixture styling, source anchors,
+  schema linking, and invalidation metadata without selecting selectors,
+  cascade, inheritance, or public syntax.
+- Planning: keep style instructions distinct from construction and define one
+  replaceable exact-target program plus typed diagnostics and equivalence data.
+- Implementation: write failing schema-link, target, property, value, duplicate,
+  version, span, and deterministic-order tests before adding the minimum style
+  program needed by the headless fixture.
+- Verification: compare linked defaults and exact assignments with a manual
+  expected result and prove no style parser or runtime state enters the IR.
+
+Exit: construction and style are distinct linked typed programs before the
+headless spine begins, without implying final style-language semantics.
+
+## WU-0008: Headless EXP-0001 spine
 
 Branch: `feat/probe-headless-spine`
 
@@ -106,7 +147,7 @@ Branch: `feat/probe-headless-spine`
 
 Exit: the full headless flow is correct, bounded, observable, and reproducible.
 
-## WU-0007: Disposable native spine
+## WU-0009: Disposable native spine
 
 Branch: `experiment/native-spine`
 
@@ -122,7 +163,7 @@ Branch: `experiment/native-spine`
 
 Exit: the native seam is measurable and replaceable, not selected permanently.
 
-## WU-0008: Typed dual authoring
+## WU-0010: Typed dual authoring
 
 Branch: `experiment/typed-authoring`
 

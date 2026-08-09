@@ -288,19 +288,25 @@ research, planning, implementation, and verification artifacts are specified in
    Linux and Windows CI, and make all packages `publish = false`.
 2. `feat/runtime-identity-tree`: add typed generational IDs and the minimal
    logical tree through failing lifecycle and stale-handle tests first.
-3. `feat/runtime-transactions`: add typed property mutation, keyed fragment
+3. `feat/provisional-typed-ir`: add the minimal bounded, versioned schema,
+   construction fixture, source anchors, keyed-region descriptors, and declared
+   invalidation metadata required by later runtime work.
+4. `feat/runtime-transactions`: add typed property mutation, keyed fragment
    operations, validation, atomic generations, and rollback-on-failure tests.
-4. `test/runtime-oracles`: add clean reconstruction, generated mutation
+5. `test/runtime-oracles`: add clean reconstruction, generated mutation
    sequences, deterministic tracing, and minimized failure artifacts.
-5. `feat/runtime-scheduler`: add the fake platform, fake renderer, bounded
+6. `feat/runtime-scheduler`: add the fake platform, fake renderer, bounded
    mailboxes, reentrant callback rules, and slow-consumer failure injection.
-6. `feat/probe-headless-spine`: assemble the reactive layout board and prove the
+7. `feat/provisional-style-ir`: add the smallest exact-target typed style
+   program required by the fixture while leaving matching and public syntax
+   open.
+8. `feat/probe-headless-spine`: assemble the reactive layout board and prove the
    complete headless data flow.
-7. `experiment/native-spine`: admit one screened windowing and renderer
+9. `experiment/native-spine`: admit one screened windowing and renderer
    candidate behind disposable adapters, retain the minimal geometry projection,
    preserve an owned-surface export route as an early screening criterion, and
    produce the first native frame and environment manifest.
-8. `experiment/typed-authoring`: begin EXP-0007 by validating and evolving the
+10. `experiment/typed-authoring`: begin EXP-0007 by validating and evolving the
    provisional shared schemas, then lower equivalent `.fen` and `ui!` fixtures
    into them after the transaction seam is executable.
 

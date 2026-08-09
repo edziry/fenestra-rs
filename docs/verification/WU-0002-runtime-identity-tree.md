@@ -84,7 +84,7 @@ warnings denied.
 - Tree domains are process-local safety tokens, not stable serialized or trace
   identities.
 - Removed values still run their destructors synchronously after structural
-  retirement. WU-0003 and WU-0005 must keep those destructors outside runtime
+  retirement. WU-0004 and WU-0006 must keep those destructors outside runtime
   locks and callback-forbidden transaction phases.
 - A future trace needs its own opaque, correlatable token because `NodeId(..)`
   intentionally hides identity coordinates.
