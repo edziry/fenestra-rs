@@ -4,11 +4,11 @@ version = 4
 
 [[package]]
 name = "fenestra-ui"
-version = "0.0.0"
+version = "0.1.0"
 
 [[package]]
 name = "fenestra-ui-exp-0001-spine"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "fenestra-ui-ir",
  "fenestra-ui-runtime",
@@ -17,18 +17,18 @@ dependencies = [
 
 [[package]]
 name = "fenestra-ui-ir"
-version = "0.0.0"
+version = "0.1.0"
 
 [[package]]
 name = "fenestra-ui-runtime"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "fenestra-ui-ir",
 ]
 
 [[package]]
 name = "fenestra-ui-testkit"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "fenestra-ui-ir",
  "fenestra-ui-runtime",

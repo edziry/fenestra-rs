@@ -7,3 +7,5 @@ The framework provides its own UI tree, layout, styling, rendering, and native w
 The idea is to keep the useful parts of writing web interfaces without actually shipping a web browser with the application.
 
 Native capture, audio, encoding, and transport are application or ecosystem concerns rather than Fenestra core responsibilities. The Cargo package family uses `fenestra-ui` and `fenestra-ui-*`; its pre-alpha bootstrap is active under the [initial implementation plan](docs/initial-implementation-plan.md).
+
+Workspace packages follow the ratified [pre-1.0 versioning policy](docs/versioning-policy.md): versions use `MAJOR.MINOR.PATCH`, and an intentional pre-1.0 compatibility break advances `MINOR` without requiring a compatibility shim.

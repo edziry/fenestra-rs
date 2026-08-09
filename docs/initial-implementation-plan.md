@@ -3,7 +3,7 @@
 Status: active
 Scope: pre-alpha implementation bootstrap and EXP-0001 execution
 Research baseline: `fenestra-research` commit `176c42139776ed9f1ef879cd135bddadaf12a9da`
-Last updated: 2026-08-08
+Last updated: 2026-08-09
 
 This plan translates the ratified research direction into the smallest useful
 implementation sequence. It does not define a stable public API, select the
@@ -100,7 +100,12 @@ versioned and independently reproducible.
 These items do not block unpublished prototypes, but they block crate
 publication or a stability promise:
 
-1. The selected registry family is `fenestra-ui`. The `fenestra`,
+1. Package versions follow the ratified
+   [pre-1.0 versioning policy](versioning-policy.md). The workspace begins at
+   `0.1.0`; before `1.0.0`, an intentional compatibility break advances
+   `MINOR` and does not require a compatibility shim. `PATCH` remains reserved
+   for changes intended to preserve the current minor contract.
+2. The selected registry family is `fenestra-ui`. The `fenestra`,
    `fenestra-core`, and `fenestra-shell` package names are already used by
    another Rust GUI project; see the existing
    [`fenestra` 0.40.0 package](https://crates.io/crates/fenestra/0.40.0).
@@ -108,17 +113,17 @@ publication or a stability promise:
    identifiers such as `fenestra_ui_runtime`, but set `publish = false`. A local
    name does not reserve its registry entry, so availability and publication
    timing remain explicit release gates.
-2. Choose and version the project license. The repository currently has no
+3. Choose and version the project license. The repository currently has no
    license, so no manifest may imply one.
-3. Separate the pinned development toolchain from the eventual MSRV. The
+4. Separate the pinned development toolchain from the eventual MSRV. The
    bootstrap candidate is
    [Rust 1.97.1](https://blog.rust-lang.org/2026/07/16/Rust-1.97.1/), the
    current stable release when this plan was written. Pin it exactly for
    reproducible development, but leave the public `rust-version` promise open
    until the dependency graph and an explicit MSRV CI lane prove it.
-4. Ratify numeric budgets, environment rows, test owners, and artifact-retention
+5. Ratify numeric budgets, environment rows, test owners, and artifact-retention
    rules before an experiment result is interpreted as pass or fail.
-5. Keep all APIs explicitly unstable until the relevant experiment and
+6. Keep all APIs explicitly unstable until the relevant experiment and
    replacement boundary have evidence.
 
 ## Provisional workspace
@@ -317,7 +322,8 @@ spine as their prerequisite seams become testable.
 
 ## Decisions deliberately left open
 
-- Facade shape, SemVer policy, registry reservation, and publication timing.
+- Facade shape, registry reservation, publication timing, and pre-1.0 release
+  cadence.
 - Final MSRV and stable support cadence.
 - Exact `.fen`, `ui!`, expression, style, selector, and reload syntax.
 - Own runtime components versus reusable reactive machinery.
