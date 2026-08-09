@@ -1,0 +1,145 @@
+# Bootstrap work units
+
+Status: active
+Scope: research, planning, implementation, and verification trail
+Research baseline: `fenestra-research` commit `176c42139776ed9f1ef879cd135bddadaf12a9da`
+Last updated: 2026-08-08
+
+This register makes the four required stages explicit for each work unit in the
+[initial implementation plan](initial-implementation-plan.md). A unit ends with
+one of three recorded results: `pass`, `adapt`, or `stop`. Passing means only
+that the unit met its stated exit criteria; it does not imply product support or
+that a feasibility gate passed.
+
+## WU-0001: Workspace bootstrap
+
+Branch: `build/bootstrap-workspace`
+
+- Research: verify the registry family, current stable Rust release, Cargo 2024
+  behavior, CI runner contract, existing repository state, license absence, and
+  immutable ADR-0001 baseline.
+- Planning: define package ownership, dependency direction, shared lints,
+  toolchain, CI lanes, publication lock, and manifest audit criteria.
+- Implementation: create `fenestra-ui`, `fenestra-ui-ir`,
+  `fenestra-ui-runtime`, `fenestra-ui-testkit`, and
+  `fenestra-ui-exp-0001-spine` as `publish = false` packages with no external
+  dependencies.
+- Verification: run Cargo metadata, format, Clippy, tests, documentation,
+  lockfile, ASCII, file-size, dependency-direction, and Linux checks; require
+  the Windows CI lane before calling cross-platform bootstrap reproducible.
+
+Exit: the workspace is reproducible and contains no accidental public release
+or product behavior.
+
+## WU-0002: Generational identity and logical tree
+
+Branch: `feat/runtime-identity-tree`
+
+- Research: compare the baseline identity invariants with candidate arena and
+  generational-handle techniques; record why reuse is safe and replaceable.
+- Planning: define node ownership, root and parent rules, generation rollover,
+  lifecycle transitions, stale-handle behavior, and model-test sequences.
+- Implementation: start with failing creation, parentage, removal, reuse, and
+  stale-handle tests; add the smallest typed IDs and logical tree that pass.
+- Verification: run unit and generated lifecycle tests, invariant validation,
+  deterministic replay, and Miri when its separate nightly lane exists.
+
+Exit: no recycled slot can alias a retired logical identity.
+
+## WU-0003: Transactions and invalidation
+
+Branch: `feat/runtime-transactions`
+
+- Research: map ADR-0001 direct slots, local keyed fragments, invalidation
+  classes, atomic publication, panic behavior, and clean-rebuild requirements.
+- Planning: define the mutation state machine, validation boundary, rollback,
+  keyed lifecycle, projection dependencies, and expected failure cases.
+- Implementation: write failing direct-update, keyed-operation, invalidation,
+  rollback, and no-op tests before adding transaction behavior.
+- Verification: compare every incremental result with clean reconstruction;
+  prove failed or panicked transactions leave the committed generation intact.
+
+Exit: all mutation routes produce one validated typed log and one atomic result.
+
+## WU-0004: Test oracles and failure artifacts
+
+Branch: `test/runtime-oracles`
+
+- Research: evaluate model testing, deterministic generation, golden artifacts,
+  shrinking, and seed persistence without selecting unnecessary dependencies.
+- Planning: version the fixture, seed, trace, expected-state, and minimized
+  failure schemas plus retention and privacy rules.
+- Implementation: add the testkit clean-rebuild oracle, generated mutation
+  sequences, deterministic traces, and minimized failure records.
+- Verification: inject a known defect, prove the oracle detects it, reproduce it
+  from the stored seed, and confirm minimization preserves the failure.
+
+Exit: an incremental correctness failure is reproducible without private logs.
+
+## WU-0005: Bounded scheduler and fake adapters
+
+Branch: `feat/runtime-scheduler`
+
+- Research: map event-loop affinity, frame backpressure, control-message
+  delivery, reentrancy, clocks, shutdown, and resource-retirement constraints.
+- Planning: define queue capacities in items and bytes, replacement rules,
+  non-droppable controls, callback snapshots, trace fields, and fault outcomes.
+- Implementation: add fake clock, platform, renderer, bounded mailboxes,
+  deferred reentrant mutations, slow completion, loss, and shutdown injection.
+- Verification: stress slow and failed consumers; prove bounds, control ordering,
+  last-committed query semantics, deterministic traces, and idempotent shutdown.
+
+Exit: no fake workload can create unbounded queued or retired state.
+
+## WU-0006: Headless EXP-0001 spine
+
+Branch: `feat/probe-headless-spine`
+
+- Research: map the headless workload to EXP-0001 requirements and record which
+  pending budgets prevent performance or support conclusions.
+- Planning: fix the reactive layout-board fixture, environment manifest, input
+  sequence, expected projections, trace schema, failures, and exit evidence.
+- Implementation: connect typed IR, transactions, logical state, minimal style
+  and geometry, semantics, hit testing, scene rectangles, scheduler, and fakes.
+- Verification: replay the fixture against clean reconstruction and every fault
+  path; record a `pass`, `adapt`, or `stop` result with raw deterministic data.
+
+Exit: the full headless flow is correct, bounded, observable, and reproducible.
+
+## WU-0007: Disposable native spine
+
+Branch: `experiment/native-spine`
+
+- Research: screen windowing and renderer candidates by version, features,
+  maintenance, unsafe surface, license, platform reach, replacement cost, and
+  ability to preserve future owned-surface export.
+- Planning: isolate adapters, select one reference environment, define native
+  callback and capability traces, and state that one run is not platform support.
+- Implementation: replace fake platform and renderer only; retain the minimal
+  geometry projection and keep candidate types out of generic runtime APIs.
+- Verification: run on the named native environment with manifest, trace,
+  resize, scale, input, close, slow render, and failure evidence.
+
+Exit: the native seam is measurable and replaceable, not selected permanently.
+
+## WU-0008: Typed dual authoring
+
+Branch: `experiment/typed-authoring`
+
+- Research: evaluate grammar, proc-macro, build integration, source maps,
+  diagnostics, typed style semantics, runtime contracts, and toolchain costs.
+- Planning: evolve one shared schema and define equivalent `.fen`, `ui!`, and
+  style fixtures with diagnostic, span, build, memory, and behavior criteria.
+- Implementation: lower both construction frontends and typed styles into their
+  distinct linked programs without a production parser or general DOM-like IR.
+- Verification: compare schemas, programs, diagnostics, source spans, direct
+  slots, keyed fragments, observable runtime state, and bounded workflow costs.
+
+Exit: both authoring paths share semantics rather than merely similar syntax.
+
+## Parallel preparation
+
+Layout conformance and mobile-awareness preparation follow the same four stages.
+They remain separate work units before code is added: layout needs a versioned
+geometry oracle and candidate screen; mobile awareness needs an assumption
+inventory and fake lifecycle plan. Neither preparation is a support claim.

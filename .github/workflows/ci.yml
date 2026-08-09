@@ -1,0 +1,68 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: never
+  RUSTUP_TERM_PROGRESS_WHEN: never
+
+jobs:
+  quality:
+    name: quality
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+
+      - name: Install pinned Rust toolchain
+        run: rustup toolchain install
+
+      - name: Report Rust toolchain
+        run: rustup show active-toolchain
+
+      - name: Verify manifests
+        run: cargo metadata --format-version 1 --no-deps --locked
+
+      - name: Check dependency graph
+        run: cargo tree --workspace --edges normal --locked
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+      - name: Run Clippy
+        run: cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+
+      - name: Build documentation
+        run: cargo doc --workspace --all-features --no-deps --locked
+        env:
+          RUSTDOCFLAGS: "-D warnings"
+
+  test:
+    name: test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-24.04
+          - windows-2025
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+
+      - name: Install pinned Rust toolchain
+        run: rustup toolchain install
+
+      - name: Report Rust toolchain
+        run: rustup show active-toolchain
+
+      - name: Build and run tests
+        run: cargo test --workspace --all-targets --all-features --locked
