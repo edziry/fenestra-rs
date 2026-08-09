@@ -32,6 +32,7 @@ u32_symbol!(
     ConstructionFormatVersion,
     "Version of the construction program format."
 );
+u32_symbol!(StyleFormatVersion, "Version of the style program format.");
 u32_symbol!(
     ComponentTypeId,
     "Component symbol local to one validated schema."
@@ -70,3 +71,5 @@ pub const SUPPORTED_SCHEMA_FORMAT: SchemaFormatVersion = SchemaFormatVersion::ne
 /// Construction format understood by this prototype.
 pub const SUPPORTED_CONSTRUCTION_FORMAT: ConstructionFormatVersion =
     ConstructionFormatVersion::new(1);
+/// Style program format understood by this prototype.
+pub const SUPPORTED_STYLE_FORMAT: StyleFormatVersion = StyleFormatVersion::new(1);

@@ -1,0 +1,5 @@
+* text=auto eol=lf
+
+/crates/fenestra-ui-testkit/tests/artifacts/*.txt text eol=lf
+/crates/fenestra-ui-testkit/tests/fixtures/*.txt text eol=lf
+/probes/exp-0001-spine/tests/artifacts/*.txt text eol=lf

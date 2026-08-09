@@ -3,7 +3,7 @@
 Status: active
 Scope: research, planning, implementation, and verification trail
 Research baseline: `fenestra-research` commit `176c42139776ed9f1ef879cd135bddadaf12a9da`
-Last updated: 2026-08-08
+Last updated: 2026-08-09
 
 This register makes the four required stages explicit for each work unit in the
 [initial implementation plan](initial-implementation-plan.md). A unit ends with

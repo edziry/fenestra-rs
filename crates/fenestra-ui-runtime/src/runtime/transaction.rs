@@ -2,7 +2,7 @@ use std::fmt;
 use std::sync::{Arc, Weak};
 
 use fenestra_ui_ir::prototype::{
-    InvalidationSet, PropertyId, PropertyValue, ValidatedConstruction,
+    InvalidationSet, PropertyId, PropertyValue, ValidatedConstruction, ValidatedStyleProgram,
 };
 
 use crate::logical_tree::NodeId;
@@ -12,9 +12,13 @@ use super::capacity::RuntimeCapacity;
 pub(super) use super::commit_control::CommitTestHook;
 use super::commit_control::{CommitCheckpoint, CommitControl};
 use super::error::{
-    CapacityKind, RuntimeInitializationError, TransactionError, TransactionErrorKind,
+    CapacityKind, RuntimeInitializationError, RuntimeInitializationErrorKind, TransactionError,
+    TransactionErrorKind,
 };
 use super::fragment::FragmentId;
+use super::headless::{
+    HeadlessProjectionErrorKind, HeadlessProjectionSpec, HeadlessRuntimeConfig, HeadlessSurface,
+};
 use super::mutation::{MutationIter, MutationRecord};
 use super::state::{RuntimeGeneration, RuntimeState};
 use super::view::CommittedRuntimeSnapshot;
@@ -45,6 +49,9 @@ pub(super) enum Operation {
         fragment: FragmentId,
         key: u64,
     },
+    ResizeHeadless {
+        surface: HeadlessSurface,
+    },
 }
 
 /// Detached bounded mutation plan targeting one exact committed state.
@@ -56,6 +63,10 @@ pub struct UiTransaction {
 }
 
 impl UiTransaction {
+    pub(super) fn operation_count(&self) -> usize {
+        self.operations.len()
+    }
+
     /// Stages one typed direct property update.
     pub fn set_property(
         &mut self,
@@ -119,6 +130,11 @@ impl UiTransaction {
         self.stage(Operation::RemoveKeyed { fragment, key })
     }
 
+    /// Stages one provisional headless surface extent change.
+    pub fn resize_headless(&mut self, surface: HeadlessSurface) -> Result<(), TransactionError> {
+        self.stage(Operation::ResizeHeadless { surface })
+    }
+
     fn stage(&mut self, operation: Operation) -> Result<(), TransactionError> {
         if let Some(error) = self.poison {
             return Err(error);
@@ -140,6 +156,7 @@ impl UiTransaction {
 pub struct UiRuntime {
     pub(super) construction: ValidatedConstruction,
     pub(super) capacity: RuntimeCapacity,
+    pub(super) headless: Option<HeadlessRuntimeConfig>,
     state: Arc<RuntimeState>,
     retired: Vec<Weak<RuntimeState>>,
 }
@@ -154,6 +171,28 @@ impl UiRuntime {
         Ok(Self {
             construction,
             capacity,
+            headless: None,
+            state: Arc::new(state),
+            retired: Vec::new(),
+        })
+    }
+
+    /// Materializes generation zero with a provisional headless projection.
+    pub fn new_headless(
+        style: ValidatedStyleProgram,
+        spec: HeadlessProjectionSpec,
+        surface: HeadlessSurface,
+        capacity: RuntimeCapacity,
+    ) -> Result<Self, RuntimeInitializationError> {
+        let construction = style.construction().clone();
+        let headless = HeadlessRuntimeConfig::new(style, spec, surface).map_err(|kind| {
+            RuntimeInitializationError::new(RuntimeInitializationErrorKind::Headless(kind))
+        })?;
+        let state = RuntimeState::initialize_headless(&construction, capacity, &headless, surface)?;
+        Ok(Self {
+            construction,
+            capacity,
+            headless: Some(headless),
             state: Arc::new(state),
             retired: Vec::new(),
         })
@@ -200,24 +239,49 @@ impl UiRuntime {
 
         let mut draft = transaction.base.fork_for_transaction();
         control.panic_if(CommitCheckpoint::Draft);
-        let mut records = self.apply_operations(&mut draft, transaction.operations)?;
+        let mut applied = self.apply_operations(&mut draft, transaction.operations)?;
         control.panic_if(CommitCheckpoint::Apply);
         control.before_validation(&mut draft);
         draft
             .validate(&self.construction, self.capacity)
             .map_err(|()| TransactionError::new(TransactionErrorKind::InvariantViolation, None))?;
         control.panic_if(CommitCheckpoint::Validation);
-        records.retain(MutationRecord::is_effective);
-        let invalidation = records.iter().fold(InvalidationSet::NONE, |set, record| {
-            set.union(record.invalidation())
-        });
-        if records.is_empty() {
+        applied.records.retain(MutationRecord::is_effective);
+        let invalidation = applied
+            .records
+            .iter()
+            .fold(InvalidationSet::NONE, |set, record| {
+                set.union(record.invalidation())
+            });
+        if applied.records.is_empty() {
             return Ok(CommitReceipt {
                 generation: self.state.generation,
-                records,
+                records: applied.records,
                 invalidation,
                 _retired_generation: None,
             });
+        }
+
+        if let Some(headless) = &self.headless {
+            let surface = applied.candidate_surface().ok_or_else(|| {
+                TransactionError::new(TransactionErrorKind::InvariantViolation, None)
+            })?;
+            draft
+                .rebuild_headless_projection(headless, surface)
+                .map_err(|failure| {
+                    let operation_index = match failure.kind() {
+                        HeadlessProjectionErrorKind::InvalidSurface => {
+                            applied.surface_operation_index()
+                        }
+                        _ => failure
+                            .cause()
+                            .and_then(|(node, property)| applied.operation_index(node, property)),
+                    };
+                    TransactionError::new(
+                        TransactionErrorKind::Headless(failure.kind()),
+                        operation_index,
+                    )
+                })?;
         }
 
         self.retired.retain(|state| state.strong_count() != 0);
@@ -245,7 +309,7 @@ impl UiRuntime {
         self.retired.push(Arc::downgrade(&previous));
         Ok(CommitReceipt {
             generation,
-            records,
+            records: applied.records,
             invalidation,
             _retired_generation: Some(previous),
         })

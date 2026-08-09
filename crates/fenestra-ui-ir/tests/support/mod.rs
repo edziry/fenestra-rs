@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+pub mod construction_faults;
 mod limits;
 pub mod malformed;
 

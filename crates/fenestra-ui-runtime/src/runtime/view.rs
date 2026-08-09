@@ -9,6 +9,7 @@ use fenestra_ui_ir::prototype::{
 use crate::logical_tree::NodeId;
 
 use super::fragment::{FragmentId, KeyedMember};
+use super::headless::HeadlessProjectionView;
 use super::state::{RuntimeGeneration, RuntimeState};
 
 /// Immutable handle to one exact committed logical runtime generation.
@@ -73,6 +74,15 @@ impl CommittedRuntimeSnapshot {
             .iter()
             .find(|slot| slot.id == property)
             .map(|slot| &slot.value)
+    }
+
+    /// Returns the optional headless projection for this exact generation.
+    #[must_use]
+    pub fn headless_projection(&self) -> Option<HeadlessProjectionView<'_>> {
+        self.state
+            .headless
+            .as_ref()
+            .map(|state| HeadlessProjectionView::new(state, self.state.generation))
     }
 
     /// Returns a live non-root node's parent.

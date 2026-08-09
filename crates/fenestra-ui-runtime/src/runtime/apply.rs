@@ -6,8 +6,13 @@ use crate::logical_tree::NodeId;
 
 use super::change::{StateEditError, StructuralTracker};
 use super::error::{TransactionError, TransactionErrorKind};
+use super::expand::ExpansionContext;
 use super::fragment::FragmentId;
-use super::mutation::{KeyInsert, KeyMove, KeyRemove, MutationRecord, PropertyChange};
+use super::headless::HeadlessSurface;
+use super::mutation::{
+    HeadlessSurfaceChange, KeyInsert, KeyMove, KeyRemove, ManifestItem, MutationRecord,
+    PropertyChange,
+};
 use super::state::RuntimeState;
 use super::transaction::{Operation, UiRuntime};
 
@@ -16,7 +21,44 @@ struct DraftApplication<'a> {
     state: &'a mut RuntimeState,
     records: Vec<MutationRecord>,
     property_records: HashMap<(NodeId, PropertyId), usize>,
+    property_sources: HashMap<(NodeId, PropertyId), usize>,
+    created_sources: HashMap<NodeId, usize>,
+    candidate_surface: Option<HeadlessSurface>,
+    surface_record: Option<usize>,
+    surface_source: Option<usize>,
     structural: StructuralTracker,
+}
+
+pub(super) struct AppliedDraft {
+    pub(super) records: Vec<MutationRecord>,
+    property_sources: HashMap<(NodeId, PropertyId), usize>,
+    created_sources: HashMap<NodeId, usize>,
+    candidate_surface: Option<HeadlessSurface>,
+    surface_source: Option<usize>,
+}
+
+impl AppliedDraft {
+    pub(super) fn operation_index(&self, node: NodeId, property: PropertyId) -> Option<usize> {
+        let retained_property = self.records.iter().any(|record| {
+            matches!(
+                record,
+                MutationRecord::PropertyChanged(change)
+                    if change.node == node && change.property == property
+            )
+        });
+        retained_property
+            .then(|| self.property_sources.get(&(node, property)).copied())
+            .flatten()
+            .or_else(|| self.created_sources.get(&node).copied())
+    }
+
+    pub(super) const fn candidate_surface(&self) -> Option<HeadlessSurface> {
+        self.candidate_surface
+    }
+
+    pub(super) const fn surface_operation_index(&self) -> Option<usize> {
+        self.surface_source
+    }
 }
 
 impl UiRuntime {
@@ -24,18 +66,30 @@ impl UiRuntime {
         &self,
         state: &mut RuntimeState,
         operations: Vec<Operation>,
-    ) -> Result<Vec<MutationRecord>, TransactionError> {
+    ) -> Result<AppliedDraft, TransactionError> {
+        let candidate_surface = state.headless_surface();
         let mut application = DraftApplication {
             runtime: self,
             state,
             records: Vec::new(),
             property_records: HashMap::new(),
+            property_sources: HashMap::new(),
+            created_sources: HashMap::new(),
+            candidate_surface,
+            surface_record: None,
+            surface_source: None,
             structural: StructuralTracker::new(self.capacity.structural_changes()),
         };
         for (index, operation) in operations.into_iter().enumerate() {
             application.apply(operation, index)?;
         }
-        Ok(application.records)
+        Ok(AppliedDraft {
+            records: application.records,
+            property_sources: application.property_sources,
+            created_sources: application.created_sources,
+            candidate_surface: application.candidate_surface,
+            surface_source: application.surface_source,
+        })
     }
 }
 
@@ -64,7 +118,45 @@ impl DraftApplication<'_> {
                 value,
             } => self.keyed_property(fragment, key, property, value, index),
             Operation::RemoveKeyed { fragment, key } => self.remove(fragment, key, index),
+            Operation::ResizeHeadless { surface } => self.resize(surface, index),
         }
+    }
+
+    fn resize(
+        &mut self,
+        surface: HeadlessSurface,
+        operation_index: usize,
+    ) -> Result<(), TransactionError> {
+        let old_surface = self.candidate_surface.ok_or_else(|| {
+            TransactionError::new(
+                TransactionErrorKind::HeadlessUnavailable,
+                Some(operation_index),
+            )
+        })?;
+        if old_surface == surface {
+            return Ok(());
+        }
+        if let Some(record_index) = self.surface_record {
+            let MutationRecord::HeadlessSurfaceChanged(change) = &mut self.records[record_index]
+            else {
+                return Err(TransactionError::new(
+                    TransactionErrorKind::InvariantViolation,
+                    None,
+                ));
+            };
+            change.new_surface = surface;
+        } else {
+            self.surface_record = Some(self.records.len());
+            self.records.push(MutationRecord::HeadlessSurfaceChanged(
+                HeadlessSurfaceChange {
+                    old_surface,
+                    new_surface: surface,
+                },
+            ));
+        }
+        self.candidate_surface = Some(surface);
+        self.surface_source = Some(operation_index);
+        Ok(())
     }
 
     fn property(
@@ -123,6 +215,8 @@ impl DraftApplication<'_> {
                     invalidation,
                 }));
         }
+        self.property_sources
+            .insert((node, property), operation_index);
         Ok(())
     }
 
@@ -149,10 +243,12 @@ impl DraftApplication<'_> {
             ));
         }
         let invalidation = self.region_invalidation(stored.descriptor)?;
+        let expansion =
+            ExpansionContext::new(&self.runtime.construction, self.runtime.headless.as_ref());
         let (root, created) = self
             .state
             .insert_member(
-                &self.runtime.construction,
+                expansion,
                 self.runtime.capacity,
                 &mut self.structural,
                 fragment,
@@ -160,6 +256,11 @@ impl DraftApplication<'_> {
                 final_index,
             )
             .map_err(|error| Self::edit_error(error, operation_index))?;
+        for item in &created {
+            if let ManifestItem::Node(node) = item {
+                self.created_sources.insert(*node, operation_index);
+            }
+        }
         self.records.push(MutationRecord::KeyInserted(KeyInsert {
             fragment,
             key,
@@ -286,6 +387,9 @@ impl DraftApplication<'_> {
                 TransactionErrorKind::CapacityExceeded(kind),
                 Some(operation_index),
             ),
+            StateEditError::Headless(kind) => {
+                TransactionError::new(TransactionErrorKind::Headless(kind), Some(operation_index))
+            }
             StateEditError::Invariant => {
                 TransactionError::new(TransactionErrorKind::InvariantViolation, None)
             }

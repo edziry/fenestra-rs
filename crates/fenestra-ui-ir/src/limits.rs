@@ -114,3 +114,21 @@ impl ValidationLimits {
         ),
     );
 }
+
+/// Inclusive resource limits applied while validating provisional style IR.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct StyleValidationLimits {
+    assignments: usize,
+}
+
+impl StyleValidationLimits {
+    /// Creates an explicit inclusive style-assignment limit.
+    #[must_use]
+    pub const fn new(assignments: usize) -> Self {
+        Self { assignments }
+    }
+
+    pub(crate) const fn assignments(self) -> usize {
+        self.assignments
+    }
+}

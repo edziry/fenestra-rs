@@ -1,11 +1,10 @@
 use std::collections::HashSet;
 
-use fenestra_ui_ir::prototype::ValidatedConstruction;
-
 use crate::logical_tree::NodeId;
 
 use super::capacity::RuntimeCapacity;
 use super::change::{StateEditError, StructuralTracker};
+use super::expand::ExpansionContext;
 use super::fragment::{FragmentId, KeyedMember};
 use super::mutation::ManifestItem;
 use super::state::{ChildGroup, RuntimeState};
@@ -19,7 +18,7 @@ enum RetireTask {
 impl RuntimeState {
     pub(crate) fn insert_member(
         &mut self,
-        construction: &ValidatedConstruction,
+        expansion: ExpansionContext<'_>,
         capacity: RuntimeCapacity,
         structural: &mut StructuralTracker,
         fragment: FragmentId,
@@ -31,14 +30,15 @@ impl RuntimeState {
             .get(fragment)
             .ok_or(StateEditError::Invariant)?;
         let owner = stored.owner;
-        let repeat_body = construction
+        let repeat_body = expansion
+            .construction()
             .region(stored.descriptor)
             .ok_or(StateEditError::Invariant)?
             .repeat_body();
         let footprint = Self::factory_footprint(repeat_body);
-        self.preflight_created(footprint, capacity, structural)?;
+        self.preflight_created(footprint, capacity, expansion, structural)?;
         let mut manifest = Vec::with_capacity(footprint.structural()?);
-        let value = self.build_expanded_node(repeat_body)?;
+        let value = self.build_expanded_node(repeat_body, expansion)?;
         let root = self
             .tree
             .append_child(owner, value)
@@ -53,7 +53,7 @@ impl RuntimeState {
         self.tree
             .reorder_direct_child(owner, root, flat_index)
             .map_err(|()| StateEditError::Invariant)?;
-        self.populate_expansion(root, repeat_body, &mut Some(&mut manifest))?;
+        self.populate_expansion(root, repeat_body, expansion, &mut Some(&mut manifest))?;
         Ok((root, manifest))
     }
 

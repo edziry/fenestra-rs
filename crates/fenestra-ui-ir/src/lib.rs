@@ -12,6 +12,7 @@ mod invalidation;
 mod limits;
 mod schema;
 mod source;
+mod style;
 mod validated;
 mod validation;
 mod value;
@@ -25,18 +26,21 @@ pub mod prototype {
     pub use crate::error::{IrValidationError, IrValidationErrorKind, ValidationLimitKind};
     pub use crate::ids::{
         ComponentTypeId, ConstructionFormatVersion, PropertyId, SUPPORTED_CONSTRUCTION_FORMAT,
-        SUPPORTED_SCHEMA_FORMAT, SchemaFormatVersion, SchemaNamespace, SchemaRevision, SourceId,
-        StructuralRegionId, TemplateNodeId,
+        SUPPORTED_SCHEMA_FORMAT, SUPPORTED_STYLE_FORMAT, SchemaFormatVersion, SchemaNamespace,
+        SchemaRevision, SourceId, StructuralRegionId, StyleFormatVersion, TemplateNodeId,
     };
     pub use crate::invalidation::{InvalidationClass, InvalidationIter, InvalidationSet};
-    pub use crate::limits::ValidationLimits;
+    pub use crate::limits::{StyleValidationLimits, ValidationLimits};
     pub use crate::schema::{ComponentSchema, PropertySchema, SchemaManifest};
     pub use crate::source::SourceSpan;
+    pub use crate::style::{StyleAssignment, StyleProgram};
     pub use crate::validated::{
         ChildFactory, ChildFactoryIter, ComponentPropertiesIter, ComponentSchemaView,
         InitialKeyIter, InitialKeyView, InitialPropertyIter, InitialPropertyView,
-        PropertySchemaView, RegionFactory, TemplateFactory, ValidatedConstruction, ValidatedSchema,
+        LinkedStyleValueView, PropertySchemaView, RegionFactory, StyleAssignmentIter,
+        StyleAssignmentView, StyleValueOrigin, TemplateFactory, ValidatedConstruction,
+        ValidatedSchema, ValidatedStyleProgram,
     };
-    pub use crate::validation::{validate_construction, validate_schema};
+    pub use crate::validation::{validate_construction, validate_schema, validate_style};
     pub use crate::value::{InputPolicy, PropertyValue, ValueType};
 }

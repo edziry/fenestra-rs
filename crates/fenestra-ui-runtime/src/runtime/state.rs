@@ -9,6 +9,7 @@ use crate::logical_tree::{LogicalTree, NodeId};
 
 use super::capacity::RuntimeCapacity;
 use super::fragment::{FragmentId, FragmentStore};
+use super::headless::HeadlessProjectionState;
 
 /// Monotonic identity of one committed logical runtime state.
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -54,6 +55,7 @@ pub(crate) struct RuntimeState {
     pub(crate) tree: LogicalTree<RuntimeNode>,
     pub(crate) fragments: FragmentStore,
     pub(crate) property_slot_count: usize,
+    pub(crate) headless: Option<HeadlessProjectionState>,
 }
 
 impl RuntimeState {
@@ -103,6 +105,7 @@ impl RuntimeState {
             tree: self.tree.fork_for_transaction(),
             fragments: self.fragments.fork_for_transaction(),
             property_slot_count: self.property_slot_count,
+            headless: self.headless.clone(),
         }
     }
 

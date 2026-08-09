@@ -1,7 +1,9 @@
 use super::error::CapacityKind;
+use super::headless::HeadlessProjectionErrorKind;
 
 pub(crate) enum StateEditError {
     Capacity(CapacityKind),
+    Headless(HeadlessProjectionErrorKind),
     Invariant,
 }
 

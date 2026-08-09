@@ -1,9 +1,11 @@
 mod construction;
 mod graph;
 mod schema;
+mod style;
 
 pub use construction::validate_construction;
 pub use schema::validate_schema;
+pub use style::validate_style;
 
 use crate::error::{IrValidationError, IrValidationErrorKind, ValidationLimitKind};
 use crate::source::SourceSpan;

@@ -1,4 +1,6 @@
-use fenestra_ui_ir::prototype::{ChildFactory, TemplateFactory};
+use fenestra_ui_ir::prototype::{
+    ChildFactory, PropertyId, PropertyValue, TemplateFactory, ValidatedConstruction,
+};
 
 use crate::logical_tree::NodeId;
 
@@ -6,8 +8,52 @@ use super::capacity::RuntimeCapacity;
 use super::change::{StateEditError, StructuralTracker};
 use super::error::CapacityKind;
 use super::fragment::{Fragment, FragmentId, KeyedMember};
+use super::headless::{HeadlessProjectionErrorKind, HeadlessRuntimeConfig};
 use super::mutation::ManifestItem;
 use super::state::{ChildGroup, PropertySlot, RuntimeNode, RuntimeState};
+
+#[derive(Clone, Copy)]
+pub(crate) struct ExpansionContext<'a> {
+    construction: &'a ValidatedConstruction,
+    headless: Option<&'a HeadlessRuntimeConfig>,
+}
+
+impl<'a> ExpansionContext<'a> {
+    pub(crate) const fn new(
+        construction: &'a ValidatedConstruction,
+        headless: Option<&'a HeadlessRuntimeConfig>,
+    ) -> Self {
+        Self {
+            construction,
+            headless,
+        }
+    }
+
+    pub(crate) const fn construction(self) -> &'a ValidatedConstruction {
+        self.construction
+    }
+
+    fn preflight_fixed_records(
+        self,
+        projected_nodes: Option<usize>,
+    ) -> Result<(), HeadlessProjectionErrorKind> {
+        match self.headless {
+            Some(config) => config.preflight_fixed_records(projected_nodes),
+            None => Ok(()),
+        }
+    }
+
+    fn materialized_value(
+        self,
+        template: TemplateFactory<'_>,
+        property: PropertyId,
+    ) -> Option<PropertyValue> {
+        match self.headless {
+            Some(config) => config.materialized_value(template, property),
+            None => template.effective_value(property).cloned(),
+        }
+    }
+}
 
 #[derive(Clone, Copy)]
 pub(crate) struct FactoryFootprint {
@@ -54,6 +100,12 @@ impl MeasuredCount {
             || current
                 .checked_add(self.value)
                 .is_none_or(|total| total > limit)
+    }
+
+    fn projected(self, current: usize) -> Option<usize> {
+        (!self.overflowed)
+            .then(|| current.checked_add(self.value))
+            .flatten()
     }
 }
 
@@ -128,14 +180,18 @@ impl RuntimeState {
         &self,
         footprint: FactoryFootprint,
         capacity: RuntimeCapacity,
+        expansion: ExpansionContext<'_>,
         structural: &mut StructuralTracker,
     ) -> Result<(), StateEditError> {
         let created = footprint.structural_count();
         if created.overflowed || created.value > structural.remaining() {
             return Err(StateEditError::Capacity(CapacityKind::StructuralChanges));
         }
-        structural.reserve(created.value)?;
-        self.check_live_footprint(footprint, capacity)
+        self.check_live_footprint(footprint, capacity)?;
+        expansion
+            .preflight_fixed_records(footprint.nodes.projected(self.tree.len()))
+            .map_err(StateEditError::Headless)?;
+        structural.reserve(created.value)
     }
 
     fn check_live_footprint(
@@ -167,17 +223,18 @@ impl RuntimeState {
     pub(crate) fn build_expanded_node(
         &mut self,
         template: TemplateFactory<'_>,
+        expansion: ExpansionContext<'_>,
     ) -> Result<RuntimeNode, StateEditError> {
         let component = template.component();
         let properties = component
             .properties()
             .map(|property| {
+                let value = expansion
+                    .materialized_value(template, property.id())
+                    .ok_or(StateEditError::Invariant)?;
                 Ok(PropertySlot {
                     id: property.id(),
-                    value: template
-                        .effective_value(property.id())
-                        .ok_or(StateEditError::Invariant)?
-                        .clone(),
+                    value,
                     invalidation: property.invalidation(),
                 })
             })
@@ -198,6 +255,7 @@ impl RuntimeState {
         &mut self,
         root: NodeId,
         root_factory: TemplateFactory<'a>,
+        expansion: ExpansionContext<'_>,
         manifest: &mut Option<&mut Vec<ManifestItem>>,
     ) -> Result<(), StateEditError> {
         let mut pending = vec![PopulateTask::Node {
@@ -222,7 +280,7 @@ impl RuntimeState {
                     });
                     match child {
                         ChildFactory::Static { template, .. } => {
-                            let value = self.build_expanded_node(template)?;
+                            let value = self.build_expanded_node(template, expansion)?;
                             let child_node = self
                                 .tree
                                 .append_child(node, value)
@@ -280,7 +338,7 @@ impl RuntimeState {
                         .get(fragment)
                         .map(|stored| stored.owner)
                         .ok_or(StateEditError::Invariant)?;
-                    let value = self.build_expanded_node(repeat_body)?;
+                    let value = self.build_expanded_node(repeat_body, expansion)?;
                     let member = self
                         .tree
                         .append_child(owner, value)

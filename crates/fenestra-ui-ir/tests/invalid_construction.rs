@@ -2,53 +2,12 @@ mod support;
 
 use fenestra_ui_ir::prototype::{IrValidationErrorKind, validate_construction, validate_schema};
 
+use support::construction_faults::CONSTRUCTION_FAULTS;
 use support::malformed::{Fault, malformed_fixture};
 
 #[test]
 fn malformed_fixture_corpus_covers_every_error_kind_and_span() {
-    let cases = [
-        Fault::UnsupportedSchemaFormat,
-        Fault::UnsupportedConstructionFormat,
-        Fault::SchemaIdentityMismatch,
-        Fault::InvalidSourceSpan,
-        Fault::DuplicateComponent,
-        Fault::DuplicateProperty,
-        Fault::PropertyDefaultTypeMismatch,
-        Fault::EmptyPropertyInvalidation,
-        Fault::InvalidPropertyInvalidation,
-        Fault::DuplicateNode,
-        Fault::DuplicateInitialProperty,
-        Fault::UnknownInitialProperty,
-        Fault::InitialPropertyTypeMismatch,
-        Fault::DuplicateRegion,
-        Fault::MissingComponent,
-        Fault::MissingStaticChild,
-        Fault::MissingRegion,
-        Fault::MissingRegionOwner,
-        Fault::RegionOwnerMismatch,
-        Fault::DuplicateRegionPlacement,
-        Fault::MissingRegionTemplate,
-        Fault::UnplacedRegion,
-        Fault::DuplicateNodeOwner,
-        Fault::InvalidRootCount,
-        Fault::OwnershipCycle,
-        Fault::DuplicateRegionKey,
-        Fault::InvalidRegionInvalidation,
-        Fault::LimitComponents,
-        Fault::LimitProperties,
-        Fault::LimitTemplates,
-        Fault::LimitRegions,
-        Fault::LimitChildSlots,
-        Fault::LimitInitialProperties,
-        Fault::LimitInitialKeys,
-        Fault::LimitTemplateDepth,
-        Fault::LimitInitialInstances,
-    ];
-
-    let expected_kinds = cases.map(|fault| malformed_fixture(fault).3);
-    assert_eq!(expected_kinds, IrValidationErrorKind::ALL);
-
-    for fault in cases {
+    for fault in CONSTRUCTION_FAULTS {
         let (manifest, program, limits, expected_kind, expected_span) = malformed_fixture(fault);
         let error = match validate_schema(manifest, limits) {
             Ok(schema) => validate_construction(&schema, program, limits)

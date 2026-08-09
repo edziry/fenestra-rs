@@ -24,6 +24,8 @@ pub enum ValidationLimitKind {
     TemplateDepth,
     /// Initially expanded template instances.
     InitialInstances,
+    /// Exact style assignments.
+    StyleAssignments,
 }
 
 impl ValidationLimitKind {
@@ -38,6 +40,7 @@ impl ValidationLimitKind {
             Self::InitialKeys => "initial-keys",
             Self::TemplateDepth => "template-depth",
             Self::InitialInstances => "initial-instances",
+            Self::StyleAssignments => "style-assignments",
         }
     }
 }
@@ -49,7 +52,7 @@ pub enum IrValidationErrorKind {
     UnsupportedSchemaFormat,
     /// Unsupported construction program format.
     UnsupportedConstructionFormat,
-    /// Construction and schema authored identities differ.
+    /// A linked program and schema authored identities differ.
     SchemaIdentityMismatch,
     /// A concrete byte span has its bounds inverted.
     InvalidSourceSpan,
@@ -99,13 +102,23 @@ pub enum IrValidationErrorKind {
     DuplicateRegionKey,
     /// A region has an invalid structural invalidation declaration.
     InvalidRegionInvalidation,
+    /// Unsupported exact-target style program format.
+    UnsupportedStyleFormat,
+    /// A style assignment names an absent construction template.
+    MissingStyleTarget,
+    /// A style assignment names no property on its target component.
+    UnknownStyleProperty,
+    /// A style value does not match its target property's type.
+    StylePropertyTypeMismatch,
+    /// A target-property pair is assigned more than once.
+    DuplicateStyleAssignment,
     /// A bounded validation resource was exceeded.
     LimitExceeded(ValidationLimitKind),
 }
 
 impl IrValidationErrorKind {
     /// Every concrete error kind, including each typed limit category.
-    pub const ALL: [Self; 36] = [
+    pub const ALL: [Self; 42] = [
         Self::UnsupportedSchemaFormat,
         Self::UnsupportedConstructionFormat,
         Self::SchemaIdentityMismatch,
@@ -142,6 +155,12 @@ impl IrValidationErrorKind {
         Self::LimitExceeded(ValidationLimitKind::InitialKeys),
         Self::LimitExceeded(ValidationLimitKind::TemplateDepth),
         Self::LimitExceeded(ValidationLimitKind::InitialInstances),
+        Self::UnsupportedStyleFormat,
+        Self::MissingStyleTarget,
+        Self::UnknownStyleProperty,
+        Self::StylePropertyTypeMismatch,
+        Self::DuplicateStyleAssignment,
+        Self::LimitExceeded(ValidationLimitKind::StyleAssignments),
     ];
 
     const fn as_str(self) -> &'static str {
@@ -173,6 +192,11 @@ impl IrValidationErrorKind {
             Self::OwnershipCycle => "ownership-cycle",
             Self::DuplicateRegionKey => "duplicate-region-key",
             Self::InvalidRegionInvalidation => "invalid-region-invalidation",
+            Self::UnsupportedStyleFormat => "unsupported-style-format",
+            Self::MissingStyleTarget => "missing-style-target",
+            Self::UnknownStyleProperty => "unknown-style-property",
+            Self::StylePropertyTypeMismatch => "style-property-type-mismatch",
+            Self::DuplicateStyleAssignment => "duplicate-style-assignment",
             Self::LimitExceeded(_) => "limit-exceeded",
         }
     }

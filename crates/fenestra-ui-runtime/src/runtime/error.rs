@@ -1,6 +1,8 @@
 use std::error::Error;
 use std::fmt;
 
+use super::headless::HeadlessProjectionErrorKind;
+
 /// Bounded resource categories in deterministic diagnostic order.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum CapacityKind {
@@ -35,6 +37,8 @@ impl CapacityKind {
 pub enum RuntimeInitializationErrorKind {
     /// An explicit runtime capacity would be exceeded.
     CapacityExceeded(CapacityKind),
+    /// A provisional headless specification or projection failed.
+    Headless(HeadlessProjectionErrorKind),
     /// The materialized runtime state violated an internal invariant.
     InvariantViolation,
 }
@@ -79,6 +83,10 @@ impl Error for RuntimeInitializationError {}
 pub enum TransactionErrorKind {
     /// An explicit capacity would be exceeded.
     CapacityExceeded(CapacityKind),
+    /// Provisional headless projection work failed.
+    Headless(HeadlessProjectionErrorKind),
+    /// A headless-only operation targeted an ordinary runtime.
+    HeadlessUnavailable,
     /// The transaction no longer targets the exact committed base.
     StaleBase,
     /// A node identity is absent, foreign, or stale.

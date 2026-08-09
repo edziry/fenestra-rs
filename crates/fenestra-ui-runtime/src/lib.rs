@@ -14,10 +14,19 @@ mod runtime;
 pub mod prototype {
     pub use crate::logical_tree::{LogicalTree, NodeId, TreeError, TreeInvariantError};
     pub use crate::runtime::{
-        CapacityKind, CommitReceipt, CommittedRuntimeSnapshot, FragmentId, KeyInsertView,
-        KeyMoveView, KeyRemoveView, KeyedMemberIter, ManifestEntry, ManifestIter, MutationIter,
-        MutationRecordView, PropertyChangeView, RuntimeCapacity, RuntimeGeneration,
-        RuntimeInitializationError, RuntimeInitializationErrorKind, TransactionError,
-        TransactionErrorKind, UiRuntime, UiTransaction,
+        CallbackFinish, CallbackScope, CapacityKind, CommitReceipt, CommittedRuntimeSnapshot,
+        CompletionWatermark, ComputedStyleView, ControlAdmission, ControlSequence, FragmentId,
+        FrameId, FrameWork, HeadlessGeometryView, HeadlessHitRegionView, HeadlessPoint,
+        HeadlessProjectionCapacity, HeadlessProjectionErrorKind, HeadlessProjectionLimitKind,
+        HeadlessProjectionSpec, HeadlessProjectionView, HeadlessRect, HeadlessSceneRectangleView,
+        HeadlessSemanticAction, HeadlessSemanticRole, HeadlessSemanticView, HeadlessSurface,
+        HeadlessSurfaceChangeView, KeyInsertView, KeyMoveView, KeyRemoveView, KeyedMemberIter,
+        ManifestEntry, ManifestIter, MutationIter, MutationRecordView, NestedCallbackScope,
+        PropertyChangeView, QueueCapacity, QueueStats, RendererEpoch, RuntimeCapacity,
+        RuntimeGeneration, RuntimeInitializationError, RuntimeInitializationErrorKind,
+        ScheduledCommit, SchedulerAction, SchedulerCapacity, SchedulerError, SchedulerErrorKind,
+        SchedulerInput, SchedulerInputResult, SchedulerLane, SchedulerState, SchedulerStats,
+        SchedulerTick, SubmissionId, TransactionError, TransactionErrorKind, UiRuntime,
+        UiScheduler, UiTransaction, VisualCancelResult,
     };
 }

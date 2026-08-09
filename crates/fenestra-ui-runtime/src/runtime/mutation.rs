@@ -1,11 +1,20 @@
 use std::fmt;
 use std::slice;
 
-use fenestra_ui_ir::prototype::{InvalidationSet, PropertyId, PropertyValue};
+use fenestra_ui_ir::prototype::{InvalidationClass, InvalidationSet, PropertyId, PropertyValue};
 
 use crate::logical_tree::NodeId;
 
 use super::fragment::FragmentId;
+use super::headless::HeadlessSurface;
+
+const HEADLESS_RESIZE_INVALIDATION: InvalidationSet = InvalidationSet::NONE
+    .union(InvalidationSet::from_class(InvalidationClass::Surface))
+    .union(InvalidationSet::from_class(InvalidationClass::Layout))
+    .union(InvalidationSet::from_class(InvalidationClass::HitTest))
+    .union(InvalidationSet::from_class(InvalidationClass::Semantics))
+    .union(InvalidationSet::from_class(InvalidationClass::Paint))
+    .union(InvalidationSet::from_class(InvalidationClass::Composition));
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct PropertyChange {
@@ -52,12 +61,25 @@ pub(crate) struct KeyRemove {
     pub(crate) invalidation: InvalidationSet,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) struct HeadlessSurfaceChange {
+    pub(crate) old_surface: HeadlessSurface,
+    pub(crate) new_surface: HeadlessSurface,
+}
+
+impl HeadlessSurfaceChange {
+    pub(crate) const fn invalidation(self) -> InvalidationSet {
+        HEADLESS_RESIZE_INVALIDATION
+    }
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) enum MutationRecord {
     PropertyChanged(PropertyChange),
     KeyInserted(KeyInsert),
     KeyMoved(KeyMove),
     KeyRemoved(KeyRemove),
+    HeadlessSurfaceChanged(HeadlessSurfaceChange),
 }
 
 impl MutationRecord {
@@ -67,12 +89,14 @@ impl MutationRecord {
             Self::KeyInserted(insert) => insert.invalidation,
             Self::KeyMoved(movement) => movement.invalidation,
             Self::KeyRemoved(removal) => removal.invalidation,
+            Self::HeadlessSurfaceChanged(change) => change.invalidation(),
         }
     }
 
     pub(crate) fn is_effective(&self) -> bool {
         match self {
             Self::PropertyChanged(change) => change.old_value != change.new_value,
+            Self::HeadlessSurfaceChanged(change) => change.old_surface != change.new_surface,
             Self::KeyInserted(_) | Self::KeyMoved(_) | Self::KeyRemoved(_) => true,
         }
     }
@@ -89,6 +113,8 @@ pub enum MutationRecordView<'a> {
     KeyMoved(KeyMoveView<'a>),
     /// A keyed member and its nested expansion were retired.
     KeyRemoved(KeyRemoveView<'a>),
+    /// The provisional headless surface extent changed.
+    HeadlessSurfaceChanged(HeadlessSurfaceChangeView<'a>),
 }
 
 impl fmt::Debug for MutationRecordView<'_> {
@@ -98,6 +124,7 @@ impl fmt::Debug for MutationRecordView<'_> {
             Self::KeyInserted(_) => "KeyInserted",
             Self::KeyMoved(_) => "KeyMoved",
             Self::KeyRemoved(_) => "KeyRemoved",
+            Self::HeadlessSurfaceChanged(_) => "HeadlessSurfaceChanged",
         };
         formatter.write_str(kind)
     }
@@ -247,6 +274,26 @@ impl<'a> KeyRemoveView<'a> {
     }
 }
 
+/// Borrowed payload for one provisional headless surface change.
+#[derive(Clone, Copy)]
+pub struct HeadlessSurfaceChangeView<'a> {
+    change: &'a HeadlessSurfaceChange,
+}
+
+impl HeadlessSurfaceChangeView<'_> {
+    /// Returns the surface extent before the transaction.
+    #[must_use]
+    pub const fn old_surface(self) -> HeadlessSurface {
+        self.change.old_surface
+    }
+
+    /// Returns the final coalesced surface extent.
+    #[must_use]
+    pub const fn new_surface(self) -> HeadlessSurface {
+        self.change.new_surface
+    }
+}
+
 /// One identity in a deterministic structural lifecycle manifest.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ManifestEntry {
@@ -315,6 +362,9 @@ impl<'a> Iterator for MutationIter<'a> {
             }
             MutationRecord::KeyRemoved(removal) => {
                 MutationRecordView::KeyRemoved(KeyRemoveView { removal })
+            }
+            MutationRecord::HeadlessSurfaceChanged(change) => {
+                MutationRecordView::HeadlessSurfaceChanged(HeadlessSurfaceChangeView { change })
             }
         })
     }
