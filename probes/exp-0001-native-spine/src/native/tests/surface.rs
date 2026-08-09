@@ -251,6 +251,34 @@ fn zero_extent_suspends_and_nonzero_extent_restores() {
 }
 
 #[test]
+fn prepublication_scale_observations_coalesce_before_scale_is_fixed() {
+    let mut state = NativeSurfaceStateV1::new();
+    state
+        .observe(NativePhysicalExtentV1::new(100, 80), 1.0)
+        .expect("first observation should apply");
+    let first = state.pending_tuple().expect("first tuple is pending");
+    assert_eq!(first.generation().get(), 0);
+
+    state
+        .observe(NativePhysicalExtentV1::new(125, 100), 1.25)
+        .expect("scale remains replaceable before first publication");
+    let latest = state.pending_tuple().expect("latest tuple is pending");
+    assert_eq!(latest.generation().get(), 0);
+    assert_eq!(latest.scale().micros(), 1_250_000);
+    assert_eq!(latest.logical_surface(), HeadlessSurface::new(100, 80));
+    assert_eq!(state.accepted_tuple(), None);
+    assert_eq!(state.input_tuple(), None);
+    assert_eq!(state.pending_count(), 1);
+
+    assert_eq!(
+        state.promote_pending(first),
+        Err(NativeContractErrorKindV1::Invariant)
+    );
+    assert_eq!(state.promote_pending(latest), Ok(latest));
+    assert_eq!(state.input_tuple(), Some(latest));
+}
+
+#[test]
 fn superseded_resize_keeps_one_generation_and_rejects_stale_promotion() {
     let mut state = NativeSurfaceStateV1::new();
     state
