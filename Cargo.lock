@@ -7,6 +7,14 @@ name = "fenestra-ui"
 version = "0.1.0"
 
 [[package]]
+name = "fenestra-ui-exp-0001-native-spine"
+version = "0.1.0"
+dependencies = [
+ "fenestra-ui-runtime",
+ "fenestra-ui-testkit",
+]
+
+[[package]]
 name = "fenestra-ui-exp-0001-spine"
 version = "0.1.0"
 dependencies = [
