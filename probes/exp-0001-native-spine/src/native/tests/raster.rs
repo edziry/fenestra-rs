@@ -74,17 +74,23 @@ fn raster_scales_edges_instead_of_independent_widths() {
 
 #[test]
 fn zero_extent_skips_without_allocating_a_frame() {
-    let result = build_cpu_frame_v1(
+    let storage_called = std::cell::Cell::new(false);
+    let result = build_cpu_frame_with_reserver_v1(
         generation_zero(),
         0,
         NativePhysicalExtentV1::new(0, 4),
         NativeScaleFactorV1::try_from_f64(1.0).expect("unit scale"),
         &[rectangle(0, 0, 1, 1, [1, 1, 1, 255])],
         LIMITS,
+        |_| {
+            storage_called.set(true);
+            Err(())
+        },
     )
     .expect("zero extent is a valid suspension");
 
     assert!(result.is_none());
+    assert!(!storage_called.get());
 }
 
 #[test]
