@@ -125,11 +125,20 @@ fn surface_generation_changes_only_for_effective_native_state() {
 
     assert_eq!(
         state
-            .observe(NativePhysicalExtentV1::new(202, 100), 2.01)
+            .observe(NativePhysicalExtentV1::new(202, 100), 2.0)
             .expect("native-only change should apply"),
         NativeSurfaceChangeV1::NativeOnly
     );
     assert_eq!(state.generation().expect("native generation").get(), 2);
+    assert_eq!(state.logical_surface(), Some(HeadlessSurface::new(101, 50)));
+
+    assert_eq!(
+        state
+            .observe(NativePhysicalExtentV1::new(202, 100), 2.01)
+            .expect_err("post-initial scale changes are outside the fixed run"),
+        NativeContractErrorKindV1::EnvironmentScaleChanged
+    );
+    assert_eq!(state.generation().expect("accepted generation").get(), 2);
     assert_eq!(state.logical_surface(), Some(HeadlessSurface::new(101, 50)));
 }
 
