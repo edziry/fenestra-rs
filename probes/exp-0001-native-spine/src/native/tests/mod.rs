@@ -1,5 +1,7 @@
 mod raster;
 mod surface;
+mod trace;
+mod trace_capacity;
 
 use fenestra_ui_runtime::prototype::{RuntimeGeneration, UiRuntime};
 use fenestra_ui_testkit::prototype::HeadlessFixtureV1;
