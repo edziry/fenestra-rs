@@ -3,6 +3,7 @@ use fenestra_ui_runtime::prototype::HeadlessRect;
 use super::super::{
     NativeContractErrorKindV1, NativeFrameLimitsV1, NativeLimitKindV1, NativePhysicalExtentV1,
     NativeScaleFactorV1, NativeSceneRectangleV1, build_cpu_frame_v1,
+    build_cpu_frame_with_reserver_v1,
 };
 use super::generation_zero;
 
@@ -45,7 +46,7 @@ fn raster_clears_clips_and_overwrites_in_authored_order() {
             0,
         ]
     );
-    assert_eq!(frame.digest(), digest(frame.pixels()));
+    assert_eq!(frame.digest(), 0xe16c_9417_6cb9_7ef9);
 }
 
 #[test]
@@ -98,7 +99,68 @@ fn raster_rejects_nonopaque_scene_before_returning_a_frame() {
     )
     .expect_err("nonopaque color must fail");
 
-    assert_eq!(error, NativeContractErrorKindV1::UnsupportedAlpha);
+    assert_eq!(error, NativeContractErrorKindV1::UnsupportedAlpha(0));
+}
+
+#[test]
+fn scene_validation_precedes_storage_and_reports_the_first_record() {
+    let storage_called = std::cell::Cell::new(false);
+    let error = build_cpu_frame_with_reserver_v1(
+        generation_zero(),
+        0,
+        NativePhysicalExtentV1::new(2, 2),
+        NativeScaleFactorV1::try_from_f64(1.0).expect("unit scale"),
+        &[
+            rectangle(0, 0, 1, 1, [1, 2, 3, 255]),
+            rectangle(0, 0, -1, 1, [4, 5, 6, 255]),
+        ],
+        LIMITS,
+        |_| {
+            storage_called.set(true);
+            Err(())
+        },
+    )
+    .expect_err("invalid rectangle must fail before storage");
+    assert_eq!(error, NativeContractErrorKindV1::InvalidRectangle(1));
+    assert!(!storage_called.get());
+
+    let error = build_cpu_frame_with_reserver_v1(
+        generation_zero(),
+        0,
+        NativePhysicalExtentV1::new(2, 2),
+        NativeScaleFactorV1::try_from_f64(1.0).expect("unit scale"),
+        &[
+            rectangle(0, 0, 1, 1, [1, 2, 3, 255]),
+            rectangle(0, 0, 1, 1, [4, 5, 6, 254]),
+        ],
+        LIMITS,
+        |_| {
+            storage_called.set(true);
+            Err(())
+        },
+    )
+    .expect_err("nonopaque record must fail before storage");
+    assert_eq!(error, NativeContractErrorKindV1::UnsupportedAlpha(1));
+    assert!(!storage_called.get());
+}
+
+#[test]
+fn storage_failure_is_closed_and_returns_no_partial_frame() {
+    let error = build_cpu_frame_with_reserver_v1(
+        generation_zero(),
+        0,
+        NativePhysicalExtentV1::new(2, 2),
+        NativeScaleFactorV1::try_from_f64(1.0).expect("unit scale"),
+        &[rectangle(0, 0, 2, 2, [1, 2, 3, 255])],
+        LIMITS,
+        |pixel_count| {
+            assert_eq!(pixel_count, 4);
+            Err(())
+        },
+    )
+    .expect_err("storage failure must be typed");
+
+    assert_eq!(error, NativeContractErrorKindV1::Allocation);
 }
 
 #[test]
@@ -145,13 +207,4 @@ fn frame_limits_use_width_height_pixels_then_bytes_priority() {
 
 fn rectangle(x: i32, y: i32, width: i32, height: i32, color: [u8; 4]) -> NativeSceneRectangleV1 {
     NativeSceneRectangleV1::new(HeadlessRect::new(x, y, width, height), color)
-}
-
-fn digest(pixels: &[u32]) -> u64 {
-    pixels
-        .iter()
-        .flat_map(|pixel| pixel.to_le_bytes())
-        .fold(0xcbf2_9ce4_8422_2325, |hash, byte| {
-            (hash ^ u64::from(byte)).wrapping_mul(0x0000_0100_0000_01b3)
-        })
 }

@@ -39,6 +39,17 @@ fn invalid_scale_and_point_values_fail_closed() {
         );
     }
 
+    assert_eq!(
+        NativeScaleFactorV1::try_from_f64(8.000_000_4)
+            .expect("scale rounds before range validation")
+            .micros(),
+        8_000_000
+    );
+    assert_eq!(
+        NativeScaleFactorV1::try_from_f64(8.000_000_6).expect_err("rounded scale must fail"),
+        NativeContractErrorKindV1::InvalidScale
+    );
+
     let scale = NativeScaleFactorV1::try_from_f64(1.0).expect("unit scale is supported");
     for point in [
         NativePhysicalPointV1::new(f64::NAN, 0.0),
@@ -50,6 +61,41 @@ fn invalid_scale_and_point_values_fail_closed() {
             NativeContractErrorKindV1::InvalidPoint
         );
     }
+}
+
+#[test]
+fn surface_limits_and_generation_exhaustion_are_atomic() {
+    let mut state = NativeSurfaceStateV1::new();
+    state
+        .observe(NativePhysicalExtentV1::new(4_096, 4_096), 1.0)
+        .expect("inclusive surface limit should apply");
+    let generation = state.generation();
+    let logical = state.logical_surface();
+
+    assert_eq!(
+        state
+            .observe(NativePhysicalExtentV1::new(4_097, 4_096), 1.0)
+            .expect_err("width one-over must fail"),
+        NativeContractErrorKindV1::LimitExceeded(super::super::NativeLimitKindV1::Width)
+    );
+    assert_eq!(state.generation(), generation);
+    assert_eq!(state.logical_surface(), logical);
+
+    state.force_generation_for_test(u64::MAX);
+    assert_eq!(
+        state
+            .observe(NativePhysicalExtentV1::new(4_095, 4_096), 1.0)
+            .expect_err("generation exhaustion must fail"),
+        NativeContractErrorKindV1::ArithmeticExhausted
+    );
+    assert_eq!(
+        state
+            .generation()
+            .expect("forced generation must remain")
+            .get(),
+        u64::MAX
+    );
+    assert_eq!(state.logical_surface(), logical);
 }
 
 #[test]
