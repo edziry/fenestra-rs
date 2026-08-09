@@ -82,7 +82,9 @@ Branch: `feat/runtime-transactions`
   leave the committed generation intact. WU-0005 generalizes the model into the
   reusable clean-rebuild oracle, seeds, traces, and minimization artifacts.
 
-Exit: all mutation routes produce one validated typed log and one atomic result.
+Exit: successful non-noop mutation routes produce one validated typed log and
+one new logical generation; no-ops retain the generation, and failures publish
+neither state nor log.
 
 ## WU-0005: Test oracles and failure artifacts
 

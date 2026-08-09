@@ -61,6 +61,16 @@ impl ValidatedConstruction {
         }
     }
 
+    /// Resolves a template symbol through this construction domain.
+    #[must_use]
+    pub fn template(&self, id: TemplateNodeId) -> Option<TemplateFactory<'_>> {
+        let index = *self.data.nodes.get(&id)?;
+        Some(TemplateFactory {
+            construction: self,
+            index,
+        })
+    }
+
     /// Resolves a region symbol through this construction domain.
     #[must_use]
     pub fn region(&self, id: StructuralRegionId) -> Option<RegionFactory<'_>> {

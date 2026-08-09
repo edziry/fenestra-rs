@@ -4,7 +4,7 @@ pub(crate) struct ArenaId {
     generation: u64,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 struct Slot<T> {
     generation: u64,
     value: Option<T>,
@@ -91,6 +91,31 @@ impl<T> Arena<T> {
     pub(crate) const fn len(&self) -> usize {
         self.len
     }
+
+    pub(crate) fn iter(&self) -> impl Iterator<Item = (ArenaId, &T)> {
+        self.slots.iter().enumerate().filter_map(|(index, slot)| {
+            slot.value.as_ref().map(|value| {
+                (
+                    ArenaId {
+                        slot: index,
+                        generation: slot.generation,
+                    },
+                    value,
+                )
+            })
+        })
+    }
+
+    pub(crate) fn fork_for_transaction(&self) -> Self
+    where
+        T: Clone,
+    {
+        Self {
+            slots: self.slots.clone(),
+            free_head: self.free_head,
+            len: self.len,
+        }
+    }
 }
 
 impl<T> Default for Arena<T> {
@@ -140,5 +165,25 @@ mod tests {
         assert_eq!(replacement.generation, 0);
         assert_eq!(arena.get(maximum_id), None);
         assert_eq!(arena.get(replacement), Some(&"replacement"));
+    }
+
+    #[test]
+    fn transaction_fork_preserves_live_and_free_slot_generations() {
+        let mut arena = Arena::new();
+        let retained = arena.insert("retained");
+        let removed = arena.insert("removed");
+        assert_eq!(arena.remove(removed), Some("removed"));
+        let mut fork = arena.fork_for_transaction();
+
+        let original_replacement = arena.insert("original");
+        let fork_replacement = fork.insert("fork");
+
+        assert_eq!(original_replacement, fork_replacement);
+        assert_eq!(arena.get(retained), Some(&"retained"));
+        assert_eq!(fork.get(retained), Some(&"retained"));
+        assert_eq!(arena.get(original_replacement), Some(&"original"));
+        assert_eq!(fork.get(fork_replacement), Some(&"fork"));
+        assert_eq!(arena.iter().count(), 2);
+        assert_eq!(fork.iter().count(), 2);
     }
 }

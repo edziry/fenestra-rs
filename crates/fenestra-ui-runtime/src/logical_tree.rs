@@ -82,7 +82,7 @@ impl fmt::Display for TreeInvariantError {
 
 impl Error for TreeInvariantError {}
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 struct LogicalNode<T> {
     value: T,
     parent: Option<NodeId>,
@@ -236,6 +236,75 @@ impl<T> LogicalTree<T> {
         self.nodes.get_mut(node.arena)
     }
 
+    pub(crate) fn value_mut_for_transaction(&mut self, node: NodeId) -> Option<&mut T> {
+        self.get_node_mut(node).map(|stored| &mut stored.value)
+    }
+
+    #[cfg(test)]
+    pub(crate) fn clear_children_for_test(&mut self, node: NodeId) {
+        self.get_node_mut(node)
+            .expect("test corruption requires a live node")
+            .children
+            .clear();
+    }
+
+    pub(crate) fn fork_for_transaction(&self) -> Self
+    where
+        T: Clone,
+    {
+        Self {
+            id: self.id,
+            nodes: self.nodes.fork_for_transaction(),
+            root: self.root,
+        }
+    }
+
+    pub(crate) fn live_nodes(&self) -> impl Iterator<Item = (NodeId, &T)> {
+        self.nodes.iter().map(|(arena, stored)| {
+            (
+                NodeId {
+                    tree: self.id,
+                    arena,
+                },
+                &stored.value,
+            )
+        })
+    }
+
+    pub(crate) fn reorder_direct_child(
+        &mut self,
+        parent: NodeId,
+        child: NodeId,
+        final_index: usize,
+    ) -> Result<(), ()> {
+        let parent_node = self.get_node(parent).ok_or(())?;
+        if final_index >= parent_node.children.len()
+            || self.get_node(child).and_then(|stored| stored.parent) != Some(parent)
+        {
+            return Err(());
+        }
+        let mut matches = parent_node
+            .children
+            .iter()
+            .enumerate()
+            .filter(|(_, candidate)| **candidate == child);
+        let old_index = matches.next().map(|(index, _)| index).ok_or(())?;
+        if matches.next().is_some() {
+            return Err(());
+        }
+        if old_index == final_index {
+            return Ok(());
+        }
+
+        let children = &mut self.get_node_mut(parent).ok_or(())?.children;
+        if old_index < final_index {
+            children[old_index..=final_index].rotate_left(1);
+        } else {
+            children[final_index..=old_index].rotate_right(1);
+        }
+        Ok(())
+    }
+
     /// Validates root reachability and reciprocal parent-child links.
     pub fn validate(&self) -> Result<(), TreeInvariantError> {
         let Some(root) = self.root else {
@@ -291,99 +360,4 @@ impl<T> Default for LogicalTree<T> {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::LogicalTree;
-
-    fn tree_with_child() -> (LogicalTree<&'static str>, super::NodeId, super::NodeId) {
-        let mut tree = LogicalTree::new();
-        let root = tree.insert_root("root").expect("root should be inserted");
-        let child = tree
-            .append_child(root, "child")
-            .expect("child should be inserted");
-        (tree, root, child)
-    }
-
-    fn assert_invalid(tree: &LogicalTree<&str>, expected: &'static str) {
-        assert_eq!(
-            tree.validate()
-                .expect_err("corrupted tree should be rejected")
-                .message(),
-            expected
-        );
-    }
-
-    #[test]
-    fn validation_rejects_nodes_without_a_root() {
-        let (mut tree, _, _) = tree_with_child();
-        tree.root = None;
-
-        assert_invalid(&tree, "nodes exist without a root");
-    }
-
-    #[test]
-    fn validation_rejects_a_stale_root() {
-        let mut tree = LogicalTree::new();
-        let root = tree.insert_root("root").expect("root should be inserted");
-        tree.nodes
-            .remove(root.arena)
-            .expect("root should be removed from the arena");
-
-        assert_invalid(&tree, "root identity is stale");
-    }
-
-    #[test]
-    fn validation_rejects_a_root_with_a_parent() {
-        let (mut tree, root, child) = tree_with_child();
-        tree.nodes
-            .get_mut(root.arena)
-            .expect("root should be live")
-            .parent = Some(child);
-
-        assert_invalid(&tree, "root has a parent");
-    }
-
-    #[test]
-    fn validation_rejects_a_stale_child() {
-        let (mut tree, _, child) = tree_with_child();
-        tree.nodes
-            .remove(child.arena)
-            .expect("child should be removed from the arena");
-
-        assert_invalid(&tree, "child identity is stale");
-    }
-
-    #[test]
-    fn validation_rejects_a_child_with_the_wrong_parent() {
-        let (mut tree, _, child) = tree_with_child();
-        tree.nodes
-            .get_mut(child.arena)
-            .expect("child should be live")
-            .parent = None;
-
-        assert_invalid(&tree, "child does not point to its parent");
-    }
-
-    #[test]
-    fn validation_rejects_duplicate_reachability() {
-        let (mut tree, root, child) = tree_with_child();
-        tree.nodes
-            .get_mut(root.arena)
-            .expect("root should be live")
-            .children
-            .push(child);
-
-        assert_invalid(&tree, "node is reachable more than once");
-    }
-
-    #[test]
-    fn validation_rejects_unreachable_live_nodes() {
-        let (mut tree, root, _) = tree_with_child();
-        tree.nodes
-            .get_mut(root.arena)
-            .expect("root should be live")
-            .children
-            .clear();
-
-        assert_invalid(&tree, "live nodes are unreachable from the root");
-    }
-}
+mod tests;

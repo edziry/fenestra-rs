@@ -2,7 +2,7 @@ mod support;
 
 use fenestra_ui_ir::prototype::{
     ChildSlot, InputPolicy, InvalidationClass, InvalidationSet, PropertyId, PropertyValue,
-    ValueType,
+    TemplateNodeId, ValueType,
 };
 use support::{
     COMPONENT, PROPERTY, REGION, REPEAT, ROOT, SCHEMA_NAMESPACE, SCHEMA_REVISION, basic_manifest,
@@ -19,6 +19,14 @@ fn validated_views_expose_runtime_construction_inputs() {
     let repeat = region.repeat_body();
 
     assert_eq!(root.component().id(), COMPONENT);
+    assert_eq!(
+        validated
+            .template(ROOT)
+            .expect("root template should resolve")
+            .id(),
+        ROOT
+    );
+    assert!(validated.template(TemplateNodeId::new(u32::MAX)).is_none());
     assert_eq!(region.owner().id(), ROOT);
     assert_eq!(repeat.id(), REPEAT);
     assert_eq!(
