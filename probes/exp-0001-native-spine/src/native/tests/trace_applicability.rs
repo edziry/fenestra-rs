@@ -64,6 +64,93 @@ fn control_near_miss_and_invalid_stage_tuple_fail_before_storage() {
     }
 }
 
+#[test]
+fn incomplete_or_extraneous_presentation_identity_is_rejected() {
+    let mut present_without_submission = presented_frame();
+    present_without_submission.submission = None;
+    let mut offer_with_submission = rejected_frame();
+    offer_with_submission.stage = NativeTraceStageV1::Scheduler;
+    offer_with_submission.outcome = NativeOutcomeV1::Offered;
+    offer_with_submission.scheduler_turn = Some(0);
+    offer_with_submission.submission = Some(NativeTraceSubmissionV1::new(0, 0));
+    let mut reject_with_submission = rejected_frame();
+    reject_with_submission.submission = Some(NativeTraceSubmissionV1::new(0, 0));
+    let mut loss_without_control = renderer_loss_control();
+    loss_without_control.control = None;
+    let mut accepted_shutdown_without_control = shutdown_control(NativeOutcomeV1::Accepted);
+    accepted_shutdown_without_control.control = None;
+    let mut stopped_shutdown_without_control = shutdown_control(NativeOutcomeV1::Stopped);
+    stopped_shutdown_without_control.control = None;
+    let environment_without_surface = environment_failure_without_surface(
+        super::super::trace::NativeFailureCauseV1::EnvironmentScaleChanged,
+    );
+    let repaint_without_surface = environment_failure_without_surface(
+        super::super::trace::NativeFailureCauseV1::SurfaceRepaintUnavailable,
+    );
+
+    for invalid in [
+        present_without_submission,
+        offer_with_submission,
+        reject_with_submission,
+        loss_without_control,
+        accepted_shutdown_without_control,
+        stopped_shutdown_without_control,
+        environment_without_surface,
+        repaint_without_surface,
+    ] {
+        let storage_called = Cell::new(false);
+        let mut trace = NativeTraceV1::new();
+        assert_eq!(
+            trace
+                .record_with_reserver_for_test(SchedulerTick::new(0), invalid, |_| {
+                    storage_called.set(true);
+                    Ok(())
+                })
+                .expect_err("identity shape must fail before storage"),
+            NativeTraceErrorKindV1::InvalidApplicability
+        );
+        assert!(!storage_called.get());
+        assert!(trace.is_empty());
+    }
+}
+
+#[test]
+fn observations_that_depend_on_a_surface_reject_a_missing_tuple() {
+    let mut pointer = NativeTraceStepV1::new(
+        NativeTraceStageV1::Platform,
+        NativeObservationV1::Pointer,
+        NativeOutcomeV1::Observed,
+    );
+    pointer.captured_generation = Some(generation_zero());
+    pointer.target = Some(HeadlessPointerTargetV1::StaticControl);
+    let mut deferred = deferred_surface();
+    deferred.surface = None;
+    let mut published = published_surface();
+    published.surface = None;
+    let mut matched = oracle_match();
+    matched.surface = None;
+    let mut rejected = rejected_frame();
+    rejected.surface = None;
+    let mut presented = presented_frame();
+    presented.surface = None;
+
+    for invalid in [pointer, deferred, published, matched, rejected, presented] {
+        let storage_called = Cell::new(false);
+        let mut trace = NativeTraceV1::new();
+        assert_eq!(
+            trace
+                .record_with_reserver_for_test(SchedulerTick::new(0), invalid, |_| {
+                    storage_called.set(true);
+                    Ok(())
+                })
+                .expect_err("surface-dependent step must carry its tuple"),
+            NativeTraceErrorKindV1::InvalidApplicability
+        );
+        assert!(!storage_called.get());
+        assert!(trace.is_empty());
+    }
+}
+
 fn deferred_surface() -> NativeTraceStepV1 {
     let mut step = NativeTraceStepV1::new(
         NativeTraceStageV1::Platform,
@@ -143,6 +230,16 @@ fn shutdown_control(outcome: NativeOutcomeV1) -> NativeTraceStepV1 {
     step.scheduler_turn = Some(0);
     step.control = Some(0);
     step
+}
+
+fn environment_failure_without_surface(
+    cause: super::super::trace::NativeFailureCauseV1,
+) -> NativeTraceStepV1 {
+    NativeTraceStepV1::new(
+        NativeTraceStageV1::Platform,
+        NativeObservationV1::Scale,
+        NativeOutcomeV1::Failed(cause),
+    )
 }
 
 fn surface() -> NativeSurfaceTupleV1 {
