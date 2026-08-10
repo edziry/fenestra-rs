@@ -20,7 +20,7 @@ pub enum SemanticArtifactLimitKindV1 {
 
 impl SemanticArtifactLimitKindV1 {
     /// Every semantic artifact bound in deterministic enforcement order.
-    pub const ALL: [Self; 3] = [Self::ArtifactBytes, Self::LineBytes, Self::Records];
+    pub const ALL: [Self; 3] = [Self::Records, Self::LineBytes, Self::ArtifactBytes];
 
     const fn as_str(self) -> &'static str {
         match self {
@@ -71,9 +71,9 @@ pub enum SemanticArtifactErrorKindV1 {
 impl SemanticArtifactErrorKindV1 {
     /// Every semantic artifact failure in deterministic vocabulary order.
     pub const ALL: [Self; 4] = [
-        Self::LimitExceeded(SemanticArtifactLimitKindV1::ArtifactBytes),
-        Self::LimitExceeded(SemanticArtifactLimitKindV1::LineBytes),
         Self::LimitExceeded(SemanticArtifactLimitKindV1::Records),
+        Self::LimitExceeded(SemanticArtifactLimitKindV1::LineBytes),
+        Self::LimitExceeded(SemanticArtifactLimitKindV1::ArtifactBytes),
         Self::InvalidCompiledDocument,
     ];
 }

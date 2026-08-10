@@ -1,4 +1,4 @@
-fenestra-authoring-semantics|1|records=34
+fenestra-authoring-semantics|1|authoring-format=1|schema-format=1|construction-format=1|style-format=1|records=34
 record|0|document|span=0:1|format=1
 record|1|schema|span=1:2|namespace=8001|revision=1
 record|2|component|span=2:3|order=0|name=fixture|id=0

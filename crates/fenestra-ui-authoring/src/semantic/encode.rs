@@ -1,3 +1,7 @@
+use fenestra_ui_ir::prototype::{
+    SUPPORTED_CONSTRUCTION_FORMAT, SUPPORTED_SCHEMA_FORMAT, SUPPORTED_STYLE_FORMAT,
+};
+
 use crate::resolved::{
     ResolvedChildV1, ResolvedDocumentV1, ResolvedInitialPropertyV1, ResolvedPropertyV1,
     ResolvedRegionV1, ResolvedStyleAssignmentV1, ResolvedTemplateV1,
@@ -32,7 +36,17 @@ pub(super) fn encode_resolved_v1(
     }
 
     let mut writer = ArtifactWriterV1::new(limits);
-    writer.push_line(&format!("fenestra-authoring-semantics|1|records={count}"))?;
+    writer.push_line(&format!(
+        concat!(
+            "fenestra-authoring-semantics|1|authoring-format={}",
+            "|schema-format={}|construction-format={}|style-format={}|records={}"
+        ),
+        resolved.format,
+        SUPPORTED_SCHEMA_FORMAT.get(),
+        SUPPORTED_CONSTRUCTION_FORMAT.get(),
+        SUPPORTED_STYLE_FORMAT.get(),
+        count,
+    ))?;
     for record in records {
         writer.push_line(&record.line)?;
     }
@@ -135,12 +149,16 @@ fn collect_template(
         collect_initial_property(template.id, initial_order, initial, records)?;
     }
     for (child_order, child) in template.children.iter().enumerate() {
-        let (kind, reference, reference_value) = match *child {
-            ResolvedChildV1::Static { template, .. } => ("static-child", "target", template),
-            ResolvedChildV1::Region { region, .. } => ("region-child", "region", region),
+        let (kind, anchor, reference, reference_value) = match *child {
+            ResolvedChildV1::Static { template, anchor } => {
+                ("static-child", anchor, "target", template)
+            }
+            ResolvedChildV1::Region { region, anchor } => {
+                ("region-child", anchor, "region", region)
+            }
         };
         records.push(RecordV1::new(
-            child_anchor(child),
+            anchor,
             kind,
             format!(
                 "template={}|order={child_order}|{reference}={reference_value}",
@@ -220,12 +238,6 @@ fn schema_identity(document: &ResolvedDocumentV1) -> String {
         "namespace={}|revision={}",
         document.schema.namespace, document.schema.revision
     )
-}
-
-fn child_anchor(child: &ResolvedChildV1) -> u32 {
-    match *child {
-        ResolvedChildV1::Static { anchor, .. } | ResolvedChildV1::Region { anchor, .. } => anchor,
-    }
 }
 
 fn validate_name(name: &str) -> Result<(), SemanticArtifactErrorV1> {

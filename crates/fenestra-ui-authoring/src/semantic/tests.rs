@@ -23,9 +23,7 @@ fn semantic_artifact_vocabulary_and_reference_limits_are_closed() {
         [
             SemanticArtifactErrorKindV1::LimitExceeded(SemanticArtifactLimitKindV1::Records),
             SemanticArtifactErrorKindV1::LimitExceeded(SemanticArtifactLimitKindV1::LineBytes),
-            SemanticArtifactErrorKindV1::LimitExceeded(
-                SemanticArtifactLimitKindV1::ArtifactBytes,
-            ),
+            SemanticArtifactErrorKindV1::LimitExceeded(SemanticArtifactLimitKindV1::ArtifactBytes,),
             SemanticArtifactErrorKindV1::InvalidCompiledDocument,
         ]
     );
@@ -100,13 +98,19 @@ fn every_retained_semantic_field_class_changes_the_observation() {
     });
     assert_changes("static-child-target", |document| {
         match &mut document.construction.templates[0].children[0] {
-            ResolvedChildV1::Static { template, anchor: _ } => *template = 9,
+            ResolvedChildV1::Static {
+                template,
+                anchor: _,
+            } => *template = 9,
             ResolvedChildV1::Region { region, anchor: _ } => *region = 9,
         }
     });
     assert_changes("region-child-target", |document| {
         match &mut document.construction.templates[0].children[1] {
-            ResolvedChildV1::Static { template, anchor: _ } => *template = 9,
+            ResolvedChildV1::Static {
+                template,
+                anchor: _,
+            } => *template = 9,
             ResolvedChildV1::Region { region, anchor: _ } => *region = 9,
         }
     });
@@ -205,11 +209,9 @@ fn semantic_artifact_bounds_are_inclusive_and_one_under_is_typed() {
         all_cross.kind(),
         SemanticArtifactErrorKindV1::LimitExceeded(SemanticArtifactLimitKindV1::Records)
     );
-    let line_and_bytes_cross = observe_resolved_v1(
-        &document,
-        SemanticArtifactLimitsV1::new(0, 0, records),
-    )
-    .expect_err("line crossing should precede artifact bytes");
+    let line_and_bytes_cross =
+        observe_resolved_v1(&document, SemanticArtifactLimitsV1::new(0, 0, records))
+            .expect_err("line crossing should precede artifact bytes");
     assert_eq!(
         line_and_bytes_cross.kind(),
         SemanticArtifactErrorKindV1::LimitExceeded(SemanticArtifactLimitKindV1::LineBytes)
