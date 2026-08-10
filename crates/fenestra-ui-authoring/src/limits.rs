@@ -76,6 +76,12 @@ pub struct AuthoringLimitsV1 {
     values: [usize; 14],
 }
 
+/// Exact bounded profile shared by the disposable WU-0010 reference lanes.
+///
+/// This experiment profile is not an unbounded default or a product budget.
+pub const REFERENCE_AUTHORING_LIMITS_V1: AuthoringLimitsV1 =
+    AuthoringLimitsV1::new(8_192, 1_024, 32, 8, 1, 5, 4, 1, 3, 12, 2, 2, 34, 32_768);
+
 impl AuthoringLimitsV1 {
     /// Creates a complete explicit authoring limit set.
     #[allow(clippy::too_many_arguments)]

@@ -34,7 +34,9 @@ pub mod prototype {
     pub use crate::diagnostic::{AuthoringDiagnosticKindV1, AuthoringDiagnosticV1};
     pub use crate::emitter::emit_tokens_v1;
     pub use crate::expansion::{diagnostic_tokens_v1, expand_ui_v1};
-    pub use crate::limits::{AuthoringLimitKindV1, AuthoringLimitsV1};
+    pub use crate::limits::{
+        AuthoringLimitKindV1, AuthoringLimitsV1, REFERENCE_AUTHORING_LIMITS_V1,
+    };
     pub use crate::source::{DiagnosticLocationV1, FenSourceV1, PhysicalOriginV1};
     pub use crate::version::{AuthoringFormatVersion, SUPPORTED_AUTHORING_FORMAT};
     pub use crate::vocabulary::{AnchorKindV1, AuthoringFrontendV1};
