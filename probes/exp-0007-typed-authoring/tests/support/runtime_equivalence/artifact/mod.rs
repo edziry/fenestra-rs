@@ -2,6 +2,14 @@ use fenestra_ui_testkit::prototype::HeadlessProjectionFaultV1;
 
 use super::LaneLog;
 
+mod encode;
+mod fault;
+mod path;
+mod projection;
+mod receipt;
+mod state;
+mod value;
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum RuntimeArtifactLimitKindV1 {
     ArtifactBytes,
@@ -59,15 +67,27 @@ pub enum RuntimeArtifactFaultV1 {
 }
 
 pub fn encode_runtime_artifact_v1(
-    _log: &LaneLog,
-    _limits: RuntimeArtifactLimitsV1,
+    log: &LaneLog,
+    limits: RuntimeArtifactLimitsV1,
 ) -> Result<String, RuntimeArtifactEncodeErrorV1> {
-    Ok(String::new())
+    encode::encode(log, limits)
 }
 
 pub fn inject_runtime_artifact_fault_v1(
     log: &LaneLog,
-    _fault: RuntimeArtifactFaultV1,
+    fault: RuntimeArtifactFaultV1,
 ) -> Result<LaneLog, RuntimeArtifactEncodeErrorV1> {
-    Ok(log.clone())
+    fault::inject(log, fault)
+}
+
+fn invalid_log() -> RuntimeArtifactEncodeErrorV1 {
+    RuntimeArtifactEncodeErrorV1 {
+        kind: RuntimeArtifactEncodeErrorKindV1::InvalidLog,
+    }
+}
+
+fn limit_exceeded(limit: RuntimeArtifactLimitKindV1) -> RuntimeArtifactEncodeErrorV1 {
+    RuntimeArtifactEncodeErrorV1 {
+        kind: RuntimeArtifactEncodeErrorKindV1::LimitExceeded(limit),
+    }
 }

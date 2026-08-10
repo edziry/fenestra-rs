@@ -41,6 +41,7 @@ impl LaneLog {
         &self.final_keys
     }
 
+    #[allow(dead_code)]
     pub(super) const fn from_parts(
         receipts: Vec<NormalizedReceipt>,
         states: Vec<NormalizedStateV1>,

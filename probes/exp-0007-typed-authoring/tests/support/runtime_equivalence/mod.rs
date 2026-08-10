@@ -1,3 +1,4 @@
+#[allow(dead_code)]
 mod artifact;
 mod identity;
 mod receipt;
@@ -8,6 +9,7 @@ use fenestra_ui_testkit::prototype::{
     FragmentPathV1, HeadlessFixtureV1, NodePathV1, SemanticOperationV1,
 };
 
+#[allow(unused_imports)]
 pub use artifact::{
     REGISTERED_RUNTIME_ARTIFACT_LIMITS_V1, RuntimeArtifactEncodeErrorKindV1,
     RuntimeArtifactFaultV1, RuntimeArtifactLimitKindV1, RuntimeArtifactLimitsV1,

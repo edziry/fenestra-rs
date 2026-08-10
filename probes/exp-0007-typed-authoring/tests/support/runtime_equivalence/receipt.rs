@@ -69,14 +69,17 @@ impl NormalizedReceipt {
         }
     }
 
+    #[allow(dead_code)]
     pub const fn generation(&self) -> u64 {
         self.generation
     }
 
+    #[allow(dead_code)]
     pub fn mutations(&self) -> &[NormalizedMutation] {
         &self.mutations
     }
 
+    #[allow(dead_code)]
     pub const fn invalidation(&self) -> InvalidationSet {
         self.invalidation
     }
