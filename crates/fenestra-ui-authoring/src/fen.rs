@@ -68,7 +68,7 @@ fn lex_fen_v1(
             while offset < bytes.len() && bytes[offset].is_ascii_digit() {
                 offset += 1;
             }
-            if offset < bytes.len() && is_numeric_continuation(bytes[offset]) {
+            if offset < bytes.len() && is_numeric_continuation(bytes, offset) {
                 let end = unsupported_lexeme_end(text, start);
                 return Err(physical_failure(
                     source,
@@ -156,8 +156,18 @@ fn starts_raw_identifier(bytes: &[u8], offset: usize) -> bool {
     bytes[offset] == b'r' && bytes.get(offset + 1) == Some(&b'#')
 }
 
-const fn is_numeric_continuation(byte: u8) -> bool {
-    is_identifier_start(byte) || byte == b'.'
+fn is_numeric_continuation(bytes: &[u8], offset: usize) -> bool {
+    let byte = bytes[offset];
+    if is_identifier_start(byte) {
+        return true;
+    }
+    if byte != b'.' {
+        return false;
+    }
+    !matches!(
+        bytes.get(offset + 1),
+        Some(next) if *next == b'.' || is_identifier_start(*next) || !next.is_ascii()
+    )
 }
 
 fn unsupported_lexeme_end(text: &str, start: usize) -> usize {
