@@ -12,5 +12,8 @@ proc-macro = true
 [dependencies]
 fenestra-ui-authoring.workspace = true
 
+[dev-dependencies]
+trybuild = "=1.0.120"
+
 [lints]
 workspace = true

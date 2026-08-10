@@ -1,0 +1,5 @@
+error: unknown-component-name
+  --> tests/ui/unknown_component.rs:12:32
+   |
+12 |             template root = 0: secret_missing_component {
+   |                                ^^^^^^^^^^^^^^^^^^^^^^^^

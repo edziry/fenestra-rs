@@ -1,0 +1,5 @@
+error: limit-exceeded(nesting-depth)
+ --> tests/ui/nesting_depth.rs:4:27
+  |
+4 |     let _ = ui! { {{{{{{{{{}}}}}}}}} };
+  |                           ^
