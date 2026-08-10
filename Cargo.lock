@@ -303,12 +303,20 @@ version = "0.1.0"
 dependencies = [
  "fenestra-ui-authoring",
  "fenestra-ui-ir",
+ "fenestra-ui-macros",
  "proc-macro2",
 ]
 
 [[package]]
 name = "fenestra-ui-ir"
 version = "0.1.0"
+
+[[package]]
+name = "fenestra-ui-macros"
+version = "0.1.0"
+dependencies = [
+ "fenestra-ui-authoring",
+]
 
 [[package]]
 name = "fenestra-ui-runtime"
