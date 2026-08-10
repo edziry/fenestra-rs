@@ -1,4 +1,5 @@
 use super::super::super::driver::{NativeDriverActionV1, NativeRedrawResultV1};
+use super::super::super::trace::{NativeObservationV1, NativeOutcomeV1, NativeTraceStageV1};
 use super::support::{PresenterMode, driver, physical, tick};
 
 #[test]
@@ -45,13 +46,61 @@ fn only_an_armed_redraw_can_offer_accept_present_and_complete() {
         Some(driver.runtime_generation())
     );
     assert_eq!(driver.presenter().last_surface(), Some(surface));
-    assert!(driver.presenter().last_digest().is_some());
+    let digest = driver
+        .presenter()
+        .last_digest()
+        .expect("presenter should consume the staged digest");
+    let accepted_index = driver
+        .trace()
+        .events()
+        .iter()
+        .position(|event| {
+            event.stage() == NativeTraceStageV1::Scheduler
+                && event.observation() == NativeObservationV1::Frame
+                && event.outcome() == NativeOutcomeV1::Accepted
+        })
+        .expect("accepted frame should record");
+    let presented_index = driver
+        .trace()
+        .events()
+        .iter()
+        .position(|event| {
+            event.stage() == NativeTraceStageV1::Renderer
+                && event.observation() == NativeObservationV1::Present
+                && event.outcome() == NativeOutcomeV1::Completed
+        })
+        .expect("presented frame should record");
+    assert_eq!(
+        driver.trace().events()[accepted_index].staging_digest(),
+        Some(digest)
+    );
+    assert!(accepted_index < presented_index);
+    assert_eq!(
+        driver.trace().events()[presented_index].staging_digest(),
+        None
+    );
     assert_eq!(driver.presenter_pending_count(), 0);
     assert!(!driver.redraw_armed());
     let stats = driver.scheduler_stats();
     assert_eq!(stats.visual().items(), 0);
     assert_eq!(stats.in_flight().items(), 0);
     assert_eq!(stats.controls().items(), 0);
+    let completion = driver
+        .trace()
+        .events()
+        .iter()
+        .find(|event| {
+            event.stage() == NativeTraceStageV1::Scheduler
+                && event.observation() == NativeObservationV1::Completion
+                && event.outcome() == NativeOutcomeV1::Completed
+        })
+        .expect("processed completion should retain its identity");
+    assert!(
+        completion
+            .submission()
+            .is_some_and(|value| value.epoch() == 0 && value.token() == 0)
+    );
+    assert_eq!(completion.control(), Some(0));
 
     let stats = driver.scheduler_stats();
     assert_eq!(

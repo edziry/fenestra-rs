@@ -7,6 +7,7 @@ use super::super::trace::{
     NativeTraceEventV1, NativeTraceLimitKindV1, NativeTraceStageV1, NativeTraceStepV1,
     NativeTraceV1,
 };
+use super::trace_step;
 
 const EVENT_BYTES: usize = 192;
 const MAX_EVENTS: usize = 128;
@@ -149,7 +150,7 @@ fn ticks_are_nondecreasing_and_regression_is_atomic() {
 }
 
 fn observed_build() -> NativeTraceStepV1 {
-    NativeTraceStepV1::new(
+    trace_step(
         NativeTraceStageV1::Manifest,
         NativeObservationV1::Build,
         NativeOutcomeV1::Observed,

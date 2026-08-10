@@ -4,11 +4,12 @@ use fenestra_ui_runtime::prototype::SchedulerTick;
 use fenestra_ui_testkit::prototype::HeadlessPointerTargetV1;
 
 use super::super::trace::{
-    NativeInputSourceV1, NativeObservationV1, NativeOutcomeV1, NativeTraceErrorKindV1,
-    NativeTraceStageV1, NativeTraceStepV1, NativeTraceSubmissionV1, NativeTraceV1,
+    NativeFailureCauseV1, NativeInputSourceV1, NativeObservationV1, NativeOutcomeV1,
+    NativeTraceErrorKindV1, NativeTraceStageV1, NativeTraceStepV1, NativeTraceSubmissionV1,
+    NativeTraceV1,
 };
 use super::super::{NativePhysicalExtentV1, NativeSurfaceStateV1, NativeSurfaceTupleV1};
-use super::generation_zero;
+use super::{generation_one, generation_zero, trace_step};
 
 #[test]
 fn required_generation_frame_and_control_paths_are_accepted() {
@@ -18,7 +19,7 @@ fn required_generation_frame_and_control_paths_are_accepted() {
         oracle_match(),
         rejected_frame(),
         presented_frame(),
-        renderer_loss_control(),
+        renderer_loss_control(NativeOutcomeV1::Accepted),
         shutdown_control(NativeOutcomeV1::Accepted),
         shutdown_control(NativeOutcomeV1::Stopped),
     ] {
@@ -32,7 +33,7 @@ fn required_generation_frame_and_control_paths_are_accepted() {
 
 #[test]
 fn control_near_miss_and_invalid_stage_tuple_fail_before_storage() {
-    let mut control_on_pointer = NativeTraceStepV1::new(
+    let mut control_on_pointer = trace_step(
         NativeTraceStageV1::Platform,
         NativeObservationV1::Pointer,
         NativeOutcomeV1::Observed,
@@ -42,82 +43,142 @@ fn control_near_miss_and_invalid_stage_tuple_fail_before_storage() {
     control_on_pointer.surface = Some(surface());
     control_on_pointer.target = Some(HeadlessPointerTargetV1::StaticControl);
     control_on_pointer.control = Some(0);
-    let invalid_tuple = NativeTraceStepV1::new(
+    let invalid_tuple = trace_step(
         NativeTraceStageV1::Manifest,
         NativeObservationV1::Resumed,
         NativeOutcomeV1::Matched,
     );
 
     for invalid in [control_on_pointer, invalid_tuple] {
-        let storage_called = Cell::new(false);
-        let mut trace = NativeTraceV1::new();
-        assert_eq!(
-            trace
-                .record_with_reserver_for_test(SchedulerTick::new(0), invalid, |_| {
-                    storage_called.set(true);
-                    Ok(())
-                })
-                .expect_err("invalid applicability must fail"),
-            NativeTraceErrorKindV1::InvalidApplicability
-        );
-        assert!(!storage_called.get());
-        assert!(trace.is_empty());
+        assert_invalid(invalid);
     }
 }
 
 #[test]
-fn incomplete_or_extraneous_presentation_identity_is_rejected() {
-    let mut present_without_submission = presented_frame();
-    present_without_submission.submission = None;
-    let mut offer_with_submission = rejected_frame();
-    offer_with_submission.stage = NativeTraceStageV1::Scheduler;
-    offer_with_submission.outcome = NativeOutcomeV1::Offered;
-    offer_with_submission.scheduler_turn = Some(0);
-    offer_with_submission.submission = Some(NativeTraceSubmissionV1::new(0, 0));
-    let mut reject_with_submission = rejected_frame();
-    reject_with_submission.submission = Some(NativeTraceSubmissionV1::new(0, 0));
-    let mut loss_without_control = renderer_loss_control();
-    loss_without_control.control = None;
-    let mut accepted_shutdown_without_control = shutdown_control(NativeOutcomeV1::Accepted);
-    accepted_shutdown_without_control.control = None;
-    let mut stopped_shutdown_without_control = shutdown_control(NativeOutcomeV1::Stopped);
-    stopped_shutdown_without_control.control = None;
-    let environment_without_surface = environment_failure_without_surface(
-        super::super::trace::NativeFailureCauseV1::EnvironmentScaleChanged,
-    );
-    let repaint_without_surface = environment_failure_without_surface(
-        super::super::trace::NativeFailureCauseV1::SurfaceRepaintUnavailable,
-    );
-
-    for invalid in [
-        present_without_submission,
-        offer_with_submission,
-        reject_with_submission,
-        loss_without_control,
-        accepted_shutdown_without_control,
-        stopped_shutdown_without_control,
-        environment_without_surface,
-        repaint_without_surface,
+fn presentation_loss_and_completion_identity_shapes_are_exact() {
+    for (valid, shape) in [
+        (
+            scheduler_frame(NativeOutcomeV1::Armed),
+            (false, false, false),
+        ),
+        (
+            scheduler_frame(NativeOutcomeV1::Offered),
+            (true, false, false),
+        ),
+        (
+            scheduler_frame(NativeOutcomeV1::Accepted),
+            (true, true, false),
+        ),
+        (
+            scheduler_frame(NativeOutcomeV1::Rejected),
+            (true, false, false),
+        ),
+        (rejected_frame(), (true, false, false)),
+        (presented_frame(), (true, true, false)),
+        (
+            renderer_loss_control(NativeOutcomeV1::Accepted),
+            (true, true, true),
+        ),
+        (
+            renderer_loss_control(NativeOutcomeV1::Failed(NativeFailureCauseV1::Presenter)),
+            (true, true, true),
+        ),
+        (completion(NativeOutcomeV1::Accepted), (false, true, true)),
+        (completion(NativeOutcomeV1::Completed), (false, true, true)),
     ] {
-        let storage_called = Cell::new(false);
-        let mut trace = NativeTraceV1::new();
-        assert_eq!(
-            trace
-                .record_with_reserver_for_test(SchedulerTick::new(0), invalid, |_| {
-                    storage_called.set(true);
-                    Ok(())
-                })
-                .expect_err("identity shape must fail before storage"),
-            NativeTraceErrorKindV1::InvalidApplicability
-        );
-        assert!(!storage_called.get());
-        assert!(trace.is_empty());
+        assert_exact_identity(valid, shape);
+    }
+}
+
+#[test]
+fn snapshots_require_scheduler_state_and_current_generation() {
+    let mut missing_state = trace_step(
+        NativeTraceStageV1::Manifest,
+        NativeObservationV1::Build,
+        NativeOutcomeV1::Observed,
+    );
+    missing_state.scheduler_state = None;
+    let mut missing_generation = missing_state;
+    missing_generation.scheduler_state = trace_step(
+        NativeTraceStageV1::Manifest,
+        NativeObservationV1::Build,
+        NativeOutcomeV1::Observed,
+    )
+    .scheduler_state;
+    missing_generation.current_generation = None;
+    assert_invalid(missing_state);
+    assert_invalid(missing_generation);
+}
+
+#[test]
+fn publication_generation_is_required_or_optional_only_on_exact_paths() {
+    let mut published = published_surface();
+    assert_valid(published);
+    published.published_generation = None;
+    assert_invalid(published);
+
+    let mut matched = oracle_match();
+    assert_valid(matched);
+    matched.published_generation = None;
+    assert_valid(matched);
+
+    let mut combined_offer = scheduler_frame(NativeOutcomeV1::Offered);
+    assert_valid(combined_offer);
+    combined_offer.published_generation = Some(generation_zero());
+    assert_valid(combined_offer);
+
+    for mut invalid in [
+        deferred_surface(),
+        scheduler_frame(NativeOutcomeV1::Accepted),
+        presented_frame(),
+        completion(NativeOutcomeV1::Completed),
+        oracle_failure(),
+    ] {
+        invalid.published_generation = Some(generation_zero());
+        assert_invalid(invalid);
+    }
+}
+
+#[test]
+fn staging_digest_is_required_only_on_an_accepted_frame() {
+    let accepted = scheduler_frame(NativeOutcomeV1::Accepted);
+    assert_valid(accepted);
+    let mut missing = accepted;
+    missing.staging_digest = None;
+    assert_invalid(missing);
+
+    for mut invalid in [
+        scheduler_frame(NativeOutcomeV1::Offered),
+        rejected_frame(),
+        presented_frame(),
+        completion(NativeOutcomeV1::Completed),
+    ] {
+        invalid.staging_digest = Some(0xcbf2_9ce4_8422_2325);
+        assert_invalid(invalid);
+    }
+}
+
+#[test]
+fn scheduler_post_state_and_generations_must_match_the_typed_outcome() {
+    let mut stopped = shutdown_control(NativeOutcomeV1::Stopped);
+    assert_valid(stopped);
+    stopped.scheduler_state = Some(fenestra_ui_runtime::prototype::SchedulerState::Running);
+    assert_invalid(stopped);
+
+    let mut loss = renderer_loss_control(NativeOutcomeV1::Failed(NativeFailureCauseV1::Presenter));
+    assert_valid(loss);
+    loss.scheduler_state = Some(fenestra_ui_runtime::prototype::SchedulerState::Running);
+    assert_invalid(loss);
+
+    for mut invalid in [deferred_surface(), published_surface(), oracle_match()] {
+        invalid.current_generation = Some(generation_one());
+        assert_invalid(invalid);
     }
 }
 
 #[test]
 fn observations_that_depend_on_a_surface_reject_a_missing_tuple() {
-    let mut pointer = NativeTraceStepV1::new(
+    let mut pointer = trace_step(
         NativeTraceStageV1::Platform,
         NativeObservationV1::Pointer,
         NativeOutcomeV1::Observed,
@@ -137,24 +198,52 @@ fn observations_that_depend_on_a_surface_reject_a_missing_tuple() {
     presented.surface = None;
 
     for invalid in [pointer, deferred, published, matched, rejected, presented] {
-        let storage_called = Cell::new(false);
-        let mut trace = NativeTraceV1::new();
-        assert_eq!(
-            trace
-                .record_with_reserver_for_test(SchedulerTick::new(0), invalid, |_| {
-                    storage_called.set(true);
-                    Ok(())
-                })
-                .expect_err("surface-dependent step must carry its tuple"),
-            NativeTraceErrorKindV1::InvalidApplicability
-        );
-        assert!(!storage_called.get());
-        assert!(trace.is_empty());
+        assert_invalid(invalid);
     }
 }
 
+fn assert_valid(valid: NativeTraceStepV1) {
+    let mut trace = NativeTraceV1::new();
+    trace
+        .record(SchedulerTick::new(0), valid)
+        .expect("exact applicability shape should record");
+}
+
+fn assert_invalid(invalid: NativeTraceStepV1) {
+    let storage_called = Cell::new(false);
+    let mut trace = NativeTraceV1::new();
+    assert_eq!(
+        trace
+            .record_with_reserver_for_test(SchedulerTick::new(0), invalid, |_| {
+                storage_called.set(true);
+                Ok(())
+            })
+            .expect_err("invalid applicability must fail before storage"),
+        NativeTraceErrorKindV1::InvalidApplicability
+    );
+    assert!(!storage_called.get());
+    assert!(trace.is_empty());
+}
+
+fn assert_exact_identity(valid: NativeTraceStepV1, shape: (bool, bool, bool)) {
+    assert_valid(valid);
+    let mut frame = valid;
+    frame.frame = if shape.0 { None } else { Some(0) };
+    assert_invalid(frame);
+    let mut submission = valid;
+    submission.submission = if shape.1 {
+        None
+    } else {
+        Some(NativeTraceSubmissionV1::new(0, 0))
+    };
+    assert_invalid(submission);
+    let mut control = valid;
+    control.control = if shape.2 { None } else { Some(0) };
+    assert_invalid(control);
+}
+
 fn deferred_surface() -> NativeTraceStepV1 {
-    let mut step = NativeTraceStepV1::new(
+    let mut step = trace_step(
         NativeTraceStageV1::Scheduler,
         NativeObservationV1::Surface,
         NativeOutcomeV1::Deferred,
@@ -166,7 +255,7 @@ fn deferred_surface() -> NativeTraceStepV1 {
 }
 
 fn published_surface() -> NativeTraceStepV1 {
-    let mut step = NativeTraceStepV1::new(
+    let mut step = trace_step(
         NativeTraceStageV1::Scheduler,
         NativeObservationV1::Surface,
         NativeOutcomeV1::Published,
@@ -178,7 +267,7 @@ fn published_surface() -> NativeTraceStepV1 {
 }
 
 fn oracle_match() -> NativeTraceStepV1 {
-    let mut step = NativeTraceStepV1::new(
+    let mut step = trace_step(
         NativeTraceStageV1::Oracle,
         NativeObservationV1::Surface,
         NativeOutcomeV1::Matched,
@@ -189,7 +278,7 @@ fn oracle_match() -> NativeTraceStepV1 {
 }
 
 fn rejected_frame() -> NativeTraceStepV1 {
-    let mut step = NativeTraceStepV1::new(
+    let mut step = trace_step(
         NativeTraceStageV1::Renderer,
         NativeObservationV1::Frame,
         NativeOutcomeV1::Rejected,
@@ -200,7 +289,7 @@ fn rejected_frame() -> NativeTraceStepV1 {
 }
 
 fn presented_frame() -> NativeTraceStepV1 {
-    let mut step = NativeTraceStepV1::new(
+    let mut step = trace_step(
         NativeTraceStageV1::Renderer,
         NativeObservationV1::Present,
         NativeOutcomeV1::Completed,
@@ -211,39 +300,76 @@ fn presented_frame() -> NativeTraceStepV1 {
     step
 }
 
-fn renderer_loss_control() -> NativeTraceStepV1 {
-    let mut step = NativeTraceStepV1::new(
+fn renderer_loss_control(outcome: NativeOutcomeV1) -> NativeTraceStepV1 {
+    let mut step = trace_step(
         NativeTraceStageV1::Scheduler,
         NativeObservationV1::Present,
-        NativeOutcomeV1::Accepted,
+        outcome,
     );
     step.scheduler_turn = Some(0);
     step.surface = Some(surface());
     step.frame = Some(0);
     step.submission = Some(NativeTraceSubmissionV1::new(0, 0));
     step.control = Some(0);
+    if outcome == NativeOutcomeV1::Failed(NativeFailureCauseV1::Presenter) {
+        step.scheduler_state = Some(fenestra_ui_runtime::prototype::SchedulerState::Faulted);
+    }
+    step
+}
+
+fn scheduler_frame(outcome: NativeOutcomeV1) -> NativeTraceStepV1 {
+    let mut step = trace_step(
+        NativeTraceStageV1::Scheduler,
+        NativeObservationV1::Frame,
+        outcome,
+    );
+    step.scheduler_turn = Some(0);
+    step.surface = Some(surface());
+    if outcome != NativeOutcomeV1::Armed {
+        step.frame = Some(0);
+    }
+    if outcome == NativeOutcomeV1::Accepted {
+        step.submission = Some(NativeTraceSubmissionV1::new(0, 0));
+        step.staging_digest = Some(0xcbf2_9ce4_8422_2325);
+    }
+    step
+}
+
+fn completion(outcome: NativeOutcomeV1) -> NativeTraceStepV1 {
+    let mut step = trace_step(
+        NativeTraceStageV1::Scheduler,
+        NativeObservationV1::Completion,
+        outcome,
+    );
+    step.scheduler_turn = Some(0);
+    step.surface = Some(surface());
+    step.submission = Some(NativeTraceSubmissionV1::new(0, 0));
+    step.control = Some(0);
+    step
+}
+
+fn oracle_failure() -> NativeTraceStepV1 {
+    let mut step = trace_step(
+        NativeTraceStageV1::Oracle,
+        NativeObservationV1::Surface,
+        NativeOutcomeV1::Failed(NativeFailureCauseV1::Oracle),
+    );
+    step.surface = Some(surface());
     step
 }
 
 fn shutdown_control(outcome: NativeOutcomeV1) -> NativeTraceStepV1 {
-    let mut step = NativeTraceStepV1::new(
+    let mut step = trace_step(
         NativeTraceStageV1::Scheduler,
         NativeObservationV1::Shutdown,
         outcome,
     );
     step.scheduler_turn = Some(0);
     step.control = Some(0);
+    if outcome == NativeOutcomeV1::Stopped {
+        step.scheduler_state = Some(fenestra_ui_runtime::prototype::SchedulerState::Stopped);
+    }
     step
-}
-
-fn environment_failure_without_surface(
-    cause: super::super::trace::NativeFailureCauseV1,
-) -> NativeTraceStepV1 {
-    NativeTraceStepV1::new(
-        NativeTraceStageV1::Platform,
-        NativeObservationV1::Scale,
-        NativeOutcomeV1::Failed(cause),
-    )
 }
 
 fn surface() -> NativeSurfaceTupleV1 {

@@ -12,12 +12,12 @@ fn cursor_moves_replace_one_slot_and_press_consumes_the_latest_point() {
     let mut driver = ready_driver();
     let scheduler_stats = driver.scheduler_stats();
 
-    for value in 0..31 {
+    for value in 0_u32..31 {
         driver
             .cursor_moved(
                 NativePhysicalPointV1::new(500.0 + f64::from(value), 500.0),
                 NativeInputSourceV1::Scripted,
-                tick(2 + value.into()),
+                tick(2 + u64::from(value)),
             )
             .expect("cursor movement should replace the bounded slot");
         assert_eq!(driver.pending_pointer_count(), 1);

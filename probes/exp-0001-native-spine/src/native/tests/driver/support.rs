@@ -134,5 +134,7 @@ pub(super) fn assert_terminal_empty(driver: &NativeDriverV1<TestPresenter>) {
     assert_eq!(stats.visual().items(), 0);
     assert_eq!(stats.in_flight().items(), 0);
     assert!(!driver.redraw_armed());
+    assert!(driver.pending_surface().is_none());
+    assert_eq!(driver.pending_pointer_count(), 0);
     assert_eq!(driver.presenter_pending_count(), 0);
 }

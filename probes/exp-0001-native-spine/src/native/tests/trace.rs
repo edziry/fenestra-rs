@@ -3,6 +3,7 @@ use std::cell::Cell;
 use fenestra_ui_runtime::prototype::{SchedulerState, SchedulerTick};
 use fenestra_ui_testkit::prototype::HeadlessPointerTargetV1;
 
+use super::super::surface::NativeSurfaceObservationV1;
 use super::super::trace::{
     NativeFailureCauseV1, NativeInputSourceV1, NativeObservationV1, NativeOutcomeV1,
     NativeTraceErrorKindV1, NativeTraceEventV1, NativeTraceLaneStatsV1, NativeTraceLimitKindV1,
@@ -10,12 +11,12 @@ use super::super::trace::{
     NativeTraceV1,
 };
 use super::super::{NativePhysicalExtentV1, NativeSurfaceStateV1, NativeSurfaceTupleV1};
-use super::generation_zero;
+use super::{generation_zero, trace_step};
 
 #[test]
 fn representative_scalar_state_is_typed_and_lossless() {
     let mut trace = NativeTraceV1::new();
-    let mut pointer = NativeTraceStepV1::new(
+    let mut pointer = trace_step(
         NativeTraceStageV1::Platform,
         NativeObservationV1::Pointer,
         NativeOutcomeV1::Observed,
@@ -24,8 +25,8 @@ fn representative_scalar_state_is_typed_and_lossless() {
     pointer.input_source = Some(NativeInputSourceV1::Native);
     pointer.surface = Some(surface());
     pointer.target = Some(HeadlessPointerTargetV1::StaticControl);
-    pointer.scheduler_state = SchedulerState::ShutdownQueued;
-    pointer.current_generation = generation_zero();
+    pointer.scheduler_state = Some(SchedulerState::ShutdownQueued);
+    pointer.current_generation = Some(generation_zero());
     pointer.redraw_armed = true;
     pointer.pending = NativeTracePendingV1::new(1, 1, 1);
     pointer.deferred = NativeTraceLaneStatsV1::new(1, 80);
@@ -43,6 +44,7 @@ fn representative_scalar_state_is_typed_and_lossless() {
     assert_eq!(event.captured_generation(), Some(generation_zero()));
     assert_eq!(event.published_generation(), None);
     assert_eq!(event.surface(), Some(surface()));
+    assert_eq!(event.surface_observation(), None);
     assert_eq!(event.target(), Some(HeadlessPointerTargetV1::StaticControl));
     assert_eq!(event.scheduler_state(), SchedulerState::ShutdownQueued);
     assert_eq!(event.current_generation(), generation_zero());
@@ -60,7 +62,7 @@ fn representative_scalar_state_is_typed_and_lossless() {
 #[test]
 fn frame_submission_control_and_four_scheduler_lanes_are_closed_scalars() {
     let mut trace = NativeTraceV1::new();
-    let mut offered = NativeTraceStepV1::new(
+    let mut offered = trace_step(
         NativeTraceStageV1::Scheduler,
         NativeObservationV1::Frame,
         NativeOutcomeV1::Offered,
@@ -70,7 +72,7 @@ fn frame_submission_control_and_four_scheduler_lanes_are_closed_scalars() {
     offered.frame = Some(2);
     offered.controls = NativeTraceLaneStatsV1::new(1, 32);
     offered.in_flight = NativeTraceLaneStatsV1::new(1, 40);
-    let mut accepted = NativeTraceStepV1::new(
+    let mut accepted = trace_step(
         NativeTraceStageV1::Scheduler,
         NativeObservationV1::Frame,
         NativeOutcomeV1::Accepted,
@@ -79,7 +81,8 @@ fn frame_submission_control_and_four_scheduler_lanes_are_closed_scalars() {
     accepted.surface = Some(surface());
     accepted.frame = Some(2);
     accepted.submission = Some(NativeTraceSubmissionV1::new(0, 1));
-    let mut completion = NativeTraceStepV1::new(
+    accepted.staging_digest = Some(0xcbf2_9ce4_8422_2325);
+    let mut completion = trace_step(
         NativeTraceStageV1::Scheduler,
         NativeObservationV1::Completion,
         NativeOutcomeV1::Accepted,
@@ -127,7 +130,7 @@ fn invalid_applicability_is_rejected_before_storage_without_a_prefix() {
     oversized_pending.pending = NativeTracePendingV1::new(2, 0, 0);
     let mut captured_on_build = observed_build();
     captured_on_build.captured_generation = Some(generation_zero());
-    let mut submission_without_frame = NativeTraceStepV1::new(
+    let mut submission_without_frame = trace_step(
         NativeTraceStageV1::Renderer,
         NativeObservationV1::Frame,
         NativeOutcomeV1::Accepted,
@@ -200,7 +203,8 @@ fn environment_failures_retain_surface_and_reject_presentation_identity() {
         .record(SchedulerTick::new(12), failed)
         .expect("environment failure may retain only its observed surface");
     let event = trace.events()[0];
-    assert_eq!(event.surface(), Some(surface()));
+    assert_eq!(event.surface(), None);
+    assert_eq!(event.surface_observation(), Some(surface_observation()));
     assert_eq!(event.frame(), None);
     assert_eq!(event.submission(), None);
     assert_eq!(event.control(), None);
@@ -330,7 +334,7 @@ fn vocabularies_are_closed_ordered_and_privacy_safe() {
 }
 
 fn observed_build() -> NativeTraceStepV1 {
-    NativeTraceStepV1::new(
+    trace_step(
         NativeTraceStageV1::Manifest,
         NativeObservationV1::Build,
         NativeOutcomeV1::Observed,
@@ -344,7 +348,7 @@ fn scheduler_offer(turn: u64) -> NativeTraceStepV1 {
 }
 
 fn scheduler_offer_without_turn() -> NativeTraceStepV1 {
-    let mut step = NativeTraceStepV1::new(
+    let mut step = trace_step(
         NativeTraceStageV1::Scheduler,
         NativeObservationV1::Frame,
         NativeOutcomeV1::Offered,
@@ -360,13 +364,22 @@ fn environment_failure(cause: NativeFailureCauseV1) -> NativeTraceStepV1 {
     } else {
         NativeObservationV1::Surface
     };
-    let mut step = NativeTraceStepV1::new(
+    let mut step = trace_step(
         NativeTraceStageV1::Platform,
         observation,
         NativeOutcomeV1::Failed(cause),
     );
-    step.surface = Some(surface());
+    if cause == NativeFailureCauseV1::EnvironmentScaleChanged {
+        step.surface_observation = Some(surface_observation());
+    } else {
+        step.surface = Some(surface());
+    }
     step
+}
+
+fn surface_observation() -> NativeSurfaceObservationV1 {
+    NativeSurfaceObservationV1::try_new(NativePhysicalExtentV1::new(241, 181), 2.01)
+        .expect("fixed observation should normalize")
 }
 
 fn surface() -> NativeSurfaceTupleV1 {

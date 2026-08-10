@@ -84,10 +84,12 @@ fn scheduler_trace_turns_are_dense_and_terminal_state_is_observed() {
         scheduler_events[8].scheduler_state(),
         SchedulerState::Stopped
     );
-    assert!(
+    assert_eq!(
         scheduler_events
             .iter()
-            .all(|event| event.current_generation().get() == 1)
+            .map(|event| event.current_generation().get())
+            .collect::<Vec<_>>(),
+        [0, 1, 1, 1, 1, 1, 1, 1, 1]
     );
     assert!(
         scheduler_events
@@ -95,4 +97,41 @@ fn scheduler_trace_turns_are_dense_and_terminal_state_is_observed() {
             .all(|events| events[0].tick() <= events[1].tick())
     );
     assert_terminal_empty(&driver);
+}
+
+#[test]
+fn shutdown_preempts_pending_surface_and_disarms_outstanding_redraw() {
+    let mut driver = driver(PresenterMode::Success);
+    driver
+        .observe_surface(physical(640, 480), 2.0, tick(0))
+        .expect("initial surface should stage");
+    driver
+        .drain_scheduler(tick(1))
+        .expect("initial surface should publish");
+    assert!(driver.redraw_armed());
+    driver
+        .observe_surface(physical(720, 520), 2.0, tick(2))
+        .expect("resize should remain pending");
+    assert!(driver.pending_surface().is_some());
+
+    let admission = driver
+        .close_requested(NativeInputSourceV1::Scripted, tick(3))
+        .expect("shutdown should preempt pending visual work");
+    let ControlAdmission::Accepted(control) = admission else {
+        panic!("first shutdown must allocate one control");
+    };
+    assert!(!driver.redraw_armed());
+    assert!(driver.pending_surface().is_none());
+    assert_eq!(
+        driver
+            .drain_scheduler(tick(4))
+            .expect("stop must not be blocked by a pending resize"),
+        NativeDriverActionV1::StopRenderer { control }
+    );
+    assert_terminal_empty(&driver);
+    let terminal = driver.trace().events().last().expect("stop should record");
+    assert_eq!(terminal.scheduler_state(), SchedulerState::Stopped);
+    assert!(!terminal.redraw_armed());
+    assert_eq!(terminal.pending().surface(), 0);
+    assert_eq!(terminal.visual().items(), 0);
 }

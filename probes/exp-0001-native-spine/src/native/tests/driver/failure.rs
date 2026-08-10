@@ -116,4 +116,39 @@ fn postaccept_failure_reports_renderer_loss_without_rejecting_the_frame() {
             .is_some_and(|submission| submission.epoch() == 0 && submission.token() == 0)
     );
     assert_eq!(failure.control(), Some(0));
+    assert_eq!(failure.scheduler_state(), SchedulerState::Faulted);
+    assert_eq!(failure.current_generation().get(), 1);
+}
+
+#[test]
+fn renderer_loss_preempts_and_discards_a_pending_surface() {
+    let mut driver = driver(PresenterMode::FailPresent);
+    driver
+        .observe_surface(physical(640, 480), 2.0, tick(0))
+        .expect("initial surface should stage");
+    driver
+        .drain_scheduler(tick(1))
+        .expect("initial surface should publish");
+    driver
+        .observe_surface(physical(720, 520), 2.0, tick(2))
+        .expect("resize should remain pending during the prior redraw");
+
+    assert_eq!(
+        driver
+            .redraw_requested(tick(3))
+            .expect_err("present failure should admit renderer loss"),
+        NativeFailureCauseV1::Presenter
+    );
+    assert!(driver.pending_surface().is_none());
+    assert_eq!(
+        driver
+            .drain_scheduler(tick(4))
+            .expect("loss must drain before any discarded resize"),
+        NativeDriverActionV1::Idle
+    );
+    assert_eq!(driver.scheduler_state(), SchedulerState::Faulted);
+    assert!(driver.pending_surface().is_none());
+    let loss = driver.trace().events().last().expect("loss should record");
+    assert_eq!(loss.scheduler_state(), SchedulerState::Faulted);
+    assert_eq!(loss.pending().surface(), 0);
 }
