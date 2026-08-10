@@ -82,6 +82,14 @@ fn fen_rows_slice_all_tokens_and_ui_rows_never_serialize_origins() {
 
 #[test]
 fn map_bounds_are_inclusive_and_report_the_first_crossing() {
+    assert_eq!(
+        MapArtifactLimitKindV1::ALL,
+        [
+            MapArtifactLimitKindV1::Records,
+            MapArtifactLimitKindV1::LineBytes,
+            MapArtifactLimitKindV1::ArtifactBytes,
+        ]
+    );
     let (fen, _) = compile_both();
     let artifact_bytes = FEN_GOLDEN.len();
     let line_bytes = FEN_GOLDEN.lines().map(str::len).max().unwrap_or(0);
@@ -110,6 +118,20 @@ fn map_bounds_are_inclusive_and_report_the_first_crossing() {
         let error = encode_fen_map_v1(&fen, limits).expect_err("one-under should fail");
         assert_eq!(error.limit_kind(), Some(expected));
     }
+
+    let all_cross = encode_fen_map_v1(&fen, MapArtifactLimitsV1::new(0, 0, 0))
+        .expect_err("simultaneous crossings should fail");
+    assert_eq!(
+        all_cross.limit_kind(),
+        Some(MapArtifactLimitKindV1::Records)
+    );
+    let line_and_bytes_cross =
+        encode_fen_map_v1(&fen, MapArtifactLimitsV1::new(0, 0, records))
+            .expect_err("line crossing should precede artifact bytes");
+    assert_eq!(
+        line_and_bytes_cross.limit_kind(),
+        Some(MapArtifactLimitKindV1::LineBytes)
+    );
 }
 
 fn compile_both() -> (CompiledAuthoringV1, CompiledAuthoringV1) {
