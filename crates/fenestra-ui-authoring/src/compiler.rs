@@ -1,27 +1,19 @@
 use fenestra_ui_ir::prototype::SourceId;
 
+use crate::compiled::CompiledAuthoringV1;
 use crate::diagnostic::{AuthoringDiagnosticKindV1, AuthoringDiagnosticV1};
+use crate::fen::parse_fen_document_v1;
 use crate::limits::{AuthoringLimitKindV1, AuthoringLimitsV1};
+use crate::lower::lower_document_v1;
 use crate::source::{DiagnosticLocationV1, FenSourceV1, PhysicalOriginV1};
 use crate::vocabulary::AuthoringFrontendV1;
 
-/// Opaque result of a successful version-1 authoring compilation.
-///
-/// No value is produced until a later parser and lowering slice exists.
-#[derive(Debug)]
-pub struct CompiledAuthoringV1 {
-    _private: (),
-}
-
-/// Performs the bounded version-1 `.fen` preflight.
-///
-/// Grammar parsing is intentionally outside this initial compiler slice, so a
-/// valid nonempty source currently produces a typed placeholder parse failure.
+/// Compiles one bounded version-1 `.fen` document into the typed IR triple.
 ///
 /// # Errors
 ///
-/// Returns the first source-byte, UTF-8, empty-input, or placeholder parse
-/// diagnostic in deterministic validation order.
+/// Returns the first bounded lexical, grammar, name-resolution, type, or IR
+/// validation diagnostic in deterministic validation order.
 pub fn compile_fen_v1(
     source: FenSourceV1<'_>,
     limits: AuthoringLimitsV1,
@@ -59,16 +51,8 @@ pub fn compile_fen_v1(
         ));
     }
 
-    let first_token_end = text
-        .chars()
-        .next()
-        .map_or(0, |character| character.len_utf8());
-    Err(fen_failure(
-        source_id,
-        AuthoringDiagnosticKindV1::UnexpectedToken,
-        0,
-        first_token_end,
-    ))
+    let parsed = parse_fen_document_v1(source_id, text, limits)?;
+    lower_document_v1(parsed, limits)
 }
 
 fn fen_failure(
