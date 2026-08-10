@@ -302,6 +302,7 @@ fn vocabularies_are_closed_ordered_and_privacy_safe() {
             NativeFailureCauseV1::UnsupportedAlpha,
             NativeFailureCauseV1::Storage,
             NativeFailureCauseV1::EnvironmentScaleChanged,
+            NativeFailureCauseV1::EnvironmentSurfaceChanged,
             NativeFailureCauseV1::SurfaceRepaintUnavailable,
             NativeFailureCauseV1::Runtime,
             NativeFailureCauseV1::Oracle,

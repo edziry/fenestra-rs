@@ -264,6 +264,7 @@ fn failure(value: NativeFailureCauseV1) -> &'static str {
         NativeFailureCauseV1::UnsupportedAlpha => "unsupported-alpha",
         NativeFailureCauseV1::Storage => "storage",
         NativeFailureCauseV1::EnvironmentScaleChanged => "environment-scale-changed",
+        NativeFailureCauseV1::EnvironmentSurfaceChanged => "environment-surface-changed",
         NativeFailureCauseV1::SurfaceRepaintUnavailable => "surface-repaint-unavailable",
         NativeFailureCauseV1::Runtime => "runtime",
         NativeFailureCauseV1::Oracle => "oracle",

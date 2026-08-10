@@ -203,6 +203,7 @@ impl NativeSurfaceStateV1 {
             .is_some_and(NativeSurfaceTupleV1::is_suspended)
     }
 
+    #[cfg(test)]
     pub(super) fn pending_is_suspended(&self) -> bool {
         self.pending.is_some_and(NativeSurfaceTupleV1::is_suspended)
     }

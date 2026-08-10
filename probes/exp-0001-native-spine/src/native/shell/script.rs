@@ -32,9 +32,13 @@ pub(crate) enum NativeRunEvidenceV1 {
     ResizePublished {
         runtime_generation: u64,
         surface_generation: u64,
+        logical_width: i32,
+        logical_height: i32,
     },
     Stopped {
         control: u64,
+        runtime_generation: u64,
+        surface_generation: u64,
     },
 }
 
@@ -116,6 +120,8 @@ impl NativeReferenceScriptV1 {
                 NativeRunEvidenceV1::ResizePublished {
                     runtime_generation: 2,
                     surface_generation: 1,
+                    logical_width: 360,
+                    logical_height: 260,
                 },
             ) => (ScriptStateV1::SecondRedraw, self.scale_micros),
             (
@@ -128,7 +134,14 @@ impl NativeReferenceScriptV1 {
                     completion_control: 1,
                 },
             ) => (ScriptStateV1::Close, self.scale_micros),
-            (ScriptStateV1::Close, NativeRunEvidenceV1::Stopped { control: 2 }) => (
+            (
+                ScriptStateV1::Close,
+                NativeRunEvidenceV1::Stopped {
+                    control: 2,
+                    runtime_generation: 2,
+                    surface_generation: 1,
+                },
+            ) => (
                 ScriptStateV1::Exit(NativeProbeResultV1::Pass),
                 self.scale_micros,
             ),
@@ -154,6 +167,7 @@ impl NativeReferenceScriptV1 {
 pub(crate) const fn classify_native_failure_v1(cause: NativeFailureCauseV1) -> NativeProbeResultV1 {
     match cause {
         NativeFailureCauseV1::EnvironmentScaleChanged
+        | NativeFailureCauseV1::EnvironmentSurfaceChanged
         | NativeFailureCauseV1::SurfaceRepaintUnavailable => NativeProbeResultV1::Adapt,
         NativeFailureCauseV1::InvalidScale
         | NativeFailureCauseV1::InvalidPoint

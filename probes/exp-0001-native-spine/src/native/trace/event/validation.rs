@@ -116,6 +116,7 @@ fn stage_tuple_is_valid(step: NativeTraceStepV1) -> bool {
                     NativeFailureCauseV1::Arithmetic
                         | NativeFailureCauseV1::WidthLimit
                         | NativeFailureCauseV1::HeightLimit
+                        | NativeFailureCauseV1::EnvironmentSurfaceChanged
                         | NativeFailureCauseV1::SurfaceRepaintUnavailable,
                 ),
         ) | (
@@ -315,6 +316,7 @@ fn surface_is_required(step: NativeTraceStepV1) -> bool {
             NativeObservationV1::Surface,
             NativeOutcomeV1::Observed
                 | NativeOutcomeV1::Coalesced
+                | NativeOutcomeV1::Failed(NativeFailureCauseV1::EnvironmentSurfaceChanged)
                 | NativeOutcomeV1::Failed(NativeFailureCauseV1::SurfaceRepaintUnavailable),
         ) | (
             NativeTraceStageV1::Platform,

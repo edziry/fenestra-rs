@@ -75,6 +75,16 @@ impl<P: PresenterPortV1> NativeDriverV1<P> {
             Ok(staged) => staged,
             Err(cause) => return self.reject_before_accept(tick, surface, frame, cause),
         };
+        if staged.runtime_generation() != work.generation()
+            || staged.pixels().len().checked_mul(4) != Some(staged.accounted_bytes())
+        {
+            return self.reject_before_accept(
+                tick,
+                surface,
+                frame,
+                NativeFailureCauseV1::Invariant,
+            );
+        }
         let staging_digest = staged.digest();
         self.presenter_pending = true;
         let mut accepted_submission = None;

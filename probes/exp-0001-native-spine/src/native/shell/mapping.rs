@@ -45,6 +45,7 @@ pub(crate) fn map_window_event_v1(
     }
 }
 
+#[cfg(test)]
 pub(crate) fn map_scale_factor_changed_v1(
     active: WindowId,
     observed: WindowId,

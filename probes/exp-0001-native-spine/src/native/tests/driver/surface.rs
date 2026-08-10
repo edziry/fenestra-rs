@@ -182,3 +182,126 @@ fn native_only_and_post_initial_scale_changes_do_not_bypass_the_scheduler() {
     assert_eq!(observed.scale().micros(), 2_010_000);
     assert_eq!(observed.logical_surface(), HeadlessSurface::new(359, 259));
 }
+
+#[test]
+fn environment_surface_change_is_typed_before_redraw_and_preserves_accepted_state() {
+    let mut driver = driver(PresenterMode::Success);
+    driver
+        .observe_surface(physical(640, 480), 2.0, tick(0))
+        .expect("initial surface should stage");
+    driver
+        .drain_scheduler(tick(1))
+        .expect("initial surface should publish");
+    let accepted = driver.accepted_surface();
+    let generation = driver.runtime_generation();
+    let stats = driver.scheduler_stats();
+
+    driver
+        .observe_surface(physical(720, 520), 2.0, tick(2))
+        .expect("environment change should remain pending");
+    assert_eq!(
+        driver
+            .reject_environment_surface_before_redraw(tick(3))
+            .expect_err("unstable surface must preempt the frame"),
+        NativeFailureCauseV1::EnvironmentSurfaceChanged
+    );
+
+    assert_eq!(driver.accepted_surface(), accepted);
+    assert_eq!(driver.pending_surface(), None);
+    assert_eq!(driver.runtime_generation(), generation);
+    assert_eq!(driver.scheduler_stats(), stats);
+    let events = driver.trace().events();
+    let [ignored, failed] = &events[events.len() - 2..] else {
+        panic!("redraw rejection should append two events");
+    };
+    assert_eq!(
+        ignored.stage(),
+        super::super::super::trace::NativeTraceStageV1::Platform
+    );
+    assert_eq!(
+        ignored.observation(),
+        super::super::super::trace::NativeObservationV1::Redraw
+    );
+    assert_eq!(
+        ignored.outcome(),
+        super::super::super::trace::NativeOutcomeV1::Ignored
+    );
+    assert_eq!(
+        failed.outcome(),
+        super::super::super::trace::NativeOutcomeV1::Failed(
+            NativeFailureCauseV1::EnvironmentSurfaceChanged,
+        )
+    );
+    assert!(failed.surface().is_some());
+}
+
+#[test]
+fn environment_surface_change_between_script_directives_has_no_fake_redraw() {
+    let mut driver = driver(PresenterMode::Success);
+    driver
+        .observe_surface(physical(640, 480), 2.0, tick(0))
+        .expect("initial surface should stage");
+    driver
+        .drain_scheduler(tick(1))
+        .expect("initial surface should publish");
+    driver
+        .observe_surface(physical(720, 520), 2.0, tick(2))
+        .expect("environment change should remain pending");
+    let before = driver.trace().events().len();
+
+    assert_eq!(
+        driver
+            .reject_environment_surface_between_directives(tick(3))
+            .expect_err("settlement barrier must reject an effective change"),
+        NativeFailureCauseV1::EnvironmentSurfaceChanged
+    );
+    assert_eq!(driver.trace().events().len(), before + 1);
+    let failed = driver
+        .trace()
+        .events()
+        .last()
+        .expect("failure should record");
+    assert_eq!(
+        failed.observation(),
+        super::super::super::trace::NativeObservationV1::Surface
+    );
+    assert_eq!(
+        failed.outcome(),
+        super::super::super::trace::NativeOutcomeV1::Failed(
+            NativeFailureCauseV1::EnvironmentSurfaceChanged,
+        )
+    );
+}
+
+#[test]
+fn refused_current_resize_uses_the_accepted_tuple_without_creating_pending_work() {
+    let mut driver = driver(PresenterMode::Success);
+    driver
+        .observe_surface(physical(640, 480), 2.0, tick(0))
+        .expect("initial surface should stage");
+    driver
+        .drain_scheduler(tick(1))
+        .expect("initial surface should publish");
+    let accepted = driver.accepted_surface();
+    let generation = driver.runtime_generation();
+    let stats = driver.scheduler_stats();
+
+    assert_eq!(
+        driver
+            .reject_environment_surface_between_directives(tick(2))
+            .expect_err("a refused resize should fail from the accepted observation"),
+        NativeFailureCauseV1::EnvironmentSurfaceChanged
+    );
+    assert_eq!(driver.accepted_surface(), accepted);
+    assert_eq!(driver.pending_surface(), None);
+    assert_eq!(driver.runtime_generation(), generation);
+    assert_eq!(driver.scheduler_stats(), stats);
+    assert_eq!(
+        driver
+            .trace()
+            .events()
+            .last()
+            .and_then(|event| event.surface()),
+        accepted
+    );
+}

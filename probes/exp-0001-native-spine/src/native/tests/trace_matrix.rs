@@ -152,7 +152,11 @@ fn platform_surface_failure_causes_and_tuple_shapes_are_exact() {
                 | NativeFailureCauseV1::WidthLimit
                 | NativeFailureCauseV1::HeightLimit
         );
-        let allowed_with_tuple = cause == NativeFailureCauseV1::SurfaceRepaintUnavailable;
+        let allowed_with_tuple = matches!(
+            cause,
+            NativeFailureCauseV1::EnvironmentSurfaceChanged
+                | NativeFailureCauseV1::SurfaceRepaintUnavailable
+        );
         let mut candidate = step(
             NativeTraceStageV1::Platform,
             NativeObservationV1::Surface,

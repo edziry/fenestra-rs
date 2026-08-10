@@ -151,6 +151,7 @@ impl NativePresenterBufferPortV1 for NativeOwnedBufferV1<'_> {
     }
 }
 
+#[cfg(test)]
 pub(crate) const fn native_pre_present_notify_source_v1() -> fn(&Window) {
     Window::pre_present_notify
 }

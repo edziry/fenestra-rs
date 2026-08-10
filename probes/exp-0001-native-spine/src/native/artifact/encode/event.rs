@@ -164,6 +164,7 @@ const fn failed(value: NativeFailureCauseV1) -> &'static str {
         NativeFailureCauseV1::UnsupportedAlpha => "failed:unsupported-alpha",
         NativeFailureCauseV1::Storage => "failed:storage",
         NativeFailureCauseV1::EnvironmentScaleChanged => "failed:environment-scale-changed",
+        NativeFailureCauseV1::EnvironmentSurfaceChanged => "failed:environment-surface-changed",
         NativeFailureCauseV1::SurfaceRepaintUnavailable => "failed:surface-repaint-unavailable",
         NativeFailureCauseV1::Runtime => "failed:runtime",
         NativeFailureCauseV1::Oracle => "failed:oracle",

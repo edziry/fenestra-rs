@@ -49,9 +49,7 @@ fn fixed_script_accepts_only_the_registered_identity_milestones() {
         NativeRunDirectiveV1::ScriptClose
     );
     assert_eq!(
-        script
-            .advance(NativeRunEvidenceV1::Stopped { control: 2 })
-            .expect("stop milestone"),
+        script.advance(stopped(2, 2, 1)).expect("stop milestone"),
         NativeRunDirectiveV1::Exit(NativeProbeResultV1::Pass)
     );
 }
@@ -105,11 +103,16 @@ fn every_wrong_pointer_resize_second_frame_and_stop_identity_is_atomic() {
         NativeRunEvidenceV1::ResizePublished {
             runtime_generation: 1,
             surface_generation: 1,
+            logical_width: 360,
+            logical_height: 260,
         },
         NativeRunEvidenceV1::ResizePublished {
             runtime_generation: 2,
             surface_generation: 0,
+            logical_width: 360,
+            logical_height: 260,
         },
+        resize_with_size(350, 250),
         second_frame(),
     ] {
         assert_atomic_failure(&mut after_pointer(), evidence);
@@ -121,16 +124,16 @@ fn every_wrong_pointer_resize_second_frame_and_stop_identity_is_atomic() {
         presented(2, 1, 0, 1, 1),
         presented(2, 1, 1, 0, 1),
         presented(2, 1, 1, 1, 0),
-        NativeRunEvidenceV1::Stopped { control: 2 },
+        stopped(2, 2, 1),
     ] {
         assert_atomic_failure(&mut after_resize(), evidence);
     }
 
     for control in [0, 1, 3, u64::MAX] {
-        assert_atomic_failure(
-            &mut after_second_frame(),
-            NativeRunEvidenceV1::Stopped { control },
-        );
+        assert_atomic_failure(&mut after_second_frame(), stopped(control, 2, 1));
+    }
+    for evidence in [stopped(2, 1, 1), stopped(2, 2, 0), stopped(2, 3, 1)] {
+        assert_atomic_failure(&mut after_second_frame(), evidence);
     }
 }
 
@@ -171,14 +174,32 @@ const fn first_frame() -> NativeRunEvidenceV1 {
 }
 
 const fn resize() -> NativeRunEvidenceV1 {
+    resize_with_size(360, 260)
+}
+
+const fn resize_with_size(logical_width: i32, logical_height: i32) -> NativeRunEvidenceV1 {
     NativeRunEvidenceV1::ResizePublished {
         runtime_generation: 2,
         surface_generation: 1,
+        logical_width,
+        logical_height,
     }
 }
 
 const fn second_frame() -> NativeRunEvidenceV1 {
     presented(2, 1, 1, 1, 1)
+}
+
+const fn stopped(
+    control: u64,
+    runtime_generation: u64,
+    surface_generation: u64,
+) -> NativeRunEvidenceV1 {
+    NativeRunEvidenceV1::Stopped {
+        control,
+        runtime_generation,
+        surface_generation,
+    }
 }
 
 const fn presented(

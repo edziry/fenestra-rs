@@ -24,6 +24,7 @@ pub(super) enum NativeTraceLimitKindV1 {
 }
 
 impl NativeTraceLimitKindV1 {
+    #[cfg(test)]
     pub(super) const ALL: [Self; 2] = [Self::Events, Self::AccountedBytes];
 }
 
@@ -83,10 +84,12 @@ impl NativeTraceV1 {
         }
     }
 
+    #[cfg(test)]
     pub(super) const fn capacity(&self) -> NativeTraceCapacityV1 {
         self.capacity
     }
 
+    #[cfg(test)]
     pub(super) const fn is_empty(&self) -> bool {
         self.events.is_empty()
     }

@@ -10,6 +10,7 @@ pub(crate) enum NativeInputSourceV1 {
 }
 
 impl NativeInputSourceV1 {
+    #[cfg(test)]
     pub(crate) const ALL: [Self; 2] = [Self::Native, Self::Scripted];
 }
 
@@ -24,6 +25,7 @@ pub(crate) enum NativeTraceStageV1 {
 }
 
 impl NativeTraceStageV1 {
+    #[cfg(test)]
     pub(crate) const ALL: [Self; 6] = [
         Self::Manifest,
         Self::Shell,
@@ -51,6 +53,7 @@ pub(crate) enum NativeObservationV1 {
 }
 
 impl NativeObservationV1 {
+    #[cfg(test)]
     pub(crate) const ALL: [Self; 12] = [
         Self::Build,
         Self::Resumed,
@@ -79,6 +82,7 @@ pub(crate) enum NativeFailureCauseV1 {
     UnsupportedAlpha,
     Storage,
     EnvironmentScaleChanged,
+    EnvironmentSurfaceChanged,
     SurfaceRepaintUnavailable,
     Runtime,
     Oracle,
@@ -91,7 +95,8 @@ pub(crate) enum NativeFailureCauseV1 {
 }
 
 impl NativeFailureCauseV1 {
-    pub(crate) const ALL: [Self; 19] = [
+    #[cfg(test)]
+    pub(crate) const ALL: [Self; 20] = [
         Self::InvalidScale,
         Self::InvalidPoint,
         Self::Arithmetic,
@@ -102,6 +107,7 @@ impl NativeFailureCauseV1 {
         Self::UnsupportedAlpha,
         Self::Storage,
         Self::EnvironmentScaleChanged,
+        Self::EnvironmentSurfaceChanged,
         Self::SurfaceRepaintUnavailable,
         Self::Runtime,
         Self::Oracle,
@@ -132,6 +138,7 @@ pub(crate) enum NativeOutcomeV1 {
 }
 
 impl NativeOutcomeV1 {
+    #[cfg(test)]
     pub(crate) const ALL: [Self; 13] = [
         Self::Observed,
         Self::Coalesced,

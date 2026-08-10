@@ -124,6 +124,7 @@ impl<P: PresenterPortV1> NativeDriverV1<P> {
         if self.presenter_pending { 1 } else { 0 }
     }
 
+    #[cfg(test)]
     pub(crate) const fn presenter(&self) -> &P {
         &self.presenter
     }

@@ -6,6 +6,7 @@ use std::time::{Duration, Instant};
 pub(crate) struct NativeWatchdogTokenV1(u64);
 
 impl NativeWatchdogTokenV1 {
+    #[cfg(test)]
     pub(crate) const fn get(self) -> u64 {
         self.0
     }
@@ -82,10 +83,12 @@ impl<P: NativeWatchdogProxyV1> NativeWatchdogV1<P> {
         })
     }
 
+    #[cfg(test)]
     pub(crate) fn deadline_from(start: Instant) -> Option<Instant> {
         start.checked_add(Self::TIMEOUT)
     }
 
+    #[cfg(test)]
     pub(crate) const fn command_capacity(&self) -> usize {
         Self::COMMAND_CAPACITY
     }

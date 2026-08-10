@@ -79,6 +79,7 @@ fn closed_failure_classification_is_adapt_only_for_environment_boundaries() {
         let expected = if matches!(
             cause,
             NativeFailureCauseV1::EnvironmentScaleChanged
+                | NativeFailureCauseV1::EnvironmentSurfaceChanged
                 | NativeFailureCauseV1::SurfaceRepaintUnavailable
         ) {
             NativeProbeResultV1::Adapt
