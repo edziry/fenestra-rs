@@ -1,3 +1,4 @@
+mod driver;
 mod raster;
 mod surface;
 mod trace;
