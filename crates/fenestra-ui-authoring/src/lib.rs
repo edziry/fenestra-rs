@@ -4,8 +4,8 @@
 //!
 //! The current slice parses and lowers the closed bounded `.fen` grammar and
 //! equivalent `ui!` input tokens into the existing raw schema, construction,
-//! and style programs, emits target tokens, and generates canonical Rust. The
-//! procedural macro package remains absent.
+//! and style programs, emits target tokens, and generates canonical Rust. A
+//! separate thin procedural-macro package delegates to this compiler.
 
 mod canonical;
 mod compiled;

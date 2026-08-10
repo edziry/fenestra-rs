@@ -321,7 +321,7 @@ generation and one-record receipt tuples are:
 
 ```text
 0: []
-1: PropertyChanged(root/s:0/s:0, color, rgba8(3,3,3,255), rgba8(20,30,40,255), P)
+1: PropertyChanged(root/s:0/s:0, color, rgba8(10,20,30,255), rgba8(20,30,40,255), P)
 2: KeyInserted(root/s:0/r:1, 30, final=1, [root/s:0/m:1:30], R)
 3: KeyMoved(root/s:0/r:1, 30, old=1, final=2, R)
 4: PropertyChanged(root/s:0/m:1:30, height, 12, 14, D)
