@@ -5,8 +5,8 @@ use fenestra_ui_ir::prototype::{
 };
 use fenestra_ui_runtime::prototype::UiRuntime;
 use fenestra_ui_testkit::prototype::{
-    HeadlessFixtureV1, HeadlessOracleV1, NormalizedHeadlessProjectionV1, SemanticOperationV1,
-    observe_headless_projection_v1,
+    HeadlessFixtureV1, HeadlessOracleV1, NormalizedHeadlessProjectionV1, NormalizedStateV1,
+    SemanticOperationV1, observe_headless_projection_v1, observe_snapshot_v1,
 };
 
 use super::identity::{resolve_fragment, stage_operation};
@@ -19,6 +19,7 @@ const STYLE_LIMITS: StyleValidationLimits = StyleValidationLimits::new(2);
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct LaneLog {
     receipts: Vec<NormalizedReceipt>,
+    states: Vec<NormalizedStateV1>,
     projections: Vec<NormalizedHeadlessProjectionV1>,
     final_keys: Vec<u64>,
 }
@@ -26,6 +27,10 @@ pub struct LaneLog {
 impl LaneLog {
     pub fn receipts(&self) -> &[NormalizedReceipt] {
         &self.receipts
+    }
+
+    pub fn states(&self) -> &[NormalizedStateV1] {
+        &self.states
     }
 
     pub fn projections(&self) -> &[NormalizedHeadlessProjectionV1] {
@@ -62,6 +67,8 @@ pub fn run_lane(
     )
     .expect("the registered runtime lane should initialize");
     let initial = runtime.committed();
+    let initial_state = observe_snapshot_v1(&construction, &initial, fixture.harness_limits())
+        .expect("generation zero should normalize its logical state");
     let initial_projection = observe_headless_projection_v1(fixture, &initial)
         .expect("generation zero should normalize");
     assert_eq!(initial.generation().get(), 0);
@@ -71,6 +78,7 @@ pub fn run_lane(
         Vec::new(),
         fenestra_ui_ir::prototype::InvalidationSet::NONE,
     )];
+    let mut states = vec![initial_state];
     let mut projections = vec![initial_projection.projection().clone()];
     drop(initial);
 
@@ -85,10 +93,13 @@ pub fn run_lane(
         let after = runtime.committed();
         let normalized = normalize_receipt(&construction, &before, &after, &receipt)
             .expect("the registered receipt should normalize");
+        let state = observe_snapshot_v1(&construction, &after, fixture.harness_limits())
+            .expect("the committed logical state should normalize");
         let projection = observe_headless_projection_v1(fixture, &after)
             .expect("the committed headless projection should normalize");
         assert_eq!(projection.generation(), after.generation());
         receipts.push(normalized);
+        states.push(state);
         projections.push(projection.projection().clone());
         drop(receipt);
         drop(before);
@@ -105,6 +116,7 @@ pub fn run_lane(
         .collect();
     LaneLog {
         receipts,
+        states,
         projections,
         final_keys,
     }
