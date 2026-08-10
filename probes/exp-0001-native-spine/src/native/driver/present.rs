@@ -232,6 +232,11 @@ impl<P: PresenterPortV1> NativeDriverV1<P> {
         &mut self,
         tick: SchedulerTick,
     ) -> Result<fenestra_ui_runtime::prototype::ControlSequence, NativeFailureCauseV1> {
+        if self.scheduler.state() != fenestra_ui_runtime::prototype::SchedulerState::Draining
+            || self.pending_control.is_some()
+        {
+            return Err(NativeFailureCauseV1::Invariant);
+        }
         let submission = self
             .retiring_submission
             .ok_or(NativeFailureCauseV1::Invariant)?;
