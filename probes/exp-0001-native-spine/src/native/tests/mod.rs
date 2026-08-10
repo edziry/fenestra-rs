@@ -4,6 +4,7 @@ mod surface;
 mod trace;
 mod trace_applicability;
 mod trace_capacity;
+mod trace_matrix;
 
 use fenestra_ui_runtime::prototype::{RuntimeGeneration, UiRuntime};
 use fenestra_ui_testkit::prototype::HeadlessFixtureV1;
