@@ -2,9 +2,12 @@ use std::fmt;
 
 use fenestra_ui_ir::prototype::{ConstructionProgram, SchemaManifest, SourceSpan, StyleProgram};
 
+use crate::diagnostic::{AuthoringDiagnosticKindV1, AuthoringDiagnosticV1};
+use crate::limits::AuthoringLimitKindV1;
 use crate::resolved::ResolvedDocumentV1;
-use crate::source::PhysicalOriginV1;
-use crate::vocabulary::AnchorKindV1;
+use crate::resolved::logical_span;
+use crate::source::{DiagnosticLocationV1, PhysicalOriginV1};
+use crate::vocabulary::{AnchorKindV1, AuthoringFrontendV1};
 
 /// One host-only mapping from a logical IR anchor to its authored origin.
 pub struct SourceMapEntryV1 {
@@ -82,6 +85,8 @@ impl fmt::Debug for SourceMapV1 {
 
 /// Opaque result of a successful version-1 authoring compilation.
 pub struct CompiledAuthoringV1 {
+    frontend: AuthoringFrontendV1,
+    document_origin: PhysicalOriginV1,
     schema: SchemaManifest,
     construction: ConstructionProgram,
     style: StyleProgram,
@@ -91,15 +96,18 @@ pub struct CompiledAuthoringV1 {
 }
 
 impl CompiledAuthoringV1 {
-    pub(crate) const fn new(
-        schema: SchemaManifest,
-        construction: ConstructionProgram,
-        style: StyleProgram,
+    pub(crate) fn new(
+        frontend: AuthoringFrontendV1,
+        document_origin: PhysicalOriginV1,
+        programs: (SchemaManifest, ConstructionProgram, StyleProgram),
         logical_source_catalog: Vec<u8>,
         source_map: SourceMapV1,
         resolved: ResolvedDocumentV1,
     ) -> Self {
+        let (schema, construction, style) = programs;
         Self {
+            frontend,
+            document_origin,
             schema,
             construction,
             style,
@@ -141,6 +149,19 @@ impl CompiledAuthoringV1 {
 
     pub(crate) const fn resolved(&self) -> &ResolvedDocumentV1 {
         &self.resolved
+    }
+
+    pub(crate) fn generated_rust_limit_failure(&self) -> AuthoringDiagnosticV1 {
+        let document_anchor = self.resolved.document_anchor();
+        AuthoringDiagnosticV1::new(
+            self.frontend,
+            AuthoringDiagnosticKindV1::LimitExceeded(AuthoringLimitKindV1::GeneratedRustBytes),
+            DiagnosticLocationV1::Anchored {
+                logical: logical_span(document_anchor),
+                anchor_kind: AnchorKindV1::Document,
+                physical: self.document_origin,
+            },
+        )
     }
 }
 

@@ -20,10 +20,11 @@ pub(crate) fn lower_document_v1(
     validate_programs(&parsed, &schema, &construction, &style, limits)?;
     let source_map = source_map(&parsed);
     let catalog = vec![b'@'; parsed.anchors.len()];
+    let document_origin = parsed.anchors[parsed.document_anchor as usize].physical;
     Ok(CompiledAuthoringV1::new(
-        schema,
-        construction,
-        style,
+        parsed.frontend,
+        document_origin,
+        (schema, construction, style),
         catalog,
         source_map,
         resolved,

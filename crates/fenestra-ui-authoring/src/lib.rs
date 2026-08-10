@@ -4,11 +4,13 @@
 //!
 //! The current slice parses and lowers the closed bounded `.fen` grammar and
 //! equivalent `ui!` input tokens into the existing raw schema, construction,
-//! and style programs. Token emission and the procedural macro remain absent.
+//! and style programs. Canonical text generation and the procedural macro
+//! remain absent.
 
 mod compiled;
 mod compiler;
 mod diagnostic;
+mod emitter;
 mod fen;
 mod limits;
 mod lower;
@@ -27,6 +29,7 @@ pub mod prototype {
     pub use crate::compiled::{CompiledAuthoringV1, SourceMapEntryV1, SourceMapV1};
     pub use crate::compiler::{compile_fen_v1, compile_ui_v1};
     pub use crate::diagnostic::{AuthoringDiagnosticKindV1, AuthoringDiagnosticV1};
+    pub use crate::emitter::emit_tokens_v1;
     pub use crate::limits::{AuthoringLimitKindV1, AuthoringLimitsV1};
     pub use crate::source::{DiagnosticLocationV1, FenSourceV1, PhysicalOriginV1};
     pub use crate::version::{AuthoringFormatVersion, SUPPORTED_AUTHORING_FORMAT};
