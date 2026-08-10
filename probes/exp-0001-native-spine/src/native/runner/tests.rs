@@ -3,7 +3,8 @@ use fenestra_ui_runtime::prototype::HeadlessSurface;
 use super::super::shell::script::NativeRunDirectiveV1;
 use super::app::{
     NativeDirectiveSlotV1, WatchdogExpectationV1, active_resize_refuses_surface_v1,
-    requested_surface_matches_v1, surface_preempts_directive_v1, surface_preempts_redraw_v1,
+    requested_surface_matches_v1, surface_preemption_watchdog_v1, surface_preempts_directive_v1,
+    surface_preempts_redraw_v1,
 };
 
 #[test]
@@ -48,6 +49,18 @@ fn effective_surface_preempts_frame_and_settlement_but_not_requested_resize() {
         Some(WatchdogExpectationV1::Resize)
     ));
     assert!(!surface_preempts_redraw_v1(false, None));
+    assert_eq!(
+        surface_preemption_watchdog_v1(true, Some(WatchdogExpectationV1::Redraw)),
+        Some(WatchdogExpectationV1::Redraw)
+    );
+    assert_eq!(
+        surface_preemption_watchdog_v1(true, Some(WatchdogExpectationV1::PresentSettled)),
+        Some(WatchdogExpectationV1::PresentSettled)
+    );
+    assert_eq!(
+        surface_preemption_watchdog_v1(true, Some(WatchdogExpectationV1::Resize)),
+        None
+    );
     assert!(surface_preempts_directive_v1(true, false));
     assert!(!surface_preempts_directive_v1(false, false));
     assert!(!surface_preempts_directive_v1(true, true));

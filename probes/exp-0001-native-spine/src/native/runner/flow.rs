@@ -8,7 +8,7 @@ use super::super::trace::{NativeFailureCauseV1, NativeInputSourceV1};
 use super::super::types::NativePhysicalExtentV1;
 use super::app::{
     NativeApplicationV1, WatchdogExpectationV1, active_resize_refuses_surface_v1,
-    surface_preempts_directive_v1, surface_preempts_redraw_v1,
+    surface_preemption_watchdog_v1, surface_preempts_directive_v1, surface_preempts_redraw_v1,
 };
 use crate::NativeProbeErrorV1;
 
@@ -71,7 +71,15 @@ impl NativeApplicationV1 {
             || surface_preempts_directive_v1(pending_surface, self.pending_script.is_empty())
         {
             self.surface_dirty = false;
-            let result = self.next_scheduler_tick().and_then(|tick| {
+            let result = if let Some(expectation) =
+                surface_preemption_watchdog_v1(pending_surface, expectation)
+            {
+                self.cancel_watchdog(expectation)
+            } else {
+                Ok(())
+            }
+            .and_then(|()| self.next_scheduler_tick())
+            .and_then(|tick| {
                 self.driver
                     .as_mut()
                     .ok_or(NativeFailureCauseV1::Invariant)?

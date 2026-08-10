@@ -42,6 +42,17 @@ pub(super) const fn surface_preempts_redraw_v1(
         )
 }
 
+pub(super) const fn surface_preemption_watchdog_v1(
+    pending_surface: bool,
+    expectation: Option<WatchdogExpectationV1>,
+) -> Option<WatchdogExpectationV1> {
+    if surface_preempts_redraw_v1(pending_surface, expectation) {
+        expectation
+    } else {
+        None
+    }
+}
+
 pub(super) const fn surface_preempts_directive_v1(
     pending_surface: bool,
     directive_slot_empty: bool,
