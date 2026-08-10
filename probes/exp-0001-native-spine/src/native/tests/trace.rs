@@ -1,12 +1,13 @@
 use std::cell::Cell;
 
-use fenestra_ui_runtime::prototype::SchedulerTick;
+use fenestra_ui_runtime::prototype::{SchedulerState, SchedulerTick};
 use fenestra_ui_testkit::prototype::HeadlessPointerTargetV1;
 
 use super::super::trace::{
-    NativeFailureCauseV1, NativeObservationV1, NativeOutcomeV1, NativeTraceErrorKindV1,
-    NativeTraceEventV1, NativeTraceLaneStatsV1, NativeTraceLimitKindV1, NativeTracePendingV1,
-    NativeTraceStageV1, NativeTraceStepV1, NativeTraceSubmissionV1, NativeTraceV1,
+    NativeFailureCauseV1, NativeInputSourceV1, NativeObservationV1, NativeOutcomeV1,
+    NativeTraceErrorKindV1, NativeTraceEventV1, NativeTraceLaneStatsV1, NativeTraceLimitKindV1,
+    NativeTracePendingV1, NativeTraceStageV1, NativeTraceStepV1, NativeTraceSubmissionV1,
+    NativeTraceV1,
 };
 use super::super::{NativePhysicalExtentV1, NativeSurfaceStateV1, NativeSurfaceTupleV1};
 use super::generation_zero;
@@ -20,8 +21,11 @@ fn representative_scalar_state_is_typed_and_lossless() {
         NativeOutcomeV1::Observed,
     );
     pointer.captured_generation = Some(generation_zero());
+    pointer.input_source = Some(NativeInputSourceV1::Native);
     pointer.surface = Some(surface());
     pointer.target = Some(HeadlessPointerTargetV1::StaticControl);
+    pointer.scheduler_state = SchedulerState::ShutdownQueued;
+    pointer.current_generation = generation_zero();
     pointer.redraw_armed = true;
     pointer.pending = NativeTracePendingV1::new(1, 1, 1);
     pointer.deferred = NativeTraceLaneStatsV1::new(1, 80);
@@ -35,13 +39,21 @@ fn representative_scalar_state_is_typed_and_lossless() {
     assert_eq!(event.stage(), NativeTraceStageV1::Platform);
     assert_eq!(event.observation(), NativeObservationV1::Pointer);
     assert_eq!(event.outcome(), NativeOutcomeV1::Observed);
+    assert_eq!(event.input_source(), Some(NativeInputSourceV1::Native));
     assert_eq!(event.captured_generation(), Some(generation_zero()));
     assert_eq!(event.published_generation(), None);
     assert_eq!(event.surface(), Some(surface()));
     assert_eq!(event.target(), Some(HeadlessPointerTargetV1::StaticControl));
+    assert_eq!(event.scheduler_state(), SchedulerState::ShutdownQueued);
+    assert_eq!(event.current_generation(), generation_zero());
     assert_eq!(event.pending(), NativeTracePendingV1::new(1, 1, 1));
+    assert_eq!(event.pending().surface(), 1);
+    assert_eq!(event.pending().pointer(), 1);
+    assert_eq!(event.pending().presenter(), 1);
     assert_eq!(event.deferred(), NativeTraceLaneStatsV1::new(1, 80));
     assert_eq!(event.visual(), NativeTraceLaneStatsV1::new(1, 40));
+    assert_eq!(event.deferred().items(), 1);
+    assert_eq!(event.deferred().accounted_bytes(), 80);
     assert!(event.redraw_armed());
 }
 
@@ -59,10 +71,11 @@ fn frame_submission_control_and_four_scheduler_lanes_are_closed_scalars() {
     offered.controls = NativeTraceLaneStatsV1::new(1, 32);
     offered.in_flight = NativeTraceLaneStatsV1::new(1, 40);
     let mut accepted = NativeTraceStepV1::new(
-        NativeTraceStageV1::Renderer,
+        NativeTraceStageV1::Scheduler,
         NativeObservationV1::Frame,
         NativeOutcomeV1::Accepted,
     );
+    accepted.scheduler_turn = Some(1);
     accepted.surface = Some(surface());
     accepted.frame = Some(2);
     accepted.submission = Some(NativeTraceSubmissionV1::new(0, 1));
@@ -71,7 +84,7 @@ fn frame_submission_control_and_four_scheduler_lanes_are_closed_scalars() {
         NativeObservationV1::Completion,
         NativeOutcomeV1::Accepted,
     );
-    completion.scheduler_turn = Some(1);
+    completion.scheduler_turn = Some(2);
     completion.surface = Some(surface());
     completion.submission = Some(NativeTraceSubmissionV1::new(0, 1));
     completion.control = Some(3);
@@ -222,6 +235,10 @@ fn environment_failures_retain_surface_and_reject_presentation_identity() {
 
 #[test]
 fn vocabularies_are_closed_ordered_and_privacy_safe() {
+    assert_eq!(
+        NativeInputSourceV1::ALL,
+        [NativeInputSourceV1::Native, NativeInputSourceV1::Scripted]
+    );
     assert_eq!(
         NativeTraceStageV1::ALL,
         [

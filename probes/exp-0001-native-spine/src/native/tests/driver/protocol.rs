@@ -19,6 +19,17 @@ fn presenter_keeps_staging_acceptance_and_present_in_one_scope() {
             PresenterPhase::Present,
         ]
     );
+    let acceptance = driver
+        .trace()
+        .events()
+        .iter()
+        .find(|event| {
+            event.stage() == NativeTraceStageV1::Scheduler
+                && event.observation() == NativeObservationV1::Frame
+                && event.outcome() == super::super::super::trace::NativeOutcomeV1::Accepted
+        })
+        .expect("scheduler acceptance should record inside the presenter scope");
+    assert_eq!(acceptance.pending().presenter(), 1);
 }
 
 #[test]
@@ -31,7 +42,10 @@ fn scripted_pointer_and_close_are_labeled_without_changing_the_reducer() {
     driver.redraw_requested(tick(2)).expect("frame present");
 
     driver
-        .pointer_pressed(scripted_point(), NativeInputSourceV1::Scripted, tick(3))
+        .cursor_moved(scripted_point(), NativeInputSourceV1::Scripted, tick(3))
+        .expect("scripted cursor should use the normal reducer");
+    driver
+        .pointer_pressed(NativeInputSourceV1::Scripted, tick(3))
         .expect("scripted pointer should use the normal reducer");
     driver
         .close_requested(NativeInputSourceV1::Scripted, tick(4))
@@ -49,13 +63,17 @@ fn scripted_pointer_and_close_are_labeled_without_changing_the_reducer() {
                 )
         })
         .collect();
-    assert_eq!(inputs.len(), 2);
+    assert_eq!(inputs.len(), 3);
     assert_eq!(
         inputs[0].input_source(),
         Some(NativeInputSourceV1::Scripted)
     );
     assert_eq!(
         inputs[1].input_source(),
+        Some(NativeInputSourceV1::Scripted)
+    );
+    assert_eq!(
+        inputs[2].input_source(),
         Some(NativeInputSourceV1::Scripted)
     );
 }

@@ -4,8 +4,8 @@ use fenestra_ui_runtime::prototype::SchedulerTick;
 use fenestra_ui_testkit::prototype::HeadlessPointerTargetV1;
 
 use super::super::trace::{
-    NativeObservationV1, NativeOutcomeV1, NativeTraceErrorKindV1, NativeTraceStageV1,
-    NativeTraceStepV1, NativeTraceSubmissionV1, NativeTraceV1,
+    NativeInputSourceV1, NativeObservationV1, NativeOutcomeV1, NativeTraceErrorKindV1,
+    NativeTraceStageV1, NativeTraceStepV1, NativeTraceSubmissionV1, NativeTraceV1,
 };
 use super::super::{NativePhysicalExtentV1, NativeSurfaceStateV1, NativeSurfaceTupleV1};
 use super::generation_zero;
@@ -38,6 +38,7 @@ fn control_near_miss_and_invalid_stage_tuple_fail_before_storage() {
         NativeOutcomeV1::Observed,
     );
     control_on_pointer.captured_generation = Some(generation_zero());
+    control_on_pointer.input_source = Some(NativeInputSourceV1::Native);
     control_on_pointer.surface = Some(surface());
     control_on_pointer.target = Some(HeadlessPointerTargetV1::StaticControl);
     control_on_pointer.control = Some(0);
@@ -122,6 +123,7 @@ fn observations_that_depend_on_a_surface_reject_a_missing_tuple() {
         NativeOutcomeV1::Observed,
     );
     pointer.captured_generation = Some(generation_zero());
+    pointer.input_source = Some(NativeInputSourceV1::Native);
     pointer.target = Some(HeadlessPointerTargetV1::StaticControl);
     let mut deferred = deferred_surface();
     deferred.surface = None;
@@ -153,10 +155,11 @@ fn observations_that_depend_on_a_surface_reject_a_missing_tuple() {
 
 fn deferred_surface() -> NativeTraceStepV1 {
     let mut step = NativeTraceStepV1::new(
-        NativeTraceStageV1::Platform,
+        NativeTraceStageV1::Scheduler,
         NativeObservationV1::Surface,
         NativeOutcomeV1::Deferred,
     );
+    step.scheduler_turn = Some(0);
     step.captured_generation = Some(generation_zero());
     step.surface = Some(surface());
     step
@@ -164,10 +167,11 @@ fn deferred_surface() -> NativeTraceStepV1 {
 
 fn published_surface() -> NativeTraceStepV1 {
     let mut step = NativeTraceStepV1::new(
-        NativeTraceStageV1::Platform,
+        NativeTraceStageV1::Scheduler,
         NativeObservationV1::Surface,
         NativeOutcomeV1::Published,
     );
+    step.scheduler_turn = Some(0);
     step.published_generation = Some(generation_zero());
     step.surface = Some(surface());
     step

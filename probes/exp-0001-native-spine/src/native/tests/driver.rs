@@ -1,4 +1,5 @@
 mod atomicity;
+mod cursor;
 mod failure;
 mod frame;
 mod lifecycle;

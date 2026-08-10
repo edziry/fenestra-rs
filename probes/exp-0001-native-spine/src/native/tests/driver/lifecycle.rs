@@ -72,6 +72,25 @@ fn scheduler_trace_turns_are_dense_and_terminal_state_is_observed() {
     }
     assert!(
         scheduler_events
+            .iter()
+            .take(7)
+            .all(|event| event.scheduler_state() == SchedulerState::Running)
+    );
+    assert_eq!(
+        scheduler_events[7].scheduler_state(),
+        SchedulerState::ShutdownQueued
+    );
+    assert_eq!(
+        scheduler_events[8].scheduler_state(),
+        SchedulerState::Stopped
+    );
+    assert!(
+        scheduler_events
+            .iter()
+            .all(|event| event.current_generation().get() == 1)
+    );
+    assert!(
+        scheduler_events
             .windows(2)
             .all(|events| events[0].tick() <= events[1].tick())
     );

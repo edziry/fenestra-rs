@@ -25,6 +25,13 @@ fn initial_surface_publishes_before_it_becomes_input_visible() {
     assert_eq!(driver.accepted_surface(), None);
     assert_eq!(driver.runtime_generation().get(), 0);
     assert_eq!(driver.scheduler_stats().deferred().items(), 0);
+    let observation = driver
+        .trace()
+        .events()
+        .last()
+        .expect("surface observation should record");
+    assert_eq!(observation.pending().surface(), 1);
+    assert_eq!(observation.pending().presenter(), 0);
 
     let NativeDriverActionV1::RequestFrame {
         generation,
@@ -68,13 +75,16 @@ fn pending_resize_keeps_pointer_on_the_previous_accepted_tuple() {
     );
     assert_eq!(driver.accepted_surface(), Some(accepted));
     assert_eq!(driver.runtime_generation().get(), 1);
+    driver
+        .cursor_moved(
+            NativePhysicalPointV1::new(50.0, 10.0),
+            NativeInputSourceV1::Scripted,
+            tick(3),
+        )
+        .expect("pointer position should stage");
     assert_eq!(
         driver
-            .pointer_pressed(
-                NativePhysicalPointV1::new(50.0, 10.0),
-                NativeInputSourceV1::Scripted,
-                tick(3),
-            )
+            .pointer_pressed(NativeInputSourceV1::Scripted, tick(3))
             .expect("pointer should use the committed tuple"),
         HeadlessPointerTargetV1::None
     );
@@ -108,13 +118,16 @@ fn pending_resize_keeps_pointer_on_the_previous_accepted_tuple() {
             .logical_surface(),
         HeadlessSurface::new(360, 260)
     );
+    driver
+        .cursor_moved(
+            NativePhysicalPointV1::new(50.0, 10.0),
+            NativeInputSourceV1::Scripted,
+            tick(4),
+        )
+        .expect("pointer position should stage again");
     assert_eq!(
         driver
-            .pointer_pressed(
-                NativePhysicalPointV1::new(50.0, 10.0),
-                NativeInputSourceV1::Scripted,
-                tick(4),
-            )
+            .pointer_pressed(NativeInputSourceV1::Scripted, tick(4))
             .expect("published resize should enter input"),
         HeadlessPointerTargetV1::StaticControl
     );

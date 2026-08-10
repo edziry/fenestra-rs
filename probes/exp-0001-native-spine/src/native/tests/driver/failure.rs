@@ -98,4 +98,22 @@ fn postaccept_failure_reports_renderer_loss_without_rejecting_the_frame() {
     assert_eq!(driver.scheduler_stats().in_flight().items(), 1);
     assert_eq!(driver.presenter_pending_count(), 0);
     assert!(!driver.redraw_armed());
+    let failure = driver
+        .trace()
+        .events()
+        .last()
+        .expect("renderer loss processing should be terminal evidence");
+    assert_eq!(failure.stage(), NativeTraceStageV1::Scheduler);
+    assert_eq!(failure.observation(), NativeObservationV1::Present);
+    assert_eq!(
+        failure.outcome(),
+        NativeOutcomeV1::Failed(NativeFailureCauseV1::Presenter)
+    );
+    assert_eq!(failure.frame(), Some(0));
+    assert!(
+        failure
+            .submission()
+            .is_some_and(|submission| submission.epoch() == 0 && submission.token() == 0)
+    );
+    assert_eq!(failure.control(), Some(0));
 }
