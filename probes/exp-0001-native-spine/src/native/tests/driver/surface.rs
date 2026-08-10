@@ -162,11 +162,23 @@ fn native_only_and_post_initial_scale_changes_do_not_bypass_the_scheduler() {
     let pending = driver.pending_surface();
     assert_eq!(
         driver
-            .observe_surface(physical(640, 480), 2.01, tick(4))
+            .observe_surface(physical(720, 520), 2.01, tick(4))
             .expect_err("post-initial scale change is terminal"),
         NativeFailureCauseV1::EnvironmentScaleChanged
     );
     assert_eq!(driver.accepted_surface(), accepted);
     assert_eq!(driver.pending_surface(), pending);
     assert_eq!(driver.scheduler_stats(), stats);
+    let failure = driver
+        .trace()
+        .events()
+        .last()
+        .expect("scale rejection should retain its observation");
+    assert_eq!(failure.surface(), None);
+    let observed = failure
+        .surface_observation()
+        .expect("scale rejection should not masquerade as an accepted tuple");
+    assert_eq!(observed.physical(), physical(720, 520));
+    assert_eq!(observed.scale().micros(), 2_010_000);
+    assert_eq!(observed.logical_surface(), HeadlessSurface::new(359, 259));
 }
