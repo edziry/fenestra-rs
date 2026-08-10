@@ -7,6 +7,7 @@
 //! and style programs. Canonical text generation and the procedural macro
 //! remain absent.
 
+mod canonical;
 mod compiled;
 mod compiler;
 mod diagnostic;
@@ -26,6 +27,7 @@ mod vocabulary;
 /// Reserved unstable surface for the typed authoring experiment.
 #[doc(hidden)]
 pub mod prototype {
+    pub use crate::canonical::{GeneratedRustV1, canonical_rust_v1};
     pub use crate::compiled::{CompiledAuthoringV1, SourceMapEntryV1, SourceMapV1};
     pub use crate::compiler::{compile_fen_v1, compile_ui_v1};
     pub use crate::diagnostic::{AuthoringDiagnosticKindV1, AuthoringDiagnosticV1};
