@@ -152,6 +152,7 @@ Exit: the full headless flow is correct, bounded, observable, and reproducible.
 ## WU-0009: Disposable native spine
 
 Branch: `experiment/native-spine`
+Design: [disposable native EXP-0001 spine](design/native-exp-0001-spine.md)
 
 - Research: screen windowing and renderer candidates by version, features,
   maintenance, unsafe surface, license, platform reach, replacement cost, and

@@ -2,11 +2,12 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 const FIRST_PRE_ALPHA_VERSION: &str = "0.1.0";
-const MEMBER_MANIFESTS: [&str; 5] = [
+const MEMBER_MANIFESTS: [&str; 6] = [
     "crates/fenestra-ui/Cargo.toml",
     "crates/fenestra-ui-ir/Cargo.toml",
     "crates/fenestra-ui-runtime/Cargo.toml",
     "crates/fenestra-ui-testkit/Cargo.toml",
+    "probes/exp-0001-native-spine/Cargo.toml",
     "probes/exp-0001-spine/Cargo.toml",
 ];
 

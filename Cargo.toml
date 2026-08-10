@@ -4,6 +4,7 @@ members = [
     "crates/fenestra-ui-ir",
     "crates/fenestra-ui-runtime",
     "crates/fenestra-ui-testkit",
+    "probes/exp-0001-native-spine",
     "probes/exp-0001-spine",
 ]
 resolver = "3"
