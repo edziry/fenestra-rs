@@ -150,6 +150,10 @@ fn every_runtime_field_fault_is_detected_and_atomic_to_one_slice() {
             RuntimeArtifactSliceV1::Receipt,
         ),
         (
+            RuntimeArtifactFaultV1::MutationKind,
+            RuntimeArtifactSliceV1::Receipt,
+        ),
+        (
             RuntimeArtifactFaultV1::MutationPath,
             RuntimeArtifactSliceV1::Receipt,
         ),
@@ -158,7 +162,11 @@ fn every_runtime_field_fault_is_detected_and_atomic_to_one_slice() {
             RuntimeArtifactSliceV1::Receipt,
         ),
         (
-            RuntimeArtifactFaultV1::MutationValue,
+            RuntimeArtifactFaultV1::MutationOldValue,
+            RuntimeArtifactSliceV1::Receipt,
+        ),
+        (
+            RuntimeArtifactFaultV1::MutationNewValue,
             RuntimeArtifactSliceV1::Receipt,
         ),
         (
@@ -182,6 +190,10 @@ fn every_runtime_field_fault_is_detected_and_atomic_to_one_slice() {
             RuntimeArtifactSliceV1::Receipt,
         ),
         (
+            RuntimeArtifactFaultV1::StateNodePath,
+            RuntimeArtifactSliceV1::State,
+        ),
+        (
             RuntimeArtifactFaultV1::StateNodeParent,
             RuntimeArtifactSliceV1::State,
         ),
@@ -198,6 +210,10 @@ fn every_runtime_field_fault_is_detected_and_atomic_to_one_slice() {
             RuntimeArtifactSliceV1::State,
         ),
         (
+            RuntimeArtifactFaultV1::StatePropertyOrder,
+            RuntimeArtifactSliceV1::State,
+        ),
+        (
             RuntimeArtifactFaultV1::StatePropertyId,
             RuntimeArtifactSliceV1::State,
         ),
@@ -206,11 +222,19 @@ fn every_runtime_field_fault_is_detected_and_atomic_to_one_slice() {
             RuntimeArtifactSliceV1::State,
         ),
         (
+            RuntimeArtifactFaultV1::StateChildOrder,
+            RuntimeArtifactSliceV1::State,
+        ),
+        (
             RuntimeArtifactFaultV1::StateChildKind,
             RuntimeArtifactSliceV1::State,
         ),
         (
             RuntimeArtifactFaultV1::StateChildTarget,
+            RuntimeArtifactSliceV1::State,
+        ),
+        (
+            RuntimeArtifactFaultV1::StateFragmentPath,
             RuntimeArtifactSliceV1::State,
         ),
         (
@@ -255,8 +279,10 @@ fn every_runtime_field_fault_is_detected_and_atomic_to_one_slice() {
         ),
     ];
     for (fault, changed_slice) in faults {
-        let faulted = inject_runtime_artifact_fault_v1(&baseline, fault)
+        let faulted_lane = inject_runtime_artifact_fault_v1(&lane, fault)
             .expect("the registered runtime fault should apply");
+        let faulted = runtime_artifact_model_v1(&faulted_lane)
+            .expect("the faulted typed log should normalize");
         let observed =
             encode_runtime_artifact_model_v1(&faulted, REGISTERED_RUNTIME_ARTIFACT_LIMITS_V1)
                 .expect("the faulted model should encode");
@@ -267,7 +293,21 @@ fn every_runtime_field_fault_is_detected_and_atomic_to_one_slice() {
                 slice != changed_slice,
                 "non-atomic {fault:?} in {slice:?}"
             );
+            assert_eq!(
+                same_lane_slice(&lane, &faulted_lane, slice),
+                slice != changed_slice,
+                "non-atomic typed log {fault:?} in {slice:?}"
+            );
         }
+    }
+}
+
+fn same_lane_slice(left: &LaneLog, right: &LaneLog, slice: RuntimeArtifactSliceV1) -> bool {
+    match slice {
+        RuntimeArtifactSliceV1::Receipt => left.receipts() == right.receipts(),
+        RuntimeArtifactSliceV1::State => left.states() == right.states(),
+        RuntimeArtifactSliceV1::Projection => left.projections() == right.projections(),
+        RuntimeArtifactSliceV1::FinalKeys => left.final_keys() == right.final_keys(),
     }
 }
 
