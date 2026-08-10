@@ -12,6 +12,7 @@ use fenestra_ui_runtime::prototype::{
 };
 
 use crate::error::{HarnessError, HarnessErrorKind};
+use crate::fixture::HarnessLimitsV1;
 
 const COMPONENT: ComponentTypeId = ComponentTypeId::new(0);
 const WIDTH: PropertyId = PropertyId::new(0);
@@ -84,6 +85,12 @@ impl HeadlessFixtureV1 {
     #[must_use]
     pub const fn runtime_capacity(&self) -> RuntimeCapacity {
         self.runtime_capacity
+    }
+
+    /// Returns the bounds used by the complete headless snapshot observer.
+    #[must_use]
+    pub const fn harness_limits(&self) -> HarnessLimitsV1 {
+        super::oracle::ORACLE_LIMITS
     }
 }
 

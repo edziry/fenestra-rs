@@ -15,7 +15,7 @@ use crate::fixture::HarnessLimitsV1;
 use super::fixture::HeadlessFixtureV1;
 
 pub use compare::compare_headless_projection_v1;
-pub use fault::inject_headless_projection_fault_v1;
+pub use fault::{inject_headless_projection_fault_v1, inject_headless_surface_fault_v1};
 pub use observe::observe_headless_projection_v1;
 pub use types::{
     HeadlessMismatchFieldV1, HeadlessMismatchKindV1, HeadlessMismatchLocationV1,

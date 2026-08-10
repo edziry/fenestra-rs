@@ -1,0 +1,19 @@
+[package]
+name = "fenestra-ui-macros"
+description = "Experimental procedural authoring macros for Fenestra"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+repository.workspace = true
+
+[lib]
+proc-macro = true
+
+[dependencies]
+fenestra-ui-authoring.workspace = true
+
+[dev-dependencies]
+trybuild = "=1.0.120"
+
+[lints]
+workspace = true

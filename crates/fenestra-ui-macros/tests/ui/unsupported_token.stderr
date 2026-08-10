@@ -1,0 +1,5 @@
+error: unsupported-token
+ --> tests/ui/unsupported_token.rs:4:19
+  |
+4 |     let _ = ui! { + };
+  |                   ^

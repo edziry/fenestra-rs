@@ -61,8 +61,8 @@ pub mod prototype {
         NormalizedHeadlessSceneRectangleV1, NormalizedHeadlessSemanticV1,
         ObservedHeadlessProjectionV1, build_headless_artifact_v1, compare_headless_projection_v1,
         decode_headless_artifact_v1, encode_headless_artifact_v1, headless_frame_resource_v1,
-        inject_headless_projection_fault_v1, observe_headless_projection_v1, run_headless_spine_v1,
-        verify_headless_artifact_v1,
+        inject_headless_projection_fault_v1, inject_headless_surface_fault_v1,
+        observe_headless_projection_v1, run_headless_spine_v1, verify_headless_artifact_v1,
     };
     pub use crate::identity::IdentitySummaryV1;
     pub use crate::model::clean_rebuild_v1;
@@ -89,8 +89,8 @@ pub mod prototype {
     };
     pub use crate::semantic::{
         FragmentPathV1, NodePathV1, NormalizedChildGroupV1, NormalizedFragmentV1,
-        NormalizedMemberV1, NormalizedNodeV1, NormalizedPropertyV1, NormalizedStateV1,
-        PathSegmentV1,
+        NormalizedMemberV1, NormalizedNodeV1, NormalizedPropertyV1, NormalizedStateFaultV1,
+        NormalizedStateV1, PathSegmentV1, inject_normalized_state_fault_v1,
     };
     pub use crate::trace::{
         CandidateRejectionV1, LogicalTraceV1, TraceComparisonV1, TraceEventV1, TraceFaultV1,

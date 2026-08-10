@@ -116,6 +116,17 @@ fn registered_fixture_exposes_the_exact_style_specification_and_bounds() {
         fixture.runtime_capacity(),
         RuntimeCapacity::new(8, 8, 8, 2, 40, 3)
     );
+    let observer_limits = fixture.harness_limits();
+    assert_eq!(observer_limits.transactions(), 16);
+    assert_eq!(observer_limits.operations_per_transaction(), 8);
+    assert_eq!(observer_limits.operations(), 128);
+    assert_eq!(observer_limits.live_memberships(), 5);
+    assert_eq!(observer_limits.path_depth(), 3);
+    assert_eq!(observer_limits.normalized_nodes(), 8);
+    assert_eq!(observer_limits.normalized_fragments(), 2);
+    assert_eq!(observer_limits.normalized_properties(), 40);
+    assert_eq!(observer_limits.applicable_actions(), 64);
+    assert_eq!(observer_limits.trace_bytes(), 20_480);
 }
 
 #[test]

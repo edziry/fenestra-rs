@@ -21,7 +21,8 @@ pub use oracle::{
     NormalizedHeadlessComputedStyleV1, NormalizedHeadlessGeometryV1, NormalizedHeadlessHitRegionV1,
     NormalizedHeadlessProjectionV1, NormalizedHeadlessSceneRectangleV1,
     NormalizedHeadlessSemanticV1, ObservedHeadlessProjectionV1, compare_headless_projection_v1,
-    inject_headless_projection_fault_v1, observe_headless_projection_v1,
+    inject_headless_projection_fault_v1, inject_headless_surface_fault_v1,
+    observe_headless_projection_v1,
 };
 pub use platform::{
     HeadlessCallbackReportV1, HeadlessPlatformErrorKindV1, HeadlessPlatformErrorV1,

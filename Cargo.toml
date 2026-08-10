@@ -1,11 +1,14 @@
 [workspace]
 members = [
     "crates/fenestra-ui",
+    "crates/fenestra-ui-authoring",
     "crates/fenestra-ui-ir",
+    "crates/fenestra-ui-macros",
     "crates/fenestra-ui-runtime",
     "crates/fenestra-ui-testkit",
     "probes/exp-0001-native-spine",
     "probes/exp-0001-spine",
+    "probes/exp-0007-typed-authoring",
 ]
 resolver = "3"
 
@@ -17,7 +20,9 @@ repository = "https://github.com/edziry/fenestra-rs"
 
 [workspace.dependencies]
 fenestra-ui = { path = "crates/fenestra-ui", version = "=0.1.0" }
+fenestra-ui-authoring = { path = "crates/fenestra-ui-authoring", version = "=0.1.0" }
 fenestra-ui-ir = { path = "crates/fenestra-ui-ir", version = "=0.1.0" }
+fenestra-ui-macros = { path = "crates/fenestra-ui-macros", version = "=0.1.0" }
 fenestra-ui-runtime = { path = "crates/fenestra-ui-runtime", version = "=0.1.0" }
 fenestra-ui-testkit = { path = "crates/fenestra-ui-testkit", version = "=0.1.0" }
 
