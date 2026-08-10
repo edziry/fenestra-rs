@@ -9,7 +9,13 @@ repository.workspace = true
 [lints]
 workspace = true
 
-[dev-dependencies]
+[dependencies]
+fenestra-ui-ir.workspace = true
+
+[build-dependencies]
 fenestra-ui-authoring.workspace = true
 fenestra-ui-ir.workspace = true
+
+[dev-dependencies]
+fenestra-ui-authoring.workspace = true
 proc-macro2 = "=1.0.107"

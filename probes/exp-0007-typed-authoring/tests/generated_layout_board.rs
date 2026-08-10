@@ -17,6 +17,13 @@ fn out_dir_generated_triple_matches_the_independent_layout_board_oracle() {
         support::EXPECTED_LOGICAL_CATALOG.len(),
         support::EXPECTED_ANCHORS.len()
     );
+    for anchor in support::EXPECTED_ANCHORS {
+        assert!(fenestra_ui_authoring::prototype::AnchorKindV1::ALL.contains(&anchor.kind));
+        assert_eq!(
+            &support::FIXTURE[anchor.start as usize..anchor.end as usize],
+            anchor.label.as_bytes()
+        );
+    }
 
     let repeated = generated_layout_board_v1();
     assert_eq!(repeated.0, generated.0);

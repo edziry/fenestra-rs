@@ -1,6 +1,8 @@
 mod programs;
 
-use fenestra_ui_authoring::prototype::{AnchorKindV1, AuthoringLimitsV1};
+use fenestra_ui_authoring::prototype::{
+    AnchorKindV1, AuthoringLimitsV1, REFERENCE_AUTHORING_LIMITS_V1,
+};
 use fenestra_ui_exp_0007_typed_authoring::LAYOUT_BOARD_FEN_V1;
 use fenestra_ui_ir::prototype::{SourceId, SourceSpan};
 
@@ -8,8 +10,7 @@ pub use programs::{expected_construction, expected_schema, expected_style};
 
 pub const FIXTURE: &[u8] = LAYOUT_BOARD_FEN_V1;
 pub const SOURCE: SourceId = SourceId::new(7);
-pub const REGISTERED_LIMITS: AuthoringLimitsV1 =
-    AuthoringLimitsV1::new(8_192, 1_024, 32, 8, 1, 5, 4, 1, 3, 12, 2, 2, 34, 32_768);
+pub const REGISTERED_LIMITS: AuthoringLimitsV1 = REFERENCE_AUTHORING_LIMITS_V1;
 pub const EXPECTED_LOGICAL_CATALOG: &[u8] = &[b'@'; 34];
 
 #[derive(Clone, Copy)]
