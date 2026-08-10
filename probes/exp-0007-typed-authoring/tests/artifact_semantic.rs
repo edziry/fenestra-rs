@@ -52,7 +52,9 @@ fn committed_semantics_are_closed_bounded_ascii_records_in_source_order() {
     let mut lines = GOLDEN.lines();
     assert_eq!(
         lines.next(),
-        Some("fenestra-authoring-semantics|1|records=34")
+        Some(
+            "fenestra-authoring-semantics|1|authoring-format=1|schema-format=1|construction-format=1|style-format=1|records=34"
+        )
     );
     let records = lines.collect::<Vec<_>>();
     assert_eq!(records.len(), 34);
