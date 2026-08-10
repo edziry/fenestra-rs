@@ -49,6 +49,16 @@ fn invalid_scale_and_point_values_fail_closed() {
         NativeScaleFactorV1::try_from_f64(8.000_000_6).expect_err("rounded scale must fail"),
         NativeContractErrorKindV1::InvalidScale
     );
+    assert_eq!(
+        NativeScaleFactorV1::try_from_f64(0.000_000_4).expect_err("zero micros must fail"),
+        NativeContractErrorKindV1::InvalidScale
+    );
+    assert_eq!(
+        NativeScaleFactorV1::try_from_f64(0.000_000_5)
+            .expect("half a micro rounds into the supported range")
+            .micros(),
+        1
+    );
 
     let scale = NativeScaleFactorV1::try_from_f64(1.0).expect("unit scale is supported");
     for point in [
@@ -78,6 +88,15 @@ fn surface_limits_and_generation_exhaustion_are_atomic() {
             .observe(NativePhysicalExtentV1::new(4_097, 4_096), 1.0)
             .expect_err("width one-over must fail"),
         NativeContractErrorKindV1::LimitExceeded(super::super::NativeLimitKindV1::Width)
+    );
+    assert_eq!(state.accepted_tuple(), accepted);
+    assert_eq!(state.pending_tuple(), pending);
+
+    assert_eq!(
+        state
+            .observe(NativePhysicalExtentV1::new(4_096, 4_097), 1.0)
+            .expect_err("height one-over must fail"),
+        NativeContractErrorKindV1::LimitExceeded(super::super::NativeLimitKindV1::Height)
     );
     assert_eq!(state.accepted_tuple(), accepted);
     assert_eq!(state.pending_tuple(), pending);
