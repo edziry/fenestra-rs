@@ -10,6 +10,10 @@ pub enum MapArtifactLimitKindV1 {
     Records,
 }
 
+impl MapArtifactLimitKindV1 {
+    pub const ALL: [Self; 3] = [Self::Records, Self::LineBytes, Self::ArtifactBytes];
+}
+
 #[derive(Clone, Copy)]
 pub struct MapArtifactLimitsV1 {
     artifact_bytes: usize,

@@ -125,9 +125,8 @@ fn map_bounds_are_inclusive_and_report_the_first_crossing() {
         all_cross.limit_kind(),
         Some(MapArtifactLimitKindV1::Records)
     );
-    let line_and_bytes_cross =
-        encode_fen_map_v1(&fen, MapArtifactLimitsV1::new(0, 0, records))
-            .expect_err("line crossing should precede artifact bytes");
+    let line_and_bytes_cross = encode_fen_map_v1(&fen, MapArtifactLimitsV1::new(0, 0, records))
+        .expect_err("line crossing should precede artifact bytes");
     assert_eq!(
         line_and_bytes_cross.limit_kind(),
         Some(MapArtifactLimitKindV1::LineBytes)
