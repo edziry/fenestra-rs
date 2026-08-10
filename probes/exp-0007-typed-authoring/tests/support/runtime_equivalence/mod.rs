@@ -13,7 +13,8 @@ use fenestra_ui_testkit::prototype::{
 pub use artifact::{
     REGISTERED_RUNTIME_ARTIFACT_LIMITS_V1, RuntimeArtifactEncodeErrorKindV1,
     RuntimeArtifactFaultV1, RuntimeArtifactLimitKindV1, RuntimeArtifactLimitsV1,
-    encode_runtime_artifact_v1, inject_runtime_artifact_fault_v1,
+    RuntimeArtifactModelV1, RuntimeArtifactSliceV1, encode_runtime_artifact_model_v1,
+    encode_runtime_artifact_v1, inject_runtime_artifact_fault_v1, runtime_artifact_model_v1,
 };
 pub use receipt::{NormalizedManifestEntry, NormalizedMutation, NormalizedReceipt};
 pub use runner::{LaneLog, oracle_projection_log, run_lane, validate_programs};

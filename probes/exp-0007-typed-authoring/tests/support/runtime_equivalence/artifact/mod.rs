@@ -18,7 +18,7 @@ pub enum RuntimeArtifactLimitKindV1 {
 }
 
 impl RuntimeArtifactLimitKindV1 {
-    pub const ALL: [Self; 3] = [Self::ArtifactBytes, Self::LineBytes, Self::Records];
+    pub const ALL: [Self; 3] = [Self::Records, Self::LineBytes, Self::ArtifactBytes];
 }
 
 #[derive(Clone, Copy)]
@@ -60,10 +60,63 @@ impl RuntimeArtifactEncodeErrorV1 {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum RuntimeArtifactFaultV1 {
-    Receipt,
-    Manifest,
-    StateOrder,
+    ReceiptGeneration,
+    ReceiptInvalidation,
+    MutationPath,
+    MutationProperty,
+    MutationValue,
+    MutationKey,
+    MutationRoot,
+    MutationIndices,
+    CreatedManifest,
+    RetiredManifest,
+    StateNodeParent,
+    StateNodeTemplate,
+    StateNodeComponent,
+    StateNodeOrder,
+    StatePropertyId,
+    StatePropertyValue,
+    StateChildKind,
+    StateChildTarget,
+    StateFragmentDescriptor,
+    StateMemberKey,
+    StateMemberPath,
+    StateMemberOrder,
+    Surface,
     Projection(HeadlessProjectionFaultV1),
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum RuntimeArtifactSliceV1 {
+    Receipt,
+    State,
+    Projection,
+    FinalKeys,
+}
+
+impl RuntimeArtifactSliceV1 {
+    pub const ALL: [Self; 4] = [
+        Self::Receipt,
+        Self::State,
+        Self::Projection,
+        Self::FinalKeys,
+    ];
+}
+
+#[derive(Clone)]
+pub struct RuntimeArtifactModelV1 {
+    log: LaneLog,
+}
+
+impl RuntimeArtifactModelV1 {
+    pub fn same_slice(&self, other: &Self, slice: RuntimeArtifactSliceV1) -> bool {
+        match slice {
+            RuntimeArtifactSliceV1::Receipt => self.log.receipts() == other.log.receipts(),
+            RuntimeArtifactSliceV1::State => self.log.states() == other.log.states(),
+            RuntimeArtifactSliceV1::Projection => self.log.projections() == other.log.projections(),
+            RuntimeArtifactSliceV1::FinalKeys => self.log.final_keys() == other.log.final_keys(),
+        }
+    }
 }
 
 pub fn encode_runtime_artifact_v1(
@@ -73,11 +126,24 @@ pub fn encode_runtime_artifact_v1(
     encode::encode(log, limits)
 }
 
-pub fn inject_runtime_artifact_fault_v1(
+pub fn runtime_artifact_model_v1(
     log: &LaneLog,
+) -> Result<RuntimeArtifactModelV1, RuntimeArtifactEncodeErrorV1> {
+    Ok(RuntimeArtifactModelV1 { log: log.clone() })
+}
+
+pub fn encode_runtime_artifact_model_v1(
+    model: &RuntimeArtifactModelV1,
+    limits: RuntimeArtifactLimitsV1,
+) -> Result<String, RuntimeArtifactEncodeErrorV1> {
+    encode::encode(&model.log, limits)
+}
+
+pub fn inject_runtime_artifact_fault_v1(
+    model: &RuntimeArtifactModelV1,
     fault: RuntimeArtifactFaultV1,
-) -> Result<LaneLog, RuntimeArtifactEncodeErrorV1> {
-    fault::inject(log, fault)
+) -> Result<RuntimeArtifactModelV1, RuntimeArtifactEncodeErrorV1> {
+    fault::inject(model, fault)
 }
 
 fn invalid_log() -> RuntimeArtifactEncodeErrorV1 {
