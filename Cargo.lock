@@ -304,6 +304,8 @@ dependencies = [
  "fenestra-ui-authoring",
  "fenestra-ui-ir",
  "fenestra-ui-macros",
+ "fenestra-ui-runtime",
+ "fenestra-ui-testkit",
  "proc-macro2",
 ]
 
