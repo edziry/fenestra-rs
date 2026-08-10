@@ -259,9 +259,12 @@ fn prepublication_scale_observations_coalesce_before_scale_is_fixed() {
     let first = state.pending_tuple().expect("first tuple is pending");
     assert_eq!(first.generation().get(), 0);
 
-    state
-        .observe(NativePhysicalExtentV1::new(125, 100), 1.25)
-        .expect("scale remains replaceable before first publication");
+    assert_eq!(
+        state
+            .observe(NativePhysicalExtentV1::new(125, 100), 1.25)
+            .expect("scale remains replaceable before first publication"),
+        NativeSurfaceChangeV1::Initialized
+    );
     let latest = state.pending_tuple().expect("latest tuple is pending");
     assert_eq!(latest.generation().get(), 0);
     assert_eq!(latest.scale().micros(), 1_250_000);
@@ -282,17 +285,23 @@ fn prepublication_scale_observations_coalesce_before_scale_is_fixed() {
 fn superseded_resize_keeps_one_generation_and_rejects_stale_promotion() {
     let mut state = NativeSurfaceStateV1::new();
     state
-        .observe(NativePhysicalExtentV1::new(100, 80), 1.0)
+        .observe(NativePhysicalExtentV1::new(200, 100), 2.0)
         .expect("initial tuple should apply");
     let accepted = promote(&mut state);
 
-    state
-        .observe(NativePhysicalExtentV1::new(110, 80), 1.0)
-        .expect("first resize should apply");
+    assert_eq!(
+        state
+            .observe(NativePhysicalExtentV1::new(201, 100), 2.0)
+            .expect("first resize should apply"),
+        NativeSurfaceChangeV1::LogicalResize
+    );
     let stale = state.pending_tuple().expect("first resize is pending");
-    state
-        .observe(NativePhysicalExtentV1::new(120, 90), 1.0)
-        .expect("newer resize should supersede");
+    assert_eq!(
+        state
+            .observe(NativePhysicalExtentV1::new(202, 100), 2.0)
+            .expect("newer resize should supersede"),
+        NativeSurfaceChangeV1::LogicalResize
+    );
     let latest = state.pending_tuple().expect("latest resize is pending");
     assert_eq!(stale.generation(), latest.generation());
     assert_eq!(latest.generation().get(), 1);
@@ -307,6 +316,19 @@ fn superseded_resize_keeps_one_generation_and_rejects_stale_promotion() {
         NativeContractErrorKindV1::Invariant
     );
     assert_eq!((state.accepted_tuple(), state.pending_tuple()), slots);
+    assert_eq!(
+        state
+            .observe(NativePhysicalExtentV1::new(200, 100), 2.0)
+            .expect("returning to accepted tuple cancels pending work"),
+        NativeSurfaceChangeV1::NoChange
+    );
+    assert!(state.pending_tuple().is_none());
+    assert_eq!(state.input_tuple(), Some(accepted));
+
+    state
+        .observe(NativePhysicalExtentV1::new(202, 100), 2.0)
+        .expect("latest resize should be restaged");
+    let latest = state.pending_tuple().expect("restaged tuple is pending");
     assert_eq!(state.promote_pending(latest), Ok(latest));
     assert_eq!(state.input_tuple(), Some(latest));
     assert_eq!(state.pending_count(), 0);
