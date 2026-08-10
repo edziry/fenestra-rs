@@ -11,6 +11,7 @@ workspace = true
 
 [dependencies]
 fenestra-ui-ir.workspace = true
+fenestra-ui-macros.workspace = true
 
 [build-dependencies]
 fenestra-ui-authoring.workspace = true
@@ -18,7 +19,6 @@ fenestra-ui-ir.workspace = true
 
 [dev-dependencies]
 fenestra-ui-authoring.workspace = true
-fenestra-ui-macros.workspace = true
 fenestra-ui-runtime.workspace = true
 fenestra-ui-testkit.workspace = true
 proc-macro2 = "=1.0.107"
