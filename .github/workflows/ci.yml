@@ -67,12 +67,22 @@ jobs:
       - name: Build and run tests
         run: cargo test --workspace --all-targets --all-features --locked
 
-      - name: Verify typed authoring with Windows path separators and spaces
+      - name: Verify typed authoring contract on Windows paths
         if: runner.os == 'Windows'
         shell: pwsh
         env:
           CARGO_TARGET_DIR: ${{ runner.temp }}\fenestra target with spaces
         run: |
+          cargo fmt --all -- --check
+          cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+          $env:RUSTDOCFLAGS = "-D warnings -D missing-docs"
+          cargo doc --workspace --all-features --no-deps --locked
+          Remove-Item Env:RUSTDOCFLAGS
+          cargo metadata --format-version 1 --no-deps --locked | Out-Null
+          cargo tree -p fenestra-ui-authoring --edges normal --locked
+          cargo tree -p fenestra-ui-macros --edges all --locked
+          cargo tree -p fenestra-ui-exp-0007-typed-authoring --edges normal,no-proc-macro --locked
+          cargo tree -p fenestra-ui-exp-0007-typed-authoring --target all --edges all --locked
           cargo test -p fenestra-ui-exp-0007-typed-authoring --all-targets --all-features --locked
           $generated = @(Get-ChildItem -Path $env:CARGO_TARGET_DIR -Recurse -Filter layout_board_fen_v1.rs)
           if ($generated.Count -ne 1) {
@@ -83,3 +93,4 @@ jobs:
           if ($observed -ne $expected) {
             throw "generated typed-authoring source hash mismatch"
           }
+          git diff --check
