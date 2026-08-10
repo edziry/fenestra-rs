@@ -1,6 +1,6 @@
 # Disposable native EXP-0001 spine
 
-Status: active
+Status: complete locally
 Work unit: WU-0009
 Branch: `experiment/native-spine`
 Research baseline: `fenestra-research` commit
@@ -197,9 +197,10 @@ scheduler, scene projection, trace vocabulary, or correctness oracle.
 
 ## Native event contract
 
-The event loop uses `ControlFlow::Wait`. Winit may coalesce redraw requests, so
-the trace records observed transitions rather than assuming callback counts or
-latency.
+The event loop uses `ControlFlow::Wait`. Winit may coalesce and reorder native
+callbacks, so the trace records observed transitions rather than assuming
+callback counts or latency. Encoding is deterministic for one identical typed
+event stream; live compositor runs are not required to be byte-identical.
 
 ### Surface and scale
 
@@ -228,6 +229,10 @@ latency.
   physical change with the same logical extent is retained and classified
   atomically, then ends WU-0009 with `SurfaceRepaintUnavailable` and `adapt`.
   This driver neither invents a `FrameId` nor bypasses `UiScheduler` to repaint.
+- The fixed resize request succeeds only for the exact logical `360x260`
+  surface. A refused or superseded extent, or an effective surface change while
+  a frame or post-present barrier is pending, is recorded as
+  `EnvironmentSurfaceChanged` and `adapt` without publishing the observation.
 
 ### Pointer input
 
@@ -257,6 +262,13 @@ latency.
   scheduler `AcceptFrame`. Once accepted, the presenter consumes the buffer.
 - A successful Softbuffer `present` is followed by same-tick `Complete`. This
   proves CPU buffer retirement, not display scanout.
+- After each present, the next scripted directive waits in one bounded slot.
+  The shell arms a five-second settlement watchdog, requests one unarmed
+  redraw, and releases the directive only after that callback is recorded as
+  ignored. `about_to_wait` drains surface observations first; an effective
+  tuple there ends the run with `EnvironmentSurfaceChanged`. This callback
+  barrier prevents a fixed milestone from overtaking already delivered native
+  state, but it does not prove compositor completion or scanout.
 - Failure before acceptance rejects the outstanding offer. A failure after
   acceptance reports renderer loss rather than an ambiguous retry.
 
@@ -312,7 +324,9 @@ order. Its stable digest is FNV-1a-64 with offset
 `0xcbf29ce484222325` and prime `0x00000100000001b3`, consuming every pixel as
 explicit `u32::to_le_bytes()`. It never hashes native `Vec` memory. A digest may
 identify a staging buffer in a named run, but it is not a security or
-display-integrity claim.
+display-integrity claim. Only the scheduler event that accepts a frame carries
+its digest, before the corresponding presenter event; rejected, offered, and
+completed events do not carry one.
 
 ## TDD sequence
 
@@ -329,7 +343,8 @@ display-integrity claim.
 5. Presenter-port tests inject resize, pre-present, post-present, slow, loss,
    and stop outcomes and prove accept/reject/completion and rollback behavior.
 6. Trace tests cover inclusivity, overflow priority, dense sequence, privacy,
-   deterministic scripted runs, and no retained snapshots or native objects.
+   deterministic injected event streams, and no retained snapshots or native
+   objects. They do not impose byte determinism on live callback scheduling.
 7. The native process follows the exact bounded
    [reference run](native-exp-0001-run.md). On Wayland the window begins
    unmapped and the first buffer commit maps it; no unsupported visibility

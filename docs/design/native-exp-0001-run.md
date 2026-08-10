@@ -1,6 +1,6 @@
 # Native WU-0009 reference run
 
-Status: active
+Status: complete locally
 Work unit: WU-0009
 Parent design: [disposable native EXP-0001 spine](native-exp-0001-spine.md)
 Last updated: 2026-08-09
@@ -10,7 +10,9 @@ Last updated: 2026-08-09
 This contract makes the single Fedora Wayland execution reproducible and
 decidable without pretending that winit can portably synthesize native pointer,
 scale, resize, or close events. It separates observed OS events from a fixed
-script that enters the same bounded adapter reducer.
+script that enters the same bounded adapter reducer. One identical typed event
+stream encodes deterministically, but native callback scheduling belongs to the
+window system; separate live runs are not required to produce identical bytes.
 
 ## Fixed script
 
@@ -28,18 +30,22 @@ to return `Timeout` if the expected callback never arrives.
    Frame 0 must carry runtime generation 1 and native surface generation 0.
    Rasterize, preflight, call `pre_present_notify`, accept submission 0, present,
    and complete control 0. The first buffer commit maps the Wayland window.
+   Hold the next directive in one slot, request an unarmed redraw, and release
+   it only after the ignored redraw callback settles the delivered event batch.
 3. Feed one explicitly labeled scripted primary press at logical point `(5,5)`
    through the same reducer used by `WindowEvent::MouseInput`. It must capture
    generation 1 and target `static-control`. It performs no mutation. Separate
    pure tests prove the winit position/button mapping.
 4. Request logical inner size `360x260`. If winit returns an immediate physical
    size, feed it directly; otherwise wait for `Resized`. Reduce duplicate or
-   superseded surface events into one slot. The effective changed logical
-   surface must publish generation 2 and native surface generation 1. If the
-   retained physical tuple changes but its logical extent does not, record
+   superseded surface events into one slot. Only the exact logical `360x260`
+   result may publish generation 2 and native surface generation 1. A refused
+   or different logical extent records `EnvironmentSurfaceChanged` and
+   `adapt`. If only the retained physical tuple changes, record
    `SurfaceRepaintUnavailable` and `adapt`; do not enter milestone 5.
 5. Arm the next redraw. Frame 1 must carry runtime generation 2 and native
    surface generation 1. Accept submission 1, present, and complete control 1.
+   Cross the same ignored-redraw settlement barrier before close.
 6. Feed one explicitly labeled scripted close through the same path as
    `CloseRequested`. Admit shutdown control 2, observe `StopRenderer(2)`, reach
    `SchedulerState::Stopped`, then exit the event loop.
@@ -54,9 +60,9 @@ finish its bounded trace and shutdown, otherwise `stop`. It never shifts the
 fixed milestones.
 
 If the compositor refuses the second size, produces a post-initial effective
-scale change, never produces the armed redraw, or cannot create/present the
-surface, the run returns the corresponding typed result. It does not silently
-change the expected sequence.
+scale or surface change, never produces an armed or settlement redraw, or
+cannot create/present the surface, the run returns the corresponding typed
+result. It does not silently change the expected sequence.
 
 ## Trace vocabulary
 
@@ -85,8 +91,8 @@ Accepted, Rejected, Completed, Matched, Stopped, Failed(cause)
 ```text
 InvalidScale, InvalidPoint, Arithmetic, WidthLimit, HeightLimit,
 PixelLimit, ByteLimit, UnsupportedAlpha, Storage, EnvironmentScaleChanged,
-SurfaceRepaintUnavailable, Runtime, Oracle, Scheduler, PrePresent,
-Presenter, Trace, Timeout, Invariant
+EnvironmentSurfaceChanged, SurfaceRepaintUnavailable, Runtime, Oracle,
+Scheduler, PrePresent, Presenter, Trace, Timeout, Invariant
 ```
 
 Candidate errors are mapped immediately into this vocabulary. No upstream
@@ -113,6 +119,9 @@ four scheduler lane item/byte pairs.
 - `redraw_armed` is true only between one `RequestFrame` and the matching
   `RedrawRequested`. A spontaneous or duplicate redraw stays false and cannot
   produce `FrameReady`.
+- A settlement redraw is deliberately unarmed and therefore records `Ignored`.
+  It releases one waiting script directive only after pending surface input has
+  had the first opportunity to preempt it.
 - Pending reducer counts are each zero or one. Presenter pending is zero or one.
 - Environment-scale and native-only surface failures carry the observed surface
   tuple but no frame, submission, control, or presentation event. They cannot
@@ -156,7 +165,10 @@ empty, no redraw armed, no reducer slot occupied, and no presenter frame.
 ## Native-only and failure paths
 
 After the initial tuple, an effective scale change is terminal
-`EnvironmentScaleChanged`; it is never folded into the fixed run. A resized
+`EnvironmentScaleChanged`; it is never folded into the fixed run. An
+unexpected effective surface before an armed redraw, during settlement, or
+between fixed directives is terminal `EnvironmentSurfaceChanged`; the
+accepted tuple and runtime generation are preserved. A resized
 tuple whose physical extent changes while logical extent does not is retained
 with its next native surface generation and classified `NativeOnly`. Because
 the current scheduler exposes no same-generation repaint admission, the driver
@@ -179,7 +191,7 @@ The native command succeeds only if:
 - every fixed script milestone occurs before the watchdog;
 - both frame generations and surface generations match this contract;
 - no post-initial scale change or native-only resize entered a frame milestone;
-- staging digests are recorded before presentation;
+- staging digests appear only on accepted-frame events before presentation;
 - the oracle matches after generations 1 and 2;
 - close reaches stopped state with empty owned queues;
 - the bounded ASCII trace is emitted with LF endings and stderr remains empty.
