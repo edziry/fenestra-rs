@@ -4,29 +4,28 @@ mod support;
 mod tests;
 mod value;
 
-use fenestra_ui_ir::prototype::SourceId;
-
 use crate::diagnostic::{AuthoringDiagnosticKindV1, AuthoringDiagnosticV1};
 use crate::limits::{AuthoringLimitKindV1, AuthoringLimitsV1};
 use crate::parsed::{
     ParsedAnchorV1, ParsedComponentV1, ParsedDocumentV1, ParsedPropertyV1, ParsedSchemaV1,
 };
+use crate::source::PhysicalOriginV1;
 use crate::token::{AbstractTokenV1, PunctuationV1};
 use crate::version::SUPPORTED_AUTHORING_FORMAT;
-use crate::vocabulary::AnchorKindV1;
+use crate::vocabulary::{AnchorKindV1, AuthoringFrontendV1};
 
 pub(crate) fn parse_document_v1(
-    source: SourceId,
-    source_bytes: usize,
+    frontend: AuthoringFrontendV1,
+    eof: PhysicalOriginV1,
     tokens: Vec<AbstractTokenV1>,
     limits: AuthoringLimitsV1,
 ) -> Result<ParsedDocumentV1, AuthoringDiagnosticV1> {
-    ParserV1::new(source, source_bytes, tokens, limits).parse_document()
+    ParserV1::new(frontend, eof, tokens, limits).parse_document()
 }
 
 pub(super) struct ParserV1 {
-    source: SourceId,
-    eof: u32,
+    frontend: AuthoringFrontendV1,
+    eof: PhysicalOriginV1,
     tokens: Vec<AbstractTokenV1>,
     next: usize,
     limits: AuthoringLimitsV1,
@@ -36,14 +35,14 @@ pub(super) struct ParserV1 {
 
 impl ParserV1 {
     fn new(
-        source: SourceId,
-        source_bytes: usize,
+        frontend: AuthoringFrontendV1,
+        eof: PhysicalOriginV1,
         tokens: Vec<AbstractTokenV1>,
         limits: AuthoringLimitsV1,
     ) -> Self {
         Self {
-            source,
-            eof: bounded_offset(source_bytes),
+            frontend,
+            eof,
             tokens,
             next: 0,
             limits,
@@ -70,7 +69,7 @@ impl ParserV1 {
         self.expect_eof()?;
 
         Ok(ParsedDocumentV1 {
-            frontend: crate::vocabulary::AuthoringFrontendV1::Fen,
+            frontend: self.frontend,
             format,
             document_anchor,
             schema,
@@ -157,8 +156,7 @@ impl ParserV1 {
 
 pub(super) struct SpelledTokenV1 {
     pub(super) text: Box<str>,
-    pub(super) start: u32,
-    pub(super) end: u32,
+    pub(super) physical: PhysicalOriginV1,
 }
 
 #[derive(Clone, Copy)]
@@ -186,8 +184,4 @@ impl RecordCountV1 {
             Self::StyleAssignments => AuthoringLimitKindV1::StyleAssignments,
         }
     }
-}
-
-fn bounded_offset(offset: usize) -> u32 {
-    u32::try_from(offset).unwrap_or(u32::MAX)
 }

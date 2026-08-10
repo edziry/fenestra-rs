@@ -1,8 +1,9 @@
-#[derive(Clone, Debug, Eq, PartialEq)]
+use crate::source::PhysicalOriginV1;
+
+#[derive(Clone, Eq, PartialEq)]
 pub(crate) struct AbstractTokenV1 {
     pub(crate) kind: AbstractTokenKindV1,
-    pub(crate) start: u32,
-    pub(crate) end: u32,
+    pub(crate) physical: PhysicalOriginV1,
 }
 
 impl AbstractTokenV1 {

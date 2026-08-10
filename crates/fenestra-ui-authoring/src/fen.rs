@@ -23,7 +23,13 @@ pub(crate) fn parse_fen_document_v1(
         ));
     }
     let tokens = lex_fen_v1(source, text, limits)?;
-    parse_document_v1(source, text.len(), tokens, limits)
+    let eof = bounded_offset(text.len());
+    parse_document_v1(
+        AuthoringFrontendV1::Fen,
+        PhysicalOriginV1::fen_bytes(source, eof, eof),
+        tokens,
+        limits,
+    )
 }
 
 fn lex_fen_v1(
@@ -118,8 +124,11 @@ fn lex_fen_v1(
 
         tokens.push(AbstractTokenV1 {
             kind,
-            start: bounded_offset(start),
-            end: bounded_offset(offset),
+            physical: PhysicalOriginV1::fen_bytes(
+                source,
+                bounded_offset(start),
+                bounded_offset(offset),
+            ),
         });
     }
 

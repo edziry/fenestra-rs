@@ -63,7 +63,7 @@ impl ParserV1 {
         Ok(ParsedTemplateV1 {
             name: name.text,
             id,
-            component: component.text,
+            component: self.spanned_name(component),
             initial_properties,
             children,
             anchor,
@@ -150,8 +150,8 @@ impl ParserV1 {
         Ok(ParsedRegionV1 {
             name: name.text,
             id,
-            owner: owner.text,
-            repeat_body: repeat_body.text,
+            owner: self.spanned_name(owner),
+            repeat_body: self.spanned_name(repeat_body),
             initial_keys,
             invalidation,
             anchor,
@@ -184,7 +184,7 @@ impl ParserV1 {
         let value = self.parse_value(anchor)?;
         self.expect_punctuation(PunctuationV1::Semicolon)?;
         Ok(ParsedStyleAssignmentV1 {
-            target: target.text,
+            target: self.spanned_name(target),
             property: property.text,
             value,
             anchor,

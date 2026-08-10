@@ -9,7 +9,7 @@ use crate::parsed::ParsedDocumentV1;
 use crate::resolved::{
     ResolvedComponentV1, ResolvedDocumentV1, ResolvedPropertyV1, ResolvedSchemaV1, logical_span,
 };
-use crate::source::DiagnosticLocationV1;
+use crate::source::{DiagnosticLocationV1, PhysicalOriginV1};
 
 mod resolve;
 mod validate;
@@ -76,11 +76,12 @@ fn component_table(
                     AuthoringDiagnosticKindV1::DuplicatePropertyName,
                 ));
             }
-            if property.default.value_type() != property.value_type {
-                return Err(failure(
+            if property.default.value.value_type() != property.value_type {
+                return Err(failure_at_origin(
                     parsed,
                     property.anchor,
                     AuthoringDiagnosticKindV1::ValueTypeMismatch,
+                    property.default.physical,
                 ));
             }
             properties.insert(
@@ -118,7 +119,7 @@ fn template_table(
             template.name.clone(),
             TemplateInfo {
                 id: template.id,
-                component: template.component.clone(),
+                component: template.component.value.clone(),
             },
         );
     }
@@ -164,7 +165,7 @@ fn resolve_document(
                         name: property.name.clone(),
                         id: property.id,
                         value_type: property.value_type,
-                        default: property.default.clone(),
+                        default: property.default.value.clone(),
                         invalidation: property.invalidation,
                         anchor: property.anchor,
                     })
@@ -191,13 +192,23 @@ pub(super) fn failure(
     kind: AuthoringDiagnosticKindV1,
 ) -> AuthoringDiagnosticV1 {
     let anchor = &parsed.anchors[ordinal as usize];
+    failure_at_origin(parsed, ordinal, kind, anchor.physical)
+}
+
+pub(super) fn failure_at_origin(
+    parsed: &ParsedDocumentV1,
+    ordinal: u32,
+    kind: AuthoringDiagnosticKindV1,
+    physical: PhysicalOriginV1,
+) -> AuthoringDiagnosticV1 {
+    let anchor = &parsed.anchors[ordinal as usize];
     AuthoringDiagnosticV1::new(
         parsed.frontend,
         kind,
         DiagnosticLocationV1::Anchored {
             logical: logical_span(ordinal),
             anchor_kind: anchor.kind,
-            physical: anchor.physical,
+            physical,
         },
     )
 }

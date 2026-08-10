@@ -2,10 +2,10 @@ use fenestra_ui_ir::prototype::{SourceId, SourceSpan};
 
 use crate::diagnostic::{AuthoringDiagnosticKindV1, AuthoringDiagnosticV1};
 use crate::limits::AuthoringLimitKindV1;
-use crate::parsed::ParsedAnchorV1;
+use crate::parsed::{ParsedAnchorV1, SpannedV1};
 use crate::source::{DiagnosticLocationV1, PhysicalOriginV1};
 use crate::token::{AbstractTokenKindV1, AbstractTokenV1, PunctuationV1};
-use crate::vocabulary::{AnchorKindV1, AuthoringFrontendV1};
+use crate::vocabulary::AnchorKindV1;
 
 use super::{ParserV1, RecordCountV1, SpelledTokenV1};
 
@@ -20,8 +20,7 @@ impl ParserV1 {
         }
         Ok(SpelledTokenV1 {
             text: text.clone(),
-            start: token.start,
-            end: token.end,
+            physical: token.physical,
         })
     }
 
@@ -70,8 +69,7 @@ impl ParserV1 {
         };
         Ok(SpelledTokenV1 {
             text: text.clone(),
-            start: token.start,
-            end: token.end,
+            physical: token.physical,
         })
     }
 
@@ -80,7 +78,7 @@ impl ParserV1 {
         kind: AnchorKindV1,
         token: &AbstractTokenV1,
     ) -> Result<u32, AuthoringDiagnosticV1> {
-        self.push_anchor_parts(kind, token.label(), token.start, token.end)
+        self.push_anchor_parts(kind, token.label(), token.physical)
     }
 
     pub(super) fn push_spelled_anchor(
@@ -88,34 +86,42 @@ impl ParserV1 {
         kind: AnchorKindV1,
         token: &SpelledTokenV1,
     ) -> Result<u32, AuthoringDiagnosticV1> {
-        self.push_anchor_parts(kind, &token.text, token.start, token.end)
+        self.push_anchor_parts(kind, &token.text, token.physical)
+    }
+
+    pub(super) fn spanned_name(&self, token: SpelledTokenV1) -> SpannedV1<Box<str>> {
+        SpannedV1 {
+            physical: token.physical,
+            value: token.text,
+        }
+    }
+
+    pub(super) const fn spanned<T>(&self, value: T, physical: PhysicalOriginV1) -> SpannedV1<T> {
+        SpannedV1 { value, physical }
     }
 
     fn push_anchor_parts(
         &mut self,
         kind: AnchorKindV1,
         label: &str,
-        start: u32,
-        end: u32,
+        physical: PhysicalOriginV1,
     ) -> Result<u32, AuthoringDiagnosticV1> {
         if self.anchors.len() >= self.limits.limit(AuthoringLimitKindV1::SourceAnchors) {
             return Err(self.physical_failure(
                 AuthoringDiagnosticKindV1::LimitExceeded(AuthoringLimitKindV1::SourceAnchors),
-                start,
-                end,
+                physical,
             ));
         }
         let ordinal = u32::try_from(self.anchors.len()).map_err(|_| {
             self.physical_failure(
                 AuthoringDiagnosticKindV1::LimitExceeded(AuthoringLimitKindV1::SourceAnchors),
-                start,
-                end,
+                physical,
             )
         })?;
         self.anchors.push(ParsedAnchorV1 {
             kind,
             label: label.into(),
-            physical: PhysicalOriginV1::fen_bytes(self.source, start, end),
+            physical,
         });
         Ok(ordinal)
     }
@@ -125,7 +131,7 @@ impl ParserV1 {
         record: RecordCountV1,
         opening: &AbstractTokenV1,
     ) -> Result<(), AuthoringDiagnosticV1> {
-        self.claim_record_range(record, opening.start, opening.end)
+        self.claim_record_origin(record, opening.physical)
     }
 
     pub(super) fn claim_spelled_record(
@@ -133,23 +139,20 @@ impl ParserV1 {
         record: RecordCountV1,
         opening: &SpelledTokenV1,
     ) -> Result<(), AuthoringDiagnosticV1> {
-        self.claim_record_range(record, opening.start, opening.end)
+        self.claim_record_origin(record, opening.physical)
     }
 
-    fn claim_record_range(
+    fn claim_record_origin(
         &mut self,
         record: RecordCountV1,
-        start: u32,
-        end: u32,
+        physical: PhysicalOriginV1,
     ) -> Result<(), AuthoringDiagnosticV1> {
         let kind = record.limit_kind();
         let index = record as usize;
         if self.record_counts[index] >= self.limits.limit(kind) {
-            return Err(self.physical_failure(
-                AuthoringDiagnosticKindV1::LimitExceeded(kind),
-                start,
-                end,
-            ));
+            return Err(
+                self.physical_failure(AuthoringDiagnosticKindV1::LimitExceeded(kind), physical)
+            );
         }
         self.record_counts[index] += 1;
         Ok(())
@@ -161,13 +164,23 @@ impl ParserV1 {
         ordinal: u32,
     ) -> AuthoringDiagnosticV1 {
         let anchor = &self.anchors[ordinal as usize];
+        self.anchored_failure_at(kind, ordinal, anchor.physical)
+    }
+
+    pub(super) fn anchored_failure_at(
+        &self,
+        kind: AuthoringDiagnosticKindV1,
+        ordinal: u32,
+        physical: PhysicalOriginV1,
+    ) -> AuthoringDiagnosticV1 {
+        let anchor = &self.anchors[ordinal as usize];
         AuthoringDiagnosticV1::new(
-            AuthoringFrontendV1::Fen,
+            self.frontend,
             kind,
             DiagnosticLocationV1::Anchored {
                 logical: SourceSpan::bytes(SourceId::new(0), ordinal, ordinal + 1),
                 anchor_kind: anchor.kind,
-                physical: anchor.physical,
+                physical,
             },
         )
     }
@@ -177,12 +190,12 @@ impl ParserV1 {
         kind: AuthoringDiagnosticKindV1,
         token: &AbstractTokenV1,
     ) -> AuthoringDiagnosticV1 {
-        self.physical_failure(kind, token.start, token.end)
+        self.physical_failure(kind, token.physical)
     }
 
     pub(super) fn unexpected(&self) -> AuthoringDiagnosticV1 {
         self.peek().map_or_else(
-            || self.physical_failure(AuthoringDiagnosticKindV1::UnexpectedEof, self.eof, self.eof),
+            || self.physical_failure(AuthoringDiagnosticKindV1::UnexpectedEof, self.eof),
             |token| self.failure_at(AuthoringDiagnosticKindV1::UnexpectedToken, token),
         )
     }
@@ -190,13 +203,12 @@ impl ParserV1 {
     fn physical_failure(
         &self,
         kind: AuthoringDiagnosticKindV1,
-        start: u32,
-        end: u32,
+        physical: PhysicalOriginV1,
     ) -> AuthoringDiagnosticV1 {
         AuthoringDiagnosticV1::new(
-            AuthoringFrontendV1::Fen,
+            self.frontend,
             kind,
-            DiagnosticLocationV1::Physical(PhysicalOriginV1::fen_bytes(self.source, start, end)),
+            DiagnosticLocationV1::Physical(physical),
         )
     }
 
