@@ -66,3 +66,20 @@ jobs:
 
       - name: Build and run tests
         run: cargo test --workspace --all-targets --all-features --locked
+
+      - name: Verify typed authoring with Windows path separators and spaces
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          CARGO_TARGET_DIR: ${{ runner.temp }}\fenestra target with spaces
+        run: |
+          cargo test -p fenestra-ui-exp-0007-typed-authoring --all-targets --all-features --locked
+          $generated = @(Get-ChildItem -Path $env:CARGO_TARGET_DIR -Recurse -Filter layout_board_fen_v1.rs)
+          if ($generated.Count -ne 1) {
+            throw "expected one generated typed-authoring source, found $($generated.Count)"
+          }
+          $expected = "b633d1f01c0da43827925ae245e095a02aa87a8229d870a1cbee9f2f5adf42de"
+          $observed = (Get-FileHash -Algorithm SHA256 $generated[0].FullName).Hash.ToLowerInvariant()
+          if ($observed -ne $expected) {
+            throw "generated typed-authoring source hash mismatch"
+          }
