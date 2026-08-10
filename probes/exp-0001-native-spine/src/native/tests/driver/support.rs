@@ -3,7 +3,7 @@ use fenestra_ui_runtime::prototype::{RuntimeGeneration, SchedulerState, Schedule
 use super::super::super::driver::{NativeDriverV1, PresenterPortV1};
 use super::super::super::raster::CpuFrameV1;
 use super::super::super::trace::NativeFailureCauseV1;
-use super::super::super::{NativePhysicalExtentV1, NativeSurfaceTupleV1};
+use super::super::super::{NativePhysicalExtentV1, NativePhysicalPointV1, NativeSurfaceTupleV1};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(super) enum PresenterMode {
@@ -11,6 +11,14 @@ pub(super) enum PresenterMode {
     FailPreflight,
     FailNotify,
     FailPresent,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(super) enum PresenterPhase {
+    Preflight,
+    PrePresent,
+    Accept,
+    Present,
 }
 
 pub(super) struct TestPresenter {
@@ -21,6 +29,7 @@ pub(super) struct TestPresenter {
     last_generation: Option<RuntimeGeneration>,
     last_surface: Option<NativeSurfaceTupleV1>,
     last_digest: Option<u64>,
+    phases: Vec<PresenterPhase>,
 }
 
 impl TestPresenter {
@@ -33,6 +42,7 @@ impl TestPresenter {
             last_generation: None,
             last_surface: None,
             last_digest: None,
+            phases: Vec::new(),
         }
     }
 
@@ -59,28 +69,36 @@ impl TestPresenter {
     pub(super) const fn last_digest(&self) -> Option<u64> {
         self.last_digest
     }
+
+    pub(super) fn phases(&self) -> &[PresenterPhase] {
+        &self.phases
+    }
 }
 
 impl PresenterPortV1 for TestPresenter {
-    fn preflight(&mut self, _frame: &CpuFrameV1) -> Result<(), NativeFailureCauseV1> {
+    fn present_offer<A>(
+        &mut self,
+        frame: CpuFrameV1,
+        accept_once: A,
+    ) -> Result<(), NativeFailureCauseV1>
+    where
+        A: FnOnce() -> Result<fenestra_ui_runtime::prototype::SubmissionId, NativeFailureCauseV1>,
+    {
+        self.phases.push(PresenterPhase::Preflight);
         self.preflight_count += 1;
         if self.mode == PresenterMode::FailPreflight {
-            Err(NativeFailureCauseV1::Presenter)
-        } else {
-            Ok(())
+            return Err(NativeFailureCauseV1::Presenter);
         }
-    }
 
-    fn pre_present_notify(&mut self, _frame: &CpuFrameV1) -> Result<(), NativeFailureCauseV1> {
+        self.phases.push(PresenterPhase::PrePresent);
         self.notify_count += 1;
         if self.mode == PresenterMode::FailNotify {
-            Err(NativeFailureCauseV1::PrePresent)
-        } else {
-            Ok(())
+            return Err(NativeFailureCauseV1::PrePresent);
         }
-    }
 
-    fn present(&mut self, frame: CpuFrameV1) -> Result<(), NativeFailureCauseV1> {
+        self.phases.push(PresenterPhase::Accept);
+        accept_once()?;
+        self.phases.push(PresenterPhase::Present);
         self.present_count += 1;
         if self.mode == PresenterMode::FailPresent {
             return Err(NativeFailureCauseV1::Presenter);
@@ -98,6 +116,10 @@ pub(super) fn driver(mode: PresenterMode) -> NativeDriverV1<TestPresenter> {
 
 pub(super) const fn physical(width: u32, height: u32) -> NativePhysicalExtentV1 {
     NativePhysicalExtentV1::new(width, height)
+}
+
+pub(super) const fn scripted_point() -> NativePhysicalPointV1 {
+    NativePhysicalPointV1::new(10.0, 10.0)
 }
 
 pub(super) const fn tick(value: u64) -> SchedulerTick {

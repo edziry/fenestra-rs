@@ -1,7 +1,7 @@
 use fenestra_ui_runtime::prototype::{ControlAdmission, SchedulerState};
 
 use super::super::super::driver::NativeDriverActionV1;
-use super::super::super::trace::NativeTraceStageV1;
+use super::super::super::trace::{NativeInputSourceV1, NativeTraceStageV1};
 use super::support::{PresenterMode, assert_terminal_empty, driver, physical, tick};
 
 #[test]
@@ -14,10 +14,10 @@ fn close_is_idempotent_and_stops_only_through_the_scheduler_control() {
     driver.redraw_requested(tick(2)).expect("frame present");
 
     let first = driver
-        .close_requested(tick(3))
+        .close_requested(NativeInputSourceV1::Scripted, tick(3))
         .expect("shutdown should admit");
     let second = driver
-        .close_requested(tick(3))
+        .close_requested(NativeInputSourceV1::Scripted, tick(3))
         .expect("duplicate shutdown should be idempotent");
     let (
         ControlAdmission::Accepted(first_control),
@@ -48,7 +48,9 @@ fn scheduler_trace_turns_are_dense_and_terminal_state_is_observed() {
         .expect("surface should stage");
     driver.drain_scheduler(tick(1)).expect("surface publish");
     driver.redraw_requested(tick(2)).expect("frame present");
-    driver.close_requested(tick(3)).expect("shutdown admit");
+    driver
+        .close_requested(NativeInputSourceV1::Scripted, tick(3))
+        .expect("shutdown admit");
     driver.drain_scheduler(tick(4)).expect("shutdown stop");
 
     let scheduler_events: Vec<_> = driver
@@ -63,7 +65,7 @@ fn scheduler_trace_turns_are_dense_and_terminal_state_is_observed() {
             .iter()
             .map(|event| event.tick().get())
             .collect::<Vec<_>>(),
-        [0, 1, 2, 2, 2, 2, 2, 3, 4]
+        [1, 1, 2, 2, 2, 2, 2, 3, 4]
     );
     for (expected, event) in scheduler_events.iter().enumerate() {
         assert_eq!(event.scheduler_turn(), Some(expected as u64));

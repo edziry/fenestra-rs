@@ -2,7 +2,7 @@ use fenestra_ui_runtime::prototype::{HeadlessSurface, SchedulerState};
 use fenestra_ui_testkit::prototype::HeadlessPointerTargetV1;
 
 use super::super::super::driver::NativeDriverActionV1;
-use super::super::super::trace::NativeFailureCauseV1;
+use super::super::super::trace::{NativeFailureCauseV1, NativeInputSourceV1};
 use super::super::super::{NativePhysicalPointV1, NativeSurfaceChangeV1};
 use super::support::{PresenterMode, driver, physical, tick};
 
@@ -24,7 +24,7 @@ fn initial_surface_publishes_before_it_becomes_input_visible() {
     assert_eq!(pending.logical_surface(), HeadlessSurface::new(320, 240));
     assert_eq!(driver.accepted_surface(), None);
     assert_eq!(driver.runtime_generation().get(), 0);
-    assert_eq!(driver.scheduler_stats().deferred().items(), 1);
+    assert_eq!(driver.scheduler_stats().deferred().items(), 0);
 
     let NativeDriverActionV1::RequestFrame {
         generation,
@@ -70,7 +70,11 @@ fn pending_resize_keeps_pointer_on_the_previous_accepted_tuple() {
     assert_eq!(driver.runtime_generation().get(), 1);
     assert_eq!(
         driver
-            .pointer_pressed(NativePhysicalPointV1::new(50.0, 10.0), tick(3))
+            .pointer_pressed(
+                NativePhysicalPointV1::new(50.0, 10.0),
+                NativeInputSourceV1::Scripted,
+                tick(3),
+            )
             .expect("pointer should use the committed tuple"),
         HeadlessPointerTargetV1::None
     );
@@ -106,7 +110,11 @@ fn pending_resize_keeps_pointer_on_the_previous_accepted_tuple() {
     );
     assert_eq!(
         driver
-            .pointer_pressed(NativePhysicalPointV1::new(50.0, 10.0), tick(4))
+            .pointer_pressed(
+                NativePhysicalPointV1::new(50.0, 10.0),
+                NativeInputSourceV1::Scripted,
+                tick(4),
+            )
             .expect("published resize should enter input"),
         HeadlessPointerTargetV1::StaticControl
     );
