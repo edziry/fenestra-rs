@@ -42,47 +42,47 @@ fn semantic_artifact_vocabulary_and_reference_limits_are_closed() {
 }
 
 #[test]
-fn every_retained_semantic_field_class_changes_or_rejects_the_observation() {
-    assert_changes_or_rejects("format", |document| document.format = 2);
-    assert_changes_or_rejects("identity", |document| document.schema.namespace = 9_001);
-    assert_changes_or_rejects("order", |document| {
+fn every_retained_semantic_field_class_changes_the_observation() {
+    assert_changes("format", |document| document.format = 2);
+    assert_changes("identity", |document| document.schema.namespace = 9_001);
+    assert_changes("order", |document| {
         document.schema.components[0].properties.swap(0, 1);
     });
-    assert_changes_or_rejects("id", |document| {
+    assert_changes("id", |document| {
         document.schema.components[0].id = 4;
     });
-    assert_changes_or_rejects("type", |document| {
+    assert_changes("type", |document| {
         document.schema.components[0].properties[0].value_type = ValueType::Bool;
     });
-    assert_changes_or_rejects("value", |document| {
+    assert_changes("value", |document| {
         document.schema.components[0].properties[0].default = PropertyValue::ScalarI32(11);
     });
-    assert_changes_or_rejects("invalidation", |document| {
+    assert_changes("invalidation", |document| {
         document.schema.components[0].properties[0].invalidation =
             support::invalidation(&[InvalidationClass::Paint]);
     });
-    assert_changes_or_rejects("child", |document| {
+    assert_changes("child", |document| {
         document.construction.templates[0].children[0] = ResolvedChildV1::Region {
             region: 0,
             anchor: 8,
         };
     });
-    assert_changes_or_rejects("reference", |document| {
+    assert_changes("reference", |document| {
         document.construction.templates[0].component = 9;
     });
-    assert_changes_or_rejects("key", |document| {
+    assert_changes("key", |document| {
         document.construction.regions[0].initial_keys[0].value = 8;
     });
-    assert_changes_or_rejects("style", |document| {
+    assert_changes("style", |document| {
         document.style.assignments[0].value = support::alternate_policy();
     });
-    assert_changes_or_rejects("span", |document| {
+    assert_changes("span", |document| {
         let properties = &mut document.schema.components[0].properties;
         let first = properties[0].anchor;
         properties[0].anchor = properties[1].anchor;
         properties[1].anchor = first;
     });
-    assert_changes_or_rejects("name", |document| {
+    assert_changes("name", |document| {
         document.schema.components[0].name = "renamed".into();
     });
 }
@@ -141,14 +141,14 @@ fn semantic_artifact_bounds_are_inclusive_and_one_under_is_typed() {
     }
 }
 
-fn assert_changes_or_rejects(case: &str, mutate: impl FnOnce(&mut ResolvedDocumentV1)) {
+fn assert_changes(case: &str, mutate: impl FnOnce(&mut ResolvedDocumentV1)) {
     let baseline = observe_resolved_v1(&support::document(), REFERENCE_SEMANTIC_ARTIFACT_LIMITS_V1)
         .expect("the private reference document should encode");
     let mut changed = support::document();
     mutate(&mut changed);
-    if let Ok(observed) = observe_resolved_v1(&changed, REFERENCE_SEMANTIC_ARTIFACT_LIMITS_V1) {
-        assert_ne!(observed.as_bytes(), baseline.as_bytes(), "missed {case}");
-    }
+    let observed = observe_resolved_v1(&changed, REFERENCE_SEMANTIC_ARTIFACT_LIMITS_V1)
+        .unwrap_or_else(|error| panic!("{case} was rejected: {error}"));
+    assert_ne!(observed.as_bytes(), baseline.as_bytes(), "missed {case}");
 }
 
 fn assert_rejected(mutate: impl FnOnce(&mut ResolvedDocumentV1)) {

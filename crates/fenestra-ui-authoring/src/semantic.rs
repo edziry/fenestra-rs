@@ -4,6 +4,9 @@ use std::fmt;
 use crate::compiled::CompiledAuthoringV1;
 use crate::resolved::ResolvedDocumentV1;
 
+mod encode;
+mod value;
+
 /// Inclusive resource category bounded by semantic artifact generation.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum SemanticArtifactLimitKindV1 {
@@ -155,11 +158,11 @@ pub fn canonical_semantics_v1(
 }
 
 fn observe_resolved_v1(
-    _resolved: &ResolvedDocumentV1,
-    _limits: SemanticArtifactLimitsV1,
+    resolved: &ResolvedDocumentV1,
+    limits: SemanticArtifactLimitsV1,
 ) -> Result<SemanticArtifactV1, SemanticArtifactErrorV1> {
     Ok(SemanticArtifactV1 {
-        source: Box::<str>::from(""),
+        source: encode::encode_resolved_v1(resolved, limits)?,
     })
 }
 
