@@ -115,7 +115,7 @@ fn assert_single_compile_error(
     case_payloads: &[&str],
 ) {
     let trees = tokens.clone().into_iter().collect::<Vec<_>>();
-    assert_eq!(trees.len(), 4, "{name} should emit one macro invocation");
+    assert_eq!(trees.len(), 3, "{name} should emit one macro invocation");
 
     let TokenTree::Ident(macro_name) = &trees[0] else {
         panic!("{name} should start with the compile_error identifier");
@@ -137,11 +137,6 @@ fn assert_single_compile_error(
         panic!("{name} compile_error message should be a string literal");
     };
     assert_eq!(message.to_string(), format!("{expected_code:?}"));
-
-    let TokenTree::Punct(semicolon) = &trees[3] else {
-        panic!("{name} compile_error should end in a semicolon");
-    };
-    assert_eq!(semicolon.as_char(), ';');
 
     let spelling = tokens.to_string();
     assert_eq!(spelling.matches("compile_error").count(), 1);

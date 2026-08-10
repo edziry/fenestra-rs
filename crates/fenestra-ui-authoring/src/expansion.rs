@@ -12,7 +12,7 @@ use crate::source::DiagnosticLocationV1;
 pub fn diagnostic_tokens_v1(error: AuthoringDiagnosticV1) -> TokenStream {
     let span = physical_span(&error).unwrap_or_else(Span::call_site);
     let message = error.to_string();
-    quote_spanned!(span=> compile_error!(#message);)
+    quote_spanned!(span=> compile_error!(#message))
 }
 
 /// Compiles and emits one bounded `ui!` input through the shared pipeline.
