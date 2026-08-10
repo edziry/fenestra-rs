@@ -2,8 +2,9 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 const FIRST_PRE_ALPHA_VERSION: &str = "0.1.0";
-const MEMBER_MANIFESTS: [&str; 6] = [
+const MEMBER_MANIFESTS: [&str; 7] = [
     "crates/fenestra-ui/Cargo.toml",
+    "crates/fenestra-ui-authoring/Cargo.toml",
     "crates/fenestra-ui-ir/Cargo.toml",
     "crates/fenestra-ui-runtime/Cargo.toml",
     "crates/fenestra-ui-testkit/Cargo.toml",
@@ -20,8 +21,9 @@ fn workspace_uses_one_explicit_pre_alpha_semver_line() {
     assert!(workspace_manifest.contains("version = \"0.1.0\""));
     assert_eq!(
         workspace_manifest.matches("version = \"=0.1.0\"").count(),
-        4
+        5
     );
+    assert_eq!(workspace_dependency_count(&workspace_manifest), 5);
 
     for relative in MEMBER_MANIFESTS {
         let manifest = read(&root.join(relative));
@@ -52,4 +54,17 @@ fn workspace_root() -> PathBuf {
 fn read(path: &Path) -> String {
     fs::read_to_string(path)
         .unwrap_or_else(|error| panic!("failed to read {}: {error}", path.display()))
+}
+
+fn workspace_dependency_count(manifest: &str) -> usize {
+    manifest
+        .split_once("[workspace.dependencies]")
+        .expect("workspace dependencies should exist")
+        .1
+        .split("\n[")
+        .next()
+        .expect("workspace dependency section should terminate")
+        .lines()
+        .filter(|line| line.contains(" = "))
+        .count()
 }
