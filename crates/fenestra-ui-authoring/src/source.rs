@@ -78,6 +78,13 @@ impl PhysicalOriginV1 {
             PhysicalOriginKindV1::UiToken { .. } => None,
         }
     }
+
+    pub(crate) const fn ui_span(&self) -> Option<Span> {
+        match self.kind {
+            PhysicalOriginKindV1::FenBytes { .. } => None,
+            PhysicalOriginKindV1::UiToken { span } => Some(span),
+        }
+    }
 }
 
 /// Location of one authoring diagnostic.

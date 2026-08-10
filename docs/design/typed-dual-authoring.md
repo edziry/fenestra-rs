@@ -120,6 +120,8 @@ canonical_rust_v1(&CompiledAuthoringV1, AuthoringLimitsV1)
   -> Result<GeneratedRustV1, AuthoringDiagnosticV1>
 diagnostic_tokens_v1(AuthoringDiagnosticV1)
   -> proc_macro2::TokenStream
+expand_ui_v1(proc_macro2::TokenStream, AuthoringLimitsV1)
+  -> proc_macro2::TokenStream
 ```
 
 `FenSourceV1` borrows bytes and carries one opaque source ID. Neither compiler
