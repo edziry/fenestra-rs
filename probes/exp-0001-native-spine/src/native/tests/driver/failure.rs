@@ -2,9 +2,10 @@ use fenestra_ui_runtime::prototype::SchedulerState;
 
 use super::super::super::driver::NativeDriverActionV1;
 use super::super::super::trace::{
-    NativeFailureCauseV1, NativeObservationV1, NativeOutcomeV1, NativeTraceStageV1,
+    NativeFailureCauseV1, NativeInputSourceV1, NativeObservationV1, NativeOutcomeV1,
+    NativeTraceStageV1,
 };
-use super::support::{PresenterMode, driver, physical, tick};
+use super::support::{PresenterMode, assert_terminal_empty, driver, physical, tick};
 
 #[test]
 fn preaccept_failures_reject_the_offer_without_accepting_a_submission() {
@@ -151,4 +152,42 @@ fn renderer_loss_preempts_and_discards_a_pending_surface() {
     let loss = driver.trace().events().last().expect("loss should record");
     assert_eq!(loss.scheduler_state(), SchedulerState::Faulted);
     assert_eq!(loss.pending().surface(), 0);
+}
+
+#[test]
+fn postaccept_loss_can_shutdown_retire_and_reach_an_empty_stop() {
+    let mut driver = driver(PresenterMode::FailPresent);
+    driver
+        .observe_surface(physical(640, 480), 2.0, tick(0))
+        .expect("initial surface should stage");
+    driver
+        .drain_scheduler(tick(1))
+        .expect("initial surface should publish");
+    assert_eq!(
+        driver
+            .redraw_requested(tick(2))
+            .expect_err("present failure should admit loss"),
+        NativeFailureCauseV1::Presenter
+    );
+    driver
+        .close_requested(NativeInputSourceV1::Scripted, tick(2))
+        .expect("shutdown should queue after loss admission");
+    assert_eq!(
+        driver
+            .drain_scheduler(tick(3))
+            .expect("loss control should process"),
+        NativeDriverActionV1::Idle
+    );
+    let NativeDriverActionV1::StopRenderer { control } = driver
+        .drain_scheduler(tick(4))
+        .expect("renderer stop should follow loss")
+    else {
+        panic!("loss shutdown must expose its stop identity");
+    };
+    assert_eq!(control.get(), 1);
+    let retirement = driver
+        .renderer_stopped(tick(5))
+        .expect("released failed submission should retire");
+    assert_eq!(retirement.get(), 2);
+    assert_terminal_empty(&driver);
 }

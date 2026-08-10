@@ -9,39 +9,10 @@ use super::super::super::artifact::{
 use super::super::super::driver::NativeDriverV1;
 use super::super::super::trace::{
     NativeFailureCauseV1, NativeInputSourceV1, NativeObservationV1, NativeOutcomeV1,
-    NativeTraceEventV1, NativeTraceStageV1,
+    NativeTraceStageV1,
 };
+use super::artifact_expected::assert_complete_event_line;
 use super::support::{AcceptingPresenter, completed_reference_driver};
-
-const EVENT_KEYS: [&str; 27] = [
-    "sequence",
-    "tick",
-    "scheduler_turn",
-    "stage",
-    "observation",
-    "outcome",
-    "source",
-    "state",
-    "generation",
-    "captured",
-    "published",
-    "native_generation",
-    "physical",
-    "logical",
-    "scale_micros",
-    "target",
-    "frame",
-    "submission",
-    "control",
-    "digest",
-    "redraw",
-    "pending",
-    "deferred",
-    "controls",
-    "visual",
-    "in_flight",
-    "accounted_bytes",
-];
 
 #[test]
 fn artifact_constants_and_reference_manifest_are_exact() {
@@ -200,107 +171,6 @@ fn manifest(driver: &NativeDriverV1<AcceptingPresenter>) -> NativeArtifactManife
     )
 }
 
-fn assert_complete_event_line(event: NativeTraceEventV1, line: &str) {
-    let keys = line
-        .split('|')
-        .skip(1)
-        .map(|part| {
-            part.split_once('=')
-                .expect("event field must use key=value")
-                .0
-        })
-        .collect::<Vec<_>>();
-    assert_eq!(keys, EVENT_KEYS);
-    assert_eq!(field(line, "sequence"), event.sequence().to_string());
-    assert_eq!(field(line, "tick"), event.tick().get().to_string());
-    assert_eq!(
-        field(line, "scheduler_turn"),
-        optional_u64(event.scheduler_turn())
-    );
-    assert_eq!(
-        field(line, "generation"),
-        event.current_generation().get().to_string()
-    );
-    assert_eq!(
-        field(line, "captured"),
-        optional_u64(event.captured_generation().map(|value| value.get()))
-    );
-    assert_eq!(
-        field(line, "published"),
-        optional_u64(event.published_generation().map(|value| value.get()))
-    );
-    let (native_generation, physical, logical, scale_micros) = event.surface().map_or_else(
-        || {
-            (
-                "-".to_owned(),
-                "-".to_owned(),
-                "-".to_owned(),
-                "-".to_owned(),
-            )
-        },
-        |surface| {
-            (
-                surface.generation().get().to_string(),
-                format!(
-                    "{}x{}",
-                    surface.physical().width(),
-                    surface.physical().height()
-                ),
-                format!(
-                    "{}x{}",
-                    surface.logical_surface().width(),
-                    surface.logical_surface().height()
-                ),
-                surface.scale().micros().to_string(),
-            )
-        },
-    );
-    assert_eq!(field(line, "native_generation"), native_generation);
-    assert_eq!(field(line, "physical"), physical);
-    assert_eq!(field(line, "logical"), logical);
-    assert_eq!(field(line, "scale_micros"), scale_micros);
-    assert_eq!(field(line, "frame"), optional_u64(event.frame()));
-    assert_eq!(
-        field(line, "submission"),
-        event.submission().map_or_else(
-            || "-".to_owned(),
-            |submission| format!("{}:{}", submission.epoch(), submission.token()),
-        )
-    );
-    assert_eq!(field(line, "control"), optional_u64(event.control()));
-    assert_eq!(
-        field(line, "digest"),
-        event
-            .staging_digest()
-            .map_or_else(|| "-".to_owned(), |digest| format!("{digest:016x}"))
-    );
-    assert_eq!(
-        field(line, "redraw"),
-        u8::from(event.redraw_armed()).to_string()
-    );
-    assert_eq!(
-        field(line, "pending"),
-        format!(
-            "{}:{}:{}",
-            event.pending().surface(),
-            event.pending().pointer(),
-            event.pending().presenter()
-        )
-    );
-    assert_lane(line, "deferred", event.deferred());
-    assert_lane(line, "controls", event.controls());
-    assert_lane(line, "visual", event.visual());
-    assert_lane(line, "in_flight", event.in_flight());
-    assert_eq!(field(line, "accounted_bytes"), "192");
-}
-
-fn assert_lane(line: &str, key: &str, lane: super::super::super::trace::NativeTraceLaneStatsV1) {
-    assert_eq!(
-        field(line, key),
-        format!("{}:{}", lane.items(), lane.accounted_bytes())
-    );
-}
-
 fn field(line: &str, key: &str) -> String {
     line.split('|')
         .skip(1)
@@ -309,8 +179,4 @@ fn field(line: &str, key: &str) -> String {
             (candidate == key).then(|| value.to_owned())
         })
         .unwrap_or_else(|| panic!("missing field {key} in {line}"))
-}
-
-fn optional_u64(value: Option<u64>) -> String {
-    value.map_or_else(|| "-".to_owned(), |value| value.to_string())
 }

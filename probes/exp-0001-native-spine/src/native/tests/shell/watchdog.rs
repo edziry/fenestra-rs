@@ -60,19 +60,19 @@ fn worker_replaces_cancels_and_joins_through_the_bounded_proxy_seam() {
         sender: signal_tx,
         dropped: Arc::clone(&dropped),
     };
-    let mut watchdog =
-        NativeWatchdogV1::spawn_with_timeout_for_test(proxy, Duration::from_millis(20))
-            .expect("test watchdog worker should spawn");
+    let mut watchdog = NativeWatchdogV1::spawn_with_timeout_for_test(proxy, Duration::from_secs(1))
+        .expect("test watchdog worker should spawn");
     assert_eq!(watchdog.command_capacity(), 1);
 
     let first = watchdog.arm().expect("first token should arm");
     let replacement = watchdog.arm().expect("second token should replace first");
     assert_eq!(first.get(), 0);
     assert_eq!(replacement.get(), 1);
+    watchdog
+        .expire_now_for_test()
+        .expect("gated worker should expire its active token");
     assert_eq!(
-        signal_rx
-            .recv_timeout(Duration::from_millis(250))
-            .expect("replacement deadline should signal"),
+        signal_rx.recv().expect("replacement should signal"),
         replacement
     );
     assert_eq!(signal_rx.try_recv(), Err(TryRecvError::Empty));
@@ -89,10 +89,10 @@ fn worker_replaces_cancels_and_joins_through_the_bounded_proxy_seam() {
             .cancel(canceled)
             .expect("active cancel should reach worker")
     );
-    assert_eq!(
-        signal_rx.recv_timeout(Duration::from_millis(60)),
-        Err(RecvTimeoutError::Timeout)
-    );
+    watchdog
+        .expire_now_for_test()
+        .expect("gated worker should observe the canceled slot");
+    assert_eq!(signal_rx.try_recv(), Err(TryRecvError::Empty));
 
     watchdog
         .shutdown_and_join()
@@ -102,4 +102,26 @@ fn worker_replaces_cancels_and_joins_through_the_bounded_proxy_seam() {
         signal_rx.recv_timeout(Duration::from_millis(20)),
         Err(RecvTimeoutError::Disconnected)
     );
+}
+
+#[test]
+fn worker_fires_one_real_short_deadline_without_polling() {
+    let (signal_tx, signal_rx) = sync_channel(1);
+    let proxy = TestProxy {
+        sender: signal_tx,
+        dropped: Arc::new(AtomicUsize::new(0)),
+    };
+    let mut watchdog =
+        NativeWatchdogV1::spawn_with_timeout_for_test(proxy, Duration::from_millis(20))
+            .expect("short watchdog should spawn");
+    let token = watchdog.arm().expect("short deadline should arm");
+    assert_eq!(
+        signal_rx
+            .recv_timeout(Duration::from_secs(1))
+            .expect("worker should deliver its monotonic timeout"),
+        token
+    );
+    watchdog
+        .shutdown_and_join()
+        .expect("short worker should join");
 }
