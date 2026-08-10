@@ -191,3 +191,53 @@ fn postaccept_loss_can_shutdown_retire_and_reach_an_empty_stop() {
     assert_eq!(retirement.get(), 2);
     assert_terminal_empty(&driver);
 }
+
+#[test]
+fn renderer_retirement_before_stop_is_rejected_atomically() {
+    let mut driver = driver(PresenterMode::FailPresent);
+    driver
+        .observe_surface(physical(640, 480), 2.0, tick(0))
+        .expect("initial surface should stage");
+    driver
+        .drain_scheduler(tick(1))
+        .expect("initial surface should publish");
+    assert_eq!(
+        driver
+            .redraw_requested(tick(2))
+            .expect_err("present failure should admit renderer loss"),
+        NativeFailureCauseV1::Presenter
+    );
+    let state = driver.scheduler_state();
+    let stats = driver.scheduler_stats();
+    let trace_len = driver.trace().len();
+    let surface = driver.accepted_surface();
+
+    assert_eq!(
+        driver.renderer_stopped(tick(2)),
+        Err(NativeFailureCauseV1::Invariant)
+    );
+    assert_eq!(driver.scheduler_state(), state);
+    assert_eq!(driver.scheduler_stats(), stats);
+    assert_eq!(driver.trace().len(), trace_len);
+    assert_eq!(driver.accepted_surface(), surface);
+
+    driver
+        .close_requested(NativeInputSourceV1::Scripted, tick(2))
+        .expect("shutdown should remain admissible after the rejected call");
+    assert_eq!(
+        driver
+            .drain_scheduler(tick(3))
+            .expect("loss should still be pending"),
+        NativeDriverActionV1::Idle
+    );
+    assert!(matches!(
+        driver
+            .drain_scheduler(tick(4))
+            .expect("renderer stop should still follow loss"),
+        NativeDriverActionV1::StopRenderer { .. }
+    ));
+    driver
+        .renderer_stopped(tick(5))
+        .expect("retirement after stop should succeed");
+    assert_terminal_empty(&driver);
+}
