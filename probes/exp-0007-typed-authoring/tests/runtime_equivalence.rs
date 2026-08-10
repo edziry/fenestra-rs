@@ -26,6 +26,41 @@ fn fen_ui_and_manual_programs_publish_the_same_registered_runtime_log() {
     for log in [&fen_log, &ui_log, &manual_log] {
         assert_eq!(log.receipts(), expected_receipts);
         assert_eq!(log.final_keys(), &[10, 30]);
+        assert_eq!(log.states().len(), 6);
+        assert_eq!(
+            log.states()
+                .iter()
+                .map(|state| state.node_count())
+                .collect::<Vec<_>>(),
+            [5, 5, 6, 6, 6, 5]
+        );
+        assert_eq!(
+            log.states()
+                .iter()
+                .map(|state| state.property_slot_count())
+                .collect::<Vec<_>>(),
+            [25, 25, 30, 30, 30, 25]
+        );
+        assert_eq!(
+            log.states()
+                .iter()
+                .map(|state| {
+                    state.fragments()[0]
+                        .members()
+                        .iter()
+                        .map(|member| member.key())
+                        .collect::<Vec<_>>()
+                })
+                .collect::<Vec<_>>(),
+            [
+                vec![10, 20],
+                vec![10, 20],
+                vec![10, 30, 20],
+                vec![10, 20, 30],
+                vec![10, 20, 30],
+                vec![10, 30],
+            ]
+        );
         assert_eq!(log.projections().len(), oracle.len());
         for (expected, observed) in oracle.iter().zip(log.projections()) {
             assert_eq!(
