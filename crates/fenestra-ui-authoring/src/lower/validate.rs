@@ -51,21 +51,35 @@ pub(super) fn validate_programs(
 }
 
 fn ir_failure(parsed: &ParsedDocumentV1, error: IrValidationError) -> AuthoringDiagnosticV1 {
-    let ordinal = match error.span() {
-        SourceSpan::Bytes { source, start, end }
-            if source == SourceId::new(0) && end == start + 1 =>
-        {
-            usize::try_from(start).ok()
-        }
-        SourceSpan::Synthetic | SourceSpan::Bytes { .. } => None,
-    }
-    .filter(|ordinal| *ordinal < parsed.anchors.len())
-    .unwrap_or(parsed.document_anchor as usize);
+    let ordinal = checked_ir_ordinal(parsed, error.span())
+        .expect("lowered IR error span must map to a registered non-document anchor");
     failure(
         parsed,
-        ordinal as u32,
+        ordinal,
         AuthoringDiagnosticKindV1::IrValidation(error.kind()),
     )
+}
+
+#[derive(Debug)]
+struct IrSpanInvariantV1;
+
+fn checked_ir_ordinal(
+    parsed: &ParsedDocumentV1,
+    span: SourceSpan,
+) -> Result<u32, IrSpanInvariantV1> {
+    let SourceSpan::Bytes { source, start, end } = span else {
+        return Err(IrSpanInvariantV1);
+    };
+    let expected_end = start.checked_add(1).ok_or(IrSpanInvariantV1)?;
+    let ordinal = usize::try_from(start).map_err(|_| IrSpanInvariantV1)?;
+    if source != SourceId::new(0)
+        || end != expected_end
+        || start == parsed.document_anchor
+        || ordinal >= parsed.anchors.len()
+    {
+        return Err(IrSpanInvariantV1);
+    }
+    Ok(start)
 }
 
 pub(super) fn source_map(parsed: &ParsedDocumentV1) -> SourceMapV1 {
