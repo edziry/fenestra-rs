@@ -68,6 +68,18 @@ impl NormalizedReceipt {
             invalidation,
         }
     }
+
+    pub const fn generation(&self) -> u64 {
+        self.generation
+    }
+
+    pub fn mutations(&self) -> &[NormalizedMutation] {
+        &self.mutations
+    }
+
+    pub const fn invalidation(&self) -> InvalidationSet {
+        self.invalidation
+    }
 }
 
 pub(super) fn normalize_receipt(

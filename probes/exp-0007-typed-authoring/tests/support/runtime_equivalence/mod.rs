@@ -1,3 +1,4 @@
+mod artifact;
 mod identity;
 mod receipt;
 mod runner;
@@ -7,8 +8,13 @@ use fenestra_ui_testkit::prototype::{
     FragmentPathV1, HeadlessFixtureV1, NodePathV1, SemanticOperationV1,
 };
 
+pub use artifact::{
+    REGISTERED_RUNTIME_ARTIFACT_LIMITS_V1, RuntimeArtifactEncodeErrorKindV1,
+    RuntimeArtifactFaultV1, RuntimeArtifactLimitKindV1, RuntimeArtifactLimitsV1,
+    encode_runtime_artifact_v1, inject_runtime_artifact_fault_v1,
+};
 pub use receipt::{NormalizedManifestEntry, NormalizedMutation, NormalizedReceipt};
-pub use runner::{oracle_projection_log, run_lane, validate_programs};
+pub use runner::{LaneLog, oracle_projection_log, run_lane, validate_programs};
 
 const INSERTED_KEY: u64 = 30;
 const REMOVED_KEY: u64 = 20;

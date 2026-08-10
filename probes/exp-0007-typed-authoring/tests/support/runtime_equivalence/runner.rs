@@ -40,6 +40,20 @@ impl LaneLog {
     pub fn final_keys(&self) -> &[u64] {
         &self.final_keys
     }
+
+    pub(super) const fn from_parts(
+        receipts: Vec<NormalizedReceipt>,
+        states: Vec<NormalizedStateV1>,
+        projections: Vec<NormalizedHeadlessProjectionV1>,
+        final_keys: Vec<u64>,
+    ) -> Self {
+        Self {
+            receipts,
+            states,
+            projections,
+            final_keys,
+        }
+    }
 }
 
 pub fn validate_programs(
