@@ -1,6 +1,7 @@
 mod raster;
 mod surface;
 mod trace;
+mod trace_applicability;
 mod trace_capacity;
 
 use fenestra_ui_runtime::prototype::{RuntimeGeneration, UiRuntime};

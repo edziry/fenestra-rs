@@ -84,7 +84,7 @@ Accepted, Rejected, Completed, Matched, Stopped, Failed(cause)
 
 ```text
 InvalidScale, InvalidPoint, Arithmetic, WidthLimit, HeightLimit,
-PixelLimit, ByteLimit, UnsupportedAlpha, EnvironmentScaleChanged,
+PixelLimit, ByteLimit, UnsupportedAlpha, Storage, EnvironmentScaleChanged,
 SurfaceRepaintUnavailable, Runtime, Oracle, Scheduler, PrePresent,
 Presenter, Trace, Timeout, Invariant
 ```

@@ -1,15 +1,14 @@
 use std::cell::Cell;
 
-use fenestra_ui_runtime::prototype::{HeadlessSurface, SchedulerTick};
+use fenestra_ui_runtime::prototype::SchedulerTick;
 use fenestra_ui_testkit::prototype::HeadlessPointerTargetV1;
 
 use super::super::trace::{
     NativeFailureCauseV1, NativeObservationV1, NativeOutcomeV1, NativeTraceErrorKindV1,
     NativeTraceEventV1, NativeTraceLaneStatsV1, NativeTraceLimitKindV1, NativeTracePendingV1,
-    NativeTraceStageV1, NativeTraceStepV1, NativeTraceSubmissionV1, NativeTraceSurfaceV1,
-    NativeTraceV1,
+    NativeTraceStageV1, NativeTraceStepV1, NativeTraceSubmissionV1, NativeTraceV1,
 };
-use super::super::{NativePhysicalExtentV1, NativeScaleFactorV1};
+use super::super::{NativePhysicalExtentV1, NativeSurfaceStateV1, NativeSurfaceTupleV1};
 use super::generation_zero;
 
 #[test]
@@ -24,7 +23,7 @@ fn representative_scalar_state_is_typed_and_lossless() {
     pointer.surface = Some(surface());
     pointer.target = Some(HeadlessPointerTargetV1::StaticControl);
     pointer.redraw_armed = true;
-    pointer.pending = NativeTracePendingV1::new(1, 1, 0);
+    pointer.pending = NativeTracePendingV1::new(1, 1, 1);
     pointer.deferred = NativeTraceLaneStatsV1::new(1, 80);
     pointer.visual = NativeTraceLaneStatsV1::new(1, 40);
 
@@ -40,25 +39,25 @@ fn representative_scalar_state_is_typed_and_lossless() {
     assert_eq!(event.published_generation(), None);
     assert_eq!(event.surface(), Some(surface()));
     assert_eq!(event.target(), Some(HeadlessPointerTargetV1::StaticControl));
-    assert_eq!(event.pending(), NativeTracePendingV1::new(1, 1, 0));
+    assert_eq!(event.pending(), NativeTracePendingV1::new(1, 1, 1));
     assert_eq!(event.deferred(), NativeTraceLaneStatsV1::new(1, 80));
     assert_eq!(event.visual(), NativeTraceLaneStatsV1::new(1, 40));
     assert!(event.redraw_armed());
 }
 
 #[test]
-fn frame_submission_control_and_scheduler_turn_are_closed_scalars() {
+fn frame_submission_control_and_four_scheduler_lanes_are_closed_scalars() {
     let mut trace = NativeTraceV1::new();
     let mut offered = NativeTraceStepV1::new(
         NativeTraceStageV1::Scheduler,
         NativeObservationV1::Frame,
         NativeOutcomeV1::Offered,
     );
-    offered.scheduler_turn = Some(4);
+    offered.scheduler_turn = Some(0);
     offered.surface = Some(surface());
     offered.frame = Some(2);
+    offered.controls = NativeTraceLaneStatsV1::new(1, 32);
     offered.in_flight = NativeTraceLaneStatsV1::new(1, 40);
-    offered.renderer = NativeTraceLaneStatsV1::new(1, 96);
     let mut accepted = NativeTraceStepV1::new(
         NativeTraceStageV1::Renderer,
         NativeObservationV1::Frame,
@@ -72,7 +71,7 @@ fn frame_submission_control_and_scheduler_turn_are_closed_scalars() {
         NativeObservationV1::Completion,
         NativeOutcomeV1::Accepted,
     );
-    completion.scheduler_turn = Some(5);
+    completion.scheduler_turn = Some(1);
     completion.surface = Some(surface());
     completion.submission = Some(NativeTraceSubmissionV1::new(0, 1));
     completion.control = Some(3);
@@ -87,15 +86,15 @@ fn frame_submission_control_and_scheduler_turn_are_closed_scalars() {
         .record(SchedulerTick::new(12), completion)
         .expect("accepted completion control should record");
 
-    assert_eq!(trace.events()[0].scheduler_turn(), Some(4));
+    assert_eq!(trace.events()[0].scheduler_turn(), Some(0));
     assert_eq!(trace.events()[0].frame(), Some(2));
+    assert_eq!(
+        trace.events()[0].controls(),
+        NativeTraceLaneStatsV1::new(1, 32)
+    );
     assert_eq!(
         trace.events()[0].in_flight(),
         NativeTraceLaneStatsV1::new(1, 40)
-    );
-    assert_eq!(
-        trace.events()[0].renderer(),
-        NativeTraceLaneStatsV1::new(1, 96)
     );
     assert_eq!(trace.events()[1].frame(), Some(2));
     assert_eq!(
@@ -113,14 +112,26 @@ fn invalid_applicability_is_rejected_before_storage_without_a_prefix() {
     published_observation.published_generation = Some(generation_zero());
     let mut oversized_pending = observed_build();
     oversized_pending.pending = NativeTracePendingV1::new(2, 0, 0);
-    let mut submission_without_frame = observed_build();
+    let mut captured_on_build = observed_build();
+    captured_on_build.captured_generation = Some(generation_zero());
+    let mut submission_without_frame = NativeTraceStepV1::new(
+        NativeTraceStageV1::Renderer,
+        NativeObservationV1::Frame,
+        NativeOutcomeV1::Accepted,
+    );
+    submission_without_frame.surface = Some(surface());
     submission_without_frame.submission = Some(NativeTraceSubmissionV1::new(0, 0));
+    let mut frame_without_submission = submission_without_frame;
+    frame_without_submission.submission = None;
+    frame_without_submission.frame = Some(0);
 
     for invalid in [
         target_on_build,
         published_observation,
         oversized_pending,
+        captured_on_build,
         submission_without_frame,
+        frame_without_submission,
     ] {
         let storage_called = Cell::new(false);
         let mut trace = NativeTraceV1::new();
@@ -137,14 +148,40 @@ fn invalid_applicability_is_rejected_before_storage_without_a_prefix() {
 }
 
 #[test]
-fn environment_failure_retains_surface_without_presentation_identity() {
+fn scheduler_turns_are_dense_and_only_appear_on_scheduler_events() {
     let mut trace = NativeTraceV1::new();
-    let mut failed = NativeTraceStepV1::new(
-        NativeTraceStageV1::Platform,
-        NativeObservationV1::Scale,
-        NativeOutcomeV1::Failed(NativeFailureCauseV1::EnvironmentScaleChanged),
-    );
-    failed.surface = Some(surface());
+    trace
+        .record(SchedulerTick::new(0), scheduler_offer(0))
+        .expect("first scheduler turn should fit");
+    let prefix = trace.events().to_vec();
+
+    let mut turn_on_build = observed_build();
+    turn_on_build.scheduler_turn = Some(1);
+    for invalid in [
+        turn_on_build,
+        scheduler_offer_without_turn(),
+        scheduler_offer(0),
+        scheduler_offer(2),
+    ] {
+        assert_eq!(
+            trace
+                .record(SchedulerTick::new(0), invalid)
+                .expect_err("scheduler turn applicability must fail closed"),
+            NativeTraceErrorKindV1::InvalidApplicability
+        );
+        assert_eq!(trace.events(), prefix);
+    }
+
+    trace
+        .record(SchedulerTick::new(0), scheduler_offer(1))
+        .expect("next dense scheduler turn should fit");
+    assert_eq!(trace.events()[1].scheduler_turn(), Some(1));
+}
+
+#[test]
+fn environment_failures_retain_surface_and_reject_presentation_identity() {
+    let mut trace = NativeTraceV1::new();
+    let failed = environment_failure(NativeFailureCauseV1::EnvironmentScaleChanged);
 
     trace
         .record(SchedulerTick::new(12), failed)
@@ -154,6 +191,33 @@ fn environment_failure_retains_surface_without_presentation_identity() {
     assert_eq!(event.frame(), None);
     assert_eq!(event.submission(), None);
     assert_eq!(event.control(), None);
+
+    for cause in [
+        NativeFailureCauseV1::EnvironmentScaleChanged,
+        NativeFailureCauseV1::SurfaceRepaintUnavailable,
+    ] {
+        let mut with_frame = environment_failure(cause);
+        with_frame.frame = Some(1);
+        let mut with_submission = environment_failure(cause);
+        with_submission.frame = Some(1);
+        with_submission.submission = Some(NativeTraceSubmissionV1::new(0, 1));
+        let mut with_control = environment_failure(cause);
+        with_control.control = Some(1);
+        for invalid in [with_frame, with_submission, with_control] {
+            let storage_called = Cell::new(false);
+            let mut invalid_trace = NativeTraceV1::new();
+            assert_eq!(
+                invalid_trace
+                    .record_with_reserver_for_test(SchedulerTick::new(12), invalid, |_| {
+                        storage_called.set(true);
+                        Ok(())
+                    })
+                    .expect_err("environment failure cannot carry presentation identity"),
+                NativeTraceErrorKindV1::InvalidApplicability
+            );
+            assert!(!storage_called.get());
+        }
+    }
 }
 
 #[test]
@@ -215,6 +279,7 @@ fn vocabularies_are_closed_ordered_and_privacy_safe() {
             NativeFailureCauseV1::PixelLimit,
             NativeFailureCauseV1::ByteLimit,
             NativeFailureCauseV1::UnsupportedAlpha,
+            NativeFailureCauseV1::Storage,
             NativeFailureCauseV1::EnvironmentScaleChanged,
             NativeFailureCauseV1::SurfaceRepaintUnavailable,
             NativeFailureCauseV1::Runtime,
@@ -255,13 +320,44 @@ fn observed_build() -> NativeTraceStepV1 {
     )
 }
 
-fn surface() -> NativeTraceSurfaceV1 {
-    NativeTraceSurfaceV1::new(
-        2,
-        NativePhysicalExtentV1::new(240, 180),
-        NativeScaleFactorV1::try_from_f64(2.0).expect("fixed scale should validate"),
-        HeadlessSurface::new(120, 90),
-    )
+fn scheduler_offer(turn: u64) -> NativeTraceStepV1 {
+    let mut step = scheduler_offer_without_turn();
+    step.scheduler_turn = Some(turn);
+    step
+}
+
+fn scheduler_offer_without_turn() -> NativeTraceStepV1 {
+    let mut step = NativeTraceStepV1::new(
+        NativeTraceStageV1::Scheduler,
+        NativeObservationV1::Frame,
+        NativeOutcomeV1::Offered,
+    );
+    step.surface = Some(surface());
+    step.frame = Some(0);
+    step
+}
+
+fn environment_failure(cause: NativeFailureCauseV1) -> NativeTraceStepV1 {
+    let observation = if cause == NativeFailureCauseV1::EnvironmentScaleChanged {
+        NativeObservationV1::Scale
+    } else {
+        NativeObservationV1::Surface
+    };
+    let mut step = NativeTraceStepV1::new(
+        NativeTraceStageV1::Platform,
+        observation,
+        NativeOutcomeV1::Failed(cause),
+    );
+    step.surface = Some(surface());
+    step
+}
+
+fn surface() -> NativeSurfaceTupleV1 {
+    let mut state = NativeSurfaceStateV1::new();
+    state
+        .observe(NativePhysicalExtentV1::new(240, 180), 2.0)
+        .expect("fixed surface should validate");
+    state.pending_tuple().expect("surface tuple should exist")
 }
 
 fn assert_copy<T: Copy>() {}

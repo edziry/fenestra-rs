@@ -296,6 +296,8 @@ One CPU frame may be pending. Correctness ceilings are 4,096 pixels per axis,
 not product budgets. Checked width, height, pixel, byte, and storage preflight
 occurs before allocation. Native surface generation, runtime generation, and
 frame identity are validated before presentation.
+Storage reservation failure maps to the closed
+`NativeFailureCauseV1::Storage` category after all numeric preflights pass.
 
 The manifest and trace contain no hostname, username, environment-variable
 value, path, wall clock, native handle, pixels, source text, clipboard data, or

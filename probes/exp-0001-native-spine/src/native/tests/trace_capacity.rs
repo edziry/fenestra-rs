@@ -114,6 +114,7 @@ fn storage_failure_preserves_dense_sequence_and_tick_prefix() {
         NativeTraceErrorKindV1::Storage
     );
     assert_eq!(trace.events(), prefix);
+    assert_eq!(trace.accounted_bytes(), NativeTraceEventV1::ACCOUNTED_BYTES);
 
     trace
         .record(SchedulerTick::new(8), observed_build())
