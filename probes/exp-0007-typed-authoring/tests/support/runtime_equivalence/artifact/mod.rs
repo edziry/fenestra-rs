@@ -1,4 +1,4 @@
-use fenestra_ui_testkit::prototype::HeadlessProjectionFaultV1;
+use fenestra_ui_testkit::prototype::{HeadlessProjectionFaultV1, NormalizedHeadlessProjectionV1};
 
 use super::LaneLog;
 
@@ -105,16 +105,43 @@ impl RuntimeArtifactSliceV1 {
 
 #[derive(Clone)]
 pub struct RuntimeArtifactModelV1 {
-    log: LaneLog,
+    generations: Vec<RuntimeGenerationArtifactV1>,
+    projection_sources: Vec<NormalizedHeadlessProjectionV1>,
+    final_keys: Vec<u64>,
+}
+
+#[derive(Clone, Eq, PartialEq)]
+struct RuntimeGenerationArtifactV1 {
+    receipt: Vec<String>,
+    state: Vec<String>,
+    projection: Vec<String>,
 }
 
 impl RuntimeArtifactModelV1 {
     pub fn same_slice(&self, other: &Self, slice: RuntimeArtifactSliceV1) -> bool {
         match slice {
-            RuntimeArtifactSliceV1::Receipt => self.log.receipts() == other.log.receipts(),
-            RuntimeArtifactSliceV1::State => self.log.states() == other.log.states(),
-            RuntimeArtifactSliceV1::Projection => self.log.projections() == other.log.projections(),
-            RuntimeArtifactSliceV1::FinalKeys => self.log.final_keys() == other.log.final_keys(),
+            RuntimeArtifactSliceV1::Receipt => self
+                .generations
+                .iter()
+                .map(|generation| &generation.receipt)
+                .eq(other
+                    .generations
+                    .iter()
+                    .map(|generation| &generation.receipt)),
+            RuntimeArtifactSliceV1::State => self
+                .generations
+                .iter()
+                .map(|generation| &generation.state)
+                .eq(other.generations.iter().map(|generation| &generation.state)),
+            RuntimeArtifactSliceV1::Projection => self
+                .generations
+                .iter()
+                .map(|generation| &generation.projection)
+                .eq(other
+                    .generations
+                    .iter()
+                    .map(|generation| &generation.projection)),
+            RuntimeArtifactSliceV1::FinalKeys => self.final_keys == other.final_keys,
         }
     }
 }
@@ -123,20 +150,21 @@ pub fn encode_runtime_artifact_v1(
     log: &LaneLog,
     limits: RuntimeArtifactLimitsV1,
 ) -> Result<String, RuntimeArtifactEncodeErrorV1> {
-    encode::encode(log, limits)
+    let model = encode::model(log)?;
+    encode::encode_model(&model, limits)
 }
 
 pub fn runtime_artifact_model_v1(
     log: &LaneLog,
 ) -> Result<RuntimeArtifactModelV1, RuntimeArtifactEncodeErrorV1> {
-    Ok(RuntimeArtifactModelV1 { log: log.clone() })
+    encode::model(log)
 }
 
 pub fn encode_runtime_artifact_model_v1(
     model: &RuntimeArtifactModelV1,
     limits: RuntimeArtifactLimitsV1,
 ) -> Result<String, RuntimeArtifactEncodeErrorV1> {
-    encode::encode(&model.log, limits)
+    encode::encode_model(model, limits)
 }
 
 pub fn inject_runtime_artifact_fault_v1(
