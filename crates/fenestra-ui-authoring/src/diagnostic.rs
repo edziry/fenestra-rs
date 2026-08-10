@@ -147,7 +147,7 @@ impl AuthoringDiagnosticKindV1 {
 }
 
 /// Typed authoring failure with a closed kind and source location.
-#[derive(Clone, Copy, Eq, PartialEq)]
+#[derive(Clone, Copy)]
 pub struct AuthoringDiagnosticV1 {
     frontend: AuthoringFrontendV1,
     kind: AuthoringDiagnosticKindV1,

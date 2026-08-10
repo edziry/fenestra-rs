@@ -1,4 +1,5 @@
 use fenestra_ui_ir::prototype::SourceId;
+use proc_macro2::TokenStream;
 
 use crate::compiled::CompiledAuthoringV1;
 use crate::diagnostic::{AuthoringDiagnosticKindV1, AuthoringDiagnosticV1};
@@ -6,6 +7,7 @@ use crate::fen::parse_fen_document_v1;
 use crate::limits::{AuthoringLimitKindV1, AuthoringLimitsV1};
 use crate::lower::lower_document_v1;
 use crate::source::{DiagnosticLocationV1, FenSourceV1, PhysicalOriginV1};
+use crate::ui::parse_ui_document_v1;
 use crate::vocabulary::AuthoringFrontendV1;
 
 /// Compiles one bounded version-1 `.fen` document into the typed IR triple.
@@ -52,6 +54,20 @@ pub fn compile_fen_v1(
     }
 
     let parsed = parse_fen_document_v1(source_id, text, limits)?;
+    lower_document_v1(parsed, limits)
+}
+
+/// Compiles one bounded version-1 `ui!` token stream into the typed IR triple.
+///
+/// # Errors
+///
+/// Returns the first bounded lexical, grammar, name-resolution, type, or IR
+/// validation diagnostic in deterministic validation order.
+pub fn compile_ui_v1(
+    tokens: TokenStream,
+    limits: AuthoringLimitsV1,
+) -> Result<CompiledAuthoringV1, AuthoringDiagnosticV1> {
+    let parsed = parse_ui_document_v1(tokens, limits)?;
     lower_document_v1(parsed, limits)
 }
 

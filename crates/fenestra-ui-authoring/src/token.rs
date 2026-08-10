@@ -1,6 +1,6 @@
 use crate::source::PhysicalOriginV1;
 
-#[derive(Clone, Eq, PartialEq)]
+#[derive(Clone)]
 pub(crate) struct AbstractTokenV1 {
     pub(crate) kind: AbstractTokenKindV1,
     pub(crate) physical: PhysicalOriginV1,

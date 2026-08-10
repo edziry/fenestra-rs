@@ -1,4 +1,5 @@
 use fenestra_ui_ir::prototype::{SourceId, SourceSpan};
+use proc_macro2::Span;
 
 use crate::vocabulary::AnchorKindV1;
 
@@ -26,18 +27,21 @@ impl<'a> FenSourceV1<'a> {
 }
 
 /// Opaque physical source location for an authoring diagnostic.
-#[derive(Clone, Copy, Eq, PartialEq)]
+#[derive(Clone, Copy)]
 #[non_exhaustive]
 pub struct PhysicalOriginV1 {
     kind: PhysicalOriginKindV1,
 }
 
-#[derive(Clone, Copy, Eq, PartialEq)]
+#[derive(Clone, Copy)]
 enum PhysicalOriginKindV1 {
     FenBytes {
         source: SourceId,
         start: u32,
         end: u32,
+    },
+    UiToken {
+        span: Span,
     },
 }
 
@@ -48,11 +52,21 @@ impl PhysicalOriginV1 {
         }
     }
 
+    pub(crate) const fn ui_token(span: Span) -> Self {
+        Self {
+            kind: PhysicalOriginKindV1::UiToken { span },
+        }
+    }
+
     /// Returns the `.fen` source namespace, when the origin is byte-based.
     #[must_use]
     pub const fn source_id(&self) -> Option<SourceId> {
         match self.kind {
             PhysicalOriginKindV1::FenBytes { source, .. } => Some(source),
+            PhysicalOriginKindV1::UiToken { span } => {
+                let _ = span;
+                None
+            }
         }
     }
 
@@ -61,12 +75,13 @@ impl PhysicalOriginV1 {
     pub const fn fen_byte_range(&self) -> Option<(u32, u32)> {
         match self.kind {
             PhysicalOriginKindV1::FenBytes { start, end, .. } => Some((start, end)),
+            PhysicalOriginKindV1::UiToken { .. } => None,
         }
     }
 }
 
 /// Location of one authoring diagnostic.
-#[derive(Clone, Copy, Eq, PartialEq)]
+#[derive(Clone, Copy)]
 pub enum DiagnosticLocationV1 {
     /// Physical failure before a semantic anchor exists.
     Physical(PhysicalOriginV1),
