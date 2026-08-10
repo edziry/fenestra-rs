@@ -351,6 +351,10 @@ The reference outputs are ASCII with LF endings and one final newline:
 - evidence summary with versions, limits, measured counts, byte lengths,
   dependency facts, and content hashes.
 
+`canonical_rust_v1` accepts the compiled document so output-limit diagnostics
+retain its frontend and document origin. Its opaque output exposes borrowed
+text; debug reports only the byte count and never the generated expression.
+
 Artifacts contain no absolute path, username, time, source literal disclosure
 beyond the checked fixture, opaque span debug output, or process environment.
 

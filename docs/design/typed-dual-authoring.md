@@ -116,7 +116,7 @@ compile_ui_v1(proc_macro2::TokenStream, AuthoringLimitsV1)
   -> Result<CompiledAuthoringV1, AuthoringDiagnosticV1>
 emit_tokens_v1(&CompiledAuthoringV1, AuthoringLimitsV1)
   -> Result<proc_macro2::TokenStream, AuthoringDiagnosticV1>
-canonical_rust_v1(&proc_macro2::TokenStream, AuthoringLimitsV1)
+canonical_rust_v1(&CompiledAuthoringV1, AuthoringLimitsV1)
   -> Result<GeneratedRustV1, AuthoringDiagnosticV1>
 diagnostic_tokens_v1(AuthoringDiagnosticV1)
   -> proc_macro2::TokenStream
@@ -132,8 +132,10 @@ is not treated as inspectable because current raw fields are private.
 
 The one emitter accepts the retained resolved document and returns
 `proc_macro2::TokenStream`. The macro returns those tokens directly. The `.fen`
-lane uses their canonical `TokenStream` spelling plus exactly one LF; it has no
-second Rust-string emitter or lowering rule.
+lane passes the compiled document to `canonical_rust_v1`, which invokes that
+emitter and wraps its canonical spelling plus exactly one LF. It does not
+accept an origin-free token stream or add a second formatter. `GeneratedRustV1`
+exposes borrowed text while its debug form reports only the byte count.
 
 Generated target code is one expression that constructs the three raw IR
 programs through absolute `::fenestra_ui_ir::prototype` paths. It names no
