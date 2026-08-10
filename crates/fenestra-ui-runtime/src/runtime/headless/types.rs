@@ -1,4 +1,5 @@
 use fenestra_ui_ir::prototype::{PropertyId, PropertyValue, ValidatedStyleProgram};
+use fenestra_ui_layout::prototype::LayoutEngineV1;
 
 use crate::logical_tree::NodeId;
 
@@ -135,6 +136,7 @@ impl HeadlessProjectionFailure {
 pub(crate) struct HeadlessRuntimeConfig {
     pub(super) style: ValidatedStyleProgram,
     pub(super) spec: HeadlessProjectionSpec,
+    pub(super) layout_engine: Box<dyn LayoutEngineV1>,
 }
 
 #[derive(Clone)]

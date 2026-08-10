@@ -4,6 +4,7 @@ use fenestra_ui_ir::prototype::{
     ChildFactory, PropertyId, PropertyValue, TemplateFactory, TemplateNodeId,
     ValidatedConstruction, ValidatedStyleProgram, ValueType,
 };
+use fenestra_ui_layout::prototype::LayoutEngineV1;
 
 use super::types::HeadlessRuntimeConfig;
 
@@ -247,9 +248,14 @@ impl HeadlessRuntimeConfig {
         style: ValidatedStyleProgram,
         spec: HeadlessProjectionSpec,
         surface: HeadlessSurface,
+        layout_engine: Box<dyn LayoutEngineV1>,
     ) -> Result<Self, HeadlessProjectionErrorKind> {
         validate_specification(style.construction(), spec, surface)?;
-        Ok(Self { style, spec })
+        Ok(Self {
+            style,
+            spec,
+            layout_engine,
+        })
     }
 
     pub(crate) fn preflight_fixed_records(

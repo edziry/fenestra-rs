@@ -2,6 +2,7 @@ use std::collections::HashSet;
 
 use fenestra_ui_ir::prototype::{InputPolicy, PropertyId, PropertyValue};
 
+use super::layout::{LayoutPlacement, compute_layout};
 use super::types::{
     ComputedProperty, ComputedStyleRecord, GeometryRecord, HeadlessProjectionFailure,
     HeadlessProjectionState, HeadlessRuntimeConfig, HitRegionRecord, SceneRectangleRecord,
@@ -13,14 +14,6 @@ use super::{
 };
 use crate::logical_tree::NodeId;
 use crate::runtime::state::{RuntimeNode, RuntimeState};
-
-#[derive(Clone, Copy)]
-struct ProjectionFrame {
-    node: NodeId,
-    bounds: HeadlessRect,
-    clip: HeadlessRect,
-    visible: bool,
-}
 
 #[derive(Clone, Copy, Default)]
 struct DerivedCounts {
@@ -46,7 +39,9 @@ impl RuntimeState {
             .preflight_fixed_records(Some(self.tree.len()))
             .map_err(HeadlessProjectionFailure::new)?;
         self.scan_negative_geometry(config)?;
-        let (computed_styles, geometry, counts) = self.build_fixed_projection(config, surface)?;
+        let layout = compute_layout(self, config, surface)?;
+        let (computed_styles, geometry, counts) =
+            self.build_fixed_projection(config, surface, &layout)?;
         preflight_derived(config, counts)?;
         let derived = self.build_derived_projection(config, &geometry, counts)?;
         Ok(HeadlessProjectionState {
@@ -91,33 +86,44 @@ impl RuntimeState {
         &self,
         config: &HeadlessRuntimeConfig,
         surface: HeadlessSurface,
+        layout: &[LayoutPlacement],
     ) -> Result<
         (Vec<ComputedStyleRecord>, Vec<GeometryRecord>, DerivedCounts),
         HeadlessProjectionFailure,
     > {
         let node_count = self.tree.len();
-        let root = self.tree.root().ok_or_else(invariant)?;
-        let root_node = self.tree.value(root).ok_or_else(invariant)?;
-        let root_bounds = HeadlessRect::new(
-            0,
-            0,
-            scalar_property(root_node, config.spec.width())?,
-            scalar_property(root_node, config.spec.height())?,
-        );
+        if layout.len() != node_count {
+            return Err(invariant());
+        }
         let surface_bounds = HeadlessRect::new(0, 0, surface.width(), surface.height());
-        let mut pending = vec![ProjectionFrame {
-            node: root,
-            bounds: root_bounds,
-            clip: intersect(root_bounds, surface_bounds)?,
-            visible: bool_property(root_node, config.spec.visible())?,
-        }];
         let mut computed_styles = Vec::with_capacity(node_count);
         let mut geometry = Vec::with_capacity(node_count);
         let mut counts = DerivedCounts::default();
-        while let Some(frame) = pending.pop() {
-            let stored = self.tree.value(frame.node).ok_or_else(invariant)?;
+        for (index, placement) in layout.iter().enumerate() {
+            let stored = self.tree.value(placement.node).ok_or_else(invariant)?;
+            let (ancestor_clip, ancestor_visible) = match placement.parent_index {
+                Some(parent_index) => {
+                    if parent_index >= index {
+                        return Err(invariant());
+                    }
+                    let parent: &GeometryRecord =
+                        geometry.get(parent_index).ok_or_else(invariant)?;
+                    if self.tree.parent(placement.node) != Some(parent.node) {
+                        return Err(invariant());
+                    }
+                    (parent.clip, parent.effective_visible)
+                }
+                None => {
+                    if index != 0 || self.tree.parent(placement.node).is_some() {
+                        return Err(invariant());
+                    }
+                    (surface_bounds, true)
+                }
+            };
+            let visible = ancestor_visible && bool_property(stored, config.spec.visible())?;
+            let clip = intersect(placement.bounds, ancestor_clip)?;
             computed_styles.push(ComputedStyleRecord {
-                node: frame.node,
+                node: placement.node,
                 properties: stored
                     .properties
                     .iter()
@@ -128,12 +134,12 @@ impl RuntimeState {
                     .collect(),
             });
             geometry.push(GeometryRecord {
-                node: frame.node,
-                bounds: frame.bounds,
-                clip: frame.clip,
-                effective_visible: frame.visible,
+                node: placement.node,
+                bounds: placement.bounds,
+                clip,
+                effective_visible: visible,
             });
-            if frame.visible && frame.clip.is_non_empty() {
+            if visible && clip.is_non_empty() {
                 counts.scene_rectangles = increment(counts.scene_rectangles)?;
                 if stored.template == config.spec.semantic_template() {
                     counts.semantics = increment(counts.semantics)?;
@@ -142,31 +148,6 @@ impl RuntimeState {
                     counts.hit_regions = increment(counts.hit_regions)?;
                 }
             }
-
-            let children = self.tree.children(frame.node).ok_or_else(invariant)?;
-            let mut cursor = frame.bounds.y();
-            let mut child_frames = Vec::with_capacity(children.len());
-            for child in children {
-                if self.tree.parent(*child) != Some(frame.node) {
-                    return Err(invariant());
-                }
-                let child_node = self.tree.value(*child).ok_or_else(invariant)?;
-                let height = scalar_property(child_node, config.spec.height())?;
-                let bounds = HeadlessRect::new(
-                    frame.bounds.x(),
-                    cursor,
-                    scalar_property(child_node, config.spec.width())?.min(frame.bounds.width()),
-                    height,
-                );
-                child_frames.push(ProjectionFrame {
-                    node: *child,
-                    bounds,
-                    clip: intersect(bounds, frame.clip)?,
-                    visible: frame.visible && bool_property(child_node, config.spec.visible())?,
-                });
-                cursor = cursor.checked_add(height).ok_or_else(arithmetic)?;
-            }
-            pending.extend(child_frames.into_iter().rev());
         }
         if computed_styles.len() != node_count || geometry.len() != node_count {
             return Err(invariant());
@@ -291,7 +272,7 @@ fn property(
         .ok_or_else(invariant)
 }
 
-fn scalar_property(
+pub(super) fn scalar_property(
     node: &RuntimeNode,
     property_id: PropertyId,
 ) -> Result<i32, HeadlessProjectionFailure> {

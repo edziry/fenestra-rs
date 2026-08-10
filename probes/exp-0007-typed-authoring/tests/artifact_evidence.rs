@@ -74,7 +74,7 @@ const FILES: [FileEvidenceV1; 11] = [
         "cargo-lock",
         "Cargo.lock",
         include_bytes!("../../../Cargo.lock"),
-        "2c7f902592f00dc8a19b1eb64208434d158dc6fab8825a8d38e9ca31b2dee6ae",
+        "c0ad362332c1b09618eb707228c99884f32925bf9ef1ed3909c194de605e9b97",
     ),
 ];
 

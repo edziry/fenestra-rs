@@ -184,9 +184,44 @@ Verification: [typed dual authoring verification](verification/WU-0010-typed-aut
 
 Exit: both authoring paths share semantics rather than merely similar syntax.
 
-## Parallel preparation
+## WU-0011: Layout conformance
 
-Layout conformance and mobile-awareness preparation follow the same four stages.
-They remain separate work units before code is added: layout needs a versioned
-geometry oracle and candidate screen; mobile awareness needs an assumption
-inventory and fake lifecycle plan. Neither preparation is a support claim.
+Branch: `experiment/layout-conformance`
+Design: [layout conformance plan](design/layout-conformance.md)
+Reference: [layout reference contract](design/layout-conformance-reference.md)
+Verification: [layout conformance verification](verification/WU-0011-layout-conformance.md)
+
+- Research: inspect the current projection, runtime transaction, invalidation,
+  scheduler, hit, scene, and native seams; screen current layout candidates,
+  exact dependency closures, maintenance, MSRV, license, unsafe, and replacement
+  cost.
+- Planning: fix a candidate-neutral integer stack contract, validation order,
+  rounding, limits, corpus, independent oracle, TDD sequence, and
+  pass/adapt/stop criteria.
+- Implementation: add the unpublished neutral boundary, reference engine,
+  independent oracle, disposable candidate adapter, and atomic runtime seam
+  through focused RED/GREEN commits.
+- Verification: compare every supported case and the registered runtime script
+  field by field, retain negative controls and deterministic artifacts, and run
+  Linux plus Windows pure gates.
+
+Exit: the bounded stack subset is reproducible and replaceable without selecting
+a final layout engine or leaking candidate types.
+
+## WU-0012: Mobile lifecycle preparation
+
+Branch: lifecycle implementation deferred; preparation recorded with WU-0011
+Decision: [mobile lifecycle preparation](design/mobile-lifecycle-preparation.md)
+
+- Research: inventory desktop assumptions in lifecycle, surface ownership,
+  scale, input, backgrounding, memory pressure, scheduler clocks, and targets.
+- Planning: define the stop-the-line triggers, later lifecycle axes, fake ports,
+  surface epochs, invariants, and independent version decision.
+- Implementation: deferred because WU-0011 needs only a present logical extent;
+  no mobile lifecycle code or platform target is added in parallel.
+- Verification: audit that zero extent is geometry rather than absence, that no
+  platform vocabulary enters layout, and that every trigger remains false.
+
+Exit: preparation records a separate post-WU-0011 unit and makes no mobile
+support claim. If a trigger becomes true, WU-0011 stops and WU-0012 becomes its
+prerequisite.

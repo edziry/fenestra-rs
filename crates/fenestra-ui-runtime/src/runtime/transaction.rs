@@ -4,6 +4,7 @@ use std::sync::{Arc, Weak};
 use fenestra_ui_ir::prototype::{
     InvalidationSet, PropertyId, PropertyValue, ValidatedConstruction, ValidatedStyleProgram,
 };
+use fenestra_ui_layout::prototype::{LayoutEngineV1, ReferenceStackEngineV1};
 
 use crate::logical_tree::NodeId;
 
@@ -184,10 +185,29 @@ impl UiRuntime {
         surface: HeadlessSurface,
         capacity: RuntimeCapacity,
     ) -> Result<Self, RuntimeInitializationError> {
+        Self::new_headless_with_layout_engine(
+            style,
+            spec,
+            surface,
+            capacity,
+            Box::new(ReferenceStackEngineV1::new()),
+        )
+    }
+
+    /// Materializes generation zero with an injected provisional layout engine.
+    #[doc(hidden)]
+    pub fn new_headless_with_layout_engine(
+        style: ValidatedStyleProgram,
+        spec: HeadlessProjectionSpec,
+        surface: HeadlessSurface,
+        capacity: RuntimeCapacity,
+        layout_engine: Box<dyn LayoutEngineV1>,
+    ) -> Result<Self, RuntimeInitializationError> {
         let construction = style.construction().clone();
-        let headless = HeadlessRuntimeConfig::new(style, spec, surface).map_err(|kind| {
-            RuntimeInitializationError::new(RuntimeInitializationErrorKind::Headless(kind))
-        })?;
+        let headless =
+            HeadlessRuntimeConfig::new(style, spec, surface, layout_engine).map_err(|kind| {
+                RuntimeInitializationError::new(RuntimeInitializationErrorKind::Headless(kind))
+            })?;
         let state = RuntimeState::initialize_headless(&construction, capacity, &headless, surface)?;
         Ok(Self {
             construction,
