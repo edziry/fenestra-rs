@@ -49,7 +49,15 @@ fn lex_fen_v1(
         }
 
         let start = offset;
-        let kind = if is_identifier_start(bytes[offset]) {
+        let kind = if starts_raw_identifier(bytes, offset) {
+            let end = unsupported_lexeme_end(text, start);
+            return Err(physical_failure(
+                source,
+                AuthoringDiagnosticKindV1::UnsupportedToken,
+                start,
+                end,
+            ));
+        } else if is_identifier_start(bytes[offset]) {
             offset += 1;
             while offset < bytes.len() && is_identifier_continue(bytes[offset]) {
                 offset += 1;
@@ -60,12 +68,21 @@ fn lex_fen_v1(
             while offset < bytes.len() && bytes[offset].is_ascii_digit() {
                 offset += 1;
             }
+            if offset < bytes.len() && is_numeric_continuation(bytes[offset]) {
+                let end = unsupported_lexeme_end(text, start);
+                return Err(physical_failure(
+                    source,
+                    AuthoringDiagnosticKindV1::UnsupportedToken,
+                    start,
+                    end,
+                ));
+            }
             AbstractTokenKindV1::UnsignedDecimal(text[start..offset].into())
         } else if let Some(punctuation) = punctuation(bytes[offset]) {
             offset += 1;
             AbstractTokenKindV1::Punctuation(punctuation)
         } else {
-            let end = start + text[start..].chars().next().map_or(1, char::len_utf8);
+            let end = unsupported_lexeme_end(text, start);
             return Err(physical_failure(
                 source,
                 AuthoringDiagnosticKindV1::UnsupportedToken,
@@ -133,6 +150,33 @@ fn lex_fen_v1(
     }
 
     Ok(tokens)
+}
+
+fn starts_raw_identifier(bytes: &[u8], offset: usize) -> bool {
+    bytes[offset] == b'r' && bytes.get(offset + 1) == Some(&b'#')
+}
+
+const fn is_numeric_continuation(byte: u8) -> bool {
+    is_identifier_start(byte) || byte == b'.'
+}
+
+fn unsupported_lexeme_end(text: &str, start: usize) -> usize {
+    let mut end = start;
+    for (relative, character) in text[start..].char_indices() {
+        if relative > 0 && is_lexeme_boundary(character) {
+            break;
+        }
+        end = start + relative + character.len_utf8();
+    }
+    end
+}
+
+fn is_lexeme_boundary(character: char) -> bool {
+    character.is_ascii_whitespace()
+        || matches!(
+            character,
+            '{' | '}' | '[' | ']' | '(' | ')' | ':' | ';' | ',' | '=' | '-'
+        )
 }
 
 fn punctuation(byte: u8) -> Option<PunctuationV1> {
