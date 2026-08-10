@@ -117,6 +117,35 @@ fn canonical_zero_and_nonzero_decimals_compile_in_both_frontends() {
     }
 }
 
+#[test]
+fn dot_after_decimal_matches_rust_token_boundaries() {
+    for spelling in ["1..2", "1.foo"] {
+        let source = replace_component_name(spelling);
+        let fen = fen_error(&source);
+        let ui = ui_error(&source);
+
+        assert_eq!(fen.frontend(), AuthoringFrontendV1::Fen);
+        assert_eq!(ui.frontend(), AuthoringFrontendV1::UiMacro);
+        assert_eq!(fen.kind(), AuthoringDiagnosticKindV1::UnexpectedToken);
+        assert_eq!(ui.kind(), AuthoringDiagnosticKindV1::UnexpectedToken);
+
+        let DiagnosticLocationV1::Physical(fen_origin) = fen.location() else {
+            panic!("FEN numeric boundary should fail before an anchor");
+        };
+        let DiagnosticLocationV1::Physical(ui_origin) = ui.location() else {
+            panic!("UI numeric boundary should fail before an anchor");
+        };
+        let start = source
+            .find(&format!("component {spelling}"))
+            .expect("mutated component should exist")
+            + "component ".len();
+        let start = u32::try_from(start).expect("test offset should fit");
+        assert_eq!(fen_origin.fen_byte_range(), Some((start, start + 1)));
+        assert_eq!(ui_origin.source_id(), None);
+        assert_eq!(ui_origin.fen_byte_range(), None);
+    }
+}
+
 fn unsupported_mismatch(
     source: &str,
     spelling: &str,
