@@ -3,7 +3,7 @@
 Status: active
 Scope: pre-alpha implementation bootstrap and EXP-0001 execution
 Research baseline: `fenestra-research` commit `176c42139776ed9f1ef879cd135bddadaf12a9da`
-Last updated: 2026-08-09
+Last updated: 2026-08-10
 
 This plan translates the ratified research direction into the smallest useful
 implementation sequence. It does not define a stable public API, select the
@@ -146,7 +146,8 @@ fenestra-rs/
     exp-0001-spine/
 ```
 
-All five packages start at `0.0.0` with `publish = false`.
+All five packages initially started at `0.0.0`. The ratified versioning policy
+moves the workspace to `0.1.0`; every package remains `publish = false`.
 
 `fenestra-ui` is the unpublished facade. It owns no behavior during bootstrap
 and exposes only contracts that have already passed their owning experiment.

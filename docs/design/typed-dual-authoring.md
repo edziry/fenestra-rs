@@ -1,11 +1,11 @@
 # Typed dual authoring plan
 
-Status: active
+Status: implemented; [verification complete](../verification/WU-0010-typed-authoring.md)
 Work unit: WU-0010
 Branch: `experiment/typed-authoring`
 Reference fixture: [typed authoring reference](typed-authoring-reference.md)
 Research baseline: `fenestra-research` commit `176c42139776ed9f1ef879cd135bddadaf12a9da`
-Last updated: 2026-08-09
+Last updated: 2026-08-10
 
 ## Goal
 
@@ -297,20 +297,20 @@ Direct versions are exact, not ranges:
 | --- | --- | --- | --- | --- |
 | `proc-macro2 = 1.0.107` | host token adapter/emitter | MIT OR Apache-2.0 | 1.71 | admit, without `span-locations` |
 | `quote = 1.0.47` | spanned diagnostics only | MIT OR Apache-2.0 | 1.71 | admit |
-| `trybuild = 1.0.120` | macro diagnostics only | MIT OR Apache-2.0 | 1.88 | gated dev candidate |
-| `syn = 3.0.3` | alternative Rust parser | MIT OR Apache-2.0 | 1.71 | reject for WU-0010 |
+| `trybuild = 1.0.120` | macro diagnostics only | MIT OR Apache-2.0 | 1.88 | admit dev-only |
+| `syn = 3.0.3` | transitive dev alternative | MIT OR Apache-2.0 | 1.71 | reject direct/normal |
 
 Authoring pins `proc-macro2` and uses pinned `quote` only for spanned
 `compile_error!`; it does not create a second program emitter. Macros has no
-`syn`. Exact `trybuild` enters dev-dependencies only after Cargo records and the
-plan accepts its added locked closure, features, build scripts, licenses, and
-declared Rust version.
+`syn`. Exact `trybuild` is dev-only after Cargo records and this plan accepted
+its locked closure, features, build scripts, licenses, and declared Rust version.
 
 `unicode-ident = 1.0.24` is `(MIT OR Apache-2.0) AND Unicode-3.0` and Rust 1.71.
 All locked transitives, duplicates, features, scripts, and licenses are gates.
 
-`syn` remains an alternative only if later grammar embeds Rust expressions;
-its Rust AST would duplicate this narrow parser today.
+`syn` enters only through trybuild's dev closure. It remains rejected as a
+direct parser unless later grammar embeds Rust expressions; its Rust AST would
+duplicate this narrow parser today.
 
 All admitted code is host-side and pure Rust, but dependencies may contain
 internal unsafe code. Workspace unsafe lints govern owned packages, not their
@@ -349,8 +349,8 @@ split by responsibility; no Rust or Markdown file should exceed 400 lines.
 Versioned evidence contains both fixtures, resolved/validated/manual-oracle
 observations, both source maps, normalized path/key logs, pinned `trybuild`
 stderr, a token-spelling golden checked against `OUT_DIR`, versions and hashes.
-It also records environment-qualified clean/no-op/edit build time, host peak
-RSS, and target artifact size.
+It also records environment-qualified Linux clean/no-op/edit build time, host
+peak RSS, and target artifact size.
 
 Correctness capacities and exact artifacts are gates. Build time, RSS, and size
 remain raw measurements until budgets and environments are ratified.

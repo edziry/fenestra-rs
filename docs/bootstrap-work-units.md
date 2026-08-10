@@ -3,7 +3,7 @@
 Status: active
 Scope: research, planning, implementation, and verification trail
 Research baseline: `fenestra-research` commit `176c42139776ed9f1ef879cd135bddadaf12a9da`
-Last updated: 2026-08-09
+Last updated: 2026-08-10
 
 This register makes the four required stages explicit for each work unit in the
 [initial implementation plan](initial-implementation-plan.md). A unit ends with
@@ -171,13 +171,14 @@ Exit: the native seam is measurable and replaceable, not selected permanently.
 Branch: `experiment/typed-authoring`
 Design: [typed dual authoring plan](design/typed-dual-authoring.md)
 Reference: [typed authoring format-1 fixture](design/typed-authoring-reference.md)
+Verification: [typed dual authoring verification](verification/WU-0010-typed-authoring.md)
 
 - Research: evaluate grammar, proc-macro, build integration, source maps,
   diagnostics, typed style semantics, runtime contracts, and toolchain costs.
 - Planning: evolve one shared schema and define equivalent `.fen`, `ui!`, and
   style fixtures with diagnostic, span, build, memory, and behavior criteria.
 - Implementation: lower both construction frontends and typed styles into their
-  distinct linked programs without a production parser or general DOM-like IR.
+  distinct linked programs without a target parser or general DOM-like IR.
 - Verification: compare schemas, programs, diagnostics, source spans, direct
   slots, keyed fragments, observable runtime state, and bounded workflow costs.
 

@@ -1,9 +1,9 @@
 # Typed authoring format-1 reference
 
-Status: active
+Status: implemented; verification complete
 Work unit: WU-0010
 Design: [typed dual authoring plan](typed-dual-authoring.md)
-Last updated: 2026-08-09
+Last updated: 2026-08-10
 
 ## Purpose
 
