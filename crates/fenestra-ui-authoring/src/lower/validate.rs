@@ -12,6 +12,9 @@ use crate::resolved::logical_span;
 
 use super::failure;
 
+#[cfg(test)]
+mod tests;
+
 const REGISTERED_TEMPLATE_DEPTH: usize = 3;
 const REGISTERED_INITIAL_INSTANCES: usize = 5;
 
