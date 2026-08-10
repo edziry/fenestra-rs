@@ -110,3 +110,8 @@ jobs:
           }
           git diff --check
           Assert-NativeSuccess "git diff --check" $LASTEXITCODE
+          $status = @(git status --porcelain)
+          Assert-NativeSuccess "git status --porcelain" $LASTEXITCODE
+          if ($status.Count -ne 0) {
+            throw "Windows verification left the checkout dirty"
+          }
