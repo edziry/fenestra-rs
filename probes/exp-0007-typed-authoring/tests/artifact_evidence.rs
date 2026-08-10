@@ -78,7 +78,7 @@ const FILES: [FileEvidenceV1; 11] = [
     ),
 ];
 
-const STATIC_ROWS: [&str; 22] = [
+const STATIC_ROWS: [&str; 23] = [
     "fenestra-authoring-evidence|1",
     "work-unit|WU-0010|experiment=EXP-0007|experiment-status=open",
     "package|version=0.1.0|edition=2024|publish=false",
@@ -88,6 +88,7 @@ const STATIC_ROWS: [&str; 22] = [
     "map-limits|artifact-bytes=4096|line-bytes=128|records=36|priority=records,line-bytes,artifact-bytes",
     "semantic-limits|artifact-bytes=8192|line-bytes=512|records=64|priority=records,line-bytes,artifact-bytes",
     "runtime-artifact-limits|artifact-bytes=32768|line-bytes=512|records=512|priority=records,line-bytes,artifact-bytes",
+    "evidence-limits|artifact-bytes=8192|line-bytes=512|records=64",
     "observer-limits|transactions=16|operations-per-transaction=8|operations=128|live-memberships=5|path-depth=3|nodes=8|fragments=2|properties=40|actions=64|trace-bytes=20480",
     "semantic-counts|records=34|components=1|properties=5|templates=4|regions=1|child-slots=3|initial-properties=12|initial-keys=2|style-assignments=2",
     "runtime-counts|lanes=3|generations=6|receipts=6|mutations=5|manifests=2|nodes=33|properties=165|children=18|fragments=6|members=15|computed=33|geometry=33|semantics=6|hits=21|scene=33",
@@ -111,6 +112,9 @@ fn committed_evidence_summary_matches_every_versioned_input_and_artifact() {
     assert!(!EVIDENCE.contains('\r'));
     assert!(EVIDENCE.ends_with('\n'));
     assert!(!EVIDENCE.ends_with("\n\n"));
+    assert!(EVIDENCE.len() <= 8_192);
+    assert!(max_line_bytes(EVIDENCE.as_bytes()) <= 512);
+    assert!(line_count(EVIDENCE.as_bytes()) <= 64);
 
     let lines = EVIDENCE.lines().collect::<Vec<_>>();
     let unique = lines.iter().copied().collect::<BTreeSet<_>>();
