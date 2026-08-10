@@ -1,7 +1,17 @@
-use fenestra_ui_runtime::prototype::RuntimeGeneration;
+use fenestra_ui_runtime::prototype::{RuntimeGeneration, SchedulerState};
 use fenestra_ui_testkit::prototype::HeadlessPointerTargetV1;
 
-use super::super::surface::NativeSurfaceTupleV1;
+use super::super::surface::{NativeSurfaceObservationV1, NativeSurfaceTupleV1};
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum NativeInputSourceV1 {
+    Native,
+    Scripted,
+}
+
+impl NativeInputSourceV1 {
+    pub(crate) const ALL: [Self; 2] = [Self::Native, Self::Scripted];
+}
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum NativeTraceStageV1 {
@@ -181,6 +191,18 @@ impl NativeTracePendingV1 {
     pub(crate) const fn is_bounded(self) -> bool {
         self.surface <= 1 && self.pointer <= 1 && self.presenter <= 1
     }
+
+    pub(crate) const fn surface(self) -> usize {
+        self.surface
+    }
+
+    pub(crate) const fn pointer(self) -> usize {
+        self.pointer
+    }
+
+    pub(crate) const fn presenter(self) -> usize {
+        self.presenter
+    }
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -193,6 +215,14 @@ impl NativeTraceSubmissionV1 {
     pub(crate) const fn new(epoch: u64, token: u64) -> Self {
         Self { epoch, token }
     }
+
+    pub(crate) const fn epoch(self) -> u64 {
+        self.epoch
+    }
+
+    pub(crate) const fn token(self) -> u64 {
+        self.token
+    }
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -200,14 +230,19 @@ pub(crate) struct NativeTraceStepV1 {
     pub(crate) stage: NativeTraceStageV1,
     pub(crate) observation: NativeObservationV1,
     pub(crate) outcome: NativeOutcomeV1,
+    pub(crate) input_source: Option<NativeInputSourceV1>,
+    pub(crate) scheduler_state: Option<SchedulerState>,
+    pub(crate) current_generation: Option<RuntimeGeneration>,
     pub(crate) scheduler_turn: Option<u64>,
     pub(crate) captured_generation: Option<RuntimeGeneration>,
     pub(crate) published_generation: Option<RuntimeGeneration>,
     pub(crate) surface: Option<NativeSurfaceTupleV1>,
+    pub(crate) surface_observation: Option<NativeSurfaceObservationV1>,
     pub(crate) target: Option<HeadlessPointerTargetV1>,
     pub(crate) frame: Option<u64>,
     pub(crate) submission: Option<NativeTraceSubmissionV1>,
     pub(crate) control: Option<u64>,
+    pub(crate) staging_digest: Option<u64>,
     pub(crate) redraw_armed: bool,
     pub(crate) pending: NativeTracePendingV1,
     pub(crate) deferred: NativeTraceLaneStatsV1,
@@ -226,14 +261,19 @@ impl NativeTraceStepV1 {
             stage,
             observation,
             outcome,
+            input_source: None,
+            scheduler_state: None,
+            current_generation: None,
             scheduler_turn: None,
             captured_generation: None,
             published_generation: None,
             surface: None,
+            surface_observation: None,
             target: None,
             frame: None,
             submission: None,
             control: None,
+            staging_digest: None,
             redraw_armed: false,
             pending: NativeTracePendingV1::new(0, 0, 0),
             deferred: NativeTraceLaneStatsV1::new(0, 0),

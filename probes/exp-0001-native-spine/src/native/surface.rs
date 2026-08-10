@@ -31,6 +31,50 @@ pub(super) enum NativeSurfaceChangeV1 {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(super) struct NativeSurfaceObservationV1 {
+    physical: NativePhysicalExtentV1,
+    scale: NativeScaleFactorV1,
+    logical: HeadlessSurface,
+}
+
+impl NativeSurfaceObservationV1 {
+    pub(super) fn try_new(
+        physical: NativePhysicalExtentV1,
+        raw_scale: f64,
+    ) -> Result<Self, NativeContractErrorKindV1> {
+        let scale = NativeScaleFactorV1::try_from_f64(raw_scale)?;
+        if physical.width() > MAX_PHYSICAL_AXIS {
+            return Err(NativeContractErrorKindV1::LimitExceeded(
+                super::types::NativeLimitKindV1::Width,
+            ));
+        }
+        if physical.height() > MAX_PHYSICAL_AXIS {
+            return Err(NativeContractErrorKindV1::LimitExceeded(
+                super::types::NativeLimitKindV1::Height,
+            ));
+        }
+        let logical = scale.logical_surface(physical)?;
+        Ok(Self {
+            physical,
+            scale,
+            logical,
+        })
+    }
+
+    pub(super) const fn physical(self) -> NativePhysicalExtentV1 {
+        self.physical
+    }
+
+    pub(super) const fn scale(self) -> NativeScaleFactorV1 {
+        self.scale
+    }
+
+    pub(super) const fn logical_surface(self) -> HeadlessSurface {
+        self.logical
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(super) struct NativeSurfaceTupleV1 {
     generation: NativeSurfaceGenerationV1,
     physical: NativePhysicalExtentV1,
@@ -60,6 +104,7 @@ impl NativeSurfaceTupleV1 {
     }
 }
 
+#[derive(Clone, Copy)]
 pub(super) struct NativeSurfaceStateV1 {
     accepted: Option<NativeSurfaceTupleV1>,
     pending: Option<NativeSurfaceTupleV1>,
@@ -78,18 +123,9 @@ impl NativeSurfaceStateV1 {
         physical: NativePhysicalExtentV1,
         scale: f64,
     ) -> Result<NativeSurfaceChangeV1, NativeContractErrorKindV1> {
-        let scale = NativeScaleFactorV1::try_from_f64(scale)?;
-        if physical.width() > MAX_PHYSICAL_AXIS {
-            return Err(NativeContractErrorKindV1::LimitExceeded(
-                super::types::NativeLimitKindV1::Width,
-            ));
-        }
-        if physical.height() > MAX_PHYSICAL_AXIS {
-            return Err(NativeContractErrorKindV1::LimitExceeded(
-                super::types::NativeLimitKindV1::Height,
-            ));
-        }
-        let logical = scale.logical_surface(physical)?;
+        let observation = NativeSurfaceObservationV1::try_new(physical, scale)?;
+        let scale = observation.scale;
+        let logical = observation.logical;
         if self
             .accepted
             .is_some_and(|accepted| accepted.scale != scale)
@@ -141,6 +177,10 @@ impl NativeSurfaceStateV1 {
 
     pub(super) const fn pending_count(&self) -> usize {
         if self.pending.is_some() { 1 } else { 0 }
+    }
+
+    pub(super) fn discard_pending(&mut self) {
+        self.pending = None;
     }
 
     pub(super) fn promote_pending(

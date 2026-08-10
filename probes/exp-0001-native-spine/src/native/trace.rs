@@ -7,8 +7,9 @@ use fenestra_ui_runtime::prototype::SchedulerTick;
 
 pub(super) use event::NativeTraceEventV1;
 pub(super) use types::{
-    NativeFailureCauseV1, NativeObservationV1, NativeOutcomeV1, NativeTraceLaneStatsV1,
-    NativeTracePendingV1, NativeTraceStageV1, NativeTraceStepV1, NativeTraceSubmissionV1,
+    NativeFailureCauseV1, NativeInputSourceV1, NativeObservationV1, NativeOutcomeV1,
+    NativeTraceLaneStatsV1, NativeTracePendingV1, NativeTraceStageV1, NativeTraceStepV1,
+    NativeTraceSubmissionV1,
 };
 
 use event::validate_step_v1;
@@ -102,6 +103,50 @@ impl NativeTraceV1 {
         &self.events
     }
 
+    pub(super) fn reserve_batch(
+        &mut self,
+        tick: SchedulerTick,
+        event_count: usize,
+        scheduler_event_count: u64,
+    ) -> Result<(), NativeTraceErrorKindV1> {
+        if self.last_tick.is_some_and(|last| tick < last) {
+            return Err(NativeTraceErrorKindV1::TickRegression);
+        }
+        let next_events = self.events.len().checked_add(event_count).ok_or(
+            NativeTraceErrorKindV1::LimitExceeded(NativeTraceLimitKindV1::Events),
+        )?;
+        if next_events > self.capacity.max_events {
+            return Err(NativeTraceErrorKindV1::LimitExceeded(
+                NativeTraceLimitKindV1::Events,
+            ));
+        }
+        let batch_bytes = event_count
+            .checked_mul(NativeTraceEventV1::ACCOUNTED_BYTES)
+            .ok_or(NativeTraceErrorKindV1::LimitExceeded(
+                NativeTraceLimitKindV1::AccountedBytes,
+            ))?;
+        let next_bytes = self.accounted_bytes.checked_add(batch_bytes).ok_or(
+            NativeTraceErrorKindV1::LimitExceeded(NativeTraceLimitKindV1::AccountedBytes),
+        )?;
+        if next_bytes > self.capacity.max_accounted_bytes {
+            return Err(NativeTraceErrorKindV1::LimitExceeded(
+                NativeTraceLimitKindV1::AccountedBytes,
+            ));
+        }
+        let reserved_events = event_count;
+        let event_count =
+            u64::try_from(event_count).map_err(|_| NativeTraceErrorKindV1::InvalidApplicability)?;
+        self.next_sequence
+            .checked_add(event_count)
+            .ok_or(NativeTraceErrorKindV1::InvalidApplicability)?;
+        self.next_scheduler_turn
+            .checked_add(scheduler_event_count)
+            .ok_or(NativeTraceErrorKindV1::InvalidApplicability)?;
+        self.events
+            .try_reserve(reserved_events)
+            .map_err(|_| NativeTraceErrorKindV1::Storage)
+    }
+
     pub(super) fn record(
         &mut self,
         tick: SchedulerTick,
@@ -171,6 +216,12 @@ impl NativeTraceV1 {
         tick: SchedulerTick,
         step: NativeTraceStepV1,
     ) -> Result<(), NativeTraceErrorKindV1> {
+        let scheduler_state = step
+            .scheduler_state
+            .ok_or(NativeTraceErrorKindV1::InvalidApplicability)?;
+        let current_generation = step
+            .current_generation
+            .ok_or(NativeTraceErrorKindV1::InvalidApplicability)?;
         let next_sequence = self
             .next_sequence
             .checked_add(1)
@@ -188,8 +239,13 @@ impl NativeTraceV1 {
             .ok_or(NativeTraceErrorKindV1::LimitExceeded(
                 NativeTraceLimitKindV1::AccountedBytes,
             ))?;
-        self.events
-            .push(NativeTraceEventV1::new(self.next_sequence, tick, step));
+        self.events.push(NativeTraceEventV1::new(
+            self.next_sequence,
+            tick,
+            scheduler_state,
+            current_generation,
+            step,
+        ));
         self.accounted_bytes = next_bytes;
         self.last_tick = Some(tick);
         self.next_sequence = next_sequence;

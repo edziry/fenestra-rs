@@ -37,6 +37,10 @@ impl NativePhysicalPointV1 {
     pub(super) const fn new(x: f64, y: f64) -> Self {
         Self { x, y }
     }
+
+    pub(super) const fn is_finite(self) -> bool {
+        self.x.is_finite() && self.y.is_finite()
+    }
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

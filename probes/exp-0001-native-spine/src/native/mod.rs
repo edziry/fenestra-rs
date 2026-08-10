@@ -1,4 +1,7 @@
+mod artifact;
+mod driver;
 mod raster;
+mod shell;
 mod surface;
 mod trace;
 mod types;
