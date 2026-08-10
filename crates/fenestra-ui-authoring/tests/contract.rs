@@ -2,8 +2,8 @@ use std::error::Error;
 
 use fenestra_ui_authoring::prototype::{
     AnchorKindV1, AuthoringDiagnosticKindV1, AuthoringFrontendV1, AuthoringLimitKindV1,
-    AuthoringLimitsV1, DiagnosticLocationV1, FenSourceV1, PhysicalOriginV1,
-    SUPPORTED_AUTHORING_FORMAT, compile_fen_v1,
+    AuthoringLimitsV1, DiagnosticLocationV1, FenSourceV1, SUPPORTED_AUTHORING_FORMAT,
+    compile_fen_v1,
 };
 use fenestra_ui_ir::prototype::{IrValidationErrorKind, SourceId};
 
@@ -92,13 +92,13 @@ fn fen_preflight_is_bounded_physical_and_privacy_safe() {
         bytes_first.kind(),
         AuthoringDiagnosticKindV1::LimitExceeded(AuthoringLimitKindV1::FenSourceBytes)
     );
-    assert_fen_range(&bytes_first, 0, 1);
+    assert_fen_range(&bytes_first, 7, 0, 1);
 
     let utf8 = compile_fen_v1(source, limits_with_source_bytes(1))
         .expect_err("invalid UTF-8 must fail before semantic anchors exist");
     assert_eq!(utf8.frontend(), AuthoringFrontendV1::Fen);
     assert_eq!(utf8.kind(), AuthoringDiagnosticKindV1::InvalidUtf8);
-    assert_fen_range(&utf8, 0, 1);
+    assert_fen_range(&utf8, 7, 0, 1);
 
     let empty = compile_fen_v1(
         FenSourceV1::new(SourceId::new(7), b""),
@@ -106,7 +106,7 @@ fn fen_preflight_is_bounded_physical_and_privacy_safe() {
     )
     .expect_err("empty format-1 input must be an EOF diagnostic");
     assert_eq!(empty.kind(), AuthoringDiagnosticKindV1::UnexpectedEof);
-    assert_fen_range(&empty, 0, 0);
+    assert_fen_range(&empty, 7, 0, 0);
 
     let _: &dyn Error = &utf8;
     let rendered = format!("{utf8:?} {utf8}");
@@ -140,15 +140,16 @@ fn limits_with_source_bytes(fen_source_bytes: usize) -> AuthoringLimitsV1 {
 
 fn assert_fen_range(
     diagnostic: &fenestra_ui_authoring::prototype::AuthoringDiagnosticV1,
+    source: u32,
     start: u32,
     end: u32,
 ) {
     match diagnostic.location() {
-        DiagnosticLocationV1::Physical(PhysicalOriginV1::FenBytes {
-            start: actual_start,
-            end: actual_end,
-        }) => assert_eq!((*actual_start, *actual_end), (start, end)),
-        DiagnosticLocationV1::Physical(_) | DiagnosticLocationV1::Anchored { .. } => {
+        DiagnosticLocationV1::Physical(origin) => {
+            assert_eq!(origin.source_id(), Some(SourceId::new(source)));
+            assert_eq!(origin.fen_byte_range(), Some((start, end)));
+        }
+        DiagnosticLocationV1::Anchored { .. } => {
             panic!("pre-anchor .fen failure must use physical byte coordinates")
         }
     }
