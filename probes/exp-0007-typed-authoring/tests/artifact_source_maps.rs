@@ -1,5 +1,6 @@
 #[path = "support/artifacts/mod.rs"]
 mod artifacts;
+#[allow(dead_code, unused_imports)]
 #[path = "support/layout_board/mod.rs"]
 mod support;
 
@@ -142,4 +143,7 @@ fn assert_artifact_bytes(value: &str) {
     assert!(!value.contains('\r'));
     assert!(value.ends_with('\n'));
     assert!(!value.ends_with("\n\n"));
+    for forbidden in ["/home/", "C:\\", "OUT_DIR", "PhysicalOrigin", "SourceMapV1"] {
+        assert!(!value.contains(forbidden));
+    }
 }

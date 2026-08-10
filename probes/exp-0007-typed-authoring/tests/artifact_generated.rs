@@ -1,3 +1,4 @@
+#[allow(dead_code)]
 #[path = "support/layout_board/mod.rs"]
 mod support;
 
@@ -72,7 +73,13 @@ fn assert_canonical_bytes(bytes: &[u8]) {
     assert!(bytes.len() <= 32_768);
 
     let text = str::from_utf8(bytes).expect("ASCII generated Rust should be UTF-8");
-    for forbidden in ["/home/", "C:\\", "fenestra_ui_authoring", "SourceMap"] {
+    for forbidden in [
+        "/home/",
+        "C:\\",
+        "OUT_DIR",
+        "fenestra_ui_authoring",
+        "SourceMap",
+    ] {
         assert!(
             !text.contains(forbidden),
             "generated Rust leaked {forbidden}"
