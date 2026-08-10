@@ -1,0 +1,14 @@
+[package]
+name = "fenestra-ui-exp-0007-typed-authoring"
+description = "Disposable EXP-0007 typed authoring probe for Fenestra"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+repository.workspace = true
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+fenestra-ui-authoring.workspace = true
+fenestra-ui-ir.workspace = true

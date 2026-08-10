@@ -7,6 +7,7 @@ members = [
     "crates/fenestra-ui-testkit",
     "probes/exp-0001-native-spine",
     "probes/exp-0001-spine",
+    "probes/exp-0007-typed-authoring",
 ]
 resolver = "3"
 

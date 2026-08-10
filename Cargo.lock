@@ -296,6 +296,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "fenestra-ui-exp-0007-typed-authoring"
+version = "0.1.0"
+dependencies = [
+ "fenestra-ui-authoring",
+ "fenestra-ui-ir",
+]
+
+[[package]]
 name = "fenestra-ui-ir"
 version = "0.1.0"
 
