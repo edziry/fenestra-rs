@@ -1,20 +1,17 @@
 use super::super::{NormalizedManifestEntry, NormalizedMutation, NormalizedReceipt};
+use super::RuntimeArtifactEncodeErrorV1;
 use super::path::{fragment_path, node_path};
 use super::value::{invalidation, property_value, surface};
-use super::{RuntimeArtifactEncodeErrorV1, invalid_log};
 
 use super::encode::ArtifactWriterV1;
 
 pub(super) fn encode_receipt(
     writer: &mut ArtifactWriterV1,
-    generation: usize,
     receipt: &NormalizedReceipt,
 ) -> Result<(), RuntimeArtifactEncodeErrorV1> {
-    if receipt.generation() != generation as u64 {
-        return Err(invalid_log());
-    }
     writer.push(&format!(
-        "receipt|begin|generation={generation}|mutations={}|invalidates={}",
+        "receipt|begin|generation={}|mutations={}|invalidates={}",
+        receipt.generation(),
         receipt.mutations().len(),
         invalidation(receipt.invalidation())
     ))?;

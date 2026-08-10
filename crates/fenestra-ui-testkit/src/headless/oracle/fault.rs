@@ -1,4 +1,5 @@
 use crate::error::{HarnessError, HarnessErrorKind};
+use fenestra_ui_runtime::prototype::HeadlessSurface;
 
 use super::types::{
     HeadlessProjectionFaultV1, NormalizedHeadlessProjectionV1, ProjectionRect, rect,
@@ -36,6 +37,16 @@ pub fn inject_headless_projection_fault_v1(
             record.color[0] ^= 1;
         }
     }
+    Ok(faulted)
+}
+
+/// Perturbs only the logical surface of a normalized testkit projection.
+pub fn inject_headless_surface_fault_v1(
+    projection: &NormalizedHeadlessProjectionV1,
+) -> Result<NormalizedHeadlessProjectionV1, HarnessError> {
+    let mut faulted = projection.clone();
+    let surface = faulted.surface;
+    faulted.surface = HeadlessSurface::new(perturb(surface.width()), surface.height());
     Ok(faulted)
 }
 

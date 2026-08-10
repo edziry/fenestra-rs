@@ -1,4 +1,4 @@
-use fenestra_ui_testkit::prototype::{HeadlessProjectionFaultV1, NormalizedHeadlessProjectionV1};
+use fenestra_ui_testkit::prototype::HeadlessProjectionFaultV1;
 
 use super::LaneLog;
 
@@ -62,26 +62,32 @@ impl RuntimeArtifactEncodeErrorV1 {
 pub enum RuntimeArtifactFaultV1 {
     ReceiptGeneration,
     ReceiptInvalidation,
+    MutationKind,
     MutationPath,
     MutationProperty,
-    MutationValue,
+    MutationOldValue,
+    MutationNewValue,
     MutationKey,
     MutationRoot,
     MutationIndices,
     CreatedManifest,
     RetiredManifest,
+    StateNodePath,
     StateNodeParent,
     StateNodeTemplate,
     StateNodeComponent,
     StateNodeOrder,
+    StatePropertyOrder,
     StatePropertyId,
     StatePropertyValue,
+    StateChildOrder,
     StateChildKind,
     StateChildTarget,
+    StateFragmentPath,
     StateFragmentDescriptor,
+    StateMemberOrder,
     StateMemberKey,
     StateMemberPath,
-    StateMemberOrder,
     Surface,
     Projection(HeadlessProjectionFaultV1),
 }
@@ -106,7 +112,6 @@ impl RuntimeArtifactSliceV1 {
 #[derive(Clone)]
 pub struct RuntimeArtifactModelV1 {
     generations: Vec<RuntimeGenerationArtifactV1>,
-    projection_sources: Vec<NormalizedHeadlessProjectionV1>,
     final_keys: Vec<u64>,
 }
 
@@ -168,10 +173,10 @@ pub fn encode_runtime_artifact_model_v1(
 }
 
 pub fn inject_runtime_artifact_fault_v1(
-    model: &RuntimeArtifactModelV1,
+    log: &LaneLog,
     fault: RuntimeArtifactFaultV1,
-) -> Result<RuntimeArtifactModelV1, RuntimeArtifactEncodeErrorV1> {
-    fault::inject(model, fault)
+) -> Result<LaneLog, RuntimeArtifactEncodeErrorV1> {
+    fault::inject(log, fault)
 }
 
 fn invalid_log() -> RuntimeArtifactEncodeErrorV1 {

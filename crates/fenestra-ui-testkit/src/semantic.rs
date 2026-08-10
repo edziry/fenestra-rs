@@ -4,6 +4,10 @@ use fenestra_ui_ir::prototype::{
     ComponentTypeId, PropertyId, PropertyValue, StructuralRegionId, TemplateNodeId,
 };
 
+mod fault;
+
+pub use fault::{NormalizedStateFaultV1, inject_normalized_state_fault_v1};
+
 /// One authored step from a semantic node to a direct child.
 ///
 /// Paths contain authored slots and keys only. They never retain runtime node

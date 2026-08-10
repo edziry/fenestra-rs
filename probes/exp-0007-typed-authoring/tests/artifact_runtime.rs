@@ -242,15 +242,15 @@ fn every_runtime_field_fault_is_detected_and_atomic_to_one_slice() {
             RuntimeArtifactSliceV1::State,
         ),
         (
+            RuntimeArtifactFaultV1::StateMemberOrder,
+            RuntimeArtifactSliceV1::State,
+        ),
+        (
             RuntimeArtifactFaultV1::StateMemberKey,
             RuntimeArtifactSliceV1::State,
         ),
         (
             RuntimeArtifactFaultV1::StateMemberPath,
-            RuntimeArtifactSliceV1::State,
-        ),
-        (
-            RuntimeArtifactFaultV1::StateMemberOrder,
             RuntimeArtifactSliceV1::State,
         ),
         (
@@ -281,8 +281,9 @@ fn every_runtime_field_fault_is_detected_and_atomic_to_one_slice() {
     for (fault, changed_slice) in faults {
         let faulted_lane = inject_runtime_artifact_fault_v1(&lane, fault)
             .expect("the registered runtime fault should apply");
-        let faulted = runtime_artifact_model_v1(&faulted_lane)
-            .expect("the faulted typed log should normalize");
+        let faulted = runtime_artifact_model_v1(&faulted_lane).unwrap_or_else(|error| {
+            panic!("the faulted {fault:?} log should normalize: {error:?}")
+        });
         let observed =
             encode_runtime_artifact_model_v1(&faulted, REGISTERED_RUNTIME_ARTIFACT_LIMITS_V1)
                 .expect("the faulted model should encode");

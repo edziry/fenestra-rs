@@ -1,248 +1,277 @@
-use fenestra_ui_testkit::prototype::inject_headless_projection_fault_v1;
-
-use super::{
-    RuntimeArtifactEncodeErrorV1, RuntimeArtifactFaultV1, RuntimeArtifactModelV1, invalid_log,
+use fenestra_ui_ir::prototype::{
+    InputPolicy, InvalidationClass, InvalidationSet, PropertyId, PropertyValue,
+};
+use fenestra_ui_runtime::prototype::HeadlessSurface;
+use fenestra_ui_testkit::prototype::{
+    FragmentPathV1, NodePathV1, NormalizedStateFaultV1, inject_headless_projection_fault_v1,
+    inject_headless_surface_fault_v1, inject_normalized_state_fault_v1,
 };
 
+use super::super::{NormalizedManifestEntry, NormalizedMutation, NormalizedReceipt};
+use super::{LaneLog, RuntimeArtifactEncodeErrorV1, RuntimeArtifactFaultV1, invalid_log};
+
 pub(super) fn inject(
-    model: &RuntimeArtifactModelV1,
+    log: &LaneLog,
     fault: RuntimeArtifactFaultV1,
-) -> Result<RuntimeArtifactModelV1, RuntimeArtifactEncodeErrorV1> {
-    let mut faulted = model.clone();
+) -> Result<LaneLog, RuntimeArtifactEncodeErrorV1> {
+    let mut receipts = log.receipts().to_vec();
+    let mut states = log.states().to_vec();
+    let mut projections = log.projections().to_vec();
     match fault {
-        RuntimeArtifactFaultV1::ReceiptGeneration => replace_receipt(
-            &mut faulted,
-            1,
-            "receipt|begin|",
-            "|generation=1|",
-            "|generation=9|",
-        )?,
-        RuntimeArtifactFaultV1::ReceiptInvalidation => replace_receipt(
-            &mut faulted,
-            1,
-            "receipt|begin|",
-            "|invalidates=paint",
-            "|invalidates=layout",
-        )?,
-        RuntimeArtifactFaultV1::MutationPath => replace_receipt(
-            &mut faulted,
-            1,
-            "mutation|i=0|kind=property|",
-            "|node=root/s:0/s:0|",
-            "|node=root/s:0/s:9|",
-        )?,
-        RuntimeArtifactFaultV1::MutationProperty => replace_receipt(
-            &mut faulted,
-            1,
-            "mutation|i=0|kind=property|",
-            "|property=2|",
-            "|property=9|",
-        )?,
-        RuntimeArtifactFaultV1::MutationValue => replace_receipt(
-            &mut faulted,
-            1,
-            "mutation|i=0|kind=property|",
-            "|new=rgba8:20,30,40,255",
-            "|new=rgba8:21,30,40,255",
-        )?,
-        RuntimeArtifactFaultV1::MutationKey => replace_receipt(
-            &mut faulted,
-            2,
-            "mutation|i=0|kind=insert|",
-            "|key=30|",
-            "|key=31|",
-        )?,
-        RuntimeArtifactFaultV1::MutationRoot => replace_receipt(
-            &mut faulted,
-            2,
-            "mutation|i=0|kind=insert|",
-            "|root=root/s:0/m:1:30|",
-            "|root=root/s:0/m:1:31|",
-        )?,
-        RuntimeArtifactFaultV1::MutationIndices => replace_receipt(
-            &mut faulted,
-            3,
-            "mutation|i=0|kind=move|",
-            "|old=1|final=2",
-            "|old=2|final=1",
-        )?,
-        RuntimeArtifactFaultV1::CreatedManifest => replace_receipt(
-            &mut faulted,
-            2,
-            "manifest|mutation=0|kind=created|",
-            "node=root/s:0/m:1:30",
-            "node=root/s:0/m:1:31",
-        )?,
-        RuntimeArtifactFaultV1::RetiredManifest => replace_receipt(
-            &mut faulted,
-            5,
-            "manifest|mutation=0|kind=retired|",
-            "node=root/s:0/m:1:20",
-            "node=root/s:0/m:1:21",
-        )?,
-        RuntimeArtifactFaultV1::StateNodeParent => replace_state(
-            &mut faulted,
-            "node|i=1|path=root/s:0|",
-            "|parent=root|",
-            "|parent=root/s:9|",
-        )?,
-        RuntimeArtifactFaultV1::StateNodeTemplate => replace_state(
-            &mut faulted,
-            "node|i=1|path=root/s:0|",
-            "|template=1|",
-            "|template=9|",
-        )?,
-        RuntimeArtifactFaultV1::StateNodeComponent => replace_state(
-            &mut faulted,
-            "node|i=1|path=root/s:0|",
-            "|component=0",
-            "|component=9",
-        )?,
-        RuntimeArtifactFaultV1::StateNodeOrder => swap_state(
-            &mut faulted,
-            "node|i=0|path=root|",
-            "node|i=1|path=root/s:0|",
-        )?,
-        RuntimeArtifactFaultV1::StatePropertyId => {
-            replace_state(&mut faulted, "property|node=root|i=0|", "|id=0|", "|id=9|")?
+        RuntimeArtifactFaultV1::ReceiptGeneration => {
+            let receipt = receipt(&receipts, 1)?;
+            receipts[1] = NormalizedReceipt::new(
+                perturb_u64(receipt.generation()),
+                receipt.mutations().to_vec(),
+                receipt.invalidation(),
+            );
         }
-        RuntimeArtifactFaultV1::StatePropertyValue => replace_state(
-            &mut faulted,
-            "property|node=root|i=0|",
-            "|value=scalar-i32:100",
-            "|value=scalar-i32:101",
-        )?,
-        RuntimeArtifactFaultV1::StateChildKind => replace_state(
-            &mut faulted,
-            "child|node=root/s:0|i=1|",
-            "|kind=region|",
-            "|kind=static|",
-        )?,
-        RuntimeArtifactFaultV1::StateChildTarget => replace_state(
-            &mut faulted,
-            "child|node=root|i=0|",
-            "|target=root/s:0",
-            "|target=root/s:9",
-        )?,
-        RuntimeArtifactFaultV1::StateFragmentDescriptor => replace_state(
-            &mut faulted,
-            "fragment|i=0|path=root/s:0/r:1|",
-            "|descriptor=0",
-            "|descriptor=9",
-        )?,
-        RuntimeArtifactFaultV1::StateMemberKey => replace_state(
-            &mut faulted,
-            "member|fragment=root/s:0/r:1|i=0|",
-            "|key=10|",
-            "|key=11|",
-        )?,
-        RuntimeArtifactFaultV1::StateMemberPath => replace_state(
-            &mut faulted,
-            "member|fragment=root/s:0/r:1|i=0|",
-            "|node=root/s:0/m:1:10",
-            "|node=root/s:0/m:1:11",
-        )?,
-        RuntimeArtifactFaultV1::StateMemberOrder => swap_state(
-            &mut faulted,
-            "member|fragment=root/s:0/r:1|i=0|",
-            "member|fragment=root/s:0/r:1|i=1|",
-        )?,
+        RuntimeArtifactFaultV1::ReceiptInvalidation => {
+            let receipt = receipt(&receipts, 1)?;
+            receipts[1] = NormalizedReceipt::new(
+                receipt.generation(),
+                receipt.mutations().to_vec(),
+                InvalidationSet::from_class(InvalidationClass::Layout),
+            );
+        }
+        RuntimeArtifactFaultV1::MutationKind => mutate_receipt(&mut receipts, 1, |mutation| {
+            *mutation = NormalizedMutation::HeadlessSurfaceChanged {
+                old_surface: HeadlessSurface::new(120, 90),
+                new_surface: HeadlessSurface::new(121, 90),
+            };
+            Ok(())
+        })?,
+        RuntimeArtifactFaultV1::MutationPath => mutate_receipt(&mut receipts, 1, |mutation| {
+            let NormalizedMutation::PropertyChanged { node, .. } = mutation else {
+                return Err(invalid_log());
+            };
+            *node = perturb_node_path(node);
+            Ok(())
+        })?,
+        RuntimeArtifactFaultV1::MutationProperty => mutate_receipt(&mut receipts, 1, |mutation| {
+            let NormalizedMutation::PropertyChanged { property, .. } = mutation else {
+                return Err(invalid_log());
+            };
+            *property = PropertyId::new(perturb_u32(property.get()));
+            Ok(())
+        })?,
+        RuntimeArtifactFaultV1::MutationOldValue => mutate_receipt(&mut receipts, 1, |mutation| {
+            let NormalizedMutation::PropertyChanged { old_value, .. } = mutation else {
+                return Err(invalid_log());
+            };
+            *old_value = perturb_value(old_value);
+            Ok(())
+        })?,
+        RuntimeArtifactFaultV1::MutationNewValue => mutate_receipt(&mut receipts, 1, |mutation| {
+            let NormalizedMutation::PropertyChanged { new_value, .. } = mutation else {
+                return Err(invalid_log());
+            };
+            *new_value = perturb_value(new_value);
+            Ok(())
+        })?,
+        RuntimeArtifactFaultV1::MutationKey => mutate_receipt(&mut receipts, 2, |mutation| {
+            let NormalizedMutation::KeyInserted { key, .. } = mutation else {
+                return Err(invalid_log());
+            };
+            *key = perturb_u64(*key);
+            Ok(())
+        })?,
+        RuntimeArtifactFaultV1::MutationRoot => mutate_receipt(&mut receipts, 2, |mutation| {
+            let NormalizedMutation::KeyInserted { root, .. } = mutation else {
+                return Err(invalid_log());
+            };
+            *root = perturb_node_path(root);
+            Ok(())
+        })?,
+        RuntimeArtifactFaultV1::MutationIndices => mutate_receipt(&mut receipts, 3, |mutation| {
+            let NormalizedMutation::KeyMoved {
+                old_index,
+                final_index,
+                ..
+            } = mutation
+            else {
+                return Err(invalid_log());
+            };
+            if old_index == final_index {
+                *final_index = final_index.checked_add(1).ok_or_else(invalid_log)?;
+            } else {
+                std::mem::swap(old_index, final_index);
+            }
+            Ok(())
+        })?,
+        RuntimeArtifactFaultV1::CreatedManifest => mutate_receipt(&mut receipts, 2, |mutation| {
+            let NormalizedMutation::KeyInserted { created, .. } = mutation else {
+                return Err(invalid_log());
+            };
+            perturb_manifest(created.first_mut().ok_or_else(invalid_log)?)
+        })?,
+        RuntimeArtifactFaultV1::RetiredManifest => mutate_receipt(&mut receipts, 5, |mutation| {
+            let NormalizedMutation::KeyRemoved { retired, .. } = mutation else {
+                return Err(invalid_log());
+            };
+            perturb_manifest(retired.first_mut().ok_or_else(invalid_log)?)
+        })?,
+        RuntimeArtifactFaultV1::StateNodePath => {
+            fault_state(&mut states, NormalizedStateFaultV1::NodePath)?
+        }
+        RuntimeArtifactFaultV1::StateNodeParent => {
+            fault_state(&mut states, NormalizedStateFaultV1::NodeParent)?
+        }
+        RuntimeArtifactFaultV1::StateNodeTemplate => {
+            fault_state(&mut states, NormalizedStateFaultV1::NodeTemplate)?
+        }
+        RuntimeArtifactFaultV1::StateNodeComponent => {
+            fault_state(&mut states, NormalizedStateFaultV1::NodeComponent)?
+        }
+        RuntimeArtifactFaultV1::StateNodeOrder => {
+            fault_state(&mut states, NormalizedStateFaultV1::NodeOrder)?
+        }
+        RuntimeArtifactFaultV1::StatePropertyOrder => {
+            fault_state(&mut states, NormalizedStateFaultV1::PropertyOrder)?
+        }
+        RuntimeArtifactFaultV1::StatePropertyId => {
+            fault_state(&mut states, NormalizedStateFaultV1::PropertyId)?
+        }
+        RuntimeArtifactFaultV1::StatePropertyValue => {
+            fault_state(&mut states, NormalizedStateFaultV1::PropertyValue)?
+        }
+        RuntimeArtifactFaultV1::StateChildOrder => {
+            fault_state(&mut states, NormalizedStateFaultV1::ChildOrder)?
+        }
+        RuntimeArtifactFaultV1::StateChildKind => {
+            fault_state(&mut states, NormalizedStateFaultV1::ChildKind)?
+        }
+        RuntimeArtifactFaultV1::StateChildTarget => {
+            fault_state(&mut states, NormalizedStateFaultV1::ChildTarget)?
+        }
+        RuntimeArtifactFaultV1::StateFragmentPath => {
+            fault_state(&mut states, NormalizedStateFaultV1::FragmentPath)?
+        }
+        RuntimeArtifactFaultV1::StateFragmentDescriptor => {
+            fault_state(&mut states, NormalizedStateFaultV1::FragmentDescriptor)?
+        }
+        RuntimeArtifactFaultV1::StateMemberOrder => {
+            fault_state(&mut states, NormalizedStateFaultV1::MemberOrder)?
+        }
+        RuntimeArtifactFaultV1::StateMemberKey => {
+            fault_state(&mut states, NormalizedStateFaultV1::MemberKey)?
+        }
+        RuntimeArtifactFaultV1::StateMemberPath => {
+            fault_state(&mut states, NormalizedStateFaultV1::MemberPath)?
+        }
         RuntimeArtifactFaultV1::Surface => {
-            replace_projection(&mut faulted, "surface|", "width=120", "width=121")?
+            let projection = projections.first().ok_or_else(invalid_log)?;
+            projections[0] =
+                inject_headless_surface_fault_v1(projection).map_err(|_| invalid_log())?;
         }
         RuntimeArtifactFaultV1::Projection(projection_fault) => {
-            let source = faulted.projection_sources.first().ok_or_else(invalid_log)?;
-            let projection = inject_headless_projection_fault_v1(source, projection_fault)
+            let projection = projections.first().ok_or_else(invalid_log)?;
+            projections[0] = inject_headless_projection_fault_v1(projection, projection_fault)
                 .map_err(|_| invalid_log())?;
-            let lines = super::encode::collect_projection(&projection)?;
-            faulted
-                .generations
-                .first_mut()
-                .ok_or_else(invalid_log)?
-                .projection = lines;
-            faulted.projection_sources[0] = projection;
         }
     }
-    Ok(faulted)
+    Ok(LaneLog::from_parts(
+        receipts,
+        states,
+        projections,
+        log.final_keys().to_vec(),
+    ))
 }
 
-fn replace_receipt(
-    model: &mut RuntimeArtifactModelV1,
-    generation: usize,
-    prefix: &str,
-    needle: &str,
-    replacement: &str,
-) -> Result<(), RuntimeArtifactEncodeErrorV1> {
-    let lines = &mut model
-        .generations
-        .get_mut(generation)
-        .ok_or_else(invalid_log)?
-        .receipt;
-    replace_one(lines, prefix, needle, replacement)
+fn receipt(
+    receipts: &[NormalizedReceipt],
+    index: usize,
+) -> Result<&NormalizedReceipt, RuntimeArtifactEncodeErrorV1> {
+    receipts.get(index).ok_or_else(invalid_log)
 }
 
-fn replace_state(
-    model: &mut RuntimeArtifactModelV1,
-    prefix: &str,
-    needle: &str,
-    replacement: &str,
+fn mutate_receipt(
+    receipts: &mut [NormalizedReceipt],
+    index: usize,
+    mutate: impl FnOnce(&mut NormalizedMutation) -> Result<(), RuntimeArtifactEncodeErrorV1>,
 ) -> Result<(), RuntimeArtifactEncodeErrorV1> {
-    let lines = &mut model.generations.first_mut().ok_or_else(invalid_log)?.state;
-    replace_one(lines, prefix, needle, replacement)
-}
-
-fn replace_projection(
-    model: &mut RuntimeArtifactModelV1,
-    prefix: &str,
-    needle: &str,
-    replacement: &str,
-) -> Result<(), RuntimeArtifactEncodeErrorV1> {
-    let lines = &mut model
-        .generations
-        .first_mut()
-        .ok_or_else(invalid_log)?
-        .projection;
-    replace_one(lines, prefix, needle, replacement)
-}
-
-fn swap_state(
-    model: &mut RuntimeArtifactModelV1,
-    first: &str,
-    second: &str,
-) -> Result<(), RuntimeArtifactEncodeErrorV1> {
-    let lines = &mut model.generations.first_mut().ok_or_else(invalid_log)?.state;
-    let first = unique_index(lines, first, "")?;
-    let second = unique_index(lines, second, "")?;
-    lines.swap(first, second);
+    let source = receipt(receipts, index)?;
+    let generation = source.generation();
+    let invalidation = source.invalidation();
+    let mut mutations = source.mutations().to_vec();
+    mutate(mutations.first_mut().ok_or_else(invalid_log)?)?;
+    receipts[index] = NormalizedReceipt::new(generation, mutations, invalidation);
     Ok(())
 }
 
-fn replace_one(
-    lines: &mut [String],
-    prefix: &str,
-    needle: &str,
-    replacement: &str,
+fn fault_state(
+    states: &mut [fenestra_ui_testkit::prototype::NormalizedStateV1],
+    fault: NormalizedStateFaultV1,
 ) -> Result<(), RuntimeArtifactEncodeErrorV1> {
-    let index = unique_index(lines, prefix, needle)?;
-    if lines[index].matches(needle).count() != 1 {
-        return Err(invalid_log());
-    }
-    lines[index] = lines[index].replacen(needle, replacement, 1);
+    let state = states.first().ok_or_else(invalid_log)?;
+    states[0] = inject_normalized_state_fault_v1(state, fault).map_err(|_| invalid_log())?;
     Ok(())
 }
 
-fn unique_index(
-    lines: &[String],
-    prefix: &str,
-    needle: &str,
-) -> Result<usize, RuntimeArtifactEncodeErrorV1> {
-    let mut matches = lines
-        .iter()
-        .enumerate()
-        .filter(|(_, line)| line.starts_with(prefix) && line.contains(needle));
-    let (index, _) = matches.next().ok_or_else(invalid_log)?;
-    if matches.next().is_some() {
-        return Err(invalid_log());
+fn perturb_manifest(
+    entry: &mut NormalizedManifestEntry,
+) -> Result<(), RuntimeArtifactEncodeErrorV1> {
+    match entry {
+        NormalizedManifestEntry::Node(path) => *path = perturb_node_path(path),
+        NormalizedManifestEntry::Fragment(path) => *path = perturb_fragment_path(path),
     }
-    Ok(index)
+    Ok(())
+}
+
+fn perturb_node_path(path: &NodePathV1) -> NodePathV1 {
+    path.clone().static_child(u16::MAX)
+}
+
+fn perturb_fragment_path(path: &FragmentPathV1) -> FragmentPathV1 {
+    FragmentPathV1::new(path.owner().clone(), perturb_u16(path.region_slot()))
+}
+
+fn perturb_value(value: &PropertyValue) -> PropertyValue {
+    match value {
+        PropertyValue::Bool(value) => PropertyValue::Bool(!value),
+        PropertyValue::ScalarI32(value) => PropertyValue::ScalarI32(perturb_i32(*value)),
+        PropertyValue::Rgba8(value) => {
+            let mut value = *value;
+            value[0] ^= 1;
+            PropertyValue::Rgba8(value)
+        }
+        PropertyValue::InputPolicy(InputPolicy::Accept) => {
+            PropertyValue::InputPolicy(InputPolicy::Ignore)
+        }
+        PropertyValue::InputPolicy(InputPolicy::Ignore) => {
+            PropertyValue::InputPolicy(InputPolicy::Accept)
+        }
+    }
+}
+
+const fn perturb_u16(value: u16) -> u16 {
+    if value == u16::MAX {
+        value - 1
+    } else {
+        value + 1
+    }
+}
+
+const fn perturb_u32(value: u32) -> u32 {
+    if value == u32::MAX {
+        value - 1
+    } else {
+        value + 1
+    }
+}
+
+const fn perturb_u64(value: u64) -> u64 {
+    if value == u64::MAX {
+        value - 1
+    } else {
+        value + 1
+    }
+}
+
+const fn perturb_i32(value: i32) -> i32 {
+    if value == i32::MAX {
+        value - 1
+    } else {
+        value + 1
+    }
 }

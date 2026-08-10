@@ -22,7 +22,7 @@ pub(super) fn model(log: &LaneLog) -> Result<RuntimeArtifactModelV1, RuntimeArti
     let mut generations = Vec::with_capacity(GENERATIONS);
     for generation in 0..GENERATIONS {
         let mut receipt = ArtifactWriterV1::new();
-        encode_receipt(&mut receipt, generation, &log.receipts()[generation])?;
+        encode_receipt(&mut receipt, &log.receipts()[generation])?;
         let mut state = ArtifactWriterV1::new();
         encode_state(&mut state, &log.states()[generation])?;
         let projection = collect_projection(&log.projections()[generation])?;
@@ -34,7 +34,6 @@ pub(super) fn model(log: &LaneLog) -> Result<RuntimeArtifactModelV1, RuntimeArti
     }
     Ok(RuntimeArtifactModelV1 {
         generations,
-        projection_sources: log.projections().to_vec(),
         final_keys: log.final_keys().to_vec(),
     })
 }
@@ -70,7 +69,7 @@ pub(super) fn collect_projection(
 fn artifact_lines(
     model: &RuntimeArtifactModelV1,
 ) -> Result<Vec<String>, RuntimeArtifactEncodeErrorV1> {
-    if model.generations.len() != GENERATIONS || model.projection_sources.len() != GENERATIONS {
+    if model.generations.len() != GENERATIONS {
         return Err(invalid_log());
     }
     let mut lines = Vec::new();
