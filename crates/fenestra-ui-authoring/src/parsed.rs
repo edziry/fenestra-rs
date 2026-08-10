@@ -16,8 +16,8 @@ pub(crate) struct ParsedDocumentV1 {
 
 #[derive(Clone, Eq, PartialEq)]
 pub(crate) struct ParsedSchemaV1 {
-    pub(crate) namespace: u64,
-    pub(crate) revision: u32,
+    pub(crate) namespace: ParsedLiteralV1<u64>,
+    pub(crate) revision: ParsedLiteralV1<u32>,
     pub(crate) components: Vec<ParsedComponentV1>,
     pub(crate) anchor: u32,
 }
@@ -25,7 +25,7 @@ pub(crate) struct ParsedSchemaV1 {
 #[derive(Clone, Eq, PartialEq)]
 pub(crate) struct ParsedComponentV1 {
     pub(crate) name: Box<str>,
-    pub(crate) id: u32,
+    pub(crate) id: ParsedLiteralV1<u32>,
     pub(crate) properties: Vec<ParsedPropertyV1>,
     pub(crate) anchor: u32,
 }
@@ -33,9 +33,9 @@ pub(crate) struct ParsedComponentV1 {
 #[derive(Clone, Eq, PartialEq)]
 pub(crate) struct ParsedPropertyV1 {
     pub(crate) name: Box<str>,
-    pub(crate) id: u32,
+    pub(crate) id: ParsedLiteralV1<u32>,
     pub(crate) value_type: ValueType,
-    pub(crate) default: SpannedV1<PropertyValue>,
+    pub(crate) default: ParsedLiteralV1<PropertyValue>,
     pub(crate) invalidation: InvalidationSet,
     pub(crate) anchor: u32,
 }
@@ -50,17 +50,22 @@ pub(crate) struct ParsedConstructionV1 {
 #[derive(Clone, Eq, PartialEq)]
 pub(crate) struct ParsedTemplateV1 {
     pub(crate) name: Box<str>,
-    pub(crate) id: u32,
+    pub(crate) id: ParsedLiteralV1<u32>,
     pub(crate) component: SpannedV1<Box<str>>,
-    pub(crate) initial_properties: Vec<ParsedInitialPropertyV1>,
-    pub(crate) children: Vec<ParsedChildV1>,
+    pub(crate) items: Vec<ParsedTemplateItemV1>,
     pub(crate) anchor: u32,
+}
+
+#[derive(Clone, Eq, PartialEq)]
+pub(crate) enum ParsedTemplateItemV1 {
+    Initial(ParsedInitialPropertyV1),
+    Child(ParsedChildV1),
 }
 
 #[derive(Clone, Eq, PartialEq)]
 pub(crate) struct ParsedInitialPropertyV1 {
     pub(crate) property: Box<str>,
-    pub(crate) value: SpannedV1<PropertyValue>,
+    pub(crate) value: ParsedLiteralV1<PropertyValue>,
     pub(crate) anchor: u32,
 }
 
@@ -73,7 +78,7 @@ pub(crate) enum ParsedChildV1 {
 #[derive(Clone, Eq, PartialEq)]
 pub(crate) struct ParsedRegionV1 {
     pub(crate) name: Box<str>,
-    pub(crate) id: u32,
+    pub(crate) id: ParsedLiteralV1<u32>,
     pub(crate) owner: SpannedV1<Box<str>>,
     pub(crate) repeat_body: SpannedV1<Box<str>>,
     pub(crate) initial_keys: Vec<ParsedInitialKeyV1>,
@@ -83,7 +88,7 @@ pub(crate) struct ParsedRegionV1 {
 
 #[derive(Clone, Eq, PartialEq)]
 pub(crate) struct ParsedInitialKeyV1 {
-    pub(crate) value: u64,
+    pub(crate) value: ParsedLiteralV1<u64>,
     pub(crate) anchor: u32,
 }
 
@@ -97,7 +102,7 @@ pub(crate) struct ParsedStyleV1 {
 pub(crate) struct ParsedStyleAssignmentV1 {
     pub(crate) target: SpannedV1<Box<str>>,
     pub(crate) property: Box<str>,
-    pub(crate) value: SpannedV1<PropertyValue>,
+    pub(crate) value: ParsedLiteralV1<PropertyValue>,
     pub(crate) anchor: u32,
 }
 
@@ -111,5 +116,11 @@ pub(crate) struct ParsedAnchorV1 {
 #[derive(Clone, Eq, PartialEq)]
 pub(crate) struct SpannedV1<T> {
     pub(crate) value: T,
+    pub(crate) physical: PhysicalOriginV1,
+}
+
+#[derive(Clone, Eq, PartialEq)]
+pub(crate) struct ParsedLiteralV1<T> {
+    pub(crate) value: Result<T, PhysicalOriginV1>,
     pub(crate) physical: PhysicalOriginV1,
 }

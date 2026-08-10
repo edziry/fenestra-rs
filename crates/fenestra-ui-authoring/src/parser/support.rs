@@ -96,10 +96,6 @@ impl ParserV1 {
         }
     }
 
-    pub(super) const fn spanned<T>(&self, value: T, physical: PhysicalOriginV1) -> SpannedV1<T> {
-        SpannedV1 { value, physical }
-    }
-
     fn push_anchor_parts(
         &mut self,
         kind: AnchorKindV1,

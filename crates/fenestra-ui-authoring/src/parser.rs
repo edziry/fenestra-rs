@@ -54,7 +54,14 @@ impl ParserV1 {
     fn parse_document(mut self) -> Result<ParsedDocumentV1, AuthoringDiagnosticV1> {
         let format_keyword = self.expect_keyword("format")?;
         let document_anchor = self.push_anchor(AnchorKindV1::Document, &format_keyword)?;
-        let format = self.parse_u32(document_anchor)?;
+        let format = self.parse_u32()?;
+        let format = format.value.map_err(|physical| {
+            self.anchored_failure_at(
+                AuthoringDiagnosticKindV1::InvalidLiteral,
+                document_anchor,
+                physical,
+            )
+        })?;
         if format != SUPPORTED_AUTHORING_FORMAT.get() {
             return Err(self.anchored_failure(
                 AuthoringDiagnosticKindV1::UnsupportedAuthoringFormat,
@@ -83,9 +90,9 @@ impl ParserV1 {
         let schema_keyword = self.expect_keyword("schema")?;
         let anchor = self.push_anchor(AnchorKindV1::Schema, &schema_keyword)?;
         self.expect_keyword("namespace")?;
-        let namespace = self.parse_u64(anchor)?;
+        let namespace = self.parse_u64()?;
         self.expect_keyword("revision")?;
-        let revision = self.parse_u32(anchor)?;
+        let revision = self.parse_u32()?;
         self.expect_punctuation(PunctuationV1::OpenBrace)?;
 
         if !self.matches_keyword("component") {
@@ -110,7 +117,7 @@ impl ParserV1 {
         let name = self.parse_name()?;
         let anchor = self.push_spelled_anchor(AnchorKindV1::Component, &name)?;
         self.expect_punctuation(PunctuationV1::Equals)?;
-        let id = self.parse_u32(anchor)?;
+        let id = self.parse_u32()?;
         self.expect_punctuation(PunctuationV1::OpenBrace)?;
 
         if !self.matches_keyword("property") {
@@ -135,11 +142,11 @@ impl ParserV1 {
         let name = self.parse_name()?;
         let anchor = self.push_spelled_anchor(AnchorKindV1::Property, &name)?;
         self.expect_punctuation(PunctuationV1::Equals)?;
-        let id = self.parse_u32(anchor)?;
+        let id = self.parse_u32()?;
         self.expect_punctuation(PunctuationV1::Colon)?;
         let value_type = self.parse_value_type()?;
         self.expect_punctuation(PunctuationV1::Equals)?;
-        let default = self.parse_value(anchor)?;
+        let default = self.parse_value()?;
         self.expect_keyword("invalidates")?;
         let invalidation = self.parse_invalidation_set()?;
         self.expect_punctuation(PunctuationV1::Semicolon)?;

@@ -1,7 +1,7 @@
 use crate::diagnostic::AuthoringDiagnosticV1;
 use crate::parsed::{
     ParsedChildV1, ParsedConstructionV1, ParsedInitialKeyV1, ParsedInitialPropertyV1,
-    ParsedRegionV1, ParsedStyleAssignmentV1, ParsedStyleV1, ParsedTemplateV1,
+    ParsedRegionV1, ParsedStyleAssignmentV1, ParsedStyleV1, ParsedTemplateItemV1, ParsedTemplateV1,
 };
 use crate::token::PunctuationV1;
 use crate::vocabulary::AnchorKindV1;
@@ -45,18 +45,19 @@ impl ParserV1 {
         let name = self.parse_name()?;
         let anchor = self.push_spelled_anchor(AnchorKindV1::Template, &name)?;
         self.expect_punctuation(PunctuationV1::Equals)?;
-        let id = self.parse_u32(anchor)?;
+        let id = self.parse_u32()?;
         self.expect_punctuation(PunctuationV1::Colon)?;
         let component = self.parse_name()?;
         self.expect_punctuation(PunctuationV1::OpenBrace)?;
 
-        let mut initial_properties = Vec::new();
-        let mut children = Vec::new();
+        let mut items = Vec::new();
         while self.matches_keyword("set") || self.matches_keyword("child") {
             if self.matches_keyword("set") {
-                initial_properties.push(self.parse_initial_property()?);
+                items.push(ParsedTemplateItemV1::Initial(
+                    self.parse_initial_property()?,
+                ));
             } else {
-                children.push(self.parse_child()?);
+                items.push(ParsedTemplateItemV1::Child(self.parse_child()?));
             }
         }
         self.expect_punctuation(PunctuationV1::CloseBrace)?;
@@ -64,8 +65,7 @@ impl ParserV1 {
             name: name.text,
             id,
             component: self.spanned_name(component),
-            initial_properties,
-            children,
+            items,
             anchor,
         })
     }
@@ -76,7 +76,7 @@ impl ParserV1 {
         let property = self.parse_name()?;
         let anchor = self.push_spelled_anchor(AnchorKindV1::InitialProperty, &property)?;
         self.expect_punctuation(PunctuationV1::Equals)?;
-        let value = self.parse_value(anchor)?;
+        let value = self.parse_value()?;
         self.expect_punctuation(PunctuationV1::Semicolon)?;
         Ok(ParsedInitialPropertyV1 {
             property: property.text,
@@ -119,7 +119,7 @@ impl ParserV1 {
         let name = self.parse_name()?;
         let anchor = self.push_spelled_anchor(AnchorKindV1::Region, &name)?;
         self.expect_punctuation(PunctuationV1::Equals)?;
-        let id = self.parse_u32(anchor)?;
+        let id = self.parse_u32()?;
         self.expect_keyword("owner")?;
         let owner = self.parse_name()?;
         self.expect_keyword("repeat")?;
@@ -134,7 +134,7 @@ impl ParserV1 {
                 self.claim_spelled_record(RecordCountV1::InitialKeys, &key)?;
                 let key_anchor = self.push_spelled_anchor(AnchorKindV1::InitialKey, &key)?;
                 initial_keys.push(ParsedInitialKeyV1 {
-                    value: self.parse_u64_spelled(&key, key_anchor)?,
+                    value: self.parse_u64_spelled(&key),
                     anchor: key_anchor,
                 });
                 if !self.matches_punctuation(PunctuationV1::Comma) {
@@ -181,7 +181,7 @@ impl ParserV1 {
         let property = self.parse_name()?;
         let anchor = self.push_spelled_anchor(AnchorKindV1::StyleAssignment, &property)?;
         self.expect_punctuation(PunctuationV1::Equals)?;
-        let value = self.parse_value(anchor)?;
+        let value = self.parse_value()?;
         self.expect_punctuation(PunctuationV1::Semicolon)?;
         Ok(ParsedStyleAssignmentV1 {
             target: self.spanned_name(target),
