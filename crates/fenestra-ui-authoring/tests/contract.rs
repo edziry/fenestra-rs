@@ -2,13 +2,12 @@ use std::error::Error;
 
 use fenestra_ui_authoring::prototype::{
     AnchorKindV1, AuthoringDiagnosticKindV1, AuthoringFrontendV1, AuthoringLimitKindV1,
-    AuthoringLimitsV1, DiagnosticLocationV1, FenSourceV1, SUPPORTED_AUTHORING_FORMAT,
-    compile_fen_v1,
+    AuthoringLimitsV1, DiagnosticLocationV1, FenSourceV1, REFERENCE_AUTHORING_LIMITS_V1,
+    SUPPORTED_AUTHORING_FORMAT, compile_fen_v1,
 };
 use fenestra_ui_ir::prototype::{IrValidationErrorKind, SourceId};
 
-const REGISTERED_LIMITS: AuthoringLimitsV1 =
-    AuthoringLimitsV1::new(8_192, 1_024, 32, 8, 1, 5, 4, 1, 3, 12, 2, 2, 34, 32_768);
+const REGISTERED_LIMITS: AuthoringLimitsV1 = REFERENCE_AUTHORING_LIMITS_V1;
 
 #[test]
 fn version_limits_and_closed_vocabularies_are_exact() {
