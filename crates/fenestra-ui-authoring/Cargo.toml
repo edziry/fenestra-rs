@@ -9,5 +9,8 @@ repository.workspace = true
 [dependencies]
 fenestra-ui-ir.workspace = true
 
+[dev-dependencies]
+proc-macro2 = "=1.0.107"
+
 [lints]
 workspace = true

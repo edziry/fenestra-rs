@@ -12,3 +12,4 @@ workspace = true
 [dev-dependencies]
 fenestra-ui-authoring.workspace = true
 fenestra-ui-ir.workspace = true
+proc-macro2 = "=1.0.107"

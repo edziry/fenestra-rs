@@ -274,6 +274,7 @@ name = "fenestra-ui-authoring"
 version = "0.1.0"
 dependencies = [
  "fenestra-ui-ir",
+ "proc-macro2",
 ]
 
 [[package]]
@@ -301,6 +302,7 @@ version = "0.1.0"
 dependencies = [
  "fenestra-ui-authoring",
  "fenestra-ui-ir",
+ "proc-macro2",
 ]
 
 [[package]]
