@@ -19,6 +19,7 @@ mod lower;
 mod parsed;
 mod parser;
 mod resolved;
+mod semantic;
 mod source;
 mod token;
 mod ui;
@@ -36,6 +37,11 @@ pub mod prototype {
     pub use crate::expansion::{diagnostic_tokens_v1, expand_ui_v1};
     pub use crate::limits::{
         AuthoringLimitKindV1, AuthoringLimitsV1, REFERENCE_AUTHORING_LIMITS_V1,
+    };
+    pub use crate::semantic::{
+        REFERENCE_SEMANTIC_ARTIFACT_LIMITS_V1, SemanticArtifactErrorKindV1,
+        SemanticArtifactErrorV1, SemanticArtifactLimitKindV1, SemanticArtifactLimitsV1,
+        SemanticArtifactV1, canonical_semantics_v1,
     };
     pub use crate::source::{DiagnosticLocationV1, FenSourceV1, PhysicalOriginV1};
     pub use crate::version::{AuthoringFormatVersion, SUPPORTED_AUTHORING_FORMAT};
