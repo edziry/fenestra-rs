@@ -169,6 +169,8 @@ Exit: the native seam is measurable and replaceable, not selected permanently.
 ## WU-0010: Typed dual authoring
 
 Branch: `experiment/typed-authoring`
+Design: [typed dual authoring plan](design/typed-dual-authoring.md)
+Reference: [typed authoring format-1 fixture](design/typed-authoring-reference.md)
 
 - Research: evaluate grammar, proc-macro, build integration, source maps,
   diagnostics, typed style semantics, runtime contracts, and toolchain costs.
