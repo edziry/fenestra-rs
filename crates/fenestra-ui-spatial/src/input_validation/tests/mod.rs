@@ -1,8 +1,10 @@
 use std::error::Error;
 
 use super::{
-    make_resolve_error, map_geometry_k3_error as map_geometry_k3_error_stage,
+    execute_dependency_graph as execute_dependency_graph_stage, make_resolve_error,
+    map_geometry_k3_error as map_geometry_k3_error_stage,
     map_image_p4_error as map_image_p4_error_stage,
+    map_layout_execution_error as map_layout_execution_error_stage,
     map_layout_preflight_error as map_layout_preflight_error_stage,
     map_path_k1_error as map_path_k1_error_stage, map_path_k2_error as map_path_k2_error_stage,
     map_shape_k1_error as map_shape_k1_error_stage,
@@ -181,6 +183,22 @@ macro_rules! prepare_dependency_graph {
     }};
 }
 
+macro_rules! execute_dependency_graph {
+    ($fixture:expr, $viewport:expr, $limits:expr, $engine:expr) => {{
+        prepare_dependency_graph!($fixture, $viewport, $limits).and_then(|graph| {
+            $crate::input_validation::tests::execute_dependency_graph_stage(graph, $engine)
+        })
+    }};
+}
+
+macro_rules! map_layout_execution_error {
+    ($graph:expr, $island:expr, $kind:expr, $location:expr) => {{
+        $crate::input_validation::tests::map_layout_execution_error_stage(
+            &$graph, $island, $kind, $location,
+        )
+    }};
+}
+
 mod brush_structure_keys;
 mod brush_structure_priority;
 mod brush_structure_ranges;
@@ -224,6 +242,15 @@ mod path_structure_ranges;
 mod path_structure_success;
 mod path_structure_support;
 mod placement;
+mod placement_execution_arithmetic;
+mod placement_execution_arithmetic_priority;
+mod placement_execution_bridge;
+mod placement_execution_layout;
+mod placement_execution_output;
+mod placement_execution_priority;
+mod placement_execution_retention;
+mod placement_execution_success;
+mod placement_execution_support;
 mod prepared_brush_limits;
 mod prepared_brush_priority;
 mod prepared_brush_scalars;

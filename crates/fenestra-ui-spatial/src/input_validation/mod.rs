@@ -39,7 +39,10 @@ mod validated_shapes;
 use brush_structure::{prepare_brush_structure, validate_gradient_stop_range};
 
 #[cfg(test)]
-use dependencies::{prepare_dependency_graph, validate_dependency_fact};
+use dependencies::{
+    execute_dependency_graph, map_layout_execution_error, prepare_dependency_graph,
+    validate_dependency_fact,
+};
 
 #[cfg(test)]
 use flattened_paths::prepare_flattened_paths;
