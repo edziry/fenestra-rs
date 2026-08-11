@@ -8,6 +8,7 @@ use super::{
     prepare_layout_preflight as prepare_layout_preflight_stage,
     prepare_local_transforms as prepare_local_transforms_stage,
     prepare_path_structure as prepare_path_structure_stage,
+    prepare_prepared_brushes as prepare_prepared_brushes_stage,
     prepare_shape_structure as prepare_shape_structure_stage, prepare_topology,
     prepare_validated_paths as prepare_validated_paths_stage,
     prepare_validated_shapes as prepare_validated_shapes_stage, validate_direct_count,
@@ -102,6 +103,13 @@ macro_rules! prepare_brush_structure {
     }};
 }
 
+macro_rules! prepare_prepared_brushes {
+    ($fixture:expr, $viewport:expr, $limits:expr) => {{
+        prepare_brush_structure!($fixture, $viewport, $limits)
+            .and_then($crate::input_validation::tests::prepare_prepared_brushes_stage)
+    }};
+}
+
 mod brush_structure_keys;
 mod brush_structure_priority;
 mod brush_structure_ranges;
@@ -128,6 +136,12 @@ mod path_structure_ranges;
 mod path_structure_success;
 mod path_structure_support;
 mod placement;
+mod prepared_brush_limits;
+mod prepared_brush_priority;
+mod prepared_brush_scalars;
+mod prepared_brush_semantics;
+mod prepared_brush_success;
+mod prepared_brush_support;
 mod shape_structure_keys;
 mod shape_structure_priority;
 mod shape_structure_ranges;
