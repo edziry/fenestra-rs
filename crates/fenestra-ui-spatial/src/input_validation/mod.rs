@@ -8,7 +8,11 @@ use crate::error::SpatialErrorLocationV2;
 use crate::limits::{SpatialLimitKindV2, SpatialLimitsV2};
 use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};
 
+mod placement;
 mod topology;
+
+#[cfg(test)]
+use placement::prepare_placement_input;
 
 #[cfg(test)]
 use topology::{prepare_topology, prepare_topology_limits, validate_topology_fact};

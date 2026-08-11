@@ -1,6 +1,7 @@
 //! Root and authored-preorder validation.
 
 use super::{DirectCountProof, make_resolve_error};
+use crate::aggregate_input::SpatialInputV2;
 use crate::error::{SpatialErrorLocationV2, SpatialInputErrorKindV2};
 use crate::limits::{SpatialLimitKindV2, SpatialLimitsV2};
 use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};
@@ -15,6 +16,12 @@ pub(super) struct TopologyProof<'a> {
 
 pub(super) struct TopologyLimitsProof<'a> {
     topology: TopologyProof<'a>,
+}
+
+impl<'a> TopologyLimitsProof<'a> {
+    pub(super) fn input(&self) -> SpatialInputV2<'a> {
+        self.topology.direct_counts.input
+    }
 }
 
 #[cfg(test)]
@@ -183,7 +190,7 @@ pub(super) fn validate_topology_fact(
     Ok(())
 }
 
-fn trusted_node_ordinal(index: usize) -> u32 {
+pub(super) fn trusted_node_ordinal(index: usize) -> u32 {
     u32::try_from(index).expect("phase one validated the node row capacity")
 }
 
@@ -199,7 +206,7 @@ fn activate_parent(active_ancestors: &mut Vec<u32>, parent: u32) -> bool {
     }
 }
 
-fn node_input_error(
+pub(super) fn node_input_error(
     kind: SpatialInputErrorKindV2,
     index: u32,
     field: SpatialNodeFieldV2,
@@ -207,7 +214,7 @@ fn node_input_error(
     input_error(kind, SpatialErrorLocationV2::NodeField { index, field })
 }
 
-fn input_error(
+pub(super) fn input_error(
     kind: SpatialInputErrorKindV2,
     location: SpatialErrorLocationV2,
 ) -> SpatialResolveErrorV2 {
