@@ -23,6 +23,10 @@ impl<'a> ValidatedPathsProof<'a> {
     pub(super) fn input(&self) -> crate::aggregate_input::SpatialInputV2<'a> {
         self.structure.input()
     }
+
+    pub(super) fn limits(&self) -> crate::limits::SpatialLimitsV2 {
+        self.structure.limits()
+    }
 }
 
 pub(super) fn prepare_validated_paths(

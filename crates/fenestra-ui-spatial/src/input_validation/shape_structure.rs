@@ -10,6 +10,8 @@ use crate::content_diagnostic::{
 use crate::content_error::SpatialContentErrorKindV2;
 use crate::error::SpatialErrorLocationV2;
 use crate::geometry_field::SpatialShapeFieldV2;
+use crate::limits::SpatialLimitsV2;
+use crate::model::SpatialPointV2;
 use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};
 use crate::shape::SpatialShapeGeometryV2;
 
@@ -21,6 +23,28 @@ struct PolygonRange {
 pub(super) struct ShapeStructureProof<'a> {
     paths: ValidatedPathsProof<'a>,
     polygon_ranges: Vec<PolygonRange>,
+}
+
+impl<'a> ShapeStructureProof<'a> {
+    pub(super) fn input(&self) -> crate::aggregate_input::SpatialInputV2<'a> {
+        self.paths.input()
+    }
+
+    pub(super) fn limits(&self) -> SpatialLimitsV2 {
+        self.paths.limits()
+    }
+
+    pub(super) fn polygon_points(&self, polygon: usize, shape: u32) -> &'a [SpatialPointV2] {
+        let range = self
+            .polygon_ranges
+            .get(polygon)
+            .expect("phase seven supplied a trusted polygon ordinal");
+        assert_eq!(
+            range.shape, shape,
+            "trusted polygon ranges remain aligned with shape order"
+        );
+        &self.input().geometry().polygon_points()[range.points.clone()]
+    }
 }
 
 pub(super) fn prepare_shape_structure(

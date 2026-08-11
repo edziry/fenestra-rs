@@ -20,12 +20,12 @@ pub(crate) use bounds::{
 pub(crate) use coverage::{
     circle_fill_contains_k4, path_fill_contains_k4, polygon_fill_contains_k4, rect_fill_contains_k4,
 };
+#[cfg(test)]
+pub(crate) use error::GeometryK1StrokeKind;
 pub(crate) use error::{
     GeometryK1Error, GeometryK1ErrorKind, GeometryK1Field, GeometryK1LimitKind, GeometryK1Location,
-    GeometryK1PathGrammarKind,
+    GeometryK1PathGrammarKind, GeometryK1ShapeKind,
 };
-#[cfg(test)]
-pub(crate) use error::{GeometryK1ShapeKind, GeometryK1StrokeKind};
 #[cfg(test)]
 pub(crate) use flatten::{
     FlattenedPathK2, GeometryK2Error, GeometryK2ErrorKind, GeometryK2LimitKind, flatten_path_k2,
@@ -36,7 +36,6 @@ pub(crate) use round_stroke::{
     circle_round_stroke_contains_k5, path_round_stroke_contains_k5,
     polygon_round_stroke_contains_k5, rect_round_stroke_contains_k5,
 };
-#[cfg(test)]
 pub(crate) use shape::{
     ValidatedCircleK1, ValidatedPolygonK1, ValidatedRectK1, validate_circle_k1,
     validate_polygon_k1, validate_rect_k1,

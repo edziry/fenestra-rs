@@ -11,10 +11,12 @@ use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};
 mod islands;
 mod path_structure;
 mod placement;
+mod shape_k1_mapping;
 mod shape_structure;
 mod topology;
 mod transforms;
 mod validated_paths;
+mod validated_shapes;
 
 #[cfg(test)]
 use islands::{
@@ -31,6 +33,9 @@ use path_structure::prepare_path_structure;
 use shape_structure::{prepare_shape_structure, validate_polygon_range};
 
 #[cfg(test)]
+use shape_k1_mapping::map_shape_k1_error;
+
+#[cfg(test)]
 use topology::{prepare_topology, prepare_topology_limits, validate_topology_fact};
 
 #[cfg(test)]
@@ -38,6 +43,9 @@ use transforms::prepare_local_transforms;
 
 #[cfg(test)]
 use validated_paths::{map_path_k1_error, prepare_validated_paths};
+
+#[cfg(test)]
+use validated_shapes::prepare_validated_shapes;
 
 const U32_ROW_CAPACITY: u128 = u32::MAX as u128 + 1;
 
