@@ -1,8 +1,9 @@
 use super::{
-    GeometryK1Error, GeometryK1ErrorKind, GeometryK1Field, GeometryK1LimitKind, GeometryK1Location,
-    GeometryK1PathGrammarKind, GeometryK1ShapeKind, GeometryK1StrokeKind, GeometryK1StrokeSource,
+    FlattenedPathK2, GeometryK1Error, GeometryK1ErrorKind, GeometryK1Field, GeometryK1LimitKind,
+    GeometryK1Location, GeometryK1PathGrammarKind, GeometryK1ShapeKind, GeometryK1StrokeKind,
+    GeometryK1StrokeSource, GeometryK2Error, GeometryK2ErrorKind, GeometryK2LimitKind,
     ValidatedCircleK1, ValidatedPathK1, ValidatedPolygonK1, ValidatedRectK1, ValidatedStrokeK1,
-    validate_circle_k1, validate_path_k1, validate_polygon_k1, validate_rect_k1,
+    flatten_path_k2, validate_circle_k1, validate_path_k1, validate_polygon_k1, validate_rect_k1,
     validate_stroke_k1,
 };
 
@@ -10,6 +11,7 @@ use crate::limits::{REGISTERED_SPATIAL_LIMITS_V2, SpatialLimitKindV2};
 use crate::model::{SpatialPointV2, SpatialScalarV2};
 use crate::path::SpatialPathVerbV2;
 
+mod flatten;
 mod path;
 mod scalar_order;
 mod shape;
