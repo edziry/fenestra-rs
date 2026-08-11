@@ -3,6 +3,18 @@
 
 use crate::brush::SpatialRgba8V2;
 
+mod error;
+mod gradient;
+mod model;
+
+#[cfg(test)]
+use error::{
+    PaintP2Error, PaintP2ErrorKind, PaintP2Field, PaintP2GradientKind, PaintP2LimitKind,
+    PaintP2Location,
+};
+#[cfg(test)]
+use gradient::{prepare_gradient_p2, prepare_solid_p2};
+
 fn scale_byte(channel: u8, factor: u8) -> u8 {
     ((u16::from(channel) * u16::from(factor) + 127) / 255) as u8
 }
