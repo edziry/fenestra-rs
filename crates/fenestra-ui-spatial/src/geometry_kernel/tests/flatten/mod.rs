@@ -70,8 +70,8 @@ fn expect_k2_limit(
         error.location(),
         path_location(source_verb, GeometryK1Field::Kind)
     );
-    assert_eq!(error.observed(), Some(observed));
-    assert_eq!(error.maximum(), Some(maximum));
+    assert_eq!(error.observed(), Some(observed as u128));
+    assert_eq!(error.maximum(), Some(maximum as u128));
 }
 
 fn assert_points(flattened: &FlattenedPathK2, expected: &[SpatialPointV2]) {

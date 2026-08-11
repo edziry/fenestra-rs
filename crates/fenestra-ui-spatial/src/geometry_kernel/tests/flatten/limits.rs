@@ -201,12 +201,6 @@ fn cumulative_total_candidate_widens_past_usize_without_saturating() {
         GeometryK2ErrorKind::LimitExceeded(GeometryK2LimitKind::FlattenedSegmentsTotal)
     );
     assert_eq!(error.location(), path_location(1, GeometryK1Field::Kind));
-    assert_eq!(
-        error.observed().map(|value| value as u128),
-        Some(usize::MAX as u128 + 1)
-    );
-    assert_eq!(
-        error.maximum().map(|value| value as u128),
-        Some(usize::MAX as u128)
-    );
+    assert_eq!(error.observed(), Some(usize::MAX as u128 + 1));
+    assert_eq!(error.maximum(), Some(usize::MAX as u128));
 }

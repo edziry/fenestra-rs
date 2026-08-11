@@ -18,9 +18,9 @@ use model::FlattenedSubpathK2;
 struct SegmentEmitter {
     points: Vec<SpatialPointV2>,
     path_segments: usize,
-    total_segments: usize,
-    maximum_per_path: usize,
-    maximum_total: usize,
+    total_segments: u128,
+    maximum_per_path: u128,
+    maximum_total: u128,
 }
 
 impl SegmentEmitter {
@@ -28,9 +28,9 @@ impl SegmentEmitter {
         Self {
             points: Vec::new(),
             path_segments: 0,
-            total_segments: accepted_total,
-            maximum_per_path,
-            maximum_total,
+            total_segments: accepted_total as u128,
+            maximum_per_path: maximum_per_path as u128,
+            maximum_total: maximum_total as u128,
         }
     }
 
@@ -46,8 +46,8 @@ impl SegmentEmitter {
         path: u32,
         source_verb: u32,
     ) -> Result<(), GeometryK2Error> {
-        let observed_path = self.path_segments.saturating_add(1);
-        if self.path_segments >= self.maximum_per_path {
+        let observed_path = self.path_segments as u128 + 1;
+        if observed_path > self.maximum_per_path {
             return Err(GeometryK2Error::limit(
                 FlattenedSegmentsPerPath,
                 path,
@@ -57,8 +57,8 @@ impl SegmentEmitter {
             ));
         }
 
-        let observed_total = self.total_segments.saturating_add(1);
-        if self.total_segments >= self.maximum_total {
+        let observed_total = self.total_segments + 1;
+        if observed_total > self.maximum_total {
             return Err(GeometryK2Error::limit(
                 FlattenedSegmentsTotal,
                 path,
@@ -68,7 +68,10 @@ impl SegmentEmitter {
             ));
         }
 
-        self.path_segments = observed_path;
+        self.path_segments = self
+            .path_segments
+            .checked_add(1)
+            .expect("an accepted path segment fits its owned point table");
         self.total_segments = observed_total;
         self.points.push(endpoint);
         Ok(())
