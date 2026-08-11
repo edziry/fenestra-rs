@@ -25,4 +25,14 @@ impl<'a> ValidatedImageP4<'a> {
     pub(super) fn bytes(&self) -> &[u8] {
         self.image.bytes()
     }
+
+    #[cfg(test)]
+    pub(crate) fn facts(&self) -> (u32, u32, u32, Vec<u8>) {
+        (
+            self.image.width(),
+            self.image.height(),
+            self.image.stride(),
+            self.image.bytes().to_vec(),
+        )
+    }
 }

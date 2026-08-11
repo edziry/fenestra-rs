@@ -11,6 +11,7 @@ use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};
 mod brush_structure;
 mod islands;
 mod paint_p2_mapping;
+mod paint_p4_mapping;
 mod path_structure;
 mod placement;
 mod prepared_brushes;
@@ -18,6 +19,7 @@ mod shape_k1_mapping;
 mod shape_structure;
 mod topology;
 mod transforms;
+mod validated_images;
 mod validated_paths;
 mod validated_shapes;
 
@@ -39,6 +41,9 @@ use path_structure::prepare_path_structure;
 use prepared_brushes::prepare_prepared_brushes;
 
 #[cfg(test)]
+use paint_p4_mapping::map_image_p4_error;
+
+#[cfg(test)]
 use shape_structure::{prepare_shape_structure, validate_polygon_range};
 
 #[cfg(test)]
@@ -49,6 +54,9 @@ use topology::{prepare_topology, prepare_topology_limits, validate_topology_fact
 
 #[cfg(test)]
 use transforms::prepare_local_transforms;
+
+#[cfg(test)]
+use validated_images::prepare_validated_images;
 
 #[cfg(test)]
 use validated_paths::{map_path_k1_error, prepare_validated_paths};
