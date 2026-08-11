@@ -1,7 +1,8 @@
-// K1-K3 are staged before the private K4-K5 and resolver consumers.
+// K1-K4 are staged before the private K5 and resolver consumers.
 #![allow(dead_code)]
 
 mod bounds;
+mod coverage;
 mod error;
 mod flatten;
 mod path;
@@ -13,6 +14,10 @@ pub(crate) use bounds::{
     DerivedLocalBoundsK3, GeometryK3Error, GeometryK3ErrorKind, clip_bounds_k3,
     derive_circle_bounds_k3, derive_path_bounds_k3, derive_polygon_bounds_k3,
     derive_rect_bounds_k3, fill_bounds_k3, rect_stroke_bounds_k3, stroke_bounds_k3,
+};
+#[cfg(test)]
+pub(crate) use coverage::{
+    circle_fill_contains_k4, path_fill_contains_k4, polygon_fill_contains_k4, rect_fill_contains_k4,
 };
 #[cfg(test)]
 pub(crate) use error::{
