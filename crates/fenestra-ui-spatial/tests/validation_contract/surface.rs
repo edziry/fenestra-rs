@@ -1,0 +1,303 @@
+use std::collections::BTreeSet;
+use std::fs;
+
+use super::source::{all_source, source_dir};
+use super::surface_support::{
+    assert_const_and_must_use, assert_struct_fields_private, names, public_constants,
+    public_methods,
+};
+
+const EXPECTED_EXPORTS: [&str; 98] = [
+    "Affine2V2",
+    "REGISTERED_SPATIAL_LIMITS_V2",
+    "SpatialAabbV2",
+    "SpatialAffineComponentV2",
+    "SpatialAnchorComponentV2",
+    "SpatialAnchorTargetKindV2",
+    "SpatialAnchorTargetV2",
+    "SpatialAnchorV2",
+    "SpatialArithmeticOperationV2",
+    "SpatialAxisV2",
+    "SpatialBrushContentV2",
+    "SpatialBrushKeyV2",
+    "SpatialBrushKindV2",
+    "SpatialBrushV2",
+    "SpatialClipKeyV2",
+    "SpatialClipV2",
+    "SpatialContainerErrorKindV2",
+    "SpatialContainerV2",
+    "SpatialCoverageKindV2",
+    "SpatialCoverageV2",
+    "SpatialDependencyErrorKindV2",
+    "SpatialErrorLocationV2",
+    "SpatialExtentV2",
+    "SpatialFillRuleV2",
+    "SpatialFreePlacementV2",
+    "SpatialGeometryInputV2",
+    "SpatialGradientStopV2",
+    "SpatialHitV2",
+    "SpatialImageDestinationRectV2",
+    "SpatialImageKeyV2",
+    "SpatialImageSourceRectV2",
+    "SpatialImageV2",
+    "SpatialInputErrorKindV2",
+    "SpatialInputPolicyV2",
+    "SpatialItemInputV2",
+    "SpatialLayoutDimensionErrorKindV2",
+    "SpatialLayoutPlacementV2",
+    "SpatialLimitKindV2",
+    "SpatialLimitsV2",
+    "SpatialLocalTransformV2",
+    "SpatialNodeFieldV2",
+    "SpatialNodeKeyV2",
+    "SpatialNodeV2",
+    "SpatialOffsetV2",
+    "SpatialPaintContentV2",
+    "SpatialPaintKindV2",
+    "SpatialPaintV2",
+    "SpatialPathKeyV2",
+    "SpatialPathV2",
+    "SpatialPathVerbKindV2",
+    "SpatialPathVerbV2",
+    "SpatialPlacementKindV2",
+    "SpatialPlacementV2",
+    "SpatialPointV2",
+    "SpatialResourceInputV2",
+    "SpatialRgba8V2",
+    "SpatialScalarV2",
+    "SpatialSemanticGeometryV2",
+    "SpatialShapeGeometryV2",
+    "SpatialShapeKeyV2",
+    "SpatialShapeKindV2",
+    "SpatialShapeV2",
+    "SpatialTopologyInputV2",
+    "SpatialTransformErrorKindV2",
+    "SpatialTransformScalarFieldV2",
+    "SpatialTransformStageV2",
+    "SpatialViewportV2",
+    "round_ratio_v2",
+    "SpatialInputV2",
+    "SpatialColorChannelV2",
+    "SpatialPathFieldV2",
+    "SpatialPathVerbFieldV2",
+    "SpatialShapeFieldV2",
+    "SpatialPolygonPointFieldV2",
+    "SpatialBrushFieldV2",
+    "SpatialGradientStopFieldV2",
+    "SpatialImageFieldV2",
+    "SpatialClipFieldV2",
+    "SpatialPaintFieldV2",
+    "SpatialHitFieldV2",
+    "SpatialSemanticFieldV2",
+    "SpatialOutputTableV2",
+    "SpatialOutputFieldV2",
+    "SpatialKeyedContentTableV2",
+    "SpatialPayloadTableV2",
+    "SpatialContentReferenceV2",
+    "SpatialOrderedItemTableV2",
+    "SpatialPathGrammarErrorV2",
+    "SpatialShapeErrorV2",
+    "SpatialStrokeErrorV2",
+    "SpatialGradientErrorV2",
+    "SpatialImageErrorV2",
+    "SpatialClipErrorV2",
+    "SpatialContentErrorKindV2",
+    "SpatialLayoutErrorKindV2",
+    "SpatialOutputErrorKindV2",
+    "SpatialResolveErrorKindV2",
+    "SpatialResolveErrorV2",
+];
+
+const EXPECTED_STRUCTS: [&str; 37] = [
+    "Affine2V2",
+    "SpatialAabbV2",
+    "SpatialAnchorV2",
+    "SpatialBrushKeyV2",
+    "SpatialBrushV2",
+    "SpatialClipKeyV2",
+    "SpatialClipV2",
+    "SpatialContainerV2",
+    "SpatialFreePlacementV2",
+    "SpatialGeometryInputV2",
+    "SpatialGradientStopV2",
+    "SpatialHitV2",
+    "SpatialImageDestinationRectV2",
+    "SpatialImageKeyV2",
+    "SpatialImageSourceRectV2",
+    "SpatialImageV2",
+    "SpatialItemInputV2",
+    "SpatialLayoutPlacementV2",
+    "SpatialLimitsV2",
+    "SpatialLocalTransformV2",
+    "SpatialNodeKeyV2",
+    "SpatialNodeV2",
+    "SpatialOffsetV2",
+    "SpatialPaintV2",
+    "SpatialPathKeyV2",
+    "SpatialPathV2",
+    "SpatialPointV2",
+    "SpatialResourceInputV2",
+    "SpatialRgba8V2",
+    "SpatialScalarV2",
+    "SpatialSemanticGeometryV2",
+    "SpatialShapeKeyV2",
+    "SpatialShapeV2",
+    "SpatialTopologyInputV2",
+    "SpatialViewportV2",
+    "SpatialInputV2",
+    "SpatialResolveErrorV2",
+];
+
+const NEW_ENUMS: [&str; 28] = [
+    "SpatialColorChannelV2",
+    "SpatialPathFieldV2",
+    "SpatialPathVerbFieldV2",
+    "SpatialShapeFieldV2",
+    "SpatialPolygonPointFieldV2",
+    "SpatialBrushFieldV2",
+    "SpatialGradientStopFieldV2",
+    "SpatialImageFieldV2",
+    "SpatialClipFieldV2",
+    "SpatialPaintFieldV2",
+    "SpatialHitFieldV2",
+    "SpatialSemanticFieldV2",
+    "SpatialOutputTableV2",
+    "SpatialOutputFieldV2",
+    "SpatialKeyedContentTableV2",
+    "SpatialPayloadTableV2",
+    "SpatialContentReferenceV2",
+    "SpatialOrderedItemTableV2",
+    "SpatialPathGrammarErrorV2",
+    "SpatialShapeErrorV2",
+    "SpatialStrokeErrorV2",
+    "SpatialGradientErrorV2",
+    "SpatialImageErrorV2",
+    "SpatialClipErrorV2",
+    "SpatialContentErrorKindV2",
+    "SpatialLayoutErrorKindV2",
+    "SpatialOutputErrorKindV2",
+    "SpatialResolveErrorKindV2",
+];
+
+#[test]
+fn validation_slice_has_exact_explicit_prototype_exports() {
+    let all_source = all_source();
+    for forbidden in ["include!", "#[macro_export]"] {
+        assert!(
+            !all_source.contains(forbidden),
+            "unexpected API form {forbidden}"
+        );
+    }
+
+    let source = fs::read_to_string(source_dir().join("lib.rs")).expect("read lib.rs");
+    let marker = "pub mod prototype {";
+    assert!(source.contains("#[doc(hidden)]\npub mod prototype {"));
+    let marker_offset = source.find(marker).expect("prototype module");
+    assert!(!source[..marker_offset].lines().any(is_public_line));
+    let start = marker_offset + marker.len();
+    let end = source.rfind('}').expect("prototype end");
+    let prototype = &source[start..end];
+    for forbidden in [" as ", "::*"] {
+        assert!(
+            !prototype.contains(forbidden),
+            "unexpected API form {forbidden}"
+        );
+    }
+    assert!(
+        prototype
+            .lines()
+            .filter(|line| is_public_line(line))
+            .all(|line| line.trim_start().starts_with("pub use crate::"))
+    );
+
+    let mut observed = BTreeSet::new();
+    for item in prototype.split("pub use crate::").skip(1) {
+        let exported = if let Some(list_start) = item.find("::{") {
+            let list_end = item.find("};").expect("terminated grouped reexport");
+            &item[list_start + 3..list_end]
+        } else {
+            let item_end = item.find(';').expect("terminated singleton reexport");
+            item[..item_end]
+                .rsplit("::")
+                .next()
+                .expect("singleton name")
+        };
+        for name in exported
+            .split(',')
+            .map(str::trim)
+            .filter(|name| !name.is_empty())
+        {
+            assert!(observed.insert(name), "duplicate reexport {name}");
+        }
+    }
+    assert_eq!(observed, EXPECTED_EXPORTS.into_iter().collect());
+}
+
+#[test]
+fn all_registered_structs_are_exact_and_private() {
+    let source = all_source();
+    let observed = source
+        .lines()
+        .filter_map(|line| line.trim().strip_prefix("pub struct "))
+        .map(|declaration| {
+            declaration
+                .split(['<', '(', '{'])
+                .next()
+                .expect("struct name")
+                .trim()
+        })
+        .collect::<BTreeSet<_>>();
+    assert_eq!(observed, EXPECTED_STRUCTS.into_iter().collect());
+    for type_name in EXPECTED_STRUCTS {
+        assert_struct_fields_private(&source, type_name);
+    }
+}
+
+#[test]
+fn aggregate_input_and_stored_error_surfaces_are_exact() {
+    let source = all_source();
+    assert_struct_surface(
+        &source,
+        "SpatialInputV2",
+        &["new", "topology", "geometry", "resources", "items"],
+    );
+    assert_struct_surface(
+        &source,
+        "SpatialResolveErrorV2",
+        &["kind", "location", "observed", "maximum"],
+    );
+}
+
+#[test]
+fn new_enum_surfaces_expose_only_all_and_locations_expose_nothing() {
+    let source = all_source();
+    assert!(
+        !source
+            .lines()
+            .any(|line| line.trim_start().starts_with("pub type ")),
+        "public aliases are outside the registered surface"
+    );
+    for type_name in NEW_ENUMS {
+        let declaration = format!("pub enum {type_name}");
+        assert_eq!(
+            source.matches(&declaration).count(),
+            1,
+            "{type_name} must have one enum declaration"
+        );
+        assert!(public_methods(&source, type_name).is_empty(), "{type_name}");
+        assert_eq!(public_constants(&source, type_name), names(&["ALL"]));
+    }
+    assert!(public_methods(&source, "SpatialErrorLocationV2").is_empty());
+    assert!(public_constants(&source, "SpatialErrorLocationV2").is_empty());
+}
+
+fn assert_struct_surface(source: &str, type_name: &str, methods: &[&str]) {
+    assert_eq!(public_methods(source, type_name), names(methods));
+    assert!(public_constants(source, type_name).is_empty());
+    assert_const_and_must_use(source, type_name, methods, methods);
+}
+
+fn is_public_line(line: &str) -> bool {
+    let line = line.trim_start();
+    line.starts_with("pub ") || line.starts_with("pub(")
+}
