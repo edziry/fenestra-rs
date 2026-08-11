@@ -26,6 +26,79 @@ impl SpatialExtentV2 {
     pub const ALL: [Self; 2] = [Self::Width, Self::Height];
 }
 
+/// Closed stage vocabulary for composed affine transforms.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum SpatialTransformStageV2 {
+    /// Local affine composed about its authored origin.
+    About,
+    /// About transform composed with local placement.
+    Placed,
+    /// Placed transform composed with its spatial ancestors.
+    World,
+}
+
+impl SpatialTransformStageV2 {
+    /// Every transform stage in deterministic composition order.
+    pub const ALL: [Self; 3] = [Self::About, Self::Placed, Self::World];
+}
+
+/// Closed component vocabulary for one affine matrix.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum SpatialAffineComponentV2 {
+    /// First horizontal linear coefficient.
+    A,
+    /// First vertical linear coefficient.
+    B,
+    /// Second horizontal linear coefficient.
+    C,
+    /// Second vertical linear coefficient.
+    D,
+    /// Horizontal translation coefficient.
+    Tx,
+    /// Vertical translation coefficient.
+    Ty,
+}
+
+impl SpatialAffineComponentV2 {
+    /// Every affine component in deterministic calculation order.
+    pub const ALL: [Self; 6] = [Self::A, Self::B, Self::C, Self::D, Self::Tx, Self::Ty];
+}
+
+/// Closed raw scalar-field vocabulary for one local transform.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum SpatialTransformScalarFieldV2 {
+    /// First horizontal affine coefficient.
+    AffineA,
+    /// First vertical affine coefficient.
+    AffineB,
+    /// Second horizontal affine coefficient.
+    AffineC,
+    /// Second vertical affine coefficient.
+    AffineD,
+    /// Horizontal affine translation.
+    AffineTx,
+    /// Vertical affine translation.
+    AffineTy,
+    /// Horizontal transform origin.
+    TransformOriginX,
+    /// Vertical transform origin.
+    TransformOriginY,
+}
+
+impl SpatialTransformScalarFieldV2 {
+    /// Every transform scalar field in deterministic validation order.
+    pub const ALL: [Self; 8] = [
+        Self::AffineA,
+        Self::AffineB,
+        Self::AffineC,
+        Self::AffineD,
+        Self::AffineTx,
+        Self::AffineTy,
+        Self::TransformOriginX,
+        Self::TransformOriginY,
+    ];
+}
+
 /// Closed raw-field vocabulary for one spatial node.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum SpatialNodeFieldV2 {

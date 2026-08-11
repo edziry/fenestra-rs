@@ -1,8 +1,9 @@
 use std::collections::BTreeSet;
 use std::fs;
-use std::path::PathBuf;
 
 use crate::*;
+
+use super::source::{all_source, source_dir};
 
 const EXPECTED_EXPORTS: [&str; 36] = [
     "Affine2V2",
@@ -53,9 +54,17 @@ fn numeric_slice_reexports_exactly_the_registered_surface() {
 
     let mut observed = BTreeSet::new();
     for item in prototype.split("pub use crate::").skip(1) {
-        let list_start = item.find("::{").expect("grouped reexport") + 3;
-        let list_end = item.find("};").expect("terminated reexport");
-        for name in item[list_start..list_end].split(',').map(str::trim) {
+        let names = if let Some(list_start) = item.find("::{") {
+            let list_end = item.find("};").expect("terminated grouped reexport");
+            &item[list_start + 3..list_end]
+        } else {
+            let item_end = item.find(';').expect("terminated singleton reexport");
+            item[..item_end]
+                .rsplit("::")
+                .next()
+                .expect("singleton name")
+        };
+        for name in names.split(',').map(str::trim) {
             if !name.is_empty() {
                 assert!(observed.insert(name), "duplicate reexport {name}");
             }
@@ -323,7 +332,7 @@ fn assert_const_and_must_use(source: &str, type_name: &str, names: &[&str]) {
 fn has_must_use(source: &str, item_offset: usize) -> bool {
     for line in source[..item_offset].lines().rev() {
         let line = line.trim();
-        if line == "#[must_use]" {
+        if line == "#[must_use]" || line.starts_with("#[must_use = ") {
             return true;
         }
         if line.is_empty() || line.starts_with("///") || line.starts_with("#[") {
@@ -366,30 +375,4 @@ fn balanced_block_end(source: &str) -> usize {
 
 fn names(values: &[&str]) -> BTreeSet<String> {
     values.iter().map(|value| (*value).to_owned()).collect()
-}
-
-fn all_source() -> String {
-    let mut paths = Vec::new();
-    collect_rust_sources(&source_dir(), &mut paths);
-    paths.sort();
-    paths
-        .into_iter()
-        .map(|path| fs::read_to_string(path).expect("read spatial source"))
-        .collect::<Vec<_>>()
-        .join("\n")
-}
-
-fn collect_rust_sources(directory: &std::path::Path, paths: &mut Vec<PathBuf>) {
-    for entry in fs::read_dir(directory).expect("read spatial source directory") {
-        let path = entry.expect("source entry").path();
-        if path.is_dir() {
-            collect_rust_sources(&path, paths);
-        } else if path.extension().is_some_and(|extension| extension == "rs") {
-            paths.push(path);
-        }
-    }
-}
-
-fn source_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("src")
 }

@@ -2,9 +2,11 @@ use std::collections::BTreeSet;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-const EXPECTED_EXPORTS: [&str; 29] = [
+const EXPECTED_EXPORTS: [&str; 36] = [
     "Affine2V2",
     "REGISTERED_SPATIAL_LIMITS_V2",
+    "SpatialAabbV2",
+    "SpatialAffineComponentV2",
     "SpatialAnchorComponentV2",
     "SpatialAnchorTargetKindV2",
     "SpatialAnchorTargetV2",
@@ -31,10 +33,16 @@ const EXPECTED_EXPORTS: [&str; 29] = [
     "SpatialPointV2",
     "SpatialScalarV2",
     "SpatialTopologyInputV2",
+    "SpatialTransformErrorKindV2",
+    "SpatialTransformScalarFieldV2",
+    "SpatialTransformStageV2",
     "SpatialViewportV2",
+    "SpatialArithmeticOperationV2",
+    "round_ratio_v2",
 ];
-const EXPECTED_STRUCTS: [&str; 14] = [
+const EXPECTED_STRUCTS: [&str; 15] = [
     "Affine2V2",
+    "SpatialAabbV2",
     "SpatialAnchorV2",
     "SpatialContainerV2",
     "SpatialFreePlacementV2",
@@ -49,11 +57,15 @@ const EXPECTED_STRUCTS: [&str; 14] = [
     "SpatialTopologyInputV2",
     "SpatialViewportV2",
 ];
-const SOURCE_FILES: [&str; 6] = [
+const SOURCE_FILES: [&str; 10] = [
+    "aabb.rs",
+    "affine.rs",
     "error.rs",
     "lib.rs",
     "limits.rs",
     "model.rs",
+    "numeric.rs",
+    "numeric_error.rs",
     "topology.rs",
     "vocabulary.rs",
 ];
@@ -92,9 +104,17 @@ fn prototype_reexports_only_the_registered_first_slice() {
 
     let mut observed = BTreeSet::new();
     for item in prototype.split("pub use crate::").skip(1) {
-        let list_start = item.find("::{").expect("grouped reexport") + 3;
-        let list_end = item.find("};").expect("terminated reexport");
-        for name in item[list_start..list_end].split(',') {
+        let names = if let Some(list_start) = item.find("::{") {
+            let list_end = item.find("};").expect("terminated grouped reexport");
+            &item[list_start + 3..list_end]
+        } else {
+            let item_end = item.find(';').expect("terminated singleton reexport");
+            item[..item_end]
+                .rsplit("::")
+                .next()
+                .expect("singleton name")
+        };
+        for name in names.split(',') {
             let name = name.trim();
             if !name.is_empty() {
                 assert!(observed.insert(name), "duplicate reexport");

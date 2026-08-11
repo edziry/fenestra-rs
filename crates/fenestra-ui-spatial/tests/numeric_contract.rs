@@ -4,7 +4,7 @@ use fenestra_ui_spatial::prototype::{
     SpatialTransformScalarFieldV2, SpatialTransformStageV2, round_ratio_v2,
 };
 
-#[allow(dead_code)]
+#[allow(clippy::wrong_self_convention, dead_code)]
 trait ScalarRedFallback: Sized {
     const FRACTIONAL_BITS: u32 = 0;
     const SCALE: i64 = 0;
