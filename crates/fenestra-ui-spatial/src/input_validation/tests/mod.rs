@@ -12,12 +12,14 @@ use super::{
     prepare_prepared_brushes as prepare_prepared_brushes_stage,
     prepare_shape_structure as prepare_shape_structure_stage, prepare_topology,
     prepare_validated_clips as prepare_validated_clips_stage,
+    prepare_validated_hit_items as prepare_validated_hit_items_stage,
     prepare_validated_images as prepare_validated_images_stage,
     prepare_validated_paint_items as prepare_validated_paint_items_stage,
     prepare_validated_paths as prepare_validated_paths_stage,
     prepare_validated_shapes as prepare_validated_shapes_stage,
     validate_clip_depth as validate_clip_depth_stage, validate_direct_count,
     validate_gradient_stop_range as validate_gradient_stop_range_stage,
+    validate_hit_item_limit as validate_hit_item_limit_stage,
     validate_island_fact as validate_island_fact_stage,
     validate_paint_item_limit as validate_paint_item_limit_stage,
     validate_polygon_range as validate_polygon_range_stage,
@@ -137,6 +139,13 @@ macro_rules! prepare_validated_paint_items {
     }};
 }
 
+macro_rules! prepare_validated_hit_items {
+    ($fixture:expr, $viewport:expr, $limits:expr) => {{
+        prepare_validated_paint_items!($fixture, $viewport, $limits)
+            .and_then($crate::input_validation::tests::prepare_validated_hit_items_stage)
+    }};
+}
+
 mod brush_structure_keys;
 mod brush_structure_priority;
 mod brush_structure_ranges;
@@ -183,6 +192,12 @@ mod validated_clip_priority;
 mod validated_clip_references;
 mod validated_clip_success;
 mod validated_clip_support;
+mod validated_hit_coverage;
+mod validated_hit_limits;
+mod validated_hit_order;
+mod validated_hit_priority;
+mod validated_hit_success;
+mod validated_hit_support;
 mod validated_image_extents;
 mod validated_image_keys;
 mod validated_image_layout;
@@ -255,6 +270,14 @@ fn check_paint_item_limit(
     limits: SpatialLimitsV2,
 ) -> Result<(), SpatialResolveErrorV2> {
     validate_paint_item_limit_stage(paint, observed, limits)
+}
+
+fn check_hit_item_limit(
+    hit: u32,
+    observed: usize,
+    limits: SpatialLimitsV2,
+) -> Result<(), SpatialResolveErrorV2> {
+    validate_hit_item_limit_stage(hit, observed, limits)
 }
 
 fn limits_with_direct(maxima: [usize; DIRECT_COUNT]) -> SpatialLimitsV2 {
