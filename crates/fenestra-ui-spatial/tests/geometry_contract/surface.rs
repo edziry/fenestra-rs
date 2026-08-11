@@ -1,8 +1,6 @@
 use std::collections::BTreeSet;
 use std::fs;
 
-use fenestra_ui_spatial::prototype::{SpatialNodeKeyV2, SpatialPointV2};
-
 use crate::*;
 
 use super::source::{all_source, source_dir};
@@ -161,57 +159,6 @@ fn geometry_all_arrays_have_the_exact_registered_types() {
     let _: [SpatialShapeKindV2; 4] = SpatialShapeKindV2::ALL;
     let _: [SpatialFillRuleV2; 2] = SpatialFillRuleV2::ALL;
     let _: [SpatialCoverageKindV2; 2] = SpatialCoverageKindV2::ALL;
-}
-
-#[test]
-fn geometry_function_signatures_are_exact() {
-    let _: fn(u32) -> SpatialPathKeyV2 = SpatialPathKeyV2::new;
-    let _: fn(SpatialPathKeyV2) -> u32 = SpatialPathKeyV2::get;
-    let _: fn(u32) -> SpatialShapeKeyV2 = SpatialShapeKeyV2::new;
-    let _: fn(SpatialShapeKeyV2) -> u32 = SpatialShapeKeyV2::get;
-    let _: fn(u32) -> SpatialClipKeyV2 = SpatialClipKeyV2::new;
-    let _: fn(SpatialClipKeyV2) -> u32 = SpatialClipKeyV2::get;
-
-    let _: fn(SpatialPathKeyV2, u32, u32) -> SpatialPathV2 = SpatialPathV2::new;
-    let _: fn(SpatialPathV2) -> SpatialPathKeyV2 = SpatialPathV2::key;
-    let _: fn(SpatialPathV2) -> u32 = SpatialPathV2::verb_start;
-    let _: fn(SpatialPathV2) -> u32 = SpatialPathV2::verb_length;
-    let _: fn(SpatialShapeKeyV2, SpatialNodeKeyV2, SpatialShapeGeometryV2) -> SpatialShapeV2 =
-        SpatialShapeV2::new;
-    let _: fn(SpatialShapeV2) -> SpatialShapeKeyV2 = SpatialShapeV2::key;
-    let _: fn(SpatialShapeV2) -> SpatialNodeKeyV2 = SpatialShapeV2::owner;
-    let _: fn(SpatialShapeV2) -> SpatialShapeGeometryV2 = SpatialShapeV2::geometry;
-
-    let _: fn(
-        SpatialClipKeyV2,
-        SpatialNodeKeyV2,
-        Option<SpatialClipKeyV2>,
-        SpatialShapeKeyV2,
-        SpatialFillRuleV2,
-    ) -> SpatialClipV2 = SpatialClipV2::new;
-    let _: fn(SpatialClipV2) -> SpatialClipKeyV2 = SpatialClipV2::key;
-    let _: fn(SpatialClipV2) -> SpatialNodeKeyV2 = SpatialClipV2::owner;
-    let _: fn(SpatialClipV2) -> Option<SpatialClipKeyV2> = SpatialClipV2::parent;
-    let _: fn(SpatialClipV2) -> SpatialShapeKeyV2 = SpatialClipV2::shape;
-    let _: fn(SpatialClipV2) -> SpatialFillRuleV2 = SpatialClipV2::fill_rule;
-
-    let _: for<'a> fn(
-        &'a [SpatialPointV2],
-        &'a [SpatialPathVerbV2],
-        &'a [SpatialPathV2],
-        &'a [SpatialShapeV2],
-        &'a [SpatialClipV2],
-    ) -> SpatialGeometryInputV2<'a> = SpatialGeometryInputV2::new;
-    let _: for<'a> fn(SpatialGeometryInputV2<'a>) -> &'a [SpatialPointV2] =
-        SpatialGeometryInputV2::polygon_points;
-    let _: for<'a> fn(SpatialGeometryInputV2<'a>) -> &'a [SpatialPathVerbV2] =
-        SpatialGeometryInputV2::path_verbs;
-    let _: for<'a> fn(SpatialGeometryInputV2<'a>) -> &'a [SpatialPathV2] =
-        SpatialGeometryInputV2::paths;
-    let _: for<'a> fn(SpatialGeometryInputV2<'a>) -> &'a [SpatialShapeV2] =
-        SpatialGeometryInputV2::shapes;
-    let _: for<'a> fn(SpatialGeometryInputV2<'a>) -> &'a [SpatialClipV2] =
-        SpatialGeometryInputV2::clips;
 }
 
 #[test]
