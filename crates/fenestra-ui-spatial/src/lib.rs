@@ -19,6 +19,7 @@ mod model;
 mod numeric;
 mod numeric_error;
 mod paint;
+mod paint_kernel;
 mod path;
 mod shape;
 mod topology;
