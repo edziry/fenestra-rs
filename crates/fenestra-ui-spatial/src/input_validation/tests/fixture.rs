@@ -59,8 +59,12 @@ impl RawInputFixture {
     }
 
     pub(super) fn input(&self) -> SpatialInputV2<'_> {
+        self.input_with_viewport(SpatialViewportV2::new(-1, -1))
+    }
+
+    pub(super) fn input_with_viewport(&self, viewport: SpatialViewportV2) -> SpatialInputV2<'_> {
         SpatialInputV2::new(
-            SpatialTopologyInputV2::new(SpatialViewportV2::new(-1, -1), &self.nodes),
+            SpatialTopologyInputV2::new(viewport, &self.nodes),
             SpatialGeometryInputV2::new(
                 &self.polygon_points,
                 &self.path_verbs,

@@ -15,6 +15,7 @@ mod counts;
 mod errors;
 mod fixture;
 mod input;
+mod placement;
 mod topology;
 mod topology_limits;
 
