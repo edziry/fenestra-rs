@@ -4,8 +4,12 @@ use std::fs;
 use crate::*;
 
 use super::source::{all_source, source_dir};
+use super::surface_support::{
+    assert_const_and_must_use, has_must_use, implementation_blocks, names, public_constants,
+    public_methods,
+};
 
-const EXPECTED_EXPORTS: [&str; 50] = [
+const EXPECTED_EXPORTS: [&str; 68] = [
     "Affine2V2",
     "REGISTERED_SPATIAL_LIMITS_V2",
     "SpatialAabbV2",
@@ -16,6 +20,10 @@ const EXPECTED_EXPORTS: [&str; 50] = [
     "SpatialAnchorV2",
     "SpatialArithmeticOperationV2",
     "SpatialAxisV2",
+    "SpatialBrushContentV2",
+    "SpatialBrushKeyV2",
+    "SpatialBrushKindV2",
+    "SpatialBrushV2",
     "SpatialClipKeyV2",
     "SpatialClipV2",
     "SpatialContainerErrorKindV2",
@@ -28,7 +36,15 @@ const EXPECTED_EXPORTS: [&str; 50] = [
     "SpatialFillRuleV2",
     "SpatialFreePlacementV2",
     "SpatialGeometryInputV2",
+    "SpatialGradientStopV2",
+    "SpatialHitV2",
+    "SpatialImageDestinationRectV2",
+    "SpatialImageKeyV2",
+    "SpatialImageSourceRectV2",
+    "SpatialImageV2",
     "SpatialInputErrorKindV2",
+    "SpatialInputPolicyV2",
+    "SpatialItemInputV2",
     "SpatialLayoutDimensionErrorKindV2",
     "SpatialLayoutPlacementV2",
     "SpatialLimitKindV2",
@@ -38,6 +54,9 @@ const EXPECTED_EXPORTS: [&str; 50] = [
     "SpatialNodeKeyV2",
     "SpatialNodeV2",
     "SpatialOffsetV2",
+    "SpatialPaintContentV2",
+    "SpatialPaintKindV2",
+    "SpatialPaintV2",
     "SpatialPathKeyV2",
     "SpatialPathV2",
     "SpatialPathVerbKindV2",
@@ -45,7 +64,10 @@ const EXPECTED_EXPORTS: [&str; 50] = [
     "SpatialPlacementKindV2",
     "SpatialPlacementV2",
     "SpatialPointV2",
+    "SpatialResourceInputV2",
+    "SpatialRgba8V2",
     "SpatialScalarV2",
+    "SpatialSemanticGeometryV2",
     "SpatialShapeGeometryV2",
     "SpatialShapeKeyV2",
     "SpatialShapeKindV2",
@@ -285,108 +307,4 @@ fn assert_braced_fields_private(declaration: &str, brace: usize) {
             .any(|line| line.trim_start().starts_with("pub")),
         "SpatialAabbV2 fields must remain private"
     );
-}
-
-fn public_methods(source: &str, type_name: &str) -> BTreeSet<String> {
-    let mut methods = BTreeSet::new();
-    for implementation in implementation_blocks(source, type_name) {
-        for line in implementation.lines().map(str::trim) {
-            if line.starts_with("pub ") && line.contains("fn ") {
-                let suffix = line.split_once("fn ").expect("public method").1;
-                let name = suffix.split(['(', '<']).next().expect("method name").trim();
-                assert!(methods.insert(name.to_owned()), "duplicate method {name}");
-            }
-        }
-    }
-    methods
-}
-
-fn public_constants(source: &str, type_name: &str) -> BTreeSet<String> {
-    let mut constants = BTreeSet::new();
-    for implementation in implementation_blocks(source, type_name) {
-        for line in implementation.lines().map(str::trim) {
-            let Some(suffix) = line.strip_prefix("pub const ") else {
-                continue;
-            };
-            if suffix.starts_with("fn ") {
-                continue;
-            }
-            let name = suffix
-                .split([':', '='])
-                .next()
-                .expect("constant name")
-                .trim();
-            assert!(
-                constants.insert(name.to_owned()),
-                "duplicate constant {name}"
-            );
-        }
-    }
-    constants
-}
-
-fn assert_const_and_must_use(source: &str, type_name: &str, names: &[&str]) {
-    let implementations = implementation_blocks(source, type_name);
-    for name in names {
-        let marker = format!("pub const fn {name}");
-        let mut found = false;
-        for implementation in &implementations {
-            if let Some(offset) = implementation.find(&marker) {
-                assert!(
-                    has_must_use(implementation, offset),
-                    "{type_name}::{name} must be must_use"
-                );
-                found = true;
-            }
-        }
-        assert!(found, "missing const method {type_name}::{name}");
-    }
-}
-
-fn has_must_use(source: &str, item_offset: usize) -> bool {
-    for line in source[..item_offset].lines().rev() {
-        let line = line.trim();
-        if line == "#[must_use]" || line.starts_with("#[must_use = ") {
-            return true;
-        }
-        if line.is_empty() || line.starts_with("///") || line.starts_with("#[") {
-            continue;
-        }
-        break;
-    }
-    false
-}
-
-fn implementation_blocks<'a>(source: &'a str, type_name: &str) -> Vec<&'a str> {
-    let marker = format!("impl {type_name} {{");
-    let mut remaining = source;
-    let mut blocks = Vec::new();
-    while let Some(start) = remaining.find(&marker) {
-        let implementation = &remaining[start..];
-        let end = balanced_block_end(implementation);
-        blocks.push(&implementation[..end]);
-        remaining = &implementation[end..];
-    }
-    blocks
-}
-
-fn balanced_block_end(source: &str) -> usize {
-    let mut depth = 0_usize;
-    for (offset, character) in source.char_indices() {
-        match character {
-            '{' => depth += 1,
-            '}' => {
-                depth -= 1;
-                if depth == 0 {
-                    return offset + 1;
-                }
-            }
-            _ => {}
-        }
-    }
-    panic!("unterminated impl")
-}
-
-fn names(values: &[&str]) -> BTreeSet<String> {
-    values.iter().map(|value| (*value).to_owned()).collect()
 }

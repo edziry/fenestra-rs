@@ -128,7 +128,7 @@ trait AmbiguousIfCopy<A> {
     fn marker() {}
 }
 impl<T: ?Sized> AmbiguousIfCopy<()> for T {}
-impl<T: ?Sized + Copy> AmbiguousIfCopy<u8> for T {}
+impl<T: Copy> AmbiguousIfCopy<u8> for T {}
 
 trait AmbiguousIfDebug<A> {
     fn marker() {}
