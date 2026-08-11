@@ -242,6 +242,23 @@ fn subpath_limit_accepts_the_edge_and_names_the_crossing_move() {
 }
 
 #[test]
+fn cumulative_subpath_candidate_widens_past_usize() {
+    let verbs = [move_to(0, 0), line_to(1, 1)];
+    let error = match validate_path_k1(PATH_INDEX, &verbs, usize::MAX, usize::MAX) {
+        Ok(_) => panic!("expected widened subpath limit failure"),
+        Err(error) => error,
+    };
+
+    assert_eq!(
+        error.kind(),
+        GeometryK1ErrorKind::LimitExceeded(GeometryK1LimitKind::PathSubpathsTotal)
+    );
+    assert_eq!(error.location(), path_location(0, GeometryK1Field::Kind));
+    assert_eq!(error.observed(), Some(usize::MAX as u128 + 1));
+    assert_eq!(error.maximum(), Some(usize::MAX as u128));
+}
+
+#[test]
 fn registered_subpath_total_accepts_1024_and_rejects_1025() {
     assert_eq!(PATH_SUBPATH_MAXIMUM, 1_024);
     let one = [move_to(0, 0), line_to(1, 1)];
