@@ -13,6 +13,8 @@ mod execution;
 mod order;
 mod targets;
 
+pub(super) use execution::BasePlacementProof;
+
 #[cfg(test)]
 pub(super) use execution::{execute_dependency_graph, map_layout_execution_error};
 

@@ -63,6 +63,17 @@ impl<'a> BasePlacementProof<'a> {
     pub(in crate::input_validation) fn limits(&self) -> SpatialLimitsV2 {
         self.graph.limits()
     }
+
+    pub(in crate::input_validation) fn local_placement_origin(
+        &self,
+        index: usize,
+    ) -> SpatialPointV2 {
+        self.placements
+            .get(index)
+            .copied()
+            .expect("world composition visits every retained placement")
+            .local_origin()
+    }
 }
 
 pub(in crate::input_validation) fn execute_dependency_graph<'a, E: LayoutEngineV1 + ?Sized>(

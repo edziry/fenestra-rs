@@ -34,6 +34,7 @@ mod validated_paint_items;
 mod validated_paths;
 mod validated_semantic_items;
 mod validated_shapes;
+mod world_transforms;
 
 #[cfg(test)]
 use brush_structure::{prepare_brush_structure, validate_gradient_stop_range};
@@ -87,6 +88,9 @@ use transforms::prepare_local_transforms;
 
 #[cfg(test)]
 use validated_clips::{prepare_validated_clips, validate_clip_depth};
+
+#[cfg(test)]
+use world_transforms::prepare_world_transforms;
 
 #[cfg(test)]
 use validated_images::prepare_validated_images;
