@@ -167,12 +167,18 @@ Zero extent returns `InvalidImage(ZeroExtent)` at `Width` or `Height`.
 Edge limits use the corresponding field and dimension as `observed`.
 `ImagePixelsTotal` uses the cumulative count after including the current image
 as `observed`, is located at `Image { index, field: Pixel }`, and commits that
-count only on success. Stride and length mismatches use `Stride` and
+count only on success. P4 computes pixel products and cumulative candidates as
+`u128`; its private limit payload reports `observed` and `maximum` as `u128`.
+The caller-owned `usize` cumulative count is written only after the candidate
+is within the supplied maximum, so the successful conversion is exact.
+Stride and length mismatches use `Stride` and
 `ByteLength` with `InvalidImage(StrideMismatch)` and
 `InvalidImage(LengthMismatch)`. A premultiplication failure uses
 `InvalidImage(InvalidPremultipliedPixel)` at
 `ImagePixel { image, pixel, channel }` for the first row-major pixel and first
-of `R, G, B` greater than alpha. Alpha itself has no invalid byte state.
+of `R, G, B` greater than alpha. The zero-based `pixel` ordinal is reported as
+`u128`, independently of its byte offset. Alpha itself has no invalid byte
+state.
 
 All arithmetic widens before comparison. Successful validation borrows or
 owns the exact original bytes without reordering, color conversion, implicit
