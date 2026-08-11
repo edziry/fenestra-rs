@@ -145,10 +145,10 @@ StackOrdinal, ItemOrdinal
 ```
 
 Output validation scans every table in `SpatialOutputTableV2::ALL` for record
-count, then repeats that table order for keys, scalar fields, determinants,
-AABBs, clip chains, projection order, and references. Within a record it uses
-`SpatialOutputFieldV2::ALL`. A count mismatch uses the table-level `Output`
-location because no supplied record ordinal is trusted.
+count, then repeats that table order for keys, scalar fields, negative base
+extents, determinants, AABBs, clip chains, projection order, and references.
+Within a record it uses `SpatialOutputFieldV2::ALL`. A count mismatch uses the
+table-level `Output` location because no supplied record ordinal is trusted.
 
 ## Trusted locations
 

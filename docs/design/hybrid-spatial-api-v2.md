@@ -390,5 +390,8 @@ The remaining raw content values are fixed in
 [hybrid-spatial-content-api-v2.md](hybrid-spatial-content-api-v2.md).
 The aggregate input and closed diagnostic surface is fixed in
 [hybrid-spatial-validation-api-v2.md](hybrid-spatial-validation-api-v2.md).
-Later REDs add validation and resolved projections. Candidate types, logical
+The resolved record, immutable ownership, snapshot, and resolver surface is
+fixed in
+[hybrid-spatial-output-api-v2.md](hybrid-spatial-output-api-v2.md).
+Later REDs add exact queries and presentation. Candidate types, logical
 identities, and renderer handles never enter this module.

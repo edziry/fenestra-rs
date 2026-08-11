@@ -336,4 +336,6 @@ The GREEN adds values only. It updates every legacy exact-export guard and the
 old exhaustive location match without weakening either. It adds no output
 record, resolver signature, validation algorithm, dependency, public alias,
 glob, macro, candidate type, runtime type, or testkit type. Aggregate validation
-and resolved projection behavior require their own exclusive REDs.
+and resolved projection behavior require their own exclusive REDs. Their
+concrete output records, ownership model, snapshot, and resolver seams are fixed
+in [hybrid-spatial-output-api-v2.md](hybrid-spatial-output-api-v2.md).

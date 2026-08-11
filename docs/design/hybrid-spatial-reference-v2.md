@@ -368,8 +368,9 @@ Validation returns the first failure in these phases:
 9. graph evaluation in stable vertex order, including layout and arithmetic;
 10. world transforms in node order, closed AABBs in output-table, record, and
     edge order, then clip-chain intersections in clip order;
-11. output count, keys, scalar domains, world determinants, closed conservative
-    AABBs, clip chains, and projection table order.
+11. output count, keys, scalar domains, negative base extents, world
+    determinants, closed conservative AABBs, clip chains, projection table
+    order, and references.
 
 Artifact limits are enforced separately as records, record grammar, line
 bytes, then total bytes. A simultaneous crossing returns records before line
