@@ -5,6 +5,7 @@ use super::make_resolve_error;
 use super::topology::trusted_node_ordinal;
 use crate::aggregate_input::SpatialInputV2;
 use crate::error::SpatialErrorLocationV2;
+use crate::limits::SpatialLimitsV2;
 use crate::numeric_error::SpatialTransformErrorKindV2;
 use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};
 use crate::topology::SpatialPlacementV2;
@@ -17,6 +18,10 @@ pub(super) struct LocalTransformProof<'a> {
 impl<'a> LocalTransformProof<'a> {
     pub(super) fn input(&self) -> SpatialInputV2<'a> {
         self.preflight.input()
+    }
+
+    pub(super) fn limits(&self) -> SpatialLimitsV2 {
+        self.preflight.limits()
     }
 }
 

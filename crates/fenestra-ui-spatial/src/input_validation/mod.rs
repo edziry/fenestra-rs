@@ -13,6 +13,7 @@ mod path_structure;
 mod placement;
 mod topology;
 mod transforms;
+mod validated_paths;
 
 #[cfg(test)]
 use islands::{
@@ -30,6 +31,9 @@ use topology::{prepare_topology, prepare_topology_limits, validate_topology_fact
 
 #[cfg(test)]
 use transforms::prepare_local_transforms;
+
+#[cfg(test)]
+use validated_paths::{map_path_k1_error, prepare_validated_paths};
 
 const U32_ROW_CAPACITY: u128 = u32::MAX as u128 + 1;
 

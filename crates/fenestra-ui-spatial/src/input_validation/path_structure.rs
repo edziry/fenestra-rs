@@ -8,11 +8,32 @@ use crate::content_diagnostic::{SpatialKeyedContentTableV2, SpatialPayloadTableV
 use crate::content_error::SpatialContentErrorKindV2;
 use crate::error::SpatialErrorLocationV2;
 use crate::geometry_field::SpatialPathFieldV2;
+use crate::limits::SpatialLimitsV2;
+use crate::path::SpatialPathVerbV2;
 use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};
 
 pub(super) struct PathStructureProof<'a> {
     transforms: LocalTransformProof<'a>,
     ranges: Vec<Range<usize>>,
+}
+
+impl<'a> PathStructureProof<'a> {
+    pub(super) fn input(&self) -> crate::aggregate_input::SpatialInputV2<'a> {
+        self.transforms.input()
+    }
+
+    pub(super) fn limits(&self) -> SpatialLimitsV2 {
+        self.transforms.limits()
+    }
+
+    pub(super) fn path_verbs(&self, index: usize) -> &'a [SpatialPathVerbV2] {
+        let range = self
+            .ranges
+            .get(index)
+            .expect("phase seven supplied a trusted path ordinal")
+            .clone();
+        &self.transforms.input().geometry().path_verbs()[range]
+    }
 }
 
 pub(super) fn prepare_path_structure(
@@ -69,7 +90,7 @@ pub(super) fn prepare_path_structure(
     Ok(PathStructureProof { transforms, ranges })
 }
 
-fn trusted_path_ordinal(index: usize) -> u32 {
+pub(super) fn trusted_path_ordinal(index: usize) -> u32 {
     u32::try_from(index).expect("phase one validated the path row capacity")
 }
 

@@ -35,6 +35,10 @@ impl<'a> LayoutPreflightProof<'a> {
     pub(in crate::input_validation) fn input(&self) -> crate::aggregate_input::SpatialInputV2<'a> {
         self.placement.input()
     }
+
+    pub(in crate::input_validation) fn limits(&self) -> crate::limits::SpatialLimitsV2 {
+        self.placement.limits()
+    }
 }
 
 struct LayoutDraft {
