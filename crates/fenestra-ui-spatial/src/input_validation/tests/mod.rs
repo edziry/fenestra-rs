@@ -2,13 +2,14 @@ use std::error::Error;
 
 use super::{
     make_resolve_error, map_layout_preflight_error as map_layout_preflight_error_stage,
-    map_path_k1_error as map_path_k1_error_stage, prepare_direct_counts,
-    prepare_island_plan as prepare_island_plan_stage,
+    map_path_k1_error as map_path_k1_error_stage, map_shape_k1_error as map_shape_k1_error_stage,
+    prepare_direct_counts, prepare_island_plan as prepare_island_plan_stage,
     prepare_layout_preflight as prepare_layout_preflight_stage,
     prepare_local_transforms as prepare_local_transforms_stage,
     prepare_path_structure as prepare_path_structure_stage,
     prepare_shape_structure as prepare_shape_structure_stage, prepare_topology,
-    prepare_validated_paths as prepare_validated_paths_stage, validate_direct_count,
+    prepare_validated_paths as prepare_validated_paths_stage,
+    prepare_validated_shapes as prepare_validated_shapes_stage, validate_direct_count,
     validate_island_fact as validate_island_fact_stage,
     validate_polygon_range as validate_polygon_range_stage,
 };
@@ -85,6 +86,13 @@ macro_rules! prepare_shape_structure {
     }};
 }
 
+macro_rules! prepare_validated_shapes {
+    ($fixture:expr, $viewport:expr, $limits:expr) => {{
+        prepare_shape_structure!($fixture, $viewport, $limits)
+            .and_then($crate::input_validation::tests::prepare_validated_shapes_stage)
+    }};
+}
+
 mod counts;
 mod errors;
 mod fixture;
@@ -119,6 +127,12 @@ mod validated_path_priority;
 mod validated_path_scalars;
 mod validated_path_success;
 mod validated_path_support;
+mod validated_shape_limits;
+mod validated_shape_priority;
+mod validated_shape_scalars;
+mod validated_shape_semantics;
+mod validated_shape_success;
+mod validated_shape_support;
 
 fn check_island_fact(
     kind: SpatialLimitKindV2,
