@@ -19,6 +19,7 @@ mod shape_k1_mapping;
 mod shape_structure;
 mod topology;
 mod transforms;
+mod validated_clips;
 mod validated_images;
 mod validated_paths;
 mod validated_shapes;
@@ -54,6 +55,9 @@ use topology::{prepare_topology, prepare_topology_limits, validate_topology_fact
 
 #[cfg(test)]
 use transforms::prepare_local_transforms;
+
+#[cfg(test)]
+use validated_clips::{prepare_validated_clips, validate_clip_depth};
 
 #[cfg(test)]
 use validated_images::prepare_validated_images;
