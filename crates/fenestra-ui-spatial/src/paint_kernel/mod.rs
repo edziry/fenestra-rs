@@ -1,10 +1,13 @@
-// P1-P3 are staged before validated paint consumers.
+// P1-P4 are staged before validated paint consumers.
 #![allow(dead_code)]
 
 use crate::brush::SpatialRgba8V2;
 
 mod error;
 mod gradient;
+mod image_error;
+mod image_model;
+mod image_validation;
 mod model;
 mod sample;
 
@@ -15,6 +18,13 @@ use error::{
 };
 #[cfg(test)]
 use gradient::{prepare_gradient_p2, prepare_solid_p2};
+#[cfg(test)]
+use image_error::{
+    PaintP4Channel, PaintP4Error, PaintP4ErrorKind, PaintP4Field, PaintP4ImageKind,
+    PaintP4LimitKind, PaintP4Location,
+};
+#[cfg(test)]
+use image_validation::prepare_image_p4;
 #[cfg(test)]
 use sample::sample_gradient_p3;
 
