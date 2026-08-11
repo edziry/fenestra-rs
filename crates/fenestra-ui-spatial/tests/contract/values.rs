@@ -8,12 +8,16 @@ fn topology_values_round_trip_without_runtime_or_candidate_types() {
     let four = SpatialScalarV2::new(4);
     let five = SpatialScalarV2::new(5);
     let six = SpatialScalarV2::new(6);
+    let minimum = SpatialScalarV2::new(i64::MIN);
+    let maximum = SpatialScalarV2::new(i64::MAX);
     let point = SpatialPointV2::new(one, two);
     let offset = SpatialOffsetV2::new(three, four);
     let affine = Affine2V2::new(one, two, three, four, five, six);
     let transform = SpatialLocalTransformV2::new(affine, point);
 
     assert_eq!(one.raw(), 1);
+    assert_eq!(minimum.raw(), i64::MIN);
+    assert_eq!(maximum.raw(), i64::MAX);
     assert_eq!(point.x(), one);
     assert_eq!(point.y(), two);
     assert_eq!(offset.x(), three);
@@ -58,10 +62,11 @@ fn topology_values_round_trip_without_runtime_or_candidate_types() {
     assert_eq!(free.offset(), offset);
     assert_eq!(free.transform(), transform);
 
-    let dimension = LayoutDimensionV1::new(10, 20, 30);
-    let layout = SpatialLayoutPlacementV2::new(dimension, dimension, transform);
-    assert_eq!(layout.width(), dimension);
-    assert_eq!(layout.height(), dimension);
+    let width = LayoutDimensionV1::new(10, 20, 30);
+    let height = LayoutDimensionV1::new(11, 21, 31);
+    let layout = SpatialLayoutPlacementV2::new(width, height, transform);
+    assert_eq!(layout.width(), width);
+    assert_eq!(layout.height(), height);
     assert_eq!(layout.transform(), transform);
 
     let padding = LayoutPaddingV1::new(1, 2, 3, 4);
@@ -99,8 +104,10 @@ fn topology_values_round_trip_without_runtime_or_candidate_types() {
     assert_eq!(root.parent(), None);
     assert_eq!(root.placement(), SpatialPlacementV2::Root);
     assert_eq!(root.container(), container);
+    assert_eq!(layout_node.key(), SpatialNodeKeyV2::new(1));
     assert_eq!(layout_node.parent(), Some(SpatialNodeKeyV2::new(0)));
     assert_eq!(layout_node.placement(), SpatialPlacementV2::Layout(layout));
+    assert_eq!(free_node.key(), SpatialNodeKeyV2::new(2));
     assert_eq!(free_node.placement(), SpatialPlacementV2::Free(free));
     assert_eq!(input.viewport(), viewport);
     assert_eq!(input.nodes(), nodes.as_slice());

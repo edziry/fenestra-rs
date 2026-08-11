@@ -44,13 +44,24 @@ fn first_slice_values_and_vocabularies_preserve_required_traits() {
 
 fn assert_key_traits<T>()
 where
-    T: Clone + Copy + Debug + Eq + Hash + Ord + PartialEq,
+    T: Clone
+        + Copy
+        + Debug
+        + Eq
+        + Hash
+        + Ord
+        + PartialEq
+        + Send
+        + Sync
+        + Unpin
+        + UnwindSafe
+        + RefUnwindSafe,
 {
 }
 
 fn assert_value_traits<T>()
 where
-    T: Clone + Copy + Debug + Eq + PartialEq,
+    T: Clone + Copy + Debug + Eq + PartialEq + Send + Sync + Unpin + UnwindSafe + RefUnwindSafe,
 {
 }
 
