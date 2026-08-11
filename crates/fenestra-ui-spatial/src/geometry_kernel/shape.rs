@@ -120,8 +120,8 @@ pub(crate) fn validate_polygon_k1<'a>(
         return Err(GeometryK1Error::limit(
             GeometryK1LimitKind::PolygonPointsPerShape,
             shape_location(shape, GeometryK1Field::PolygonPointLength),
-            points.len(),
-            maximum_points,
+            points.len() as u128,
+            maximum_points as u128,
         ));
     }
     if points.len() < 3 {

@@ -76,8 +76,8 @@ fn expect_limit<T>(
     result: Result<T, GeometryK1Error>,
     limit: GeometryK1LimitKind,
     location: GeometryK1Location,
-    observed: usize,
-    maximum: usize,
+    observed: u128,
+    maximum: u128,
 ) {
     let error = match result {
         Ok(_) => panic!("expected K1 limit failure"),

@@ -97,8 +97,8 @@ pub(crate) enum GeometryK1Location {
 pub(crate) struct GeometryK1Error {
     kind: GeometryK1ErrorKind,
     location: GeometryK1Location,
-    observed: Option<usize>,
-    maximum: Option<usize>,
+    observed: Option<u128>,
+    maximum: Option<u128>,
 }
 
 impl GeometryK1Error {
@@ -114,8 +114,8 @@ impl GeometryK1Error {
     pub(crate) const fn limit(
         kind: GeometryK1LimitKind,
         location: GeometryK1Location,
-        observed: usize,
-        maximum: usize,
+        observed: u128,
+        maximum: u128,
     ) -> Self {
         Self {
             kind: GeometryK1ErrorKind::LimitExceeded(kind),
@@ -133,11 +133,11 @@ impl GeometryK1Error {
         self.location
     }
 
-    pub(crate) const fn observed(self) -> Option<usize> {
+    pub(crate) const fn observed(self) -> Option<u128> {
         self.observed
     }
 
-    pub(crate) const fn maximum(self) -> Option<usize> {
+    pub(crate) const fn maximum(self) -> Option<u128> {
         self.maximum
     }
 }

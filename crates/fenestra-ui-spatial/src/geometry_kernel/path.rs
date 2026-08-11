@@ -31,11 +31,12 @@ pub(crate) fn validate_path_k1(
     validate_path_scalars(path, verbs)?;
     validate_path_grammar(path, verbs)?;
 
-    let mut total = accepted_subpaths;
+    let mut total = accepted_subpaths as u128;
+    let maximum_subpaths = maximum_subpaths as u128;
     let mut subpath_count = 0;
     for (ordinal, verb) in verbs.iter().enumerate() {
         if matches!(verb, SpatialPathVerbV2::MoveTo { .. }) {
-            total = total.saturating_add(1);
+            total += 1;
             subpath_count += 1;
             if total > maximum_subpaths {
                 return Err(GeometryK1Error::limit(

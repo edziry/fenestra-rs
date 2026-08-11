@@ -275,8 +275,8 @@ fn registered_subpath_total_accepts_1024_and_rejects_1025() {
         validate_path_k1(PATH_INDEX, &one, PATH_SUBPATH_MAXIMUM, PATH_SUBPATH_MAXIMUM),
         GeometryK1LimitKind::PathSubpathsTotal,
         path_location(0, GeometryK1Field::Kind),
-        PATH_SUBPATH_MAXIMUM + 1,
-        PATH_SUBPATH_MAXIMUM,
+        (PATH_SUBPATH_MAXIMUM + 1) as u128,
+        PATH_SUBPATH_MAXIMUM as u128,
     );
 }
 

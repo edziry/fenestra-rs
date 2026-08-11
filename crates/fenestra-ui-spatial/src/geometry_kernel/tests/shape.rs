@@ -215,8 +215,8 @@ fn registered_polygon_limit_accepts_256_and_rejects_257() {
         validate_polygon_k1(SHAPE_INDEX, &points, POLYGON_POINT_MAXIMUM),
         GeometryK1LimitKind::PolygonPointsPerShape,
         shape_location(GeometryK1Field::PolygonPointLength),
-        POLYGON_POINT_MAXIMUM + 1,
-        POLYGON_POINT_MAXIMUM,
+        (POLYGON_POINT_MAXIMUM + 1) as u128,
+        POLYGON_POINT_MAXIMUM as u128,
     );
 }
 
