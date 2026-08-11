@@ -11,7 +11,7 @@ use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};
 mod topology;
 
 #[cfg(test)]
-use topology::prepare_topology;
+use topology::{prepare_topology, prepare_topology_limits, validate_topology_fact};
 
 const U32_ROW_CAPACITY: u128 = u32::MAX as u128 + 1;
 
