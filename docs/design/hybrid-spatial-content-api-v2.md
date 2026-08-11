@@ -368,7 +368,9 @@ absence of IR, runtime, testkit, candidate, decoder, resolved-output, and
 renderer types. The GREEN adds no normal dependency beyond
 `fenestra-ui-layout` and no validation or sampling behavior.
 
-Straight-color normalization, gradient preparation and sampling, normalized
-image validation and nearest sampling, opacity and blending, clip-chain
+Straight-color normalization, opacity application, SourceOver blending,
+gradient preparation and sampling, normalized image validation, and nearest
+sampling follow the private
+[paint-kernel contract](hybrid-spatial-paint-kernel-v2.md). Clip-chain
 projection, hit selection, semantic projection, CPU rasterization, and closed
 diagnostics each require their own later RED before implementation.
