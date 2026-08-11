@@ -24,7 +24,11 @@ mod limits;
 mod model;
 mod numeric;
 mod numeric_error;
+mod output_aabb;
 mod output_field;
+mod output_geometry;
+mod output_item;
+mod output_view;
 mod paint;
 mod paint_kernel;
 mod path;
@@ -79,7 +83,14 @@ pub mod prototype {
     };
     pub use crate::numeric::round_ratio_v2;
     pub use crate::numeric_error::{SpatialArithmeticOperationV2, SpatialTransformErrorKindV2};
+    pub use crate::output_aabb::SpatialOutputAabbV2;
     pub use crate::output_field::{SpatialOutputFieldV2, SpatialOutputTableV2};
+    pub use crate::output_geometry::{SpatialClipOutputRecordV2, SpatialGeometryOutputRecordV2};
+    pub use crate::output_item::{
+        SpatialHitOutputRecordV2, SpatialPaintOutputRecordV2, SpatialPaintOutputReferenceV2,
+        SpatialSemanticOutputRecordV2,
+    };
+    pub use crate::output_view::SpatialOutputV2;
     pub use crate::paint::{SpatialPaintContentV2, SpatialPaintKindV2, SpatialPaintV2};
     pub use crate::path::{SpatialPathV2, SpatialPathVerbKindV2, SpatialPathVerbV2};
     pub use crate::resolve_error::{
