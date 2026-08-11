@@ -230,6 +230,7 @@ prerequisite.
 
 Branch: `feat/hybrid-spatial-composition`
 Design: [hybrid spatial composition plan](design/hybrid-spatial-composition.md)
+Candidate screen: [hybrid spatial candidate screen](design/hybrid-spatial-candidate-screen.md)
 
 - Research: reconcile the original EXP-0008 rich-2D scope with the completed
   layout prerequisite; screen numeric, geometry, path, hit-test, raster, and

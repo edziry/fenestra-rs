@@ -4,6 +4,7 @@ Status: planning
 Work unit: WU-0013
 Branch: `feat/hybrid-spatial-composition`
 Depends on: [WU-0011 layout conformance](layout-conformance.md)
+Candidate screen: [hybrid spatial candidate screen](hybrid-spatial-candidate-screen.md)
 Target incompatible package line: `0.2.0`
 Research baseline: `fenestra-research` commit
 `176c42139776ed9f1ef879cd135bddadaf12a9da`
