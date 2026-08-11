@@ -88,6 +88,16 @@ impl RawInputFixture {
         self
     }
 
+    pub(super) fn with_images(mut self, images: Vec<SpatialImageV2>) -> Self {
+        self.images = images;
+        self
+    }
+
+    pub(super) fn with_paint_items(mut self, paint_items: Vec<SpatialPaintV2>) -> Self {
+        self.paint_items = paint_items;
+        self
+    }
+
     pub(super) fn input(&self) -> SpatialInputV2<'_> {
         self.input_with_viewport(SpatialViewportV2::new(-1, -1))
     }

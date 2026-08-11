@@ -1,7 +1,8 @@
 use std::error::Error;
 
 use super::{
-    make_resolve_error, map_layout_preflight_error as map_layout_preflight_error_stage,
+    make_resolve_error, map_image_p4_error as map_image_p4_error_stage,
+    map_layout_preflight_error as map_layout_preflight_error_stage,
     map_path_k1_error as map_path_k1_error_stage, map_shape_k1_error as map_shape_k1_error_stage,
     prepare_brush_structure as prepare_brush_structure_stage, prepare_direct_counts,
     prepare_island_plan as prepare_island_plan_stage,
@@ -10,6 +11,7 @@ use super::{
     prepare_path_structure as prepare_path_structure_stage,
     prepare_prepared_brushes as prepare_prepared_brushes_stage,
     prepare_shape_structure as prepare_shape_structure_stage, prepare_topology,
+    prepare_validated_images as prepare_validated_images_stage,
     prepare_validated_paths as prepare_validated_paths_stage,
     prepare_validated_shapes as prepare_validated_shapes_stage, validate_direct_count,
     validate_gradient_stop_range as validate_gradient_stop_range_stage,
@@ -110,6 +112,13 @@ macro_rules! prepare_prepared_brushes {
     }};
 }
 
+macro_rules! prepare_validated_images {
+    ($fixture:expr, $viewport:expr, $limits:expr) => {{
+        prepare_prepared_brushes!($fixture, $viewport, $limits)
+            .and_then($crate::input_validation::tests::prepare_validated_images_stage)
+    }};
+}
+
 mod brush_structure_keys;
 mod brush_structure_priority;
 mod brush_structure_ranges;
@@ -149,6 +158,14 @@ mod shape_structure_success;
 mod shape_structure_support;
 mod topology;
 mod topology_limits;
+mod validated_image_extents;
+mod validated_image_keys;
+mod validated_image_layout;
+mod validated_image_limits;
+mod validated_image_pixels;
+mod validated_image_priority;
+mod validated_image_success;
+mod validated_image_support;
 mod validated_path_grammar;
 mod validated_path_limits;
 mod validated_path_priority;
