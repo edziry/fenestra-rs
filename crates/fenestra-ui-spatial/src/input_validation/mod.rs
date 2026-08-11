@@ -9,6 +9,7 @@ use crate::limits::{SpatialLimitKindV2, SpatialLimitsV2};
 use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};
 
 mod islands;
+mod path_structure;
 mod placement;
 mod topology;
 mod transforms;
@@ -20,6 +21,9 @@ use islands::{
 
 #[cfg(test)]
 use placement::prepare_placement_input;
+
+#[cfg(test)]
+use path_structure::prepare_path_structure;
 
 #[cfg(test)]
 use topology::{prepare_topology, prepare_topology_limits, validate_topology_fact};

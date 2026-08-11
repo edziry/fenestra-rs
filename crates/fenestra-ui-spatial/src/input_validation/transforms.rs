@@ -3,6 +3,7 @@
 use super::islands::preflight::LayoutPreflightProof;
 use super::make_resolve_error;
 use super::topology::trusted_node_ordinal;
+use crate::aggregate_input::SpatialInputV2;
 use crate::error::SpatialErrorLocationV2;
 use crate::numeric_error::SpatialTransformErrorKindV2;
 use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};
@@ -11,6 +12,12 @@ use crate::vocabulary::{SpatialNodeFieldV2, SpatialTransformScalarFieldV2};
 
 pub(super) struct LocalTransformProof<'a> {
     preflight: LayoutPreflightProof<'a>,
+}
+
+impl<'a> LocalTransformProof<'a> {
+    pub(super) fn input(&self) -> SpatialInputV2<'a> {
+        self.preflight.input()
+    }
 }
 
 pub(super) fn prepare_local_transforms(
