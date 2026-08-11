@@ -1,7 +1,7 @@
 use super::{
     PaintP2Error, PaintP2ErrorKind, PaintP2Field, PaintP2GradientKind, PaintP2LimitKind,
     PaintP2Location, apply_opacity_p1, normalize_straight_p1, prepare_gradient_p2,
-    prepare_solid_p2, source_over_p1,
+    prepare_solid_p2, sample_gradient_p3, source_over_p1,
 };
 
 use crate::brush::{SpatialGradientStopV2, SpatialRgba8V2};
@@ -11,6 +11,7 @@ mod invariants;
 mod normalize;
 mod opacity;
 mod preparation;
+mod sampling;
 mod source_over;
 
 const BRUSH_INDEX: u32 = 7;
