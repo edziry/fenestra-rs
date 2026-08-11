@@ -290,6 +290,14 @@ plane; `BaseWidth` and `BaseHeight` are nonnegative integer local extents embedd
 exactly in Fixed16. `world_from_local` and every output AABB use scene-logical
 space. No record contains a logical `NodeId`, generation, pixels, or candidate data.
 
+The closed-AABB subpass projects each Geometry record's local
+`[0,0]..[BaseWidth,BaseHeight]` box; a zero extent remains a nonempty closed
+line or point. Each Clip record first projects only its own K3 clip bound
+through its owner's world transform. The later clip-chain subpass intersects
+that primitive bound with its already resolved parent. Paint, hit, and semantic
+AABBs project their retained local bounds through the item-owner transform and
+remain unclipped.
+
 Resolved clip records retain their exact local shape, owner transform, parent
 clip, and conservative world AABB. The primitive is never replaced by its
 intersection. Paint, hit, and semantic records each name their own terminal
@@ -358,7 +366,8 @@ Validation returns the first failure in these phases:
 7. every content table phase in the exact companion-contract order;
 8. anchor target scope, dependency vertices and edges, then stable cycle check;
 9. graph evaluation in stable vertex order, including layout and arithmetic;
-10. world transforms in node order, clips in clip order, then bounds;
+10. world transforms in node order, closed AABBs in output-table, record, and
+    edge order, then clip-chain intersections in clip order;
 11. output count, keys, scalar domains, world determinants, closed conservative
     AABBs, clip chains, and projection table order.
 
