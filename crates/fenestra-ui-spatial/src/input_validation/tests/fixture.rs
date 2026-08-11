@@ -103,6 +103,19 @@ impl RawInputFixture {
         self
     }
 
+    pub(super) fn with_hit_items(mut self, hit_items: Vec<SpatialHitV2>) -> Self {
+        self.hit_items = hit_items;
+        self
+    }
+
+    pub(super) fn with_semantic_items(
+        mut self,
+        semantic_items: Vec<SpatialSemanticGeometryV2>,
+    ) -> Self {
+        self.semantic_items = semantic_items;
+        self
+    }
+
     pub(super) fn input(&self) -> SpatialInputV2<'_> {
         self.input_with_viewport(SpatialViewportV2::new(-1, -1))
     }

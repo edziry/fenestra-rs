@@ -13,11 +13,13 @@ use super::{
     prepare_shape_structure as prepare_shape_structure_stage, prepare_topology,
     prepare_validated_clips as prepare_validated_clips_stage,
     prepare_validated_images as prepare_validated_images_stage,
+    prepare_validated_paint_items as prepare_validated_paint_items_stage,
     prepare_validated_paths as prepare_validated_paths_stage,
     prepare_validated_shapes as prepare_validated_shapes_stage,
     validate_clip_depth as validate_clip_depth_stage, validate_direct_count,
     validate_gradient_stop_range as validate_gradient_stop_range_stage,
     validate_island_fact as validate_island_fact_stage,
+    validate_paint_item_limit as validate_paint_item_limit_stage,
     validate_polygon_range as validate_polygon_range_stage,
 };
 use crate::error::SpatialErrorLocationV2;
@@ -128,6 +130,13 @@ macro_rules! prepare_validated_clips {
     }};
 }
 
+macro_rules! prepare_validated_paint_items {
+    ($fixture:expr, $viewport:expr, $limits:expr) => {{
+        prepare_validated_clips!($fixture, $viewport, $limits)
+            .and_then($crate::input_validation::tests::prepare_validated_paint_items_stage)
+    }};
+}
+
 mod brush_structure_keys;
 mod brush_structure_priority;
 mod brush_structure_ranges;
@@ -182,6 +191,14 @@ mod validated_image_pixels;
 mod validated_image_priority;
 mod validated_image_success;
 mod validated_image_support;
+mod validated_paint_coverage;
+mod validated_paint_image_destination;
+mod validated_paint_image_source;
+mod validated_paint_limits;
+mod validated_paint_order;
+mod validated_paint_priority;
+mod validated_paint_success;
+mod validated_paint_support;
 mod validated_path_grammar;
 mod validated_path_limits;
 mod validated_path_priority;
@@ -230,6 +247,14 @@ fn check_clip_depth(
     limits: SpatialLimitsV2,
 ) -> Result<(), SpatialResolveErrorV2> {
     validate_clip_depth_stage(clip, observed, limits)
+}
+
+fn check_paint_item_limit(
+    paint: u32,
+    observed: usize,
+    limits: SpatialLimitsV2,
+) -> Result<(), SpatialResolveErrorV2> {
+    validate_paint_item_limit_stage(paint, observed, limits)
 }
 
 fn limits_with_direct(maxima: [usize; DIRECT_COUNT]) -> SpatialLimitsV2 {
