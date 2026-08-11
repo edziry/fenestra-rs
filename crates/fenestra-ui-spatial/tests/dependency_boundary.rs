@@ -7,6 +7,12 @@ fn manifest_and_lock_keep_the_spatial_boundary_candidate_neutral() {
     let manifest = read(&manifest_dir.join("Cargo.toml"));
     let dependencies = section(&manifest, "[dependencies]");
     assert_eq!(dependencies.trim(), "fenestra-ui-layout.workspace = true");
+    for forbidden_header in ["[dev-dependencies]", "[build-dependencies]", "[target."] {
+        assert!(
+            !manifest.contains(forbidden_header),
+            "unexpected dependency section {forbidden_header}"
+        );
+    }
 
     for forbidden in [
         "fenestra-ui-ir",

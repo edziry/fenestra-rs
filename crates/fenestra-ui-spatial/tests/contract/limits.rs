@@ -101,4 +101,10 @@ fn limit_phase_vocabularies_and_registered_values_are_exact() {
     for (kind, value) in SpatialLimitKindV2::ALL.into_iter().zip(expected_values) {
         assert_eq!(REGISTERED_SPATIAL_LIMITS_V2.limit(kind), value);
     }
+
+    let distinct_values = core::array::from_fn(|index| index);
+    let distinct = SpatialLimitsV2::new(distinct_values);
+    for (index, kind) in SpatialLimitKindV2::ALL.into_iter().enumerate() {
+        assert_eq!(distinct.limit(kind), index);
+    }
 }
