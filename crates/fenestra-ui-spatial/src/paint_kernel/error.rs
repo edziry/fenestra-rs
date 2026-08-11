@@ -1,5 +1,5 @@
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(super) enum PaintP2Field {
+pub(crate) enum PaintP2Field {
     GradientStopLength,
     GradientStartX,
     GradientStartY,
@@ -9,12 +9,12 @@ pub(super) enum PaintP2Field {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(super) enum PaintP2LimitKind {
+pub(crate) enum PaintP2LimitKind {
     GradientStopsPerBrush,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(super) enum PaintP2GradientKind {
+pub(crate) enum PaintP2GradientKind {
     CoincidentEndpoints,
     TooFewStops,
     FirstOffset,
@@ -23,14 +23,14 @@ pub(super) enum PaintP2GradientKind {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(super) enum PaintP2ErrorKind {
+pub(crate) enum PaintP2ErrorKind {
     LimitExceeded(PaintP2LimitKind),
     ScalarOutOfDomain,
     InvalidGradient(PaintP2GradientKind),
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(super) enum PaintP2Location {
+pub(crate) enum PaintP2Location {
     Brush {
         index: u32,
         field: PaintP2Field,
@@ -43,7 +43,7 @@ pub(super) enum PaintP2Location {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(super) struct PaintP2Error {
+pub(crate) struct PaintP2Error {
     kind: PaintP2ErrorKind,
     location: PaintP2Location,
     observed: Option<usize>,
@@ -69,19 +69,19 @@ impl PaintP2Error {
         }
     }
 
-    pub(super) const fn kind(self) -> PaintP2ErrorKind {
+    pub(crate) const fn kind(self) -> PaintP2ErrorKind {
         self.kind
     }
 
-    pub(super) const fn location(self) -> PaintP2Location {
+    pub(crate) const fn location(self) -> PaintP2Location {
         self.location
     }
 
-    pub(super) const fn observed(self) -> Option<usize> {
+    pub(crate) const fn observed(self) -> Option<usize> {
         self.observed
     }
 
-    pub(super) const fn maximum(self) -> Option<usize> {
+    pub(crate) const fn maximum(self) -> Option<usize> {
         self.maximum
     }
 }

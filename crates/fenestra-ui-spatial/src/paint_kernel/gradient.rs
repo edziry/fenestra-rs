@@ -7,11 +7,11 @@ use super::normalize_straight_p1;
 use crate::brush::{SpatialGradientStopV2, SpatialRgba8V2};
 use crate::model::{SpatialPointV2, SpatialScalarV2};
 
-pub(super) fn prepare_solid_p2(color: SpatialRgba8V2) -> SpatialRgba8V2 {
+pub(crate) fn prepare_solid_p2(color: SpatialRgba8V2) -> SpatialRgba8V2 {
     normalize_straight_p1(color)
 }
 
-pub(super) fn prepare_gradient_p2(
+pub(crate) fn prepare_gradient_p2(
     brush: u32,
     _raw_stop_start: u32,
     raw_stop_length: u32,

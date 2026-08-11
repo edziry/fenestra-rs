@@ -20,7 +20,7 @@ impl PreparedGradientStopP2 {
     }
 }
 
-pub(super) struct PreparedGradientP2 {
+pub(crate) struct PreparedGradientP2 {
     start: SpatialPointV2,
     end: SpatialPointV2,
     stops: Vec<PreparedGradientStopP2>,
@@ -49,5 +49,17 @@ impl PreparedGradientP2 {
 
     pub(super) fn stop(&self, index: usize) -> &PreparedGradientStopP2 {
         &self.stops[index]
+    }
+
+    #[cfg(test)]
+    pub(crate) fn facts(&self) -> (SpatialPointV2, SpatialPointV2, Vec<(u16, SpatialRgba8V2)>) {
+        (
+            self.start,
+            self.end,
+            self.stops
+                .iter()
+                .map(|stop| (stop.offset, stop.color))
+                .collect(),
+        )
     }
 }

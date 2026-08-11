@@ -10,8 +10,10 @@ use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};
 
 mod brush_structure;
 mod islands;
+mod paint_p2_mapping;
 mod path_structure;
 mod placement;
+mod prepared_brushes;
 mod shape_k1_mapping;
 mod shape_structure;
 mod topology;
@@ -32,6 +34,9 @@ use placement::prepare_placement_input;
 
 #[cfg(test)]
 use path_structure::prepare_path_structure;
+
+#[cfg(test)]
+use prepared_brushes::prepare_prepared_brushes;
 
 #[cfg(test)]
 use shape_structure::{prepare_shape_structure, validate_polygon_range};

@@ -15,13 +15,11 @@ mod image_validation;
 mod model;
 mod sample;
 
-#[cfg(test)]
-use error::{
+pub(crate) use error::{
     PaintP2Error, PaintP2ErrorKind, PaintP2Field, PaintP2GradientKind, PaintP2LimitKind,
     PaintP2Location,
 };
-#[cfg(test)]
-use gradient::{prepare_gradient_p2, prepare_solid_p2};
+pub(crate) use gradient::{prepare_gradient_p2, prepare_solid_p2};
 #[cfg(test)]
 use image_error::{
     PaintP4Channel, PaintP4Error, PaintP4ErrorKind, PaintP4Field, PaintP4ImageKind,
@@ -37,6 +35,7 @@ use image_paint_error::{
 use image_sample::sample_image_p6;
 #[cfg(test)]
 use image_validation::prepare_image_p4;
+pub(crate) use model::PreparedGradientP2;
 #[cfg(test)]
 use sample::sample_gradient_p3;
 
