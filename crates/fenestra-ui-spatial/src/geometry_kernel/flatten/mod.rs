@@ -8,7 +8,6 @@ mod error;
 mod model;
 
 pub(crate) use error::GeometryK2Error;
-#[cfg(test)]
 pub(crate) use error::{GeometryK2ErrorKind, GeometryK2LimitKind};
 pub(crate) use model::FlattenedPathK2;
 

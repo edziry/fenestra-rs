@@ -24,7 +24,6 @@ pub(crate) use error::{
     GeometryK1Error, GeometryK1ErrorKind, GeometryK1Field, GeometryK1LimitKind, GeometryK1Location,
     GeometryK1PathGrammarKind, GeometryK1ShapeKind, GeometryK1StrokeKind,
 };
-#[cfg(test)]
 pub(crate) use flatten::{
     FlattenedPathK2, GeometryK2Error, GeometryK2ErrorKind, GeometryK2LimitKind, flatten_path_k2,
 };

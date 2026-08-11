@@ -38,6 +38,10 @@ impl<'a> ValidatedSemanticItemsProof<'a> {
     pub(super) fn limits(&self) -> SpatialLimitsV2 {
         self.hits.limits()
     }
+
+    pub(super) fn validated_paths(&self) -> &[crate::geometry_kernel::ValidatedPathK1<'a>] {
+        self.hits.validated_paths()
+    }
 }
 
 pub(super) fn prepare_validated_semantic_items<'a>(

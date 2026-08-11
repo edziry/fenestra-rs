@@ -37,6 +37,10 @@ impl<'a> ValidatedClipsProof<'a> {
         self.images.limits()
     }
 
+    pub(super) fn validated_paths(&self) -> &[crate::geometry_kernel::ValidatedPathK1<'a>] {
+        self.images.validated_paths()
+    }
+
     pub(super) fn validated_image(&self, index: u32) -> Option<ValidatedImageP4<'a>> {
         self.images.validated_image(index)
     }

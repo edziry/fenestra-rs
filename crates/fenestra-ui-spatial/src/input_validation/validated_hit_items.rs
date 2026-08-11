@@ -53,6 +53,10 @@ impl<'a> ValidatedHitItemsProof<'a> {
         self.paints.limits()
     }
 
+    pub(super) fn validated_paths(&self) -> &[crate::geometry_kernel::ValidatedPathK1<'a>] {
+        self.paints.validated_paths()
+    }
+
     pub(super) fn clip_owner_is_same_or_ancestor_of(&self, clip: u32, owner: u32) -> Option<bool> {
         self.paints.clip_owner_is_same_or_ancestor_of(clip, owner)
     }

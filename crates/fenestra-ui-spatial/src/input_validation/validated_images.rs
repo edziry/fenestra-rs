@@ -26,6 +26,10 @@ impl<'a> ValidatedImagesProof<'a> {
         self.brushes.limits()
     }
 
+    pub(super) fn validated_paths(&self) -> &[crate::geometry_kernel::ValidatedPathK1<'a>] {
+        self.brushes.validated_paths()
+    }
+
     pub(super) fn validated_image(&self, index: u32) -> Option<ValidatedImageP4<'a>> {
         self.images.get(index as usize).copied()
     }

@@ -30,6 +30,10 @@ impl<'a> BrushStructureProof<'a> {
         self.shapes.limits()
     }
 
+    pub(super) fn validated_paths(&self) -> &[crate::geometry_kernel::ValidatedPathK1<'a>] {
+        self.shapes.validated_paths()
+    }
+
     pub(super) fn gradient_stops(
         &self,
         gradient: usize,

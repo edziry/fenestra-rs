@@ -34,6 +34,10 @@ impl<'a> ShapeStructureProof<'a> {
         self.paths.limits()
     }
 
+    pub(super) fn validated_paths(&self) -> &[crate::geometry_kernel::ValidatedPathK1<'a>] {
+        self.paths.validated_paths()
+    }
+
     pub(super) fn polygon_points(&self, polygon: usize, shape: u32) -> &'a [SpatialPointV2] {
         let range = self
             .polygon_ranges

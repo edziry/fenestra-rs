@@ -9,11 +9,13 @@ use crate::limits::{SpatialLimitKindV2, SpatialLimitsV2};
 use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};
 
 mod brush_structure;
+mod flattened_paths;
 mod islands;
 mod ordered_items;
 mod paint_p2_mapping;
 mod paint_p4_mapping;
 mod paint_p5_mapping;
+mod path_k2_mapping;
 mod path_structure;
 mod placement;
 mod prepared_brushes;
@@ -34,6 +36,9 @@ mod validated_shapes;
 use brush_structure::{prepare_brush_structure, validate_gradient_stop_range};
 
 #[cfg(test)]
+use flattened_paths::prepare_flattened_paths;
+
+#[cfg(test)]
 use islands::{
     map_layout_preflight_error, prepare_island_plan, prepare_layout_preflight, validate_island_fact,
 };
@@ -49,6 +54,9 @@ use prepared_brushes::prepare_prepared_brushes;
 
 #[cfg(test)]
 use paint_p4_mapping::map_image_p4_error;
+
+#[cfg(test)]
+use path_k2_mapping::map_path_k2_error;
 
 #[cfg(test)]
 use shape_structure::{prepare_shape_structure, validate_polygon_range};

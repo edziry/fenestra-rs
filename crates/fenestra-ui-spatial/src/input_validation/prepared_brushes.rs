@@ -25,6 +25,10 @@ impl<'a> PreparedBrushesProof<'a> {
     pub(super) fn limits(&self) -> crate::limits::SpatialLimitsV2 {
         self.structure.limits()
     }
+
+    pub(super) fn validated_paths(&self) -> &[crate::geometry_kernel::ValidatedPathK1<'a>] {
+        self.structure.validated_paths()
+    }
 }
 
 pub(super) fn prepare_prepared_brushes<'a>(
