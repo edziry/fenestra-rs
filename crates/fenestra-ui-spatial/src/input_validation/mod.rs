@@ -10,6 +10,7 @@ use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};
 
 mod brush_structure;
 mod islands;
+mod ordered_items;
 mod paint_p2_mapping;
 mod paint_p4_mapping;
 mod paint_p5_mapping;
@@ -22,6 +23,7 @@ mod stroke_k1_mapping;
 mod topology;
 mod transforms;
 mod validated_clips;
+mod validated_hit_items;
 mod validated_images;
 mod validated_paint_items;
 mod validated_paths;
@@ -64,6 +66,9 @@ use validated_clips::{prepare_validated_clips, validate_clip_depth};
 
 #[cfg(test)]
 use validated_images::prepare_validated_images;
+
+#[cfg(test)]
+use validated_hit_items::{prepare_validated_hit_items, validate_hit_item_limit};
 
 #[cfg(test)]
 use validated_paint_items::{prepare_validated_paint_items, validate_paint_item_limit};

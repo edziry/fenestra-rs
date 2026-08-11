@@ -1,13 +1,12 @@
 //! Ordered paint-item validation and item-local kernel dispatch.
 
 use super::make_resolve_error;
+use super::ordered_items::OrderedItemCursor;
 use super::paint_p5_mapping::map_paint_p5_error;
 use super::stroke_k1_mapping::map_stroke_k1_error;
 use super::validated_clips::ValidatedClipsProof;
 use crate::aggregate_input::SpatialInputV2;
-use crate::content_diagnostic::{
-    SpatialClipErrorV2, SpatialContentReferenceV2, SpatialOrderedItemTableV2,
-};
+use crate::content_diagnostic::{SpatialClipErrorV2, SpatialContentReferenceV2};
 use crate::content_error::SpatialContentErrorKindV2;
 use crate::coverage::{SpatialCoverageV2, SpatialFillRuleV2};
 use crate::error::SpatialErrorLocationV2;
@@ -65,6 +64,10 @@ impl<'a> ValidatedPaintItemsProof<'a> {
     pub(super) fn limits(&self) -> SpatialLimitsV2 {
         self.clips.limits()
     }
+
+    pub(super) fn clip_owner_is_same_or_ancestor_of(&self, clip: u32, owner: u32) -> Option<bool> {
+        self.clips.clip_owner_is_same_or_ancestor_of(clip, owner)
+    }
 }
 
 pub(super) fn prepare_validated_paint_items<'a>(
@@ -74,37 +77,20 @@ pub(super) fn prepare_validated_paint_items<'a>(
     let paints = input.items().paint_items();
     let node_count = input.topology().nodes().len() as u128;
     let limits = clips.limits();
-    let mut current_owner = None;
-    let mut owner_count = 0_usize;
+    let mut cursor = OrderedItemCursor::new();
     let mut validated = Vec::with_capacity(paints.len());
 
     for (index, paint) in paints.iter().copied().enumerate() {
         let ordinal = trusted_paint_ordinal(index);
         let owner = paint.owner().get();
-        if owner == 0 || u128::from(owner) >= node_count {
-            return Err(invalid_reference(
-                SpatialContentReferenceV2::Owner,
-                ordinal,
-                SpatialPaintFieldV2::Owner,
-            ));
-        }
-
-        if current_owner.is_some_and(|previous| owner < previous) {
-            return Err(invalid_order(ordinal, SpatialPaintFieldV2::Owner));
-        }
-        let candidate = if current_owner == Some(owner) {
-            owner_count
-                .checked_add(1)
-                .expect("a paint owner count fits the paint table")
-        } else {
-            1
-        };
-        let expected_item_ordinal =
-            u32::try_from(candidate - 1).expect("a trusted paint owner-local ordinal fits u32");
-        if paint.item_ordinal() != expected_item_ordinal {
-            return Err(invalid_order(ordinal, SpatialPaintFieldV2::ItemOrdinal));
-        }
-        validate_paint_item_limit(ordinal, candidate, limits)?;
+        let candidate = cursor.validate(
+            crate::content_diagnostic::SpatialOrderedItemTableV2::Paint,
+            ordinal,
+            owner,
+            paint.item_ordinal(),
+            node_count,
+        )?;
+        validate_paint_item_limit(ordinal, candidate.owner_count(), limits)?;
 
         let content = match paint.content() {
             SpatialPaintContentV2::CoveragePaint {
@@ -161,11 +147,10 @@ pub(super) fn prepare_validated_paint_items<'a>(
 
         validated.push(ValidatedPaintItem {
             owner,
-            item_ordinal: expected_item_ordinal,
+            item_ordinal: candidate.item_ordinal(),
             content,
         });
-        current_owner = Some(owner);
-        owner_count = candidate;
+        cursor.commit(candidate);
     }
 
     Ok(ValidatedPaintItemsProof {
@@ -267,13 +252,6 @@ fn invalid_reference(
 ) -> SpatialResolveErrorV2 {
     content_error(
         SpatialContentErrorKindV2::InvalidReference(reference),
-        paint_location(paint, field),
-    )
-}
-
-fn invalid_order(paint: u32, field: SpatialPaintFieldV2) -> SpatialResolveErrorV2 {
-    content_error(
-        SpatialContentErrorKindV2::InvalidOrder(SpatialOrderedItemTableV2::Paint),
         paint_location(paint, field),
     )
 }
