@@ -26,17 +26,23 @@ fn zero_rect_axis_is_empty_even_at_its_closed_base_boundary() {
         (5, 0, point(5, 3)),
         (0, 0, point(2, 3)),
     ] {
+        let bounds_rect = expect_valid(validate_rect_k1(
+            SHAPE_INDEX,
+            point(2, 3),
+            scalar(width),
+            scalar(height),
+        ));
+        let derived = match derive_rect_bounds_k3(SHAPE_INDEX, bounds_rect) {
+            Ok(derived) => derived,
+            Err(error) => panic!("expected rect K3 success, got {error:?}"),
+        };
+        let bounds = fill_bounds_k3(&derived);
         let rect = expect_valid(validate_rect_k1(
             SHAPE_INDEX,
             point(2, 3),
             scalar(width),
             scalar(height),
         ));
-        let derived = match derive_rect_bounds_k3(SHAPE_INDEX, rect) {
-            Ok(derived) => derived,
-            Err(error) => panic!("expected rect K3 success, got {error:?}"),
-        };
-        let bounds = fill_bounds_k3(&derived);
 
         assert!(bounds.is_empty());
         assert!(!rect_fill_contains_k4(rect, bounds, boundary));
@@ -73,12 +79,13 @@ fn translated_circle_applies_signed_deltas_from_its_center() {
 
 #[test]
 fn zero_radius_circle_is_empty_even_at_its_center() {
-    let circle = expect_valid(validate_circle_k1(SHAPE_INDEX, point(7, -9), scalar(0)));
-    let derived = match derive_circle_bounds_k3(SHAPE_INDEX, circle) {
+    let bounds_circle = expect_valid(validate_circle_k1(SHAPE_INDEX, point(7, -9), scalar(0)));
+    let derived = match derive_circle_bounds_k3(SHAPE_INDEX, bounds_circle) {
         Ok(derived) => derived,
         Err(error) => panic!("expected circle K3 success, got {error:?}"),
     };
     let bounds = fill_bounds_k3(&derived);
+    let circle = expect_valid(validate_circle_k1(SHAPE_INDEX, point(7, -9), scalar(0)));
 
     assert!(bounds.is_empty());
     assert!(!circle_fill_contains_k4(circle, bounds, point(7, -9)));
