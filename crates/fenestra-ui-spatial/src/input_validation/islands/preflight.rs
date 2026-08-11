@@ -31,6 +31,12 @@ pub(in crate::input_validation) struct LayoutPreflightProof<'a> {
     islands: Vec<PreparedIslandPlan>,
 }
 
+impl<'a> LayoutPreflightProof<'a> {
+    pub(in crate::input_validation) fn input(&self) -> crate::aggregate_input::SpatialInputV2<'a> {
+        self.placement.input()
+    }
+}
+
 struct LayoutDraft {
     viewport: LayoutViewportV1,
     nodes: Vec<LayoutNodeV1>,

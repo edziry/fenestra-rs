@@ -11,6 +11,7 @@ use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};
 mod islands;
 mod placement;
 mod topology;
+mod transforms;
 
 #[cfg(test)]
 use islands::{
@@ -22,6 +23,9 @@ use placement::prepare_placement_input;
 
 #[cfg(test)]
 use topology::{prepare_topology, prepare_topology_limits, validate_topology_fact};
+
+#[cfg(test)]
+use transforms::prepare_local_transforms;
 
 const U32_ROW_CAPACITY: u128 = u32::MAX as u128 + 1;
 
