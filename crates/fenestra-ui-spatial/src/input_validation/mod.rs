@@ -8,6 +8,11 @@ use crate::error::SpatialErrorLocationV2;
 use crate::limits::{SpatialLimitKindV2, SpatialLimitsV2};
 use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};
 
+mod topology;
+
+#[cfg(test)]
+use topology::prepare_topology;
+
 const U32_ROW_CAPACITY: u128 = u32::MAX as u128 + 1;
 
 struct DirectCountProof<'a> {

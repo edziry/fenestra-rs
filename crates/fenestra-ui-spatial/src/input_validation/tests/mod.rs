@@ -1,6 +1,6 @@
 use std::error::Error;
 
-use super::{make_resolve_error, prepare_direct_counts, validate_direct_count};
+use super::{make_resolve_error, prepare_direct_counts, prepare_topology, validate_direct_count};
 use crate::error::SpatialErrorLocationV2;
 use crate::limits::{SpatialLimitKindV2, SpatialLimitsV2};
 use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};
