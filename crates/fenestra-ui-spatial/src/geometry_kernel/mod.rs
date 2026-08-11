@@ -10,13 +10,13 @@ mod round_stroke;
 mod shape;
 mod stroke;
 
-pub(crate) use bounds::{
-    DerivedLocalBoundsK3, GeometryK3Error, GeometryK3ErrorKind, derive_circle_bounds_k3,
-    derive_path_bounds_k3, derive_polygon_bounds_k3, derive_rect_bounds_k3, fill_bounds_k3,
-    stroke_bounds_k3,
-};
 #[cfg(test)]
-pub(crate) use bounds::{clip_bounds_k3, rect_stroke_bounds_k3};
+pub(crate) use bounds::rect_stroke_bounds_k3;
+pub(crate) use bounds::{
+    DerivedLocalBoundsK3, GeometryK3Error, GeometryK3ErrorKind, clip_bounds_k3,
+    derive_circle_bounds_k3, derive_path_bounds_k3, derive_polygon_bounds_k3,
+    derive_rect_bounds_k3, fill_bounds_k3, stroke_bounds_k3,
+};
 #[cfg(test)]
 pub(crate) use coverage::{
     circle_fill_contains_k4, path_fill_contains_k4, polygon_fill_contains_k4, rect_fill_contains_k4,

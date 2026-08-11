@@ -34,6 +34,7 @@ mod validated_paint_items;
 mod validated_paths;
 mod validated_semantic_items;
 mod validated_shapes;
+mod world_aabbs;
 mod world_transforms;
 
 #[cfg(test)]
@@ -91,6 +92,9 @@ use validated_clips::{prepare_validated_clips, validate_clip_depth};
 
 #[cfg(test)]
 use world_transforms::prepare_world_transforms;
+
+#[cfg(test)]
+use world_aabbs::prepare_world_aabbs;
 
 #[cfg(test)]
 use validated_images::prepare_validated_images;

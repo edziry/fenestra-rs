@@ -3,6 +3,7 @@
 use fenestra_ui_layout::prototype::LayoutEngineV1;
 
 use super::{DependencyGraphProof, DependencyUnitKind};
+use crate::aabb::SpatialAabbV2;
 use crate::aggregate_input::SpatialInputV2;
 use crate::error::SpatialErrorLocationV2;
 use crate::limits::SpatialLimitsV2;
@@ -48,6 +49,12 @@ impl BasePlacement {
     const fn local_origin(self) -> SpatialPointV2 {
         SpatialPointV2::new(self.local_x, self.local_y)
     }
+
+    fn local_bounds(self) -> SpatialAabbV2 {
+        let zero = SpatialScalarV2::new(0);
+        SpatialAabbV2::from_edges(zero, zero, fixed(self.width), fixed(self.height))
+            .expect("validated base extents form closed local bounds")
+    }
 }
 
 pub(in crate::input_validation) struct BasePlacementProof<'a> {
@@ -73,6 +80,30 @@ impl<'a> BasePlacementProof<'a> {
             .copied()
             .expect("world composition visits every retained placement")
             .local_origin()
+    }
+
+    pub(in crate::input_validation) fn base_local_bounds(&self, index: usize) -> SpatialAabbV2 {
+        self.placements
+            .get(index)
+            .copied()
+            .expect("world projection visits every retained placement")
+            .local_bounds()
+    }
+
+    pub(in crate::input_validation) fn shape_fill_bounds(&self, shape: u32) -> SpatialAabbV2 {
+        self.graph.bounds.shape_fill_bounds(shape)
+    }
+
+    pub(in crate::input_validation) fn shape_clip_bounds(&self, shape: u32) -> SpatialAabbV2 {
+        self.graph.bounds.shape_clip_bounds(shape)
+    }
+
+    pub(in crate::input_validation) fn paint_local_bounds(&self, index: usize) -> SpatialAabbV2 {
+        self.graph.bounds.paint_local_bounds(index)
+    }
+
+    pub(in crate::input_validation) fn hit_local_bounds(&self, index: usize) -> SpatialAabbV2 {
+        self.graph.bounds.hit_local_bounds(index)
     }
 }
 

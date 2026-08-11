@@ -9,8 +9,9 @@ use super::validated_shapes::ShapeLocalBoundsInput;
 use crate::aabb::SpatialAabbV2;
 use crate::aggregate_input::SpatialInputV2;
 use crate::geometry_kernel::{
-    DerivedLocalBoundsK3, GeometryK1StrokeSource, derive_circle_bounds_k3, derive_path_bounds_k3,
-    derive_polygon_bounds_k3, derive_rect_bounds_k3, fill_bounds_k3, stroke_bounds_k3,
+    DerivedLocalBoundsK3, GeometryK1StrokeSource, clip_bounds_k3, derive_circle_bounds_k3,
+    derive_path_bounds_k3, derive_polygon_bounds_k3, derive_rect_bounds_k3, fill_bounds_k3,
+    stroke_bounds_k3,
 };
 use crate::limits::SpatialLimitsV2;
 use crate::paint_kernel::{ValidatedImagePaintP5, finish_image_paint_bounds_after_item_phase_p5};
@@ -60,6 +61,28 @@ impl<'a> LocalBoundsProof<'a> {
         index: u32,
     ) -> fenestra_ui_layout::prototype::PreparedLayoutInputV1 {
         self.flattened.take_prepared_island(index)
+    }
+
+    pub(super) fn shape_fill_bounds(&self, shape: u32) -> SpatialAabbV2 {
+        fill_bounds_k3(trusted_shape_bounds(&self.shapes, shape))
+    }
+
+    pub(super) fn shape_clip_bounds(&self, shape: u32) -> SpatialAabbV2 {
+        clip_bounds_k3(trusted_shape_bounds(&self.shapes, shape))
+    }
+
+    pub(super) fn paint_local_bounds(&self, index: usize) -> SpatialAabbV2 {
+        self.paints
+            .get(index)
+            .expect("paint validation retained one local bound per record")
+            .local_bounds()
+    }
+
+    pub(super) fn hit_local_bounds(&self, index: usize) -> SpatialAabbV2 {
+        *self
+            .hits
+            .get(index)
+            .expect("hit validation retained one local bound per record")
     }
 }
 

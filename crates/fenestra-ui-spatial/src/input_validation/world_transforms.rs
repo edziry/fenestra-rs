@@ -3,6 +3,7 @@
 use super::dependencies::BasePlacementProof;
 use super::make_resolve_error;
 use super::topology::trusted_node_ordinal;
+use crate::aabb::SpatialAabbV2;
 use crate::aggregate_input::SpatialInputV2;
 use crate::error::SpatialErrorLocationV2;
 use crate::limits::SpatialLimitsV2;
@@ -27,6 +28,33 @@ impl<'a> WorldTransformProof<'a> {
 
     pub(super) fn limits(&self) -> SpatialLimitsV2 {
         self.placements.limits()
+    }
+
+    pub(super) fn world_transform(&self, index: usize) -> Affine2V2 {
+        *self
+            .world
+            .get(index)
+            .expect("world projection visits every composed transform")
+    }
+
+    pub(super) fn base_local_bounds(&self, index: usize) -> SpatialAabbV2 {
+        self.placements.base_local_bounds(index)
+    }
+
+    pub(super) fn shape_fill_bounds(&self, shape: u32) -> SpatialAabbV2 {
+        self.placements.shape_fill_bounds(shape)
+    }
+
+    pub(super) fn shape_clip_bounds(&self, shape: u32) -> SpatialAabbV2 {
+        self.placements.shape_clip_bounds(shape)
+    }
+
+    pub(super) fn paint_local_bounds(&self, index: usize) -> SpatialAabbV2 {
+        self.placements.paint_local_bounds(index)
+    }
+
+    pub(super) fn hit_local_bounds(&self, index: usize) -> SpatialAabbV2 {
+        self.placements.hit_local_bounds(index)
     }
 }
 
