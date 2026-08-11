@@ -27,6 +27,7 @@ mod validated_hit_items;
 mod validated_images;
 mod validated_paint_items;
 mod validated_paths;
+mod validated_semantic_items;
 mod validated_shapes;
 
 #[cfg(test)]
@@ -72,6 +73,9 @@ use validated_hit_items::{prepare_validated_hit_items, validate_hit_item_limit};
 
 #[cfg(test)]
 use validated_paint_items::{prepare_validated_paint_items, validate_paint_item_limit};
+
+#[cfg(test)]
+use validated_semantic_items::prepare_validated_semantic_items;
 
 #[cfg(test)]
 use validated_paths::{map_path_k1_error, prepare_validated_paths};

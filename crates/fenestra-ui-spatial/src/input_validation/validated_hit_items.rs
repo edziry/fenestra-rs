@@ -52,6 +52,10 @@ impl<'a> ValidatedHitItemsProof<'a> {
     pub(super) fn limits(&self) -> SpatialLimitsV2 {
         self.paints.limits()
     }
+
+    pub(super) fn clip_owner_is_same_or_ancestor_of(&self, clip: u32, owner: u32) -> Option<bool> {
+        self.paints.clip_owner_is_same_or_ancestor_of(clip, owner)
+    }
 }
 
 pub(super) fn prepare_validated_hit_items<'a>(
