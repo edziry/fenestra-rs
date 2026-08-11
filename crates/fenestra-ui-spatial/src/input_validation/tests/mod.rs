@@ -16,6 +16,7 @@ mod errors;
 mod fixture;
 mod input;
 mod topology;
+mod topology_limits;
 
 fn limits_with_direct(maxima: [usize; DIRECT_COUNT]) -> SpatialLimitsV2 {
     let mut values = [usize::MAX; SpatialLimitKindV2::ALL.len()];
