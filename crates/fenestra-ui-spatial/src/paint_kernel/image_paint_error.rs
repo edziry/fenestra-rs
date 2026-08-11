@@ -1,7 +1,7 @@
 use crate::vocabulary::{SpatialAxisV2, SpatialExtentV2};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(super) enum PaintP5Field {
+pub(crate) enum PaintP5Field {
     SourceX,
     SourceY,
     SourceWidth,
@@ -13,7 +13,7 @@ pub(super) enum PaintP5Field {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(super) enum PaintP5ImageKind {
+pub(crate) enum PaintP5ImageKind {
     EmptySource,
     SourceOutOfBounds,
     NegativeDestinationExtent(SpatialExtentV2),
@@ -21,19 +21,19 @@ pub(super) enum PaintP5ImageKind {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(super) enum PaintP5ErrorKind {
+pub(crate) enum PaintP5ErrorKind {
     ScalarOutOfDomain,
     InvalidImage(PaintP5ImageKind),
     LocalBoundsOutOfDomain(SpatialAxisV2),
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(super) enum PaintP5Location {
+pub(crate) enum PaintP5Location {
     Paint { index: u32, field: PaintP5Field },
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(super) struct PaintP5Error {
+pub(crate) struct PaintP5Error {
     kind: PaintP5ErrorKind,
     location: PaintP5Location,
 }
@@ -46,11 +46,11 @@ impl PaintP5Error {
         }
     }
 
-    pub(super) const fn kind(self) -> PaintP5ErrorKind {
+    pub(crate) const fn kind(self) -> PaintP5ErrorKind {
         self.kind
     }
 
-    pub(super) const fn location(self) -> PaintP5Location {
+    pub(crate) const fn location(self) -> PaintP5Location {
         self.location
     }
 }

@@ -25,6 +25,10 @@ impl<'a> ValidatedImagesProof<'a> {
     pub(super) fn limits(&self) -> crate::limits::SpatialLimitsV2 {
         self.brushes.limits()
     }
+
+    pub(super) fn validated_image(&self, index: u32) -> Option<ValidatedImageP4<'a>> {
+        self.images.get(index as usize).copied()
+    }
 }
 
 pub(super) fn prepare_validated_images<'a>(

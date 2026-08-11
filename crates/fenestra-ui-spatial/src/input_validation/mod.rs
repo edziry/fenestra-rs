@@ -12,15 +12,18 @@ mod brush_structure;
 mod islands;
 mod paint_p2_mapping;
 mod paint_p4_mapping;
+mod paint_p5_mapping;
 mod path_structure;
 mod placement;
 mod prepared_brushes;
 mod shape_k1_mapping;
 mod shape_structure;
+mod stroke_k1_mapping;
 mod topology;
 mod transforms;
 mod validated_clips;
 mod validated_images;
+mod validated_paint_items;
 mod validated_paths;
 mod validated_shapes;
 
@@ -61,6 +64,9 @@ use validated_clips::{prepare_validated_clips, validate_clip_depth};
 
 #[cfg(test)]
 use validated_images::prepare_validated_images;
+
+#[cfg(test)]
+use validated_paint_items::{prepare_validated_paint_items, validate_paint_item_limit};
 
 #[cfg(test)]
 use validated_paths::{map_path_k1_error, prepare_validated_paths};

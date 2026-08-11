@@ -11,6 +11,7 @@ use crate::coverage::SpatialFillRuleV2;
 use crate::error::SpatialErrorLocationV2;
 use crate::item_field::SpatialClipFieldV2;
 use crate::limits::{SpatialLimitKindV2, SpatialLimitsV2};
+use crate::paint_kernel::ValidatedImageP4;
 use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};
 use crate::topology::SpatialNodeV2;
 
@@ -34,6 +35,19 @@ impl<'a> ValidatedClipsProof<'a> {
 
     pub(super) fn limits(&self) -> SpatialLimitsV2 {
         self.images.limits()
+    }
+
+    pub(super) fn validated_image(&self, index: u32) -> Option<ValidatedImageP4<'a>> {
+        self.images.validated_image(index)
+    }
+
+    pub(super) fn clip_owner_is_same_or_ancestor_of(&self, clip: u32, owner: u32) -> Option<bool> {
+        let clip = self.clips.get(clip as usize)?;
+        Some(is_same_or_ancestor(
+            self.input().topology().nodes(),
+            clip.owner,
+            owner,
+        ))
     }
 }
 

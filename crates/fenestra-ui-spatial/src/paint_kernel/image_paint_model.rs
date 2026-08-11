@@ -3,7 +3,7 @@ use crate::image::{SpatialImageDestinationRectV2, SpatialImageSourceRectV2};
 
 use super::image_model::ValidatedImageP4;
 
-pub(super) struct PreclipImagePaintP5<'image> {
+pub(crate) struct PreclipImagePaintP5<'image> {
     paint_index: u32,
     image: ValidatedImageP4<'image>,
     source: SpatialImageSourceRectV2,
@@ -34,6 +34,23 @@ impl<'image> PreclipImagePaintP5<'image> {
 
     pub(super) const fn destination(&self) -> SpatialImageDestinationRectV2 {
         self.destination
+    }
+
+    #[cfg(test)]
+    pub(crate) fn facts(
+        &self,
+    ) -> (
+        SpatialImageSourceRectV2,
+        SpatialImageDestinationRectV2,
+        u8,
+        &[u8],
+    ) {
+        (
+            self.source,
+            self.destination,
+            self.opacity,
+            self.image.bytes(),
+        )
     }
 }
 

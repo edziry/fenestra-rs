@@ -6,7 +6,7 @@ use super::image_model::ValidatedImageP4;
 use super::image_paint_error::{PaintP5Error, PaintP5ErrorKind, PaintP5Field, PaintP5ImageKind};
 use super::image_paint_model::{PreclipImagePaintP5, ValidatedImagePaintP5};
 
-pub(super) fn prepare_image_paint_p5<'image>(
+pub(crate) fn prepare_image_paint_p5<'image>(
     paint_index: u32,
     image: &ValidatedImageP4<'image>,
     source: SpatialImageSourceRectV2,
