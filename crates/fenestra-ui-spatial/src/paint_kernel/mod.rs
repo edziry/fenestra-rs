@@ -21,7 +21,9 @@ pub(crate) use error::{
 };
 pub(crate) use gradient::{prepare_gradient_p2, prepare_solid_p2};
 #[cfg(test)]
-use image_error::{
+pub(crate) use image_error::test_p4_pixel_error;
+#[cfg(test)]
+pub(crate) use image_error::{
     PaintP4Channel, PaintP4Error, PaintP4ErrorKind, PaintP4Field, PaintP4ImageKind,
     PaintP4LimitKind, PaintP4Location,
 };
@@ -34,7 +36,7 @@ use image_paint_error::{
 #[cfg(test)]
 use image_sample::sample_image_p6;
 #[cfg(test)]
-use image_validation::prepare_image_p4;
+pub(crate) use image_validation::prepare_image_p4;
 pub(crate) use model::PreparedGradientP2;
 #[cfg(test)]
 use sample::sample_gradient_p3;

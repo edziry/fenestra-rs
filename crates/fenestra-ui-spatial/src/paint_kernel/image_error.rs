@@ -1,12 +1,12 @@
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(super) enum PaintP4Channel {
+pub(crate) enum PaintP4Channel {
     R,
     G,
     B,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(super) enum PaintP4Field {
+pub(crate) enum PaintP4Field {
     Width,
     Height,
     Stride,
@@ -15,13 +15,13 @@ pub(super) enum PaintP4Field {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(super) enum PaintP4LimitKind {
+pub(crate) enum PaintP4LimitKind {
     ImageEdge,
     ImagePixelsTotal,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(super) enum PaintP4ImageKind {
+pub(crate) enum PaintP4ImageKind {
     ZeroExtent,
     StrideMismatch,
     LengthMismatch,
@@ -29,13 +29,13 @@ pub(super) enum PaintP4ImageKind {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(super) enum PaintP4ErrorKind {
+pub(crate) enum PaintP4ErrorKind {
     LimitExceeded(PaintP4LimitKind),
     InvalidImage(PaintP4ImageKind),
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(super) enum PaintP4Location {
+pub(crate) enum PaintP4Location {
     Image {
         index: u32,
         field: PaintP4Field,
@@ -48,7 +48,7 @@ pub(super) enum PaintP4Location {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(super) struct PaintP4Error {
+pub(crate) struct PaintP4Error {
     kind: PaintP4ErrorKind,
     location: PaintP4Location,
     observed: Option<u128>,
@@ -79,19 +79,35 @@ impl PaintP4Error {
         }
     }
 
-    pub(super) const fn kind(self) -> PaintP4ErrorKind {
+    pub(crate) const fn kind(self) -> PaintP4ErrorKind {
         self.kind
     }
 
-    pub(super) const fn location(self) -> PaintP4Location {
+    pub(crate) const fn location(self) -> PaintP4Location {
         self.location
     }
 
-    pub(super) const fn observed(self) -> Option<u128> {
+    pub(crate) const fn observed(self) -> Option<u128> {
         self.observed
     }
 
-    pub(super) const fn maximum(self) -> Option<u128> {
+    pub(crate) const fn maximum(self) -> Option<u128> {
         self.maximum
     }
+}
+
+#[cfg(test)]
+pub(crate) const fn test_p4_pixel_error(
+    image: u32,
+    pixel: u128,
+    channel: PaintP4Channel,
+) -> PaintP4Error {
+    PaintP4Error::new(
+        PaintP4ErrorKind::InvalidImage(PaintP4ImageKind::InvalidPremultipliedPixel),
+        PaintP4Location::ImagePixel {
+            image,
+            pixel,
+            channel,
+        },
+    )
 }

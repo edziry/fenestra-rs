@@ -1,7 +1,7 @@
 use crate::image::SpatialImageV2;
 
 #[derive(Clone, Copy)]
-pub(super) struct ValidatedImageP4<'a> {
+pub(crate) struct ValidatedImageP4<'a> {
     image: &'a SpatialImageV2,
 }
 

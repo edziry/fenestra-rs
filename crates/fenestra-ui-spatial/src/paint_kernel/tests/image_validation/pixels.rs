@@ -1,6 +1,20 @@
 use super::*;
 
 #[test]
+fn synthetic_pixel_error_preserves_a_reachable_wide_ordinal() {
+    let pixel = u128::from(u32::MAX) + 1;
+    let error = test_p4_pixel_error(IMAGE_INDEX, pixel, PaintP4Channel::B);
+
+    assert_eq!(
+        error.kind(),
+        PaintP4ErrorKind::InvalidImage(PaintP4ImageKind::InvalidPremultipliedPixel)
+    );
+    assert_eq!(error.location(), pixel_location(pixel, PaintP4Channel::B));
+    assert_eq!(error.observed(), None);
+    assert_eq!(error.maximum(), None);
+}
+
+#[test]
 fn pixel_channels_are_checked_in_r_g_b_order() {
     let cases = [
         ([1, 0, 0, 0], PaintP4Channel::R),

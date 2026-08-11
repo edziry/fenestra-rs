@@ -6,7 +6,7 @@ use super::image_model::ValidatedImageP4;
 
 use crate::image::SpatialImageV2;
 
-pub(super) fn prepare_image_p4<'a>(
+pub(crate) fn prepare_image_p4<'a>(
     image: &'a SpatialImageV2,
     accepted_pixels: &mut usize,
     maximum_edge: usize,
