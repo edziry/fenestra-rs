@@ -4,6 +4,7 @@ Core contract: [hybrid-spatial-reference-v2.md](hybrid-spatial-reference-v2.md)
 Content contract: [hybrid-spatial-content-reference-v2.md](hybrid-spatial-content-reference-v2.md)
 Diagnostics: [hybrid-spatial-diagnostics-v2.md](hybrid-spatial-diagnostics-v2.md)
 API: [hybrid-spatial-api-v2.md](hybrid-spatial-api-v2.md)
+Validation API: [hybrid-spatial-validation-api-v2.md](hybrid-spatial-validation-api-v2.md)
 Format: spatial field vocabulary version 2
 
 ## Purpose

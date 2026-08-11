@@ -388,6 +388,7 @@ The raw geometry value surface is fixed separately in
 [hybrid-spatial-geometry-api-v2.md](hybrid-spatial-geometry-api-v2.md).
 The remaining raw content values are fixed in
 [hybrid-spatial-content-api-v2.md](hybrid-spatial-content-api-v2.md).
-Later REDs add validation, resolved projections, `SpatialInputV2`, and
-`SpatialResolveErrorV2`. Candidate types, logical identities, and renderer
-handles never enter this module.
+The aggregate input and closed diagnostic surface is fixed in
+[hybrid-spatial-validation-api-v2.md](hybrid-spatial-validation-api-v2.md).
+Later REDs add validation and resolved projections. Candidate types, logical
+identities, and renderer handles never enter this module.

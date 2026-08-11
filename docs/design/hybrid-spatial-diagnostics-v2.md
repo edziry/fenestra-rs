@@ -3,6 +3,7 @@
 Core contract: [hybrid-spatial-reference-v2.md](hybrid-spatial-reference-v2.md)
 Content contract: [hybrid-spatial-content-reference-v2.md](hybrid-spatial-content-reference-v2.md)
 Fields: [hybrid-spatial-fields-v2.md](hybrid-spatial-fields-v2.md)
+Validation API: [hybrid-spatial-validation-api-v2.md](hybrid-spatial-validation-api-v2.md)
 Format: spatial diagnostics version 2
 
 ## Boundary separation
