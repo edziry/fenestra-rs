@@ -201,7 +201,7 @@ Verification: [layout conformance verification](verification/WU-0011-layout-conf
 - Implementation: add the unpublished neutral boundary, reference engine,
   independent oracle, disposable candidate adapter, and atomic runtime seam
   through focused RED/GREEN commits.
-- Verification: compare every supported case and the registered runtime script
+- Verification: compare every required registered case and the runtime script
   field by field, retain negative controls and deterministic artifacts, and run
   Linux plus Windows pure gates.
 
@@ -231,6 +231,7 @@ prerequisite.
 Branch: `feat/hybrid-spatial-composition`
 Design: [hybrid spatial composition plan](design/hybrid-spatial-composition.md)
 Candidate screen: [hybrid spatial candidate screen](design/hybrid-spatial-candidate-screen.md)
+Reference: [hybrid spatial reference contract](design/hybrid-spatial-reference-v2.md)
 
 - Research: reconcile the original EXP-0008 rich-2D scope with the completed
   layout prerequisite; screen numeric, geometry, path, hit-test, raster, and

@@ -10,8 +10,9 @@ Research baseline: `fenestra-research` commit
 
 This screen records replaceable implementation candidates for the
 [hybrid spatial composition plan](hybrid-spatial-composition.md). It does not
-make a product dependency, renderer, numeric, path, image, or indexing
-selection.
+select a product dependency or third-party renderer, numeric, path, image, or
+indexing implementation. The companion reference contract independently
+freezes Fenestra-owned semantics; those choices do not select a candidate.
 
 Every candidate remains probe-only behind Fenestra-owned spatial, paint, hit,
 image, and presenter contracts. Versions and proposed feature profiles are
@@ -47,7 +48,7 @@ oracle.
 
 ### Euclid 0.22.14
 
-[Euclid 0.22.14](https://crates.io/crates/euclid/0.22.14) is a low-cost probe for
+[Euclid 0.22.14](https://docs.rs/euclid/0.22.14/euclid/) is a low-cost probe for
 typed local, island, scene, and device spaces. It supports `no_std`, declares
 Rust 1.63 and MIT OR Apache-2.0, and depends normally on `num-traits`. Its 44
 published `unsafe impl` occurrences are under optional `bytemuck`; the proposed
@@ -69,7 +70,7 @@ and bounds cannot define the Fenestra scalar or wire policy or exact oracle.
 
 ### Fixed 1.30.0
 
-[Fixed 1.30.0](https://crates.io/crates/fixed/1.30.0) is a comparison for a
+[Fixed 1.30.0](https://docs.rs/fixed/1.30.0/fixed/) is a comparison for a
 candidate-neutral checked scalar reference, not a selected scalar. It is the
 latest stable line; the global latest line is a 2.0 prerelease. Version 1.30.0
 declares Rust 1.85, MIT OR Apache-2.0, supports `no_std`, depends on `typenum`,
@@ -94,7 +95,7 @@ adapter results, not serialized semantics or oracle records.
 
 ### Rstar 0.13.0
 
-[Rstar 0.13.0](https://crates.io/crates/rstar/0.13.0) is a broadphase-only
+[Rstar 0.13.0](https://docs.rs/rstar/0.13.0/rstar/) is a broadphase-only
 candidate. It declares Rust 1.85, MIT OR Apache-2.0, `no_std`, empty defaults,
 and no unsafe code or build script. Its active profile uses `heapless`,
 `num-traits`, and `smallvec`.
@@ -107,7 +108,7 @@ result never decides the topmost target.
 
 ### Tiny-Skia 0.12.0
 
-[Tiny-Skia 0.12.0](https://github.com/linebender/tiny-skia) is the primary CPU
+[Tiny-Skia 0.12.0](https://docs.rs/tiny-skia/0.12.0/tiny_skia/) is the primary CPU
 probe. The proposed profile is exactly
 `default-features = false, features = ["std"]`, excluding its default PNG and
 SIMD features. It is BSD-3-Clause and has no declared MSRV or build/native
@@ -120,7 +121,7 @@ classification and tolerance; structural scene and hit records remain exact.
 
 ### Raqote 0.8.5
 
-[Raqote 0.8.5](https://crates.io/crates/raqote/0.8.5) is a CPU comparison with
+[Raqote 0.8.5](https://docs.rs/raqote/0.8.5/raqote/) is a CPU comparison with
 `default-features = false`, excluding default text and PNG. It is
 BSD-3-Clause, has no declared MSRV or native/build path, and retains `euclid`,
 `lyon_geom`, `sw-composite`, and `typed-arena`. Its published source contains
@@ -131,7 +132,7 @@ tradeoffs make it a comparison rather than the primary integration lane.
 
 ### Vello 0.9.0
 
-[Vello 0.9.0](https://github.com/linebender/vello) is the primary rich-renderer
+[Vello 0.9.0](https://docs.rs/vello/0.9.0/vello/) is the primary rich-renderer
 probe, not a selection. It declares Rust 1.88, MIT OR Apache-2.0, is officially
 alpha, and supports paths, images, gradients, and text through compute shaders.
 
@@ -144,7 +145,7 @@ across devices and drivers.
 
 ### Wgpu 30.0.0
 
-[Wgpu 30.0.0](https://github.com/gfx-rs/wgpu) is a current GPU substrate, not a
+[Wgpu 30.0.0](https://docs.rs/wgpu/30.0.0/wgpu/) is a current GPU substrate, not a
 2D renderer. It declares Rust 1.87 and MIT OR Apache-2.0 and supports native
 Vulkan, Metal, D3D12, and GLES paths through a large `wgpu-core`, `wgpu-hal`,
 and Naga closure. It is considered only inside a named renderer adapter.
@@ -154,13 +155,13 @@ versions and distort dependency evidence. WU-0013 does not do that.
 
 ### FemtoVG 0.26.0 and Skia-safe 0.99.0
 
-[FemtoVG 0.26.0](https://github.com/femtovg/femtovg) is a separate canvas
+[FemtoVG 0.26.0](https://docs.rs/femtovg/0.26.0/femtovg/) is a separate canvas
 comparison. It declares Rust 1.88 and MIT OR Apache-2.0, supports OpenGL and an
 optional wgpu 30 path, and has default image and text features. Its stateful
 canvas model, missing dash and path-clip coverage, and larger unsafe surface
 raise replacement cost.
 
-[Skia-safe 0.99.0](https://github.com/rust-skia/rust-skia) is a high-cost
+[Skia-safe 0.99.0](https://docs.rs/skia-safe/0.99.0/skia_safe/) is a high-cost
 control alternative. It declares Rust 1.85 and MIT for the bindings, depends on
 the matching `skia-bindings`, and crosses C++ FFI. The bindings declare
 `links = "skia"` and use build tooling that downloads cached binaries or
@@ -172,23 +173,23 @@ select or establish support for the others.
 
 ## Image and brush candidates
 
-[Peniko 0.6.1](https://crates.io/crates/peniko/0.6.1) is a probe for brushes,
+[Peniko 0.6.1](https://docs.rs/peniko/0.6.1/peniko/) is a probe for brushes,
 colors, and image resource handles. It declares Rust 1.85, MIT OR Apache-2.0,
 `no_std`, no build/native path, and uses Kurbo. Its handles and enums remain
 adapter-private.
 
-[PNG 0.18.1](https://github.com/image-rs/image-png) is the first bounded decoder
+[PNG 0.18.1](https://docs.rs/png/0.18.1/png/) is the first bounded decoder
 baseline. It declares Rust 1.73, MIT OR Apache-2.0, is pure Rust, forbids unsafe
 code, and has no build script. It is preferred over a broad format dependency
 for the first resource probe.
 
-[Image 0.25.10](https://github.com/image-rs/image) is admitted only with
+[Image 0.25.10](https://docs.rs/image/0.25.10/image/) is admitted only with
 `default-features = false` and named formats such as `png` and optionally
 `jpeg`. It declares Rust 1.88 and MIT OR Apache-2.0. Defaults would add Rayon
 and the `default-formats` set; `avif-native` would add native DAV1D and is
 excluded.
 
-[Resvg and usvg 0.48.1](https://github.com/linebender/resvg) remain a later SVG
+[Resvg and usvg 0.48.1](https://docs.rs/resvg/0.48.1/resvg/) remain a later SVG
 probe. Both declare Rust 1.85 and MIT OR Apache-2.0 and forbid direct unsafe
 code. Defaults enable text, system fonts, memory mapping, and raster formats,
 which introduce host-dependent inputs and a larger closure. SVG is not mixed
@@ -202,8 +203,9 @@ into the first PNG resource result.
 2. `path-hit`: Fenestra path and linear hit oracle against Kurbo and Lyon;
    convex, concave, holes, fill rules, self-intersection, degeneracy, curves,
    strokes, clips, and hits inside an AABB but outside the shape.
-3. `cpu-reference`: current rectangle raster plus Tiny-Skia and Raqote on the
-   same shapes, alpha, transform, clip, gradient, and image corpus.
+3. `cpu-reference`: the current opaque-rectangle raster as a control, a new
+   owned rich CPU reference, and Tiny-Skia and Raqote on the same shapes, alpha,
+   transform, clip, gradient, and image corpus.
 4. `native-renderer`: immutable Fenestra frame through Vello and exact native
    backend features; missing capability, resize, resource bounds, adapter
    failure, and no candidate identity leaks.
@@ -218,8 +220,8 @@ per-field typed faults, a bounded canonical artifact, and `pass`, `adapt`, or
 ## Disposition and exclusions
 
 A `pass` admits only the registered bounded corpus. `Adapt` requires one
-documented adapter rule that makes every supported case pass. `Stop` leaves the
-Fenestra reference implementation authoritative. No screen result selects a
+documented adapter rule that makes every required registered case pass. `Stop`
+leaves the Fenestra reference implementation authoritative. No screen result selects a
 public API, final dependency, renderer, path engine, rasterizer, index, image
 stack, or platform support tier.
 

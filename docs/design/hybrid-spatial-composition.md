@@ -5,6 +5,8 @@ Work unit: WU-0013
 Branch: `feat/hybrid-spatial-composition`
 Depends on: [WU-0011 layout conformance](layout-conformance.md)
 Candidate screen: [hybrid spatial candidate screen](hybrid-spatial-candidate-screen.md)
+Reference: [hybrid spatial reference contract](hybrid-spatial-reference-v2.md)
+API: [hybrid spatial API contract](hybrid-spatial-api-v2.md)
 Target incompatible package line: `0.2.0`
 Research baseline: `fenestra-research` commit
 `176c42139776ed9f1ef879cd135bddadaf12a9da`
@@ -24,10 +26,11 @@ The work unit must prove all four compositions:
 4. a layout participant hosting freely placed content.
 
 The logical ownership tree remains authoritative for identity, state, keyed
-structure, and component lifetime. Spatial parentage and layout participation
-are derived responsibilities that may coincide with logical ownership but are
-not defined by it. The immutable presentation scene is an output, not a source
-of logical or layout truth.
+structure, and component lifetime. A separate single-root spatial tree uses an
+explicit pass-local parent and authored preorder. Runtime derives and validates
+that tree from logical state; its parentage may coincide with logical ownership
+but is not defined by it. The immutable presentation scene is an output, not a
+source of logical or layout truth.
 
 This plan executes the hybrid spatial subset of the original
 [EXP-0008 advanced 2D graphics corpus](https://github.com/edziry/fenestra-research/blob/176c42139776ed9f1ef879cd135bddadaf12a9da/init/experiments/EXP-0008-rich-2d-graphics.md).
@@ -91,9 +94,10 @@ They never derive correctness from one another or from rasterized pixels.
 
 ## Placement and layout islands
 
-One spatial edge has one closed placement source:
+Every node has one closed placement source. It belongs to the incoming
+relationship for non-root nodes:
 
-- `Root`: the root local coordinate space;
+- `Root`: a sentinel valid only on node zero, which has no incoming edge;
 - `Layout`: the child participates in its containing layout island;
 - `Free`: the child receives a size and a free-placement specification.
 
@@ -122,15 +126,19 @@ Free placement combines:
 - a local transform and transform origin.
 
 The spatial boundary owns a closed dependency graph, not a general expression
-language. Runtime property computation occurs before spatial resolution. Island
-host dependencies and free anchor references form one bounded directed graph.
-A stable ordinal Kahn traversal accepts acyclic forward references and rejects
-cycles before invoking any layout engine or publishing partial output.
+language. Runtime property computation occurs before spatial resolution. The
+graph has one vertex per free placement and one per nonempty layout island.
+Edges run from a resolved host to its island, from an anchor target producer to
+the free placement, from a free placement to an island hosted below it, and
+from an island result to a free placement targeting one of its participants. A
+stable Kahn traversal breaks ties by spatial ordinal. It accepts acyclic forward
+references and rejects missing references or cycles before invoking any layout
+engine or publishing partial output.
 
 Anchors read unpainted geometry and never visual pixels. Transforms do not feed
-back into layout. The exact coordinate and transform arithmetic, rounding,
-singularity, overflow, and inverse-hit rules must be frozen in the companion
-reference contract before the first behavior GREEN.
+back into layout. The companion reference contract freezes coordinate and
+transform arithmetic, rounding, singularity, overflow, and inverse-hit rules
+before the package and API RED/GREEN slice.
 
 ## Independent geometry
 
@@ -149,25 +157,26 @@ hit, or semantic item. A painted object may accept no input. A hit shape may be
 larger, smaller, or topologically different from its paint shape. Visual
 overflow is retained unless an explicit clip removes it.
 
-The required bounded shape vocabulary covers at least rectangle, circle,
-polygon, and path. Translate, rotate, and scale are required transform
-operations. Path verbs, fill semantics, transform precision, and hit-test
-flattening or analytic rules must be candidate-neutral and independently
-tested before a renderer is admitted.
+The required bounded shape vocabulary covers rectangle, circle, polygon, and
+path. Translate, rotate, and scale are required transform operations. Paint
+also covers stroke, alpha, linear gradients, and normalized images. Path verbs,
+fill and stroke semantics, transform precision, image normalization, and hit
+rules are candidate-neutral and independently tested before a renderer is
+admitted.
 
 ## Package and dependency direction
 
-WU-0013 may add an unpublished `fenestra-ui-spatial` package only after its API
-RED exists. The intended normal dependency direction is:
+WU-0013 adds an unpublished `fenestra-ui-spatial` package in the same slice as
+its external API RED. Arrows below mean consumer to dependency:
 
 ```text
-fenestra-ui-layout
-        ^
-fenestra-ui-spatial
-        ^
-fenestra-ui-runtime <- fenestra-ui-testkit
-        ^
-native and EXP-0008 probes
+fenestra-ui-spatial -> fenestra-ui-layout
+fenestra-ui-runtime -> fenestra-ui-ir + fenestra-ui-layout + fenestra-ui-spatial
+fenestra-ui-authoring -> fenestra-ui-ir
+fenestra-ui-macros -> fenestra-ui-authoring
+fenestra-ui-testkit -> fenestra-ui-ir + fenestra-ui-runtime
+EXP-0008 probes -> Fenestra core crates + private candidate dependencies
+native executable -> fenestra-ui-runtime
 ```
 
 `fenestra-ui-ir` remains independent from runtime, layout, spatial, renderer,
@@ -199,27 +208,38 @@ records is refreshed without changing its semantic or runtime claims.
 1. Planning gate: freeze the reference contract, candidate screen, ownership,
    validation priority, limits, corpus, artifacts, version decision, and
    WU-0012 audit.
-2. Workspace RED/GREEN: add the version `0.2.0` package boundary, exact internal
-   dependency, private prototype export, and package/version guards.
-3. Spatial API RED/GREEN: values, keys, nodes, edges, shapes, transforms,
-   clips, paint, hit, semantic geometry, limits, errors, privacy, and auto
-   traits; no resolver behavior yet.
-4. Validation RED/GREEN: global record limits, dense keys, spatial topology,
+2. Package and topology API RED/GREEN: add the version `0.2.0` scaffold plus an
+   external contract test that fails exclusively on keys, `Root | Layout |
+   Free`, container policy, limits, diagnostic vocabularies, private fields,
+   and auto traits; then
+   implement that minimal value surface with only the exact layout dependency
+   and package/version guards.
+3. Layout preparation RED/GREEN: add an exclusive layout-crate contract for the
+   owned validation-only proof and prepared compute seam, then preserve the
+   existing one-shot API by delegation.
+4. Numeric behavior RED/GREEN: freeze checked scalar, ratio, affine,
+   determinant, direct inverse-point, and AABB operations before implementing
+   any content evaluator.
+5. Geometry and path API RED/GREEN: add shapes, verbs, flattening, clips, and
+   exact fill/stroke coverage through an exclusive contract and literal cases.
+6. Paint and projection API RED/GREEN: add brushes, normalized images, paint,
+   hit, semantic geometry, CPU-reference boundaries, and their closed errors.
+7. Input validation RED/GREEN: global record limits, dense keys, spatial topology,
    island derivation, membership, anchor references, dependency cycles, scalar
    domains, path grammar, transform validity, ordering, and typed locations.
-5. Reference resolver RED/GREEN: all-layout, all-free, free-to-layout,
+8. Reference resolver RED/GREEN: all-layout, all-free, free-to-layout,
    layout-to-free, forward anchors, nested transforms, explicit clips, visual
    overflow, and independent paint, hit, and semantic geometry.
-6. Runtime RED/GREEN: pass-local identity mapping, exact invalidation, one
+9. Runtime RED/GREEN: pass-local identity mapping, exact invalidation, one
    immutable generation, engine calls per island, no-op behavior, mutation,
    resize, failure mapping, and exact rollback.
-7. Authoring RED/GREEN: new IR and authoring formats, manual raw programs,
+10. Authoring RED/GREEN: new IR and authoring formats, manual raw programs,
    `.fen`, and `ui!` lower independently to byte-identical typed semantics and
    the same runtime behavior.
-8. Presentation RED/GREEN: a Fenestra-owned immutable frame, fake presenter,
+11. Presentation RED/GREEN: a Fenestra-owned immutable frame, fake presenter,
    CPU reference lane, transformed hit testing independent of pixels, and one
    disposable rich-renderer adapter if its screen passes.
-9. Evidence RED/GREEN: independent literal oracle, clean reconstruction,
+12. Evidence RED/GREEN: independent literal oracle, clean reconstruction,
    mutation and fault controls, bounded canonical artifact, native reference
    result, dependency facts, and Linux plus Windows pure verification.
 
@@ -234,7 +254,8 @@ The corpus contains at least:
 
 - all-layout: nested row and column stacks under resize;
 - all-free: overlapping freely placed objects with explicit order;
-- free-to-layout: a freely placed panel containing a responsive layout island;
+- free-to-layout: a freely placed panel whose explicitly resized host recomputes
+  its contained stack island;
 - layout-to-free: a layout participant containing a freely placed overlay;
 - mixed siblings: layout and free children under the same spatial parent;
 - transparent wrapper: layout participation with no paint or hit item;
@@ -242,6 +263,7 @@ The corpus contains at least:
   distinct semantic bounds;
 - nested translate, rotate, and scale with transformed clip and inverse hit;
 - polygon and path paint and hit cases, including misses inside their AABB;
+- stroke, alpha, linear gradient, and normalized image paint;
 - anchor forward reference, parent and viewport anchors, and a rejected cycle;
 - keyed insert, move, update, and remove plus logical resize;
 - injected validation, layout, spatial, paint, hit, and presentation failures
@@ -269,7 +291,7 @@ identity to a platform surface epoch. No such trigger is present at entry.
 
 ## Exit and nonclaims
 
-WU-0013 exits only when the three primary modes and both nesting directions are
+WU-0013 exits only when both placement modes and all four compositions are
 implemented through manual, `.fen`, and `ui!` authoring; geometry, paint, hit,
 and semantic bounds remain independent; transforms, clips, ordering, anchors,
 paths, transactions, and presentation pass their independent oracles; evidence
