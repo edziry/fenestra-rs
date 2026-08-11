@@ -1,8 +1,10 @@
 use std::error::Error;
 
 use super::{
-    make_resolve_error, prepare_direct_counts, prepare_island_plan as prepare_island_plan_stage,
-    prepare_topology, validate_direct_count, validate_island_fact as validate_island_fact_stage,
+    make_resolve_error, map_layout_preflight_error as map_layout_preflight_error_stage,
+    prepare_direct_counts, prepare_island_plan as prepare_island_plan_stage,
+    prepare_layout_preflight as prepare_layout_preflight_stage, prepare_topology,
+    validate_direct_count, validate_island_fact as validate_island_fact_stage,
 };
 use crate::error::SpatialErrorLocationV2;
 use crate::limits::{SpatialLimitKindV2, SpatialLimitsV2};
@@ -16,16 +18,36 @@ const PAYLOAD_DIRECT_INDICES: [usize; 3] = [8, 9, 10];
 
 macro_rules! prepare_island_plan {
     ($fixture:expr, $limits:expr) => {{
+        prepare_island_plan!(
+            $fixture,
+            $crate::input_validation::tests::island_support::zero_viewport(),
+            $limits
+        )
+    }};
+    ($fixture:expr, $viewport:expr, $limits:expr) => {{
         $crate::input_validation::prepare_direct_counts(
-            ($fixture).input_with_viewport(
-                $crate::input_validation::tests::island_support::zero_viewport(),
-            ),
+            ($fixture).input_with_viewport($viewport),
             $limits,
         )
         .and_then($crate::input_validation::prepare_topology)
         .and_then($crate::input_validation::prepare_topology_limits)
         .and_then($crate::input_validation::prepare_placement_input)
         .and_then($crate::input_validation::tests::prepare_island_plan_stage)
+    }};
+}
+
+macro_rules! prepare_layout_preflight {
+    ($fixture:expr, $viewport:expr, $limits:expr) => {{
+        prepare_island_plan!($fixture, $viewport, $limits)
+            .and_then($crate::input_validation::tests::prepare_layout_preflight_stage)
+    }};
+}
+
+macro_rules! map_layout_preflight_error {
+    ($plan:expr, $item:expr, $kind:expr, $location:expr) => {{
+        $crate::input_validation::tests::map_layout_preflight_error_stage(
+            &$plan, $item, $kind, $location,
+        )
     }};
 }
 
@@ -36,6 +58,10 @@ mod input;
 mod island_limits;
 mod island_support;
 mod islands;
+mod layout_preflight;
+mod layout_preflight_bridge;
+mod layout_preflight_mappings;
+mod layout_preflight_support;
 mod placement;
 mod topology;
 mod topology_limits;
