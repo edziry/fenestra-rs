@@ -1,16 +1,21 @@
 use super::{
     PaintP2Error, PaintP2ErrorKind, PaintP2Field, PaintP2GradientKind, PaintP2LimitKind,
     PaintP2Location, PaintP4Channel, PaintP4Error, PaintP4ErrorKind, PaintP4Field,
-    PaintP4ImageKind, PaintP4LimitKind, PaintP4Location, apply_opacity_p1, normalize_straight_p1,
-    prepare_gradient_p2, prepare_image_p4, prepare_solid_p2, sample_gradient_p3, source_over_p1,
+    PaintP4ImageKind, PaintP4LimitKind, PaintP4Location, PaintP5Error, PaintP5ErrorKind,
+    PaintP5Field, PaintP5ImageKind, PaintP5Location, apply_opacity_p1,
+    finish_image_paint_bounds_after_item_phase_p5, normalize_straight_p1, prepare_gradient_p2,
+    prepare_image_p4, prepare_image_paint_p5, prepare_solid_p2, sample_gradient_p3, source_over_p1,
 };
 
+use crate::aabb::SpatialAabbV2;
 use crate::brush::{SpatialGradientStopV2, SpatialRgba8V2};
 use crate::content_key::SpatialImageKeyV2;
-use crate::image::SpatialImageV2;
+use crate::image::{SpatialImageDestinationRectV2, SpatialImageSourceRectV2, SpatialImageV2};
 use crate::limits::{REGISTERED_SPATIAL_LIMITS_V2, SpatialLimitKindV2};
 use crate::model::{SpatialPointV2, SpatialScalarV2};
+use crate::vocabulary::{SpatialAxisV2, SpatialExtentV2};
 
+mod image_paint;
 mod image_validation;
 mod invariants;
 mod normalize;
