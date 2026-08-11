@@ -7,6 +7,11 @@ use crate::limits::{SpatialLimitKindV2, SpatialLimitsV2};
 use crate::resolve_error::SpatialResolveErrorV2;
 use crate::topology::SpatialPlacementV2;
 
+pub(super) mod preflight;
+
+#[cfg(test)]
+pub(super) use preflight::{map_layout_preflight_error, prepare_layout_preflight};
+
 struct IslandMemberPlan {
     node: u32,
     parent: u32,

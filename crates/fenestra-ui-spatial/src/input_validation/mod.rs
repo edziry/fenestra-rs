@@ -13,7 +13,9 @@ mod placement;
 mod topology;
 
 #[cfg(test)]
-use islands::{prepare_island_plan, validate_island_fact};
+use islands::{
+    map_layout_preflight_error, prepare_island_plan, prepare_layout_preflight, validate_island_fact,
+};
 
 #[cfg(test)]
 use placement::prepare_placement_input;
