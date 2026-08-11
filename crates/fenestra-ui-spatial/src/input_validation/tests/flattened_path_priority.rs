@@ -98,8 +98,15 @@ fn source_verbs_keep_line_before_nonflat_and_nonflat_before_later_line() {
 fn every_declared_path_flattens_in_key_order_not_shape_use_order() {
     let mut verbs = vec![move_to(0, 0), line_to(1, 0), line_to(2, 0)];
     verbs.extend(quadratic(DEPTH_16_NONFLAT_HEIGHT));
-    let used_fixture = fixture(vec![path(0, 0, 3), path(1, 3, 2)], verbs)
-        .with_shapes(vec![path_shape(0, 1, 1), path_shape(1, 2, 0)], Vec::new());
+    let used_fixture = fixture(vec![path(0, 0, 3), path(1, 3, 2)], verbs).with_shapes(
+        vec![
+            path_shape(0, 1, 1),
+            path_shape(1, 2, 0),
+            rect(2, 3),
+            rect(3, 4),
+        ],
+        Vec::new(),
+    );
     expect_limit(
         validate(&used_fixture, limits(1, usize::MAX)),
         SpatialLimitKindV2::FlattenedSegmentsPerPath,
