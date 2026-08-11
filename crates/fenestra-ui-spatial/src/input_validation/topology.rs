@@ -22,6 +22,10 @@ impl<'a> TopologyLimitsProof<'a> {
     pub(super) fn input(&self) -> SpatialInputV2<'a> {
         self.topology.direct_counts.input
     }
+
+    pub(super) fn limits(&self) -> SpatialLimitsV2 {
+        self.topology.direct_counts.limits
+    }
 }
 
 #[cfg(test)]

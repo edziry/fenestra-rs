@@ -8,8 +8,12 @@ use crate::error::SpatialErrorLocationV2;
 use crate::limits::{SpatialLimitKindV2, SpatialLimitsV2};
 use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};
 
+mod islands;
 mod placement;
 mod topology;
+
+#[cfg(test)]
+use islands::{prepare_island_plan, validate_island_fact};
 
 #[cfg(test)]
 use placement::prepare_placement_input;

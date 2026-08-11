@@ -1,13 +1,25 @@
 //! Remaining raw placement-input validation.
 
 use super::topology::{TopologyLimitsProof, input_error, node_input_error, trusted_node_ordinal};
+use crate::aggregate_input::SpatialInputV2;
 use crate::error::{SpatialErrorLocationV2, SpatialInputErrorKindV2};
+use crate::limits::SpatialLimitsV2;
 use crate::resolve_error::SpatialResolveErrorV2;
 use crate::topology::SpatialPlacementV2;
 use crate::vocabulary::{SpatialAxisV2, SpatialExtentV2, SpatialNodeFieldV2};
 
 pub(super) struct PlacementInputProof<'a> {
     topology_limits: TopologyLimitsProof<'a>,
+}
+
+impl<'a> PlacementInputProof<'a> {
+    pub(super) fn input(&self) -> SpatialInputV2<'a> {
+        self.topology_limits.input()
+    }
+
+    pub(super) fn limits(&self) -> SpatialLimitsV2 {
+        self.topology_limits.limits()
+    }
 }
 
 pub(super) fn prepare_placement_input(

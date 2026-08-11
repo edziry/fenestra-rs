@@ -144,9 +144,9 @@ pub enum SpatialErrorLocationV2 {
         /// Closed field selected by validation order.
         field: SpatialNodeFieldV2,
     },
-    /// One derived layout island ordinal.
+    /// One derived layout island index.
     Island {
-        /// Trusted stable island ordinal.
+        /// Trusted dense island index after stable-key ordering.
         index: u32,
     },
     /// One dependency unit selected by its stable ordinal.
