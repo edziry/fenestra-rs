@@ -1,6 +1,28 @@
 use super::*;
 
 #[test]
+fn prepared_paint_borrows_the_image_without_borrowing_the_p4_proof() {
+    let image = raw_image(5, 2, 2, [64, 32, 0, 128]);
+    let preclip = {
+        let mut accepted = 0;
+        let proof = prepare_image_p4(&image, &mut accepted, usize::MAX, usize::MAX)
+            .expect("image must satisfy P4");
+        assert_eq!(accepted, 4);
+        expect_p5_success(prepare_image_paint_p5(
+            PAINT_INDEX,
+            &proof,
+            source(0, 0, 2, 2),
+            valid_destination(),
+            137,
+        ))
+    };
+
+    let prepared = expect_p5_success(finish_image_paint_bounds_after_item_phase_p5(preclip));
+    assert_eq!(prepared.image_bytes(), image.bytes());
+    assert_eq!(prepared.opacity(), 137);
+}
+
+#[test]
 fn prepared_paints_remain_bound_to_their_exact_reusable_p4_images() {
     let image_a = raw_image(7, 4, 3, [64, 32, 0, 128]);
     let image_b = raw_image(11, 2, 2, [1, 2, 3, 3]);
