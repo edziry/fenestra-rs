@@ -3,10 +3,11 @@ use super::{
     GeometryK1LimitKind, GeometryK1Location, GeometryK1PathGrammarKind, GeometryK1ShapeKind,
     GeometryK1StrokeKind, GeometryK1StrokeSource, GeometryK2Error, GeometryK2ErrorKind,
     GeometryK2LimitKind, GeometryK3Error, GeometryK3ErrorKind, ValidatedCircleK1, ValidatedPathK1,
-    ValidatedPolygonK1, ValidatedRectK1, ValidatedStrokeK1, clip_bounds_k3,
-    derive_circle_bounds_k3, derive_path_bounds_k3, derive_polygon_bounds_k3,
-    derive_rect_bounds_k3, fill_bounds_k3, flatten_path_k2, rect_stroke_bounds_k3,
-    stroke_bounds_k3, validate_circle_k1, validate_path_k1, validate_polygon_k1, validate_rect_k1,
+    ValidatedPolygonK1, ValidatedRectK1, ValidatedStrokeK1, circle_fill_contains_k4,
+    clip_bounds_k3, derive_circle_bounds_k3, derive_path_bounds_k3, derive_polygon_bounds_k3,
+    derive_rect_bounds_k3, fill_bounds_k3, flatten_path_k2, path_fill_contains_k4,
+    polygon_fill_contains_k4, rect_fill_contains_k4, rect_stroke_bounds_k3, stroke_bounds_k3,
+    validate_circle_k1, validate_path_k1, validate_polygon_k1, validate_rect_k1,
     validate_stroke_k1,
 };
 
@@ -17,6 +18,7 @@ use crate::path::SpatialPathVerbV2;
 use crate::vocabulary::SpatialAxisV2;
 
 mod bounds;
+mod coverage;
 mod flatten;
 mod path;
 mod scalar_order;
