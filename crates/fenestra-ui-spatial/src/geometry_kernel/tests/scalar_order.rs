@@ -18,10 +18,10 @@ fn expect_path_scalar(verb: SpatialPathVerbV2, field: GeometryK1Field) {
 fn move_and_line_scalar_suffixes_scan_to_x_then_to_y() {
     let fields = [GeometryK1Field::ToX, GeometryK1Field::ToY];
 
-    for first_invalid in 0..fields.len() {
+    for (first_invalid, expected) in fields.iter().copied().enumerate() {
         let to = point(suffix_raw(first_invalid, 0), suffix_raw(first_invalid, 1));
-        expect_path_scalar(SpatialPathVerbV2::MoveTo { to }, fields[first_invalid]);
-        expect_path_scalar(SpatialPathVerbV2::LineTo { to }, fields[first_invalid]);
+        expect_path_scalar(SpatialPathVerbV2::MoveTo { to }, expected);
+        expect_path_scalar(SpatialPathVerbV2::LineTo { to }, expected);
     }
 }
 
@@ -34,12 +34,12 @@ fn quadratic_scalar_suffixes_scan_control_then_destination() {
         GeometryK1Field::ToY,
     ];
 
-    for first_invalid in 0..fields.len() {
+    for (first_invalid, expected) in fields.iter().copied().enumerate() {
         let verb = SpatialPathVerbV2::QuadraticTo {
             control: point(suffix_raw(first_invalid, 0), suffix_raw(first_invalid, 1)),
             to: point(suffix_raw(first_invalid, 2), suffix_raw(first_invalid, 3)),
         };
-        expect_path_scalar(verb, fields[first_invalid]);
+        expect_path_scalar(verb, expected);
     }
 }
 
@@ -54,13 +54,13 @@ fn cubic_scalar_suffixes_scan_both_controls_then_destination() {
         GeometryK1Field::ToY,
     ];
 
-    for first_invalid in 0..fields.len() {
+    for (first_invalid, expected) in fields.iter().copied().enumerate() {
         let verb = SpatialPathVerbV2::CubicTo {
             control1: point(suffix_raw(first_invalid, 0), suffix_raw(first_invalid, 1)),
             control2: point(suffix_raw(first_invalid, 2), suffix_raw(first_invalid, 3)),
             to: point(suffix_raw(first_invalid, 4), suffix_raw(first_invalid, 5)),
         };
-        expect_path_scalar(verb, fields[first_invalid]);
+        expect_path_scalar(verb, expected);
     }
 }
 
@@ -73,7 +73,7 @@ fn rect_scalar_suffixes_scan_origin_then_extents() {
         GeometryK1Field::RectHeight,
     ];
 
-    for first_invalid in 0..fields.len() {
+    for (first_invalid, expected) in fields.iter().copied().enumerate() {
         expect_error(
             validate_rect_k1(
                 SHAPE_INDEX,
@@ -82,7 +82,7 @@ fn rect_scalar_suffixes_scan_origin_then_extents() {
                 scalar(suffix_raw(first_invalid, 3)),
             ),
             GeometryK1ErrorKind::ScalarOutOfDomain,
-            shape_location(fields[first_invalid]),
+            shape_location(expected),
         );
     }
 }
@@ -95,7 +95,7 @@ fn circle_scalar_suffixes_scan_center_then_radius() {
         GeometryK1Field::CircleRadius,
     ];
 
-    for first_invalid in 0..fields.len() {
+    for (first_invalid, expected) in fields.iter().copied().enumerate() {
         expect_error(
             validate_circle_k1(
                 SHAPE_INDEX,
@@ -103,7 +103,7 @@ fn circle_scalar_suffixes_scan_center_then_radius() {
                 scalar(suffix_raw(first_invalid, 2)),
             ),
             GeometryK1ErrorKind::ScalarOutOfDomain,
-            shape_location(fields[first_invalid]),
+            shape_location(expected),
         );
     }
 }
