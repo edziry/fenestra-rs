@@ -25,6 +25,7 @@ use super::{
     prepare_validated_paths as prepare_validated_paths_stage,
     prepare_validated_semantic_items as prepare_validated_semantic_items_stage,
     prepare_validated_shapes as prepare_validated_shapes_stage,
+    prepare_world_transforms as prepare_world_transforms_stage,
     validate_clip_depth as validate_clip_depth_stage,
     validate_dependency_fact as validate_dependency_fact_stage, validate_direct_count,
     validate_gradient_stop_range as validate_gradient_stop_range_stage,
@@ -199,6 +200,13 @@ macro_rules! map_layout_execution_error {
     }};
 }
 
+macro_rules! prepare_world_transforms {
+    ($fixture:expr, $viewport:expr, $limits:expr, $engine:expr) => {{
+        execute_dependency_graph!($fixture, $viewport, $limits, $engine)
+            .and_then($crate::input_validation::tests::prepare_world_transforms_stage)
+    }};
+}
+
 mod brush_structure_keys;
 mod brush_structure_priority;
 mod brush_structure_ranges;
@@ -310,6 +318,11 @@ mod validated_shape_scalars;
 mod validated_shape_semantics;
 mod validated_shape_success;
 mod validated_shape_support;
+mod world_transform_arithmetic;
+mod world_transform_priority;
+mod world_transform_retention;
+mod world_transform_success;
+mod world_transform_support;
 
 fn check_island_fact(
     kind: SpatialLimitKindV2,
