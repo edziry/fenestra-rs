@@ -92,10 +92,10 @@ fn expect_limit_rejection(
     maximum_pixels: usize,
     limit: PaintP4LimitKind,
     location: PaintP4Location,
-    observed: u128,
-    maximum: u128,
+    evidence: (u128, u128),
 ) {
     let mut accepted = accepted_pixels;
+    let (observed, maximum) = evidence;
     expect_p4_limit(
         prepare_image_p4(image, &mut accepted, maximum_edge, maximum_pixels),
         limit,

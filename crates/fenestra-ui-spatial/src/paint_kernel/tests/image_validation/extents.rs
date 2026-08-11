@@ -45,8 +45,7 @@ fn image_edges_complete_width_then_height_and_use_the_supplied_maximum() {
         IMAGE_PIXELS_MAXIMUM,
         PaintP4LimitKind::ImageEdge,
         image_location(PaintP4Field::Width),
-        4_097,
-        4_096,
+        (4_097, 4_096),
     );
     expect_limit_rejection(
         &image(4_096, 4_097, 0, Vec::new()),
@@ -55,8 +54,7 @@ fn image_edges_complete_width_then_height_and_use_the_supplied_maximum() {
         IMAGE_PIXELS_MAXIMUM,
         PaintP4LimitKind::ImageEdge,
         image_location(PaintP4Field::Height),
-        4_097,
-        4_096,
+        (4_097, 4_096),
     );
     expect_limit_rejection(
         &image(3, 1, 12, vec![0; 12]),
@@ -65,8 +63,7 @@ fn image_edges_complete_width_then_height_and_use_the_supplied_maximum() {
         3,
         PaintP4LimitKind::ImageEdge,
         image_location(PaintP4Field::Width),
-        3,
-        2,
+        (3, 2),
     );
     expect_limit_rejection(
         &image(1, 3, 4, vec![0; 12]),
@@ -75,8 +72,7 @@ fn image_edges_complete_width_then_height_and_use_the_supplied_maximum() {
         3,
         PaintP4LimitKind::ImageEdge,
         image_location(PaintP4Field::Height),
-        3,
-        2,
+        (3, 2),
     );
 }
 
@@ -111,8 +107,7 @@ fn registered_edge_equalities_are_valid_on_both_dimensions() {
             IMAGE_PIXELS_MAXIMUM,
             PaintP4LimitKind::ImageEdge,
             image_location(field),
-            4_097,
-            4_096,
+            (4_097, 4_096),
         );
     }
 }

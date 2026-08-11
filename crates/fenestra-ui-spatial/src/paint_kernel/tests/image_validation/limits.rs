@@ -23,8 +23,7 @@ fn registered_pixel_total_accepts_equality_and_rejects_one_over_atomically() {
         IMAGE_PIXELS_MAXIMUM,
         PaintP4LimitKind::ImagePixelsTotal,
         image_location(PaintP4Field::Pixel),
-        4_194_305,
-        4_194_304,
+        (4_194_305, 4_194_304),
     );
 }
 
@@ -38,8 +37,7 @@ fn supplied_pixel_maximum_precedes_stride_length_and_pixel_semantics() {
         3,
         PaintP4LimitKind::ImagePixelsTotal,
         image_location(PaintP4Field::Pixel),
-        4,
-        3,
+        (4, 3),
     );
 }
 
@@ -53,8 +51,7 @@ fn image_area_widens_before_the_pixel_limit_comparison() {
         u32::MAX as usize,
         PaintP4LimitKind::ImagePixelsTotal,
         image_location(PaintP4Field::Pixel),
-        4_294_967_296,
-        u128::from(u32::MAX),
+        (4_294_967_296, u128::from(u32::MAX)),
     );
 }
 
@@ -68,8 +65,7 @@ fn cumulative_addition_widens_past_usize_on_every_supported_target() {
         usize::MAX,
         PaintP4LimitKind::ImagePixelsTotal,
         image_location(PaintP4Field::Pixel),
-        usize::MAX as u128 + 1,
-        usize::MAX as u128,
+        (usize::MAX as u128 + 1, usize::MAX as u128),
     );
 }
 
@@ -84,7 +80,6 @@ fn cumulative_pixel_candidate_widens_beyond_u64_and_usize() {
         usize::MAX,
         PaintP4LimitKind::ImagePixelsTotal,
         image_location(PaintP4Field::Pixel),
-        18_446_744_073_709_551_616,
-        18_446_744_073_709_551_615,
+        (18_446_744_073_709_551_616, 18_446_744_073_709_551_615),
     );
 }
