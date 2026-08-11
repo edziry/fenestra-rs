@@ -2,7 +2,7 @@ use crate::aabb::SpatialAabbV2;
 use crate::coverage::SpatialFillRuleV2;
 use crate::model::SpatialPointV2;
 
-pub(super) const fn bounds_contains(bounds: SpatialAabbV2, query: SpatialPointV2) -> bool {
+pub(crate) const fn bounds_contains(bounds: SpatialAabbV2, query: SpatialPointV2) -> bool {
     !bounds.is_empty()
         && query.x().raw() >= bounds.min_x().raw()
         && query.y().raw() >= bounds.min_y().raw()

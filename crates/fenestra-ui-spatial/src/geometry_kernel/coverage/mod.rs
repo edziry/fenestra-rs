@@ -7,7 +7,8 @@ use super::shape::{ValidatedCircleK1, ValidatedPolygonK1, ValidatedRectK1};
 
 mod segments;
 
-use segments::{FillAccumulator, bounds_contains};
+use segments::FillAccumulator;
+pub(crate) use segments::bounds_contains;
 
 pub(crate) fn rect_fill_contains_k4(
     rect: ValidatedRectK1,

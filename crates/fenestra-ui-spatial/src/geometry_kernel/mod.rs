@@ -1,4 +1,4 @@
-// K1-K4 are staged before the private K5 and resolver consumers.
+// K1-K5 are staged before resolver consumers.
 #![allow(dead_code)]
 
 mod bounds;
@@ -6,6 +6,7 @@ mod coverage;
 mod error;
 mod flatten;
 mod path;
+mod round_stroke;
 mod shape;
 mod stroke;
 
@@ -30,6 +31,11 @@ pub(crate) use flatten::{
 };
 #[cfg(test)]
 pub(crate) use path::{ValidatedPathK1, validate_path_k1};
+#[cfg(test)]
+pub(crate) use round_stroke::{
+    circle_round_stroke_contains_k5, path_round_stroke_contains_k5,
+    polygon_round_stroke_contains_k5, rect_round_stroke_contains_k5,
+};
 #[cfg(test)]
 pub(crate) use shape::{
     ValidatedCircleK1, ValidatedPolygonK1, ValidatedRectK1, validate_circle_k1,
