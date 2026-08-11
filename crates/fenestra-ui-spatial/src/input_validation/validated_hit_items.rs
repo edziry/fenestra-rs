@@ -70,6 +70,13 @@ impl<'a> ValidatedHitItemsProof<'a> {
         self.paints.dependency_islands()
     }
 
+    pub(super) fn take_prepared_island(
+        &mut self,
+        index: u32,
+    ) -> fenestra_ui_layout::prototype::PreparedLayoutInputV1 {
+        self.paints.take_prepared_island(index)
+    }
+
     pub(super) fn validated_paths(&self) -> &[crate::geometry_kernel::ValidatedPathK1<'a>] {
         self.paints.validated_paths()
     }

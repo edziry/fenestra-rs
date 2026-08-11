@@ -34,6 +34,13 @@ impl<'a> ValidatedPathsProof<'a> {
         self.structure.dependency_islands()
     }
 
+    pub(super) fn take_prepared_island(
+        &mut self,
+        index: u32,
+    ) -> fenestra_ui_layout::prototype::PreparedLayoutInputV1 {
+        self.structure.take_prepared_island(index)
+    }
+
     pub(super) fn validated_paths(&self) -> &[ValidatedPathK1<'a>] {
         &self.paths
     }

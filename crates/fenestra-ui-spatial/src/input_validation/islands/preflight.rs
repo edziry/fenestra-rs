@@ -22,7 +22,7 @@ use crate::vocabulary::SpatialNodeFieldV2;
 
 struct PreparedIslandPlan {
     plan: IslandPlan,
-    prepared: PreparedLayoutInputV1,
+    prepared: Option<PreparedLayoutInputV1>,
 }
 
 pub(in crate::input_validation) struct DependencyIslandInput<'a> {
@@ -73,6 +73,18 @@ impl<'a> LayoutPreflightProof<'a> {
                 plan: &island.plan,
             })
     }
+
+    pub(in crate::input_validation) fn take_prepared_island(
+        &mut self,
+        index: u32,
+    ) -> PreparedLayoutInputV1 {
+        let index = usize::try_from(index)
+            .expect("phase five validated the prepared-island index capacity");
+        self.islands[index]
+            .prepared
+            .take()
+            .expect("each prepared island executes exactly once")
+    }
 }
 
 struct LayoutDraft {
@@ -118,7 +130,7 @@ pub(in crate::input_validation) fn prepare_layout_preflight(
         .zip(prepared_islands)
         .map(|(plan, prepared)| PreparedIslandPlan {
             plan,
-            prepared: prepared.expect("every island was prepared exactly once"),
+            prepared: Some(prepared.expect("every island was prepared exactly once")),
         })
         .collect();
 

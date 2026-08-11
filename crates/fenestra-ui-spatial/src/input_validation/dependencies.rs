@@ -9,8 +9,12 @@ use crate::model::SpatialAnchorTargetV2;
 use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};
 use crate::topology::SpatialPlacementV2;
 
+mod execution;
 mod order;
 mod targets;
+
+#[cfg(test)]
+pub(super) use execution::{execute_dependency_graph, map_layout_execution_error};
 
 #[cfg(test)]
 mod facts;
@@ -49,6 +53,13 @@ impl<'a> DependencyGraphProof<'a> {
 
     pub(super) fn limits(&self) -> SpatialLimitsV2 {
         self.bounds.limits()
+    }
+
+    fn take_prepared_island(
+        &mut self,
+        index: u32,
+    ) -> fenestra_ui_layout::prototype::PreparedLayoutInputV1 {
+        self.bounds.take_prepared_island(index)
     }
 }
 

@@ -85,6 +85,13 @@ impl<'a> ValidatedPaintItemsProof<'a> {
         self.clips.dependency_islands()
     }
 
+    pub(super) fn take_prepared_island(
+        &mut self,
+        index: u32,
+    ) -> fenestra_ui_layout::prototype::PreparedLayoutInputV1 {
+        self.clips.take_prepared_island(index)
+    }
+
     pub(super) fn validated_paths(&self) -> &[crate::geometry_kernel::ValidatedPathK1<'a>] {
         self.clips.validated_paths()
     }

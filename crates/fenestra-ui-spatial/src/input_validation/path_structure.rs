@@ -32,6 +32,13 @@ impl<'a> PathStructureProof<'a> {
         self.transforms.dependency_islands()
     }
 
+    pub(super) fn take_prepared_island(
+        &mut self,
+        index: u32,
+    ) -> fenestra_ui_layout::prototype::PreparedLayoutInputV1 {
+        self.transforms.take_prepared_island(index)
+    }
+
     pub(super) fn path_verbs(&self, index: usize) -> &'a [SpatialPathVerbV2] {
         let range = self
             .ranges

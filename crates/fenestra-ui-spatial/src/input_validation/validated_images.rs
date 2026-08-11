@@ -33,6 +33,13 @@ impl<'a> ValidatedImagesProof<'a> {
         self.brushes.dependency_islands()
     }
 
+    pub(super) fn take_prepared_island(
+        &mut self,
+        index: u32,
+    ) -> fenestra_ui_layout::prototype::PreparedLayoutInputV1 {
+        self.brushes.take_prepared_island(index)
+    }
+
     pub(super) fn validated_paths(&self) -> &[crate::geometry_kernel::ValidatedPathK1<'a>] {
         self.brushes.validated_paths()
     }

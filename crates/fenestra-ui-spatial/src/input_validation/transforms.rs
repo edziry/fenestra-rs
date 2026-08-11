@@ -29,6 +29,13 @@ impl<'a> LocalTransformProof<'a> {
     ) -> impl Iterator<Item = super::islands::preflight::DependencyIslandInput<'_>> + '_ {
         self.preflight.dependency_islands()
     }
+
+    pub(super) fn take_prepared_island(
+        &mut self,
+        index: u32,
+    ) -> fenestra_ui_layout::prototype::PreparedLayoutInputV1 {
+        self.preflight.take_prepared_island(index)
+    }
 }
 
 pub(super) fn prepare_local_transforms(

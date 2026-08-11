@@ -36,6 +36,13 @@ impl<'a> BrushStructureProof<'a> {
         self.shapes.dependency_islands()
     }
 
+    pub(super) fn take_prepared_island(
+        &mut self,
+        index: u32,
+    ) -> fenestra_ui_layout::prototype::PreparedLayoutInputV1 {
+        self.shapes.take_prepared_island(index)
+    }
+
     pub(super) fn validated_paths(&self) -> &[crate::geometry_kernel::ValidatedPathK1<'a>] {
         self.shapes.validated_paths()
     }

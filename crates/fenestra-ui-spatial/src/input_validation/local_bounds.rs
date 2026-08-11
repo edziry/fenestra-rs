@@ -54,6 +54,13 @@ impl<'a> LocalBoundsProof<'a> {
     ) -> impl Iterator<Item = super::islands::preflight::DependencyIslandInput<'_>> + '_ {
         self.flattened.dependency_islands()
     }
+
+    pub(super) fn take_prepared_island(
+        &mut self,
+        index: u32,
+    ) -> fenestra_ui_layout::prototype::PreparedLayoutInputV1 {
+        self.flattened.take_prepared_island(index)
+    }
 }
 
 pub(super) fn prepare_local_bounds<'a>(

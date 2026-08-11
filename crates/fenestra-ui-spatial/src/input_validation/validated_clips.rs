@@ -44,6 +44,13 @@ impl<'a> ValidatedClipsProof<'a> {
         self.images.dependency_islands()
     }
 
+    pub(super) fn take_prepared_island(
+        &mut self,
+        index: u32,
+    ) -> fenestra_ui_layout::prototype::PreparedLayoutInputV1 {
+        self.images.take_prepared_island(index)
+    }
+
     pub(super) fn validated_paths(&self) -> &[crate::geometry_kernel::ValidatedPathK1<'a>] {
         self.images.validated_paths()
     }
