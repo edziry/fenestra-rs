@@ -58,6 +58,16 @@ impl RawInputFixture {
         fixture
     }
 
+    pub(super) fn with_paths(
+        mut self,
+        paths: Vec<SpatialPathV2>,
+        path_verbs: Vec<SpatialPathVerbV2>,
+    ) -> Self {
+        self.paths = paths;
+        self.path_verbs = path_verbs;
+        self
+    }
+
     pub(super) fn input(&self) -> SpatialInputV2<'_> {
         self.input_with_viewport(SpatialViewportV2::new(-1, -1))
     }

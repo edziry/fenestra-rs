@@ -4,7 +4,8 @@ use super::{
     make_resolve_error, map_layout_preflight_error as map_layout_preflight_error_stage,
     prepare_direct_counts, prepare_island_plan as prepare_island_plan_stage,
     prepare_layout_preflight as prepare_layout_preflight_stage,
-    prepare_local_transforms as prepare_local_transforms_stage, prepare_topology,
+    prepare_local_transforms as prepare_local_transforms_stage,
+    prepare_path_structure as prepare_path_structure_stage, prepare_topology,
     validate_direct_count, validate_island_fact as validate_island_fact_stage,
 };
 use crate::error::SpatialErrorLocationV2;
@@ -59,6 +60,13 @@ macro_rules! prepare_local_transforms {
     }};
 }
 
+macro_rules! prepare_path_structure {
+    ($fixture:expr, $viewport:expr, $limits:expr) => {{
+        prepare_local_transforms!($fixture, $viewport, $limits)
+            .and_then($crate::input_validation::tests::prepare_path_structure_stage)
+    }};
+}
+
 mod counts;
 mod errors;
 mod fixture;
@@ -75,6 +83,10 @@ mod local_transform_determinants;
 mod local_transform_priority;
 mod local_transform_scalars;
 mod local_transform_support;
+mod path_structure_keys;
+mod path_structure_ranges;
+mod path_structure_success;
+mod path_structure_support;
 mod placement;
 mod topology;
 mod topology_limits;
