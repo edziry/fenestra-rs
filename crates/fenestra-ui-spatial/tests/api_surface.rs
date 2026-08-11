@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-const EXPECTED_EXPORTS: [&str; 98] = [
+const EXPECTED_EXPORTS: [&str; 106] = [
     "Affine2V2",
     "REGISTERED_SPATIAL_LIMITS_V2",
     "SpatialAabbV2",
@@ -101,8 +101,16 @@ const EXPECTED_EXPORTS: [&str; 98] = [
     "SpatialOutputErrorKindV2",
     "SpatialResolveErrorKindV2",
     "SpatialResolveErrorV2",
+    "SpatialOutputAabbV2",
+    "SpatialPaintOutputReferenceV2",
+    "SpatialGeometryOutputRecordV2",
+    "SpatialClipOutputRecordV2",
+    "SpatialPaintOutputRecordV2",
+    "SpatialHitOutputRecordV2",
+    "SpatialSemanticOutputRecordV2",
+    "SpatialOutputV2",
 ];
-const EXPECTED_STRUCTS: [&str; 37] = [
+const EXPECTED_STRUCTS: [&str; 44] = [
     "Affine2V2",
     "SpatialAabbV2",
     "SpatialAnchorV2",
@@ -140,49 +148,24 @@ const EXPECTED_STRUCTS: [&str; 37] = [
     "SpatialViewportV2",
     "SpatialInputV2",
     "SpatialResolveErrorV2",
-];
-const SOURCE_FILES: [&str; 28] = [
-    "aabb.rs",
-    "aggregate_input.rs",
-    "affine.rs",
-    "brush.rs",
-    "content_diagnostic.rs",
-    "content_error.rs",
-    "content_input.rs",
-    "content_item.rs",
-    "content_key.rs",
-    "coverage.rs",
-    "error.rs",
-    "geometry_field.rs",
-    "geometry_input.rs",
-    "geometry_key.rs",
-    "image.rs",
-    "item_field.rs",
-    "lib.rs",
-    "limits.rs",
-    "model.rs",
-    "numeric.rs",
-    "numeric_error.rs",
-    "output_field.rs",
-    "paint.rs",
-    "path.rs",
-    "resolve_error.rs",
-    "shape.rs",
-    "topology.rs",
-    "vocabulary.rs",
+    "SpatialOutputAabbV2",
+    "SpatialGeometryOutputRecordV2",
+    "SpatialClipOutputRecordV2",
+    "SpatialPaintOutputRecordV2",
+    "SpatialHitOutputRecordV2",
+    "SpatialSemanticOutputRecordV2",
+    "SpatialOutputV2",
 ];
 
 #[test]
 fn prototype_reexports_only_the_registered_first_slice() {
     let source = read(&source_dir().join("lib.rs"));
-    for filename in SOURCE_FILES {
-        let module = read(&source_dir().join(filename));
-        for forbidden in ["include!", "#[macro_export]"] {
-            assert!(
-                !module.contains(forbidden),
-                "unexpected API form {forbidden} in {filename}"
-            );
-        }
+    let all_source = all_source();
+    for forbidden in ["include!", "#[macro_export]"] {
+        assert!(
+            !all_source.contains(forbidden),
+            "unexpected API form {forbidden}"
+        );
     }
     let marker = "pub mod prototype {";
     assert!(source.contains("#[doc(hidden)]\npub mod prototype {"));
@@ -228,11 +211,7 @@ fn prototype_reexports_only_the_registered_first_slice() {
 
 #[test]
 fn payload_and_indexed_enums_have_no_fieldless_all_array() {
-    let sources = SOURCE_FILES
-        .into_iter()
-        .map(|filename| read(&source_dir().join(filename)))
-        .collect::<Vec<_>>()
-        .join("\n");
+    let sources = all_source();
 
     for type_name in [
         "SpatialAnchorTargetV2",
@@ -246,41 +225,39 @@ fn payload_and_indexed_enums_have_no_fieldless_all_array() {
 #[test]
 fn every_first_slice_struct_keeps_its_fields_private() {
     let mut structs = BTreeSet::new();
-    for filename in SOURCE_FILES {
-        let source = read(&source_dir().join(filename));
-        let lines: Vec<_> = source.lines().collect();
-        let mut index = 0;
-        while index < lines.len() {
-            let line = lines[index].trim();
-            if !line.starts_with("pub struct ") {
-                index += 1;
-                continue;
-            }
-            let name = line["pub struct ".len()..]
-                .split(['<', '(', '{'])
-                .next()
-                .expect("struct name")
-                .trim();
-            assert!(structs.insert(name.to_owned()), "duplicate struct {name}");
-            if line.ends_with(';') {
-                assert!(
-                    !line.contains("(pub ") && !line.contains("(pub("),
-                    "public tuple field in {filename}"
-                );
-                index += 1;
-                continue;
-            }
+    let source = all_source();
+    let lines: Vec<_> = source.lines().collect();
+    let mut index = 0;
+    while index < lines.len() {
+        let line = lines[index].trim();
+        if !line.starts_with("pub struct ") {
             index += 1;
-            while index < lines.len() && lines[index].trim() != "}" {
-                assert!(
-                    !is_public_line(lines[index]),
-                    "public field in {filename}: {}",
-                    lines[index]
-                );
-                index += 1;
-            }
+            continue;
+        }
+        let name = line["pub struct ".len()..]
+            .split(['<', '(', '{'])
+            .next()
+            .expect("struct name")
+            .trim();
+        assert!(structs.insert(name.to_owned()), "duplicate struct {name}");
+        if line.ends_with(';') {
+            assert!(
+                !line.contains("(pub ") && !line.contains("(pub("),
+                "public tuple field"
+            );
+            index += 1;
+            continue;
+        }
+        index += 1;
+        while index < lines.len() && lines[index].trim() != "}" {
+            assert!(
+                !is_public_line(lines[index]),
+                "public field: {}",
+                lines[index]
+            );
             index += 1;
         }
+        index += 1;
     }
     assert_eq!(
         structs,
@@ -323,6 +300,28 @@ fn assert_no_associated_all(source: &str, type_name: &str) {
 
 fn source_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("src")
+}
+
+fn all_source() -> String {
+    let mut paths = Vec::new();
+    collect_rust_sources(&source_dir(), &mut paths);
+    paths.sort();
+    paths
+        .into_iter()
+        .map(|path| read(&path))
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+fn collect_rust_sources(directory: &Path, paths: &mut Vec<PathBuf>) {
+    for entry in fs::read_dir(directory).expect("read spatial source directory") {
+        let path = entry.expect("source entry").path();
+        if path.is_dir() {
+            collect_rust_sources(&path, paths);
+        } else if path.extension().is_some_and(|extension| extension == "rs") {
+            paths.push(path);
+        }
+    }
 }
 
 fn read(path: &Path) -> String {

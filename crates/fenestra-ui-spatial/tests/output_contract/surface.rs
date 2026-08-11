@@ -1,12 +1,10 @@
 use std::collections::BTreeSet;
 use std::fs;
 
-use crate::*;
-
 use super::source::{all_source, source_dir};
 use super::surface_support::{
-    assert_const_and_must_use, assert_struct_fields_private, implementation_blocks, names,
-    public_constants, public_methods,
+    assert_const_and_must_use, assert_struct_fields_private, names, public_constants,
+    public_methods,
 };
 
 const EXPECTED_EXPORTS: [&str; 106] = [
@@ -118,24 +116,8 @@ const EXPECTED_EXPORTS: [&str; 106] = [
     "SpatialOutputV2",
 ];
 
-const NEW_STRUCTS: [&str; 13] = [
-    "SpatialBrushKeyV2",
-    "SpatialImageKeyV2",
-    "SpatialRgba8V2",
-    "SpatialGradientStopV2",
-    "SpatialBrushV2",
-    "SpatialImageV2",
-    "SpatialImageSourceRectV2",
-    "SpatialImageDestinationRectV2",
-    "SpatialPaintV2",
-    "SpatialHitV2",
-    "SpatialSemanticGeometryV2",
-    "SpatialResourceInputV2",
-    "SpatialItemInputV2",
-];
-
 #[test]
-fn content_slice_reexports_exactly_the_registered_surface() {
+fn raw_output_slice_has_exact_explicit_prototype_exports() {
     let source = fs::read_to_string(source_dir().join("lib.rs")).expect("read lib.rs");
     let marker = "pub mod prototype {";
     let start = source.find(marker).expect("prototype module") + marker.len();
@@ -144,7 +126,7 @@ fn content_slice_reexports_exactly_the_registered_surface() {
 
     let mut observed = BTreeSet::new();
     for item in prototype.split("pub use crate::").skip(1) {
-        let names = if let Some(list_start) = item.find("::{") {
+        let exported = if let Some(list_start) = item.find("::{") {
             let list_end = item.find("};").expect("terminated grouped reexport");
             &item[list_start + 3..list_end]
         } else {
@@ -154,122 +136,122 @@ fn content_slice_reexports_exactly_the_registered_surface() {
                 .next()
                 .expect("singleton name")
         };
-        for name in names.split(',').map(str::trim) {
-            if !name.is_empty() {
-                assert!(observed.insert(name), "duplicate reexport {name}");
-            }
+        for name in exported
+            .split(',')
+            .map(str::trim)
+            .filter(|name| !name.is_empty())
+        {
+            assert!(observed.insert(name), "duplicate reexport {name}");
         }
     }
     assert_eq!(observed, EXPECTED_EXPORTS.into_iter().collect());
 }
 
 #[test]
-fn content_methods_and_constants_are_exact() {
+fn raw_output_struct_fields_are_private_and_surfaces_are_exact() {
     let source = all_source();
-    assert_surface(&source, "SpatialBrushKeyV2", &["new", "get"]);
-    assert_surface(&source, "SpatialImageKeyV2", &["new", "get"]);
-    assert_surface(&source, "SpatialRgba8V2", &["new", "r", "g", "b", "a"]);
+    for type_name in [
+        "SpatialOutputAabbV2",
+        "SpatialGeometryOutputRecordV2",
+        "SpatialClipOutputRecordV2",
+        "SpatialPaintOutputRecordV2",
+        "SpatialHitOutputRecordV2",
+        "SpatialSemanticOutputRecordV2",
+        "SpatialOutputV2",
+    ] {
+        assert_struct_fields_private(&source, type_name);
+        assert!(public_constants(&source, type_name).is_empty());
+    }
+
     assert_surface(
         &source,
-        "SpatialGradientStopV2",
-        &["new", "offset", "color"],
-    );
-    assert_surface(&source, "SpatialBrushV2", &["new", "key", "content"]);
-    assert_surface(
-        &source,
-        "SpatialImageSourceRectV2",
-        &["new", "x", "y", "width", "height"],
-    );
-    assert_surface(
-        &source,
-        "SpatialImageDestinationRectV2",
-        &["new", "x", "y", "width", "height"],
-    );
-    assert_surface(
-        &source,
-        "SpatialPaintV2",
-        &["new", "owner", "item_ordinal", "content"],
+        "SpatialOutputAabbV2",
+        &["new", "is_empty", "min_x", "min_y", "max_x", "max_y"],
     );
     assert_surface(
         &source,
-        "SpatialHitV2",
+        "SpatialGeometryOutputRecordV2",
         &[
             "new",
-            "owner",
-            "item_ordinal",
-            "coverage",
-            "clip",
-            "input_policy",
+            "key",
+            "base_x",
+            "base_y",
+            "base_width",
+            "base_height",
+            "world_from_local",
+            "world_determinant",
+            "world_aabb",
         ],
     );
     assert_surface(
         &source,
-        "SpatialSemanticGeometryV2",
-        &["new", "owner", "item_ordinal", "shape", "fill_rule", "clip"],
+        "SpatialClipOutputRecordV2",
+        &[
+            "new",
+            "key",
+            "world_from_local",
+            "world_determinant",
+            "primitive_world_aabb",
+            "owner",
+            "parent",
+            "shape",
+        ],
     );
     assert_surface(
         &source,
-        "SpatialResourceInputV2",
-        &["new", "gradient_stops", "brushes", "images"],
+        "SpatialPaintOutputRecordV2",
+        &[
+            "new",
+            "key",
+            "world_from_local",
+            "world_determinant",
+            "world_aabb",
+            "owner",
+            "reference",
+            "clip",
+            "stack_ordinal",
+            "item_ordinal",
+        ],
     );
+    for type_name in ["SpatialHitOutputRecordV2", "SpatialSemanticOutputRecordV2"] {
+        assert_surface(
+            &source,
+            type_name,
+            &[
+                "new",
+                "key",
+                "world_from_local",
+                "world_determinant",
+                "world_aabb",
+                "owner",
+                "shape",
+                "clip",
+                "stack_ordinal",
+                "item_ordinal",
+            ],
+        );
+    }
     assert_surface(
         &source,
-        "SpatialItemInputV2",
-        &["new", "paint_items", "hit_items", "semantic_items"],
+        "SpatialOutputV2",
+        &["new", "geometry", "clips", "paints", "hits", "semantics"],
     );
-
-    let image_methods = ["new", "key", "width", "height", "stride", "bytes"];
-    assert_eq!(
-        public_methods(&source, "SpatialImageV2"),
-        names(&image_methods)
-    );
-    assert!(public_constants(&source, "SpatialImageV2").is_empty());
-    assert_const_and_must_use(
-        &source,
-        "SpatialImageV2",
-        &["key", "width", "height", "stride"],
-        &image_methods,
-    );
-
-    for payload in ["SpatialBrushContentV2", "SpatialPaintContentV2"] {
-        assert!(public_methods(&source, payload).is_empty());
-        assert!(public_constants(&source, payload).is_empty());
-        assert_no_associated_all(&source, payload);
-    }
-    for vocabulary in [
-        "SpatialBrushKindV2",
-        "SpatialPaintKindV2",
-        "SpatialInputPolicyV2",
-    ] {
-        assert!(public_methods(&source, vocabulary).is_empty());
-        assert_eq!(public_constants(&source, vocabulary), names(&["ALL"]));
-    }
 }
 
 #[test]
-fn content_all_arrays_have_the_exact_registered_types() {
-    let _: [SpatialBrushKindV2; 2] = SpatialBrushKindV2::ALL;
-    let _: [SpatialPaintKindV2; 2] = SpatialPaintKindV2::ALL;
-    let _: [SpatialInputPolicyV2; 2] = SpatialInputPolicyV2::ALL;
-}
-
-#[test]
-fn every_new_content_struct_keeps_its_fields_private() {
+fn paint_reference_enum_has_only_its_two_payload_variants() {
     let source = all_source();
-    for name in NEW_STRUCTS {
-        assert_struct_fields_private(&source, name);
-    }
+    assert_eq!(
+        source
+            .matches("pub enum SpatialPaintOutputReferenceV2")
+            .count(),
+        1
+    );
+    assert!(public_methods(&source, "SpatialPaintOutputReferenceV2").is_empty());
+    assert!(public_constants(&source, "SpatialPaintOutputReferenceV2").is_empty());
 }
 
 fn assert_surface(source: &str, type_name: &str, methods: &[&str]) {
     assert_eq!(public_methods(source, type_name), names(methods));
-    assert!(public_constants(source, type_name).is_empty());
     assert_const_and_must_use(source, type_name, methods, methods);
-}
-
-fn assert_no_associated_all(source: &str, type_name: &str) {
-    for implementation in implementation_blocks(source, type_name) {
-        assert!(!implementation.contains("pub const ALL"));
-        assert!(!implementation.contains("pub static ALL"));
-    }
 }

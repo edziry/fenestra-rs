@@ -7,7 +7,7 @@ use super::surface_support::{
     public_methods,
 };
 
-const EXPECTED_EXPORTS: [&str; 98] = [
+const EXPECTED_EXPORTS: [&str; 106] = [
     "Affine2V2",
     "REGISTERED_SPATIAL_LIMITS_V2",
     "SpatialAabbV2",
@@ -106,9 +106,17 @@ const EXPECTED_EXPORTS: [&str; 98] = [
     "SpatialOutputErrorKindV2",
     "SpatialResolveErrorKindV2",
     "SpatialResolveErrorV2",
+    "SpatialOutputAabbV2",
+    "SpatialPaintOutputReferenceV2",
+    "SpatialGeometryOutputRecordV2",
+    "SpatialClipOutputRecordV2",
+    "SpatialPaintOutputRecordV2",
+    "SpatialHitOutputRecordV2",
+    "SpatialSemanticOutputRecordV2",
+    "SpatialOutputV2",
 ];
 
-const EXPECTED_STRUCTS: [&str; 37] = [
+const EXPECTED_STRUCTS: [&str; 44] = [
     "Affine2V2",
     "SpatialAabbV2",
     "SpatialAnchorV2",
@@ -146,6 +154,13 @@ const EXPECTED_STRUCTS: [&str; 37] = [
     "SpatialViewportV2",
     "SpatialInputV2",
     "SpatialResolveErrorV2",
+    "SpatialOutputAabbV2",
+    "SpatialGeometryOutputRecordV2",
+    "SpatialClipOutputRecordV2",
+    "SpatialPaintOutputRecordV2",
+    "SpatialHitOutputRecordV2",
+    "SpatialSemanticOutputRecordV2",
+    "SpatialOutputV2",
 ];
 
 const NEW_ENUMS: [&str; 28] = [
