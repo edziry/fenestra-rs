@@ -93,6 +93,11 @@ impl RawInputFixture {
         self
     }
 
+    pub(super) fn with_clips(mut self, clips: Vec<SpatialClipV2>) -> Self {
+        self.clips = clips;
+        self
+    }
+
     pub(super) fn with_paint_items(mut self, paint_items: Vec<SpatialPaintV2>) -> Self {
         self.paint_items = paint_items;
         self

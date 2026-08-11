@@ -11,9 +11,11 @@ use super::{
     prepare_path_structure as prepare_path_structure_stage,
     prepare_prepared_brushes as prepare_prepared_brushes_stage,
     prepare_shape_structure as prepare_shape_structure_stage, prepare_topology,
+    prepare_validated_clips as prepare_validated_clips_stage,
     prepare_validated_images as prepare_validated_images_stage,
     prepare_validated_paths as prepare_validated_paths_stage,
-    prepare_validated_shapes as prepare_validated_shapes_stage, validate_direct_count,
+    prepare_validated_shapes as prepare_validated_shapes_stage,
+    validate_clip_depth as validate_clip_depth_stage, validate_direct_count,
     validate_gradient_stop_range as validate_gradient_stop_range_stage,
     validate_island_fact as validate_island_fact_stage,
     validate_polygon_range as validate_polygon_range_stage,
@@ -119,6 +121,13 @@ macro_rules! prepare_validated_images {
     }};
 }
 
+macro_rules! prepare_validated_clips {
+    ($fixture:expr, $viewport:expr, $limits:expr) => {{
+        prepare_validated_images!($fixture, $viewport, $limits)
+            .and_then($crate::input_validation::tests::prepare_validated_clips_stage)
+    }};
+}
+
 mod brush_structure_keys;
 mod brush_structure_priority;
 mod brush_structure_ranges;
@@ -158,6 +167,13 @@ mod shape_structure_success;
 mod shape_structure_support;
 mod topology;
 mod topology_limits;
+mod validated_clip_ancestry;
+mod validated_clip_keys;
+mod validated_clip_limits;
+mod validated_clip_priority;
+mod validated_clip_references;
+mod validated_clip_success;
+mod validated_clip_support;
 mod validated_image_extents;
 mod validated_image_keys;
 mod validated_image_layout;
@@ -206,6 +222,14 @@ fn check_gradient_stop_range(
     stop_count: u128,
 ) -> Result<u128, SpatialResolveErrorV2> {
     validate_gradient_stop_range_stage(brush, cursor, start, length, stop_count)
+}
+
+fn check_clip_depth(
+    clip: u32,
+    observed: usize,
+    limits: SpatialLimitsV2,
+) -> Result<(), SpatialResolveErrorV2> {
+    validate_clip_depth_stage(clip, observed, limits)
 }
 
 fn limits_with_direct(maxima: [usize; DIRECT_COUNT]) -> SpatialLimitsV2 {
