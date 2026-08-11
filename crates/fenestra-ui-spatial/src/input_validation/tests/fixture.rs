@@ -52,6 +52,12 @@ impl RawInputFixture {
         }
     }
 
+    pub(super) fn with_nodes(nodes: Vec<SpatialNodeV2>) -> Self {
+        let mut fixture = Self::new([1; DIRECT_COUNT]);
+        fixture.nodes = nodes;
+        fixture
+    }
+
     pub(super) fn input(&self) -> SpatialInputV2<'_> {
         SpatialInputV2::new(
             SpatialTopologyInputV2::new(SpatialViewportV2::new(-1, -1), &self.nodes),
