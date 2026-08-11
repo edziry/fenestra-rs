@@ -188,6 +188,26 @@ fn every_dimension_kind_rejects_the_synthetic_host_record() {
 }
 
 #[test]
+fn every_dimension_kind_rejects_a_singleton_synthetic_record() {
+    let fixture = input(vec![root(valid_container())]);
+    let plan = expect_plan(prepare_island_plan!(&fixture, VIEWPORT, limits(0, 0, 0)));
+    let kinds = dimension_input_kinds();
+    assert_eq!(kinds.len(), 8);
+
+    for kind in kinds {
+        expect_bridge(
+            map_layout_preflight_error!(
+                plan,
+                0,
+                LayoutErrorKindV1::Input(kind),
+                LayoutErrorLocationV1::InputNode { index: 0 }
+            ),
+            SpatialErrorLocationV2::Node { index: 0 },
+        );
+    }
+}
+
+#[test]
 fn fallback_uses_the_selected_items_dense_island_or_singleton_owner() {
     let valid = valid_container();
     let island_fixture = input(vec![

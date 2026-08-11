@@ -245,12 +245,12 @@ fn synthetic_host_extents_come_from_each_root_or_free_owner() {
 
     let free_island = input(vec![
         root(valid_container()),
-        free(1, 0, 10, 20, too_wide),
+        free(1, 0, 20, 10, too_tall),
         layout(2, 1, fixed(10), fixed(10), valid_container()),
     ]);
     expect_input(
         preflight(&free_island, VIEWPORT, limits(1, 2, 2)),
-        width_fit,
+        height_fit,
         SpatialErrorLocationV2::Node { index: 1 },
     );
 }
