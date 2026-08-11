@@ -2,11 +2,13 @@ use std::error::Error;
 
 use super::{
     make_resolve_error, map_layout_preflight_error as map_layout_preflight_error_stage,
-    prepare_direct_counts, prepare_island_plan as prepare_island_plan_stage,
+    map_path_k1_error as map_path_k1_error_stage, prepare_direct_counts,
+    prepare_island_plan as prepare_island_plan_stage,
     prepare_layout_preflight as prepare_layout_preflight_stage,
     prepare_local_transforms as prepare_local_transforms_stage,
     prepare_path_structure as prepare_path_structure_stage, prepare_topology,
-    validate_direct_count, validate_island_fact as validate_island_fact_stage,
+    prepare_validated_paths as prepare_validated_paths_stage, validate_direct_count,
+    validate_island_fact as validate_island_fact_stage,
 };
 use crate::error::SpatialErrorLocationV2;
 use crate::limits::{SpatialLimitKindV2, SpatialLimitsV2};
@@ -67,6 +69,13 @@ macro_rules! prepare_path_structure {
     }};
 }
 
+macro_rules! prepare_validated_paths {
+    ($fixture:expr, $viewport:expr, $limits:expr) => {{
+        prepare_path_structure!($fixture, $viewport, $limits)
+            .and_then($crate::input_validation::tests::prepare_validated_paths_stage)
+    }};
+}
+
 mod counts;
 mod errors;
 mod fixture;
@@ -90,6 +99,12 @@ mod path_structure_support;
 mod placement;
 mod topology;
 mod topology_limits;
+mod validated_path_grammar;
+mod validated_path_limits;
+mod validated_path_priority;
+mod validated_path_scalars;
+mod validated_path_success;
+mod validated_path_support;
 
 fn check_island_fact(
     kind: SpatialLimitKindV2,
