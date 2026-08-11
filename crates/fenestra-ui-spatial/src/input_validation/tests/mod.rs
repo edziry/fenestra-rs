@@ -1,6 +1,9 @@
 use std::error::Error;
 
-use super::{make_resolve_error, prepare_direct_counts, prepare_topology, validate_direct_count};
+use super::{
+    make_resolve_error, prepare_direct_counts, prepare_island_plan as prepare_island_plan_stage,
+    prepare_topology, validate_direct_count, validate_island_fact as validate_island_fact_stage,
+};
 use crate::error::SpatialErrorLocationV2;
 use crate::limits::{SpatialLimitKindV2, SpatialLimitsV2};
 use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};
@@ -11,13 +14,40 @@ const U32_ROW_CAPACITY: u128 = u32::MAX as u128 + 1;
 const GLOBALLY_INDEXED_DIRECT_INDICES: [usize; 9] = [0, 1, 2, 3, 4, 5, 6, 7, 11];
 const PAYLOAD_DIRECT_INDICES: [usize; 3] = [8, 9, 10];
 
+macro_rules! prepare_island_plan {
+    ($fixture:expr, $limits:expr) => {{
+        $crate::input_validation::prepare_direct_counts(
+            ($fixture).input_with_viewport(
+                $crate::input_validation::tests::island_support::zero_viewport(),
+            ),
+            $limits,
+        )
+        .and_then($crate::input_validation::prepare_topology)
+        .and_then($crate::input_validation::prepare_topology_limits)
+        .and_then($crate::input_validation::prepare_placement_input)
+        .and_then($crate::input_validation::tests::prepare_island_plan_stage)
+    }};
+}
+
 mod counts;
 mod errors;
 mod fixture;
 mod input;
+mod island_limits;
+mod island_support;
+mod islands;
 mod placement;
 mod topology;
 mod topology_limits;
+
+fn check_island_fact(
+    kind: SpatialLimitKindV2,
+    index: Option<u32>,
+    observed: u128,
+    limits: SpatialLimitsV2,
+) -> Result<(), SpatialResolveErrorV2> {
+    validate_island_fact_stage(kind, index, observed, limits)
+}
 
 fn limits_with_direct(maxima: [usize; DIRECT_COUNT]) -> SpatialLimitsV2 {
     let mut values = [usize::MAX; SpatialLimitKindV2::ALL.len()];
