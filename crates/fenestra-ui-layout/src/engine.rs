@@ -31,6 +31,13 @@ impl<'a> ValidatedLayoutInputV1<'a> {
     }
 }
 
+/// Opaque owned proof that complete version-1 core input validation accepted
+/// one snapshot.
+pub struct PreparedLayoutInputV1 {
+    viewport: LayoutViewportV1,
+    nodes: Vec<LayoutNodeV1>,
+}
+
 /// Call-local candidate-neutral layout computation boundary.
 pub trait LayoutEngineV1: Send + Sync + Unpin + UnwindSafe + RefUnwindSafe + 'static {
     /// Computes one owned raw output from fully validated core input.
@@ -40,19 +47,41 @@ pub trait LayoutEngineV1: Send + Sync + Unpin + UnwindSafe + RefUnwindSafe + 'st
     ) -> Result<LayoutOutputV1, LayoutEngineErrorV1>;
 }
 
+/// Validates one borrowed input and owns the accepted snapshot without invoking
+/// a layout engine.
+pub fn prepare_layout_v1(
+    input: LayoutInputV1<'_>,
+    limits: LayoutLimitsV1,
+) -> Result<PreparedLayoutInputV1, LayoutErrorV1> {
+    validate_input_v1(input, limits)
+        .map_err(|(kind, location)| LayoutErrorV1::input(kind, location))?;
+    Ok(PreparedLayoutInputV1 {
+        viewport: input.viewport(),
+        nodes: input.nodes().to_vec(),
+    })
+}
+
+/// Invokes one engine with a prepared snapshot and validates the owned output.
+pub fn compute_prepared_layout_v1<E: LayoutEngineV1 + ?Sized>(
+    engine: &E,
+    prepared: PreparedLayoutInputV1,
+) -> Result<LayoutOutputV1, LayoutErrorV1> {
+    let input = LayoutInputV1::new(prepared.viewport, &prepared.nodes);
+    let output = engine
+        .compute(ValidatedLayoutInputV1::new(input))
+        .map_err(LayoutErrorV1::from_engine)?;
+    validate_output_v1(input.nodes(), output)
+        .map_err(|(kind, location)| LayoutErrorV1::output(kind, location))
+}
+
 /// Validates core input, invokes one engine, and validates its owned output.
 pub fn compute_layout_v1<E: LayoutEngineV1 + ?Sized>(
     engine: &E,
     input: LayoutInputV1<'_>,
     limits: LayoutLimitsV1,
 ) -> Result<LayoutOutputV1, LayoutErrorV1> {
-    validate_input_v1(input, limits)
-        .map_err(|(kind, location)| LayoutErrorV1::input(kind, location))?;
-    let output = engine
-        .compute(ValidatedLayoutInputV1::new(input))
-        .map_err(LayoutErrorV1::from_engine)?;
-    validate_output_v1(input.nodes(), output)
-        .map_err(|(kind, location)| LayoutErrorV1::output(kind, location))
+    let prepared = prepare_layout_v1(input, limits)?;
+    compute_prepared_layout_v1(engine, prepared)
 }
 
 /// Owned integer reference engine reserved for the version-1 stack contract.
