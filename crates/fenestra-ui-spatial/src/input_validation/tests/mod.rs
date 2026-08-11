@@ -3,8 +3,10 @@ use std::error::Error;
 use super::{
     make_resolve_error, map_image_p4_error as map_image_p4_error_stage,
     map_layout_preflight_error as map_layout_preflight_error_stage,
-    map_path_k1_error as map_path_k1_error_stage, map_shape_k1_error as map_shape_k1_error_stage,
+    map_path_k1_error as map_path_k1_error_stage, map_path_k2_error as map_path_k2_error_stage,
+    map_shape_k1_error as map_shape_k1_error_stage,
     prepare_brush_structure as prepare_brush_structure_stage, prepare_direct_counts,
+    prepare_flattened_paths as prepare_flattened_paths_stage,
     prepare_island_plan as prepare_island_plan_stage,
     prepare_layout_preflight as prepare_layout_preflight_stage,
     prepare_local_transforms as prepare_local_transforms_stage,
@@ -154,6 +156,13 @@ macro_rules! prepare_validated_semantic_items {
     }};
 }
 
+macro_rules! prepare_flattened_paths {
+    ($fixture:expr, $viewport:expr, $limits:expr) => {{
+        prepare_validated_semantic_items!($fixture, $viewport, $limits)
+            .and_then($crate::input_validation::tests::prepare_flattened_paths_stage)
+    }};
+}
+
 mod brush_structure_keys;
 mod brush_structure_priority;
 mod brush_structure_ranges;
@@ -162,6 +171,12 @@ mod brush_structure_support;
 mod counts;
 mod errors;
 mod fixture;
+mod flattened_path_errors;
+mod flattened_path_limits;
+mod flattened_path_priority;
+mod flattened_path_retention;
+mod flattened_path_success;
+mod flattened_path_support;
 mod input;
 mod island_limits;
 mod island_support;
