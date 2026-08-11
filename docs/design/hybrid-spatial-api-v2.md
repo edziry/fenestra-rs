@@ -250,13 +250,144 @@ After neutral output validation, the synthetic root is compared in
 translation runs. `BridgeInvariant` remains reserved for an impossible bridge
 kind or location and never represents candidate geometry.
 
-## Later surface
+## Numeric surface
 
-The numeric RED adds checked scalar and affine operations without changing raw
-storage. The content API RED adds the entity and payload records named by the
-content and field contracts, then `SpatialInputV2` combines topology and content
-views. Validation adds `SpatialResolveErrorV2`, which stores only closed kind,
-trusted location, and optional limit numbers; it never retains or renders
-authored keys, scalar values, or nested layout payloads. Resolution types appear
-only when their exclusive REDs exist. Candidate types, logical identities, and
+The numeric slice adds exactly these seven `prototype` exports, taking the
+surface from 29 to 36 names:
+
+```text
+SpatialAabbV2
+SpatialAffineComponentV2, SpatialArithmeticOperationV2
+SpatialTransformErrorKindV2, SpatialTransformScalarFieldV2
+SpatialTransformStageV2
+round_ratio_v2
+```
+
+It does not add a low-level numeric error value or expose the future resolver
+error. The contextual resolver maps the closed operation vocabularies into its
+own trusted location only after that boundary has an exclusive RED.
+
+`SpatialScalarV2` gains the constants and checked operations below without
+changing its raw constructor or storage:
+
+```rust
+pub const FRACTIONAL_BITS: u32 = 16;
+pub const SCALE: i64 = 65_536;
+pub const MIN_RAW: i64 = -140_737_488_289_792;
+pub const MAX_RAW: i64 = 140_737_488_289_792;
+
+pub const fn is_in_domain(self) -> bool;
+pub const fn checked_from_i32(value: i32) -> Option<Self>;
+pub const fn checked_add(self, rhs: Self) -> Option<Self>;
+pub const fn checked_sub(self, rhs: Self) -> Option<Self>;
+pub const fn checked_neg(self) -> Option<Self>;
+pub const fn checked_mul(self, rhs: Self) -> Option<Self>;
+pub const fn checked_div(self, rhs: Self) -> Option<Self>;
+```
+
+Checked scalar operations first reject operands outside the canonical domain.
+They return `None` for a result outside that domain and division also returns
+`None` for zero. Multiplication rounds `(left_raw * right_raw) / SCALE` once;
+division normalizes the divisor sign and rounds `(left_raw * SCALE) / right_raw`
+once. `checked_from_i32` accepts every `i32` except `i32::MIN`.
+
+```rust
+pub const fn round_ratio_v2(
+    numerator: i128,
+    positive_denominator: i128,
+) -> Option<i128>;
+```
+
+The ratio operation implements the core nearest, ties-away rule for every
+`i128` numerator without overflowing on `i128::MIN`. It returns `None` exactly
+when the denominator is zero or negative; it does not impose the spatial scalar
+domain on its `i128` result.
+
+`Affine2V2` gains:
+
+```rust
+pub const fn identity() -> Self;
+pub const fn translation(x: SpatialScalarV2, y: SpatialScalarV2) -> Self;
+pub const fn scale(x: SpatialScalarV2, y: SpatialScalarV2) -> Self;
+pub const fn quarter_turn_clockwise() -> Self;
+pub const fn checked_compose(
+    self,
+    right: Self,
+) -> Result<Self, SpatialAffineComponentV2>;
+pub const fn checked_apply_point(
+    self,
+    point: SpatialPointV2,
+) -> Result<SpatialPointV2, SpatialAxisV2>;
+pub const fn determinant_raw(self) -> i128;
+pub const fn inverse_point(self, point: SpatialPointV2)
+    -> Option<SpatialPointV2>;
+pub const fn checked_transform_aabb(
+    self,
+    local: SpatialAabbV2,
+) -> Result<SpatialAabbV2, SpatialArithmeticOperationV2>;
+```
+
+The clockwise quarter turn uses y-down scene coordinates and coefficients
+`(0,SCALE,-SCALE,0,0,0)`. Composition applies `right` first and reports the
+first out-of-domain result in `A,B,C,D,Tx,Ty` order. Point application reports
+`X` before `Y`. Every affine operation is total over raw constructors and uses
+checked `i128` intermediates. Composition, point application, and AABB
+transformation do not prevalidate coefficients; cancellation may produce a canonical result.
+Intermediate overflow reports the same component or axis. Raw matrix fields
+are validated independently before a resolver calls them. Composition may
+return a singular matrix successfully; the caller checks its determinant at
+the contextual transform stage. `determinant_raw` is exact.
+`inverse_point` normalizes a negative determinant before the positive-ratio
+rule. It returns `None` for an out-of-domain affine coefficient or input point,
+a zero determinant, or an out-of-domain inverse result. It compares the exact
+rational X then Y result with the scalar domain before rounding either result.
+Resolver coverage calls it only after input-domain and determinant validation,
+so `None` there means no valid local coverage rather than an arithmetic failure.
+Any widened inverse intermediate that cannot be represented also returns `None`.
+
+`SpatialAabbV2` is a private-field value with:
+
+```rust
+pub const fn empty() -> Self;
+pub const fn from_edges(
+    min_x: SpatialScalarV2,
+    min_y: SpatialScalarV2,
+    max_x: SpatialScalarV2,
+    max_y: SpatialScalarV2,
+) -> Option<Self>;
+pub const fn is_empty(self) -> bool;
+pub const fn min_x(self) -> SpatialScalarV2;
+pub const fn min_y(self) -> SpatialScalarV2;
+pub const fn max_x(self) -> SpatialScalarV2;
+pub const fn max_y(self) -> SpatialScalarV2;
+pub const fn intersection(self, other: Self) -> Self;
+```
+
+`from_edges` accepts only canonical operands with `min <= max`; equality is a
+nonempty closed point. `empty` stores four zero edges and every disjoint
+intersection canonicalizes to that same value. Touching intersections preserve
+their closed point or line. Transforming an empty AABB returns empty. A
+nonempty transform evaluates all four closure corners as exact numerators,
+selects rational extrema, and only then rounds minima outward with floor and
+maxima with ceil. It reports `AabbMinX,AabbMinY,AabbMaxX,AabbMaxY` in that order
+and never returns an `Affine` operation variant. Intermediate overflow is
+attributed to the first affected edge in that same order.
+
+`SpatialTransformStageV2::ALL`, `SpatialAffineComponentV2::ALL`,
+`SpatialTransformScalarFieldV2::ALL`, `SpatialTransformErrorKindV2::ALL`, and
+`SpatialArithmeticOperationV2::ALL` use the exact field and diagnostics orders.
+Their lengths are `3,6,8,12,32`; nested variants are flattened stage-major and
+then component-major. These vocabularies and `SpatialAabbV2` implement
+`Clone + Copy + Debug + Eq + PartialEq`, and every new export preserves the
+runtime auto-trait set. All numeric constructors and operations are
+`#[must_use]`.
+
+## Remaining later surface
+
+The content API RED adds the entity and payload records named by the content
+and field contracts, then `SpatialInputV2` combines topology and content views.
+Validation adds `SpatialResolveErrorV2`, which stores only closed kind, trusted
+location, and optional limit numbers; it never retains or renders authored
+keys, scalar values, or nested layout payloads. Resolution types appear only
+when their exclusive REDs exist. Candidate types, logical identities, and
 renderer handles never enter this module.
