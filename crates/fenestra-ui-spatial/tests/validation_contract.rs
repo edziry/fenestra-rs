@@ -7,9 +7,9 @@ use fenestra_ui_spatial::prototype::{
     SpatialDependencyErrorKindV2, SpatialErrorLocationV2, SpatialExtentV2, SpatialFillRuleV2,
     SpatialGeometryInputV2, SpatialGradientStopV2, SpatialHitV2, SpatialImageKeyV2, SpatialImageV2,
     SpatialInputErrorKindV2, SpatialInputPolicyV2, SpatialItemInputV2, SpatialLimitKindV2,
-    SpatialNodeKeyV2, SpatialNodeV2, SpatialPlacementV2, SpatialPointV2, SpatialResourceInputV2,
-    SpatialRgba8V2, SpatialScalarV2, SpatialShapeKeyV2, SpatialTopologyInputV2,
-    SpatialTransformErrorKindV2, SpatialViewportV2,
+    SpatialNodeFieldV2, SpatialNodeKeyV2, SpatialNodeV2, SpatialPlacementV2, SpatialPointV2,
+    SpatialResourceInputV2, SpatialRgba8V2, SpatialScalarV2, SpatialShapeKeyV2,
+    SpatialTopologyInputV2, SpatialTransformErrorKindV2, SpatialViewportV2,
 };
 use fenestra_ui_spatial::prototype::{
     SpatialBrushFieldV2, SpatialClipErrorV2, SpatialClipFieldV2, SpatialColorChannelV2,

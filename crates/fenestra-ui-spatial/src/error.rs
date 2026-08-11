@@ -1,5 +1,13 @@
 use fenestra_ui_layout::prototype::{LayoutConstraintFieldV1, LayoutExtentV1, LayoutPaddingSideV1};
 
+use crate::geometry_field::{
+    SpatialBrushFieldV2, SpatialColorChannelV2, SpatialGradientStopFieldV2, SpatialImageFieldV2,
+    SpatialPathFieldV2, SpatialPathVerbFieldV2, SpatialPolygonPointFieldV2, SpatialShapeFieldV2,
+};
+use crate::item_field::{
+    SpatialClipFieldV2, SpatialHitFieldV2, SpatialPaintFieldV2, SpatialSemanticFieldV2,
+};
+use crate::output_field::{SpatialOutputFieldV2, SpatialOutputTableV2};
 use crate::vocabulary::{SpatialAxisV2, SpatialExtentV2, SpatialNodeFieldV2};
 
 /// Closed container failure vocabulary for raw spatial input.
@@ -106,7 +114,7 @@ impl SpatialDependencyErrorKindV2 {
     ];
 }
 
-/// Trusted location for first-slice spatial diagnostics.
+/// Trusted location for aggregate spatial diagnostics.
 ///
 /// Indexed locations intentionally have no finite `ALL` array.
 ///
@@ -145,6 +153,112 @@ pub enum SpatialErrorLocationV2 {
     Dependency {
         /// Lowest spatial key produced by the unit.
         ordinal: u32,
+    },
+    /// One raw path record and field.
+    Path {
+        /// Trusted path ordinal.
+        index: u32,
+        /// Closed path field selected by validation order.
+        field: SpatialPathFieldV2,
+    },
+    /// One raw path-verb record and field.
+    PathVerb {
+        /// Trusted containing path ordinal.
+        path: u32,
+        /// Trusted path-verb ordinal.
+        verb: u32,
+        /// Closed path-verb field selected by validation order.
+        field: SpatialPathVerbFieldV2,
+    },
+    /// One raw shape record and field.
+    Shape {
+        /// Trusted shape ordinal.
+        index: u32,
+        /// Closed shape field selected by validation order.
+        field: SpatialShapeFieldV2,
+    },
+    /// One raw polygon point and field.
+    PolygonPoint {
+        /// Trusted containing shape ordinal.
+        shape: u32,
+        /// Trusted polygon-point ordinal.
+        point: u32,
+        /// Closed polygon-point field selected by validation order.
+        field: SpatialPolygonPointFieldV2,
+    },
+    /// One raw brush record and field.
+    Brush {
+        /// Trusted brush ordinal.
+        index: u32,
+        /// Closed brush field selected by validation order.
+        field: SpatialBrushFieldV2,
+    },
+    /// One raw gradient stop and field.
+    GradientStop {
+        /// Trusted containing brush ordinal.
+        brush: u32,
+        /// Trusted gradient-stop ordinal.
+        stop: u32,
+        /// Closed gradient-stop field selected by validation order.
+        field: SpatialGradientStopFieldV2,
+    },
+    /// One raw decoded-image record and field.
+    Image {
+        /// Trusted image ordinal.
+        index: u32,
+        /// Closed image field selected by validation order.
+        field: SpatialImageFieldV2,
+    },
+    /// One decoded image pixel and channel.
+    ImagePixel {
+        /// Trusted image ordinal.
+        image: u32,
+        /// Widened decoded-pixel ordinal.
+        pixel: u128,
+        /// Closed channel selected by validation order.
+        channel: SpatialColorChannelV2,
+    },
+    /// One raw clip record and field.
+    Clip {
+        /// Trusted clip ordinal.
+        index: u32,
+        /// Closed clip field selected by validation order.
+        field: SpatialClipFieldV2,
+    },
+    /// One raw paint-item record and field.
+    Paint {
+        /// Trusted paint-item ordinal.
+        index: u32,
+        /// Closed paint-item field selected by validation order.
+        field: SpatialPaintFieldV2,
+    },
+    /// One raw hit-item record and field.
+    Hit {
+        /// Trusted hit-item ordinal.
+        index: u32,
+        /// Closed hit-item field selected by validation order.
+        field: SpatialHitFieldV2,
+    },
+    /// One raw semantic-item record and field.
+    Semantic {
+        /// Trusted semantic-item ordinal.
+        index: u32,
+        /// Closed semantic-item field selected by validation order.
+        field: SpatialSemanticFieldV2,
+    },
+    /// One resolved-output table.
+    Output {
+        /// Closed output table selected by validation order.
+        table: SpatialOutputTableV2,
+    },
+    /// One resolved-output record and field.
+    OutputRecord {
+        /// Closed output table selected by validation order.
+        table: SpatialOutputTableV2,
+        /// Trusted output-record ordinal.
+        index: u32,
+        /// Closed output field selected by validation order.
+        field: SpatialOutputFieldV2,
     },
 }
 

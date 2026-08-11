@@ -142,7 +142,7 @@ trait AmbiguousIfDefault<A> {
     fn marker() {}
 }
 impl<T: ?Sized> AmbiguousIfDefault<()> for T {}
-impl<T: ?Sized + Default> AmbiguousIfDefault<u8> for T {}
+impl<T: Default> AmbiguousIfDefault<u8> for T {}
 
 trait AmbiguousIfDisplay<A> {
     fn marker() {}

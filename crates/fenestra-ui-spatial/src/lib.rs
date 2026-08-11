@@ -4,23 +4,30 @@
 
 mod aabb;
 mod affine;
+mod aggregate_input;
 mod brush;
+mod content_diagnostic;
+mod content_error;
 mod content_input;
 mod content_item;
 mod content_key;
 mod coverage;
 mod error;
+mod geometry_field;
 mod geometry_input;
 mod geometry_kernel;
 mod geometry_key;
 mod image;
+mod item_field;
 mod limits;
 mod model;
 mod numeric;
 mod numeric_error;
+mod output_field;
 mod paint;
 mod paint_kernel;
 mod path;
+mod resolve_error;
 mod shape;
 mod topology;
 mod vocabulary;
@@ -29,10 +36,17 @@ mod vocabulary;
 #[doc(hidden)]
 pub mod prototype {
     pub use crate::aabb::SpatialAabbV2;
+    pub use crate::aggregate_input::SpatialInputV2;
     pub use crate::brush::{
         SpatialBrushContentV2, SpatialBrushKindV2, SpatialBrushV2, SpatialGradientStopV2,
         SpatialRgba8V2,
     };
+    pub use crate::content_diagnostic::{
+        SpatialClipErrorV2, SpatialContentReferenceV2, SpatialGradientErrorV2, SpatialImageErrorV2,
+        SpatialKeyedContentTableV2, SpatialOrderedItemTableV2, SpatialPathGrammarErrorV2,
+        SpatialPayloadTableV2, SpatialShapeErrorV2, SpatialStrokeErrorV2,
+    };
+    pub use crate::content_error::SpatialContentErrorKindV2;
     pub use crate::content_input::{SpatialItemInputV2, SpatialResourceInputV2};
     pub use crate::content_item::{SpatialHitV2, SpatialInputPolicyV2, SpatialSemanticGeometryV2};
     pub use crate::content_key::{SpatialBrushKeyV2, SpatialImageKeyV2};
@@ -43,10 +57,18 @@ pub mod prototype {
         SpatialContainerErrorKindV2, SpatialDependencyErrorKindV2, SpatialErrorLocationV2,
         SpatialInputErrorKindV2, SpatialLayoutDimensionErrorKindV2,
     };
+    pub use crate::geometry_field::{
+        SpatialBrushFieldV2, SpatialColorChannelV2, SpatialGradientStopFieldV2,
+        SpatialImageFieldV2, SpatialPathFieldV2, SpatialPathVerbFieldV2,
+        SpatialPolygonPointFieldV2, SpatialShapeFieldV2,
+    };
     pub use crate::geometry_input::SpatialGeometryInputV2;
     pub use crate::geometry_key::{SpatialClipKeyV2, SpatialPathKeyV2, SpatialShapeKeyV2};
     pub use crate::image::{
         SpatialImageDestinationRectV2, SpatialImageSourceRectV2, SpatialImageV2,
+    };
+    pub use crate::item_field::{
+        SpatialClipFieldV2, SpatialHitFieldV2, SpatialPaintFieldV2, SpatialSemanticFieldV2,
     };
     pub use crate::limits::{REGISTERED_SPATIAL_LIMITS_V2, SpatialLimitKindV2, SpatialLimitsV2};
     pub use crate::model::{
@@ -56,8 +78,13 @@ pub mod prototype {
     };
     pub use crate::numeric::round_ratio_v2;
     pub use crate::numeric_error::{SpatialArithmeticOperationV2, SpatialTransformErrorKindV2};
+    pub use crate::output_field::{SpatialOutputFieldV2, SpatialOutputTableV2};
     pub use crate::paint::{SpatialPaintContentV2, SpatialPaintKindV2, SpatialPaintV2};
     pub use crate::path::{SpatialPathV2, SpatialPathVerbKindV2, SpatialPathVerbV2};
+    pub use crate::resolve_error::{
+        SpatialLayoutErrorKindV2, SpatialOutputErrorKindV2, SpatialResolveErrorKindV2,
+        SpatialResolveErrorV2,
+    };
     pub use crate::shape::{SpatialShapeGeometryV2, SpatialShapeKindV2, SpatialShapeV2};
     pub use crate::topology::{
         SpatialContainerV2, SpatialFreePlacementV2, SpatialLayoutPlacementV2, SpatialNodeV2,

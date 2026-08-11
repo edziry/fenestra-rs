@@ -9,7 +9,7 @@ use super::surface_support::{
     public_constants, public_methods,
 };
 
-const EXPECTED_EXPORTS: [&str; 68] = [
+const EXPECTED_EXPORTS: [&str; 98] = [
     "Affine2V2",
     "REGISTERED_SPATIAL_LIMITS_V2",
     "SpatialAabbV2",
@@ -78,6 +78,36 @@ const EXPECTED_EXPORTS: [&str; 68] = [
     "SpatialTransformStageV2",
     "SpatialViewportV2",
     "round_ratio_v2",
+    "SpatialInputV2",
+    "SpatialColorChannelV2",
+    "SpatialPathFieldV2",
+    "SpatialPathVerbFieldV2",
+    "SpatialShapeFieldV2",
+    "SpatialPolygonPointFieldV2",
+    "SpatialBrushFieldV2",
+    "SpatialGradientStopFieldV2",
+    "SpatialImageFieldV2",
+    "SpatialClipFieldV2",
+    "SpatialPaintFieldV2",
+    "SpatialHitFieldV2",
+    "SpatialSemanticFieldV2",
+    "SpatialOutputTableV2",
+    "SpatialOutputFieldV2",
+    "SpatialKeyedContentTableV2",
+    "SpatialPayloadTableV2",
+    "SpatialContentReferenceV2",
+    "SpatialOrderedItemTableV2",
+    "SpatialPathGrammarErrorV2",
+    "SpatialShapeErrorV2",
+    "SpatialStrokeErrorV2",
+    "SpatialGradientErrorV2",
+    "SpatialImageErrorV2",
+    "SpatialClipErrorV2",
+    "SpatialContentErrorKindV2",
+    "SpatialLayoutErrorKindV2",
+    "SpatialOutputErrorKindV2",
+    "SpatialResolveErrorKindV2",
+    "SpatialResolveErrorV2",
 ];
 
 const NEW_STRUCTS: [&str; 13] = [

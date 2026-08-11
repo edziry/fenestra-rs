@@ -215,10 +215,44 @@ fn initial_locations_are_typed_and_payload_free() {
 fn location_ordinal(location: SpatialErrorLocationV2) -> u8 {
     match location {
         SpatialErrorLocationV2::Input => 0,
-        SpatialErrorLocationV2::Viewport { .. } => 1,
-        SpatialErrorLocationV2::Node { .. } => 2,
-        SpatialErrorLocationV2::NodeField { .. } => 3,
-        SpatialErrorLocationV2::Island { .. } => 4,
-        SpatialErrorLocationV2::Dependency { .. } => 5,
+        SpatialErrorLocationV2::Viewport { extent: _ } => 1,
+        SpatialErrorLocationV2::Node { index: _ } => 2,
+        SpatialErrorLocationV2::NodeField { index: _, field: _ } => 3,
+        SpatialErrorLocationV2::Island { index: _ } => 4,
+        SpatialErrorLocationV2::Dependency { ordinal: _ } => 5,
+        SpatialErrorLocationV2::Path { index: _, field: _ } => 6,
+        SpatialErrorLocationV2::PathVerb {
+            path: _,
+            verb: _,
+            field: _,
+        } => 7,
+        SpatialErrorLocationV2::Shape { index: _, field: _ } => 8,
+        SpatialErrorLocationV2::PolygonPoint {
+            shape: _,
+            point: _,
+            field: _,
+        } => 9,
+        SpatialErrorLocationV2::Brush { index: _, field: _ } => 10,
+        SpatialErrorLocationV2::GradientStop {
+            brush: _,
+            stop: _,
+            field: _,
+        } => 11,
+        SpatialErrorLocationV2::Image { index: _, field: _ } => 12,
+        SpatialErrorLocationV2::ImagePixel {
+            image: _,
+            pixel: _,
+            channel: _,
+        } => 13,
+        SpatialErrorLocationV2::Clip { index: _, field: _ } => 14,
+        SpatialErrorLocationV2::Paint { index: _, field: _ } => 15,
+        SpatialErrorLocationV2::Hit { index: _, field: _ } => 16,
+        SpatialErrorLocationV2::Semantic { index: _, field: _ } => 17,
+        SpatialErrorLocationV2::Output { table: _ } => 18,
+        SpatialErrorLocationV2::OutputRecord {
+            table: _,
+            index: _,
+            field: _,
+        } => 19,
     }
 }
