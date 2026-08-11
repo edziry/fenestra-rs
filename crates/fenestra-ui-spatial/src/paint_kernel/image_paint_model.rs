@@ -1,0 +1,87 @@
+use crate::aabb::SpatialAabbV2;
+use crate::image::{SpatialImageDestinationRectV2, SpatialImageSourceRectV2};
+
+use super::image_model::ValidatedImageP4;
+
+pub(super) struct PreclipImagePaintP5<'proof, 'image> {
+    paint_index: u32,
+    image: &'proof ValidatedImageP4<'image>,
+    source: SpatialImageSourceRectV2,
+    destination: SpatialImageDestinationRectV2,
+    opacity: u8,
+}
+
+impl<'proof, 'image> PreclipImagePaintP5<'proof, 'image> {
+    pub(super) const fn new(
+        paint_index: u32,
+        image: &'proof ValidatedImageP4<'image>,
+        source: SpatialImageSourceRectV2,
+        destination: SpatialImageDestinationRectV2,
+        opacity: u8,
+    ) -> Self {
+        Self {
+            paint_index,
+            image,
+            source,
+            destination,
+            opacity,
+        }
+    }
+
+    pub(super) const fn paint_index(&self) -> u32 {
+        self.paint_index
+    }
+
+    pub(super) const fn destination(&self) -> SpatialImageDestinationRectV2 {
+        self.destination
+    }
+}
+
+pub(super) struct ValidatedImagePaintP5<'proof, 'image> {
+    preclip: PreclipImagePaintP5<'proof, 'image>,
+    local_bounds: SpatialAabbV2,
+}
+
+impl<'proof, 'image> ValidatedImagePaintP5<'proof, 'image> {
+    pub(super) const fn new(
+        preclip: PreclipImagePaintP5<'proof, 'image>,
+        local_bounds: SpatialAabbV2,
+    ) -> Self {
+        Self {
+            preclip,
+            local_bounds,
+        }
+    }
+
+    pub(super) const fn source(&self) -> SpatialImageSourceRectV2 {
+        self.preclip.source
+    }
+
+    pub(super) const fn destination(&self) -> SpatialImageDestinationRectV2 {
+        self.preclip.destination
+    }
+
+    pub(super) const fn opacity(&self) -> u8 {
+        self.preclip.opacity
+    }
+
+    pub(super) const fn image_width(&self) -> u32 {
+        self.preclip.image.width()
+    }
+
+    pub(super) const fn image_height(&self) -> u32 {
+        self.preclip.image.height()
+    }
+
+    pub(super) const fn image_stride(&self) -> u32 {
+        self.preclip.image.stride()
+    }
+
+    pub(super) fn image_bytes(&self) -> &[u8] {
+        self.preclip.image.bytes()
+    }
+
+    pub(super) const fn local_bounds(&self) -> SpatialAabbV2 {
+        self.local_bounds
+    }
+}
