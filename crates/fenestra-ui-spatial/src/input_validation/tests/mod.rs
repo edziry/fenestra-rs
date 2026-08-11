@@ -16,6 +16,7 @@ use super::{
     prepare_validated_images as prepare_validated_images_stage,
     prepare_validated_paint_items as prepare_validated_paint_items_stage,
     prepare_validated_paths as prepare_validated_paths_stage,
+    prepare_validated_semantic_items as prepare_validated_semantic_items_stage,
     prepare_validated_shapes as prepare_validated_shapes_stage,
     validate_clip_depth as validate_clip_depth_stage, validate_direct_count,
     validate_gradient_stop_range as validate_gradient_stop_range_stage,
@@ -146,6 +147,13 @@ macro_rules! prepare_validated_hit_items {
     }};
 }
 
+macro_rules! prepare_validated_semantic_items {
+    ($fixture:expr, $viewport:expr, $limits:expr) => {{
+        prepare_validated_hit_items!($fixture, $viewport, $limits)
+            .and_then($crate::input_validation::tests::prepare_validated_semantic_items_stage)
+    }};
+}
+
 mod brush_structure_keys;
 mod brush_structure_priority;
 mod brush_structure_ranges;
@@ -220,6 +228,11 @@ mod validated_path_priority;
 mod validated_path_scalars;
 mod validated_path_success;
 mod validated_path_support;
+mod validated_semantic_order;
+mod validated_semantic_priority;
+mod validated_semantic_references;
+mod validated_semantic_success;
+mod validated_semantic_support;
 mod validated_shape_limits;
 mod validated_shape_priority;
 mod validated_shape_scalars;
