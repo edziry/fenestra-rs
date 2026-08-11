@@ -3,18 +3,18 @@ use crate::image::{SpatialImageDestinationRectV2, SpatialImageSourceRectV2};
 
 use super::image_model::ValidatedImageP4;
 
-pub(super) struct PreclipImagePaintP5<'proof, 'image> {
+pub(super) struct PreclipImagePaintP5<'image> {
     paint_index: u32,
-    image: &'proof ValidatedImageP4<'image>,
+    image: ValidatedImageP4<'image>,
     source: SpatialImageSourceRectV2,
     destination: SpatialImageDestinationRectV2,
     opacity: u8,
 }
 
-impl<'proof, 'image> PreclipImagePaintP5<'proof, 'image> {
+impl<'image> PreclipImagePaintP5<'image> {
     pub(super) const fn new(
         paint_index: u32,
-        image: &'proof ValidatedImageP4<'image>,
+        image: ValidatedImageP4<'image>,
         source: SpatialImageSourceRectV2,
         destination: SpatialImageDestinationRectV2,
         opacity: u8,
@@ -37,14 +37,14 @@ impl<'proof, 'image> PreclipImagePaintP5<'proof, 'image> {
     }
 }
 
-pub(super) struct ValidatedImagePaintP5<'proof, 'image> {
-    preclip: PreclipImagePaintP5<'proof, 'image>,
+pub(super) struct ValidatedImagePaintP5<'image> {
+    preclip: PreclipImagePaintP5<'image>,
     local_bounds: SpatialAabbV2,
 }
 
-impl<'proof, 'image> ValidatedImagePaintP5<'proof, 'image> {
+impl<'image> ValidatedImagePaintP5<'image> {
     pub(super) const fn new(
-        preclip: PreclipImagePaintP5<'proof, 'image>,
+        preclip: PreclipImagePaintP5<'image>,
         local_bounds: SpatialAabbV2,
     ) -> Self {
         Self {

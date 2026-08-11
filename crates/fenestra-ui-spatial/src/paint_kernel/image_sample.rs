@@ -5,7 +5,7 @@ use super::apply_opacity_p1;
 use super::image_paint_model::ValidatedImagePaintP5;
 
 pub(super) fn sample_image_p6(
-    paint: &ValidatedImagePaintP5<'_, '_>,
+    paint: &ValidatedImagePaintP5<'_>,
     point: SpatialPointV2,
 ) -> Option<SpatialRgba8V2> {
     let bounds = paint.local_bounds();

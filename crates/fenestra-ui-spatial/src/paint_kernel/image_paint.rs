@@ -6,13 +6,13 @@ use super::image_model::ValidatedImageP4;
 use super::image_paint_error::{PaintP5Error, PaintP5ErrorKind, PaintP5Field, PaintP5ImageKind};
 use super::image_paint_model::{PreclipImagePaintP5, ValidatedImagePaintP5};
 
-pub(super) fn prepare_image_paint_p5<'proof, 'image>(
+pub(super) fn prepare_image_paint_p5<'image>(
     paint_index: u32,
-    image: &'proof ValidatedImageP4<'image>,
+    image: &ValidatedImageP4<'image>,
     source: SpatialImageSourceRectV2,
     destination: SpatialImageDestinationRectV2,
     opacity: u8,
-) -> Result<PreclipImagePaintP5<'proof, 'image>, PaintP5Error> {
+) -> Result<PreclipImagePaintP5<'image>, PaintP5Error> {
     if source.width() == 0 {
         return Err(image_error(
             paint_index,
@@ -91,16 +91,16 @@ pub(super) fn prepare_image_paint_p5<'proof, 'image>(
 
     Ok(PreclipImagePaintP5::new(
         paint_index,
-        image,
+        *image,
         source,
         destination,
         opacity,
     ))
 }
 
-pub(super) fn finish_image_paint_bounds_after_item_phase_p5<'proof, 'image>(
-    preclip: PreclipImagePaintP5<'proof, 'image>,
-) -> Result<ValidatedImagePaintP5<'proof, 'image>, PaintP5Error> {
+pub(super) fn finish_image_paint_bounds_after_item_phase_p5(
+    preclip: PreclipImagePaintP5<'_>,
+) -> Result<ValidatedImagePaintP5<'_>, PaintP5Error> {
     let destination = preclip.destination();
     let max_x = destination
         .x()
