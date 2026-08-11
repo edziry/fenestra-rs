@@ -26,6 +26,12 @@ impl<'a> PathStructureProof<'a> {
         self.transforms.limits()
     }
 
+    pub(super) fn dependency_islands(
+        &self,
+    ) -> impl Iterator<Item = super::islands::preflight::DependencyIslandInput<'_>> + '_ {
+        self.transforms.dependency_islands()
+    }
+
     pub(super) fn path_verbs(&self, index: usize) -> &'a [SpatialPathVerbV2] {
         let range = self
             .ranges

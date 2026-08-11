@@ -30,6 +30,12 @@ impl<'a> BrushStructureProof<'a> {
         self.shapes.limits()
     }
 
+    pub(super) fn dependency_islands(
+        &self,
+    ) -> impl Iterator<Item = super::islands::preflight::DependencyIslandInput<'_>> + '_ {
+        self.shapes.dependency_islands()
+    }
+
     pub(super) fn validated_paths(&self) -> &[crate::geometry_kernel::ValidatedPathK1<'a>] {
         self.shapes.validated_paths()
     }

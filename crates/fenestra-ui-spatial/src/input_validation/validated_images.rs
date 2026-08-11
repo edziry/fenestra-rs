@@ -27,6 +27,12 @@ impl<'a> ValidatedImagesProof<'a> {
         self.brushes.limits()
     }
 
+    pub(super) fn dependency_islands(
+        &self,
+    ) -> impl Iterator<Item = super::islands::preflight::DependencyIslandInput<'_>> + '_ {
+        self.brushes.dependency_islands()
+    }
+
     pub(super) fn validated_paths(&self) -> &[crate::geometry_kernel::ValidatedPathK1<'a>] {
         self.brushes.validated_paths()
     }

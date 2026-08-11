@@ -9,6 +9,7 @@ use crate::limits::{SpatialLimitKindV2, SpatialLimitsV2};
 use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};
 
 mod brush_structure;
+mod dependencies;
 mod flattened_paths;
 mod geometry_k3_mapping;
 mod islands;
@@ -36,6 +37,9 @@ mod validated_shapes;
 
 #[cfg(test)]
 use brush_structure::{prepare_brush_structure, validate_gradient_stop_range};
+
+#[cfg(test)]
+use dependencies::{prepare_dependency_graph, validate_dependency_fact};
 
 #[cfg(test)]
 use flattened_paths::prepare_flattened_paths;

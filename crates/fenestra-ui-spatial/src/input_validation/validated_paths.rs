@@ -28,6 +28,12 @@ impl<'a> ValidatedPathsProof<'a> {
         self.structure.limits()
     }
 
+    pub(super) fn dependency_islands(
+        &self,
+    ) -> impl Iterator<Item = super::islands::preflight::DependencyIslandInput<'_>> + '_ {
+        self.structure.dependency_islands()
+    }
+
     pub(super) fn validated_paths(&self) -> &[ValidatedPathK1<'a>] {
         &self.paths
     }

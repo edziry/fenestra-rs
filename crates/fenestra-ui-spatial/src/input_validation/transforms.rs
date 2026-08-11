@@ -23,6 +23,12 @@ impl<'a> LocalTransformProof<'a> {
     pub(super) fn limits(&self) -> SpatialLimitsV2 {
         self.preflight.limits()
     }
+
+    pub(super) fn dependency_islands(
+        &self,
+    ) -> impl Iterator<Item = super::islands::preflight::DependencyIslandInput<'_>> + '_ {
+        self.preflight.dependency_islands()
+    }
 }
 
 pub(super) fn prepare_local_transforms(

@@ -38,6 +38,12 @@ impl<'a> ValidatedClipsProof<'a> {
         self.images.limits()
     }
 
+    pub(super) fn dependency_islands(
+        &self,
+    ) -> impl Iterator<Item = super::islands::preflight::DependencyIslandInput<'_>> + '_ {
+        self.images.dependency_islands()
+    }
+
     pub(super) fn validated_paths(&self) -> &[crate::geometry_kernel::ValidatedPathK1<'a>] {
         self.images.validated_paths()
     }

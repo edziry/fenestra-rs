@@ -7,7 +7,6 @@ use fenestra_ui_layout::prototype::{
     prepare_layout_v1,
 };
 
-#[cfg(test)]
 use super::trusted_island_index;
 use super::{IslandPlan, IslandPlanningProof, PreparationItemPlan};
 use crate::error::{
@@ -26,6 +25,29 @@ struct PreparedIslandPlan {
     prepared: PreparedLayoutInputV1,
 }
 
+pub(in crate::input_validation) struct DependencyIslandInput<'a> {
+    index: u32,
+    plan: &'a IslandPlan,
+}
+
+impl DependencyIslandInput<'_> {
+    pub(in crate::input_validation) const fn index(&self) -> u32 {
+        self.index
+    }
+
+    pub(in crate::input_validation) const fn stable_ordinal(&self) -> u32 {
+        self.plan.stable_key
+    }
+
+    pub(in crate::input_validation) const fn host(&self) -> u32 {
+        self.plan.host
+    }
+
+    pub(in crate::input_validation) fn members(&self) -> impl Iterator<Item = u32> + '_ {
+        self.plan.members.iter().map(|member| member.node)
+    }
+}
+
 pub(in crate::input_validation) struct LayoutPreflightProof<'a> {
     placement: super::super::placement::PlacementInputProof<'a>,
     islands: Vec<PreparedIslandPlan>,
@@ -38,6 +60,18 @@ impl<'a> LayoutPreflightProof<'a> {
 
     pub(in crate::input_validation) fn limits(&self) -> crate::limits::SpatialLimitsV2 {
         self.placement.limits()
+    }
+
+    pub(in crate::input_validation) fn dependency_islands(
+        &self,
+    ) -> impl Iterator<Item = DependencyIslandInput<'_>> + '_ {
+        self.islands
+            .iter()
+            .enumerate()
+            .map(|(index, island)| DependencyIslandInput {
+                index: trusted_island_index(index),
+                plan: &island.plan,
+            })
     }
 }
 

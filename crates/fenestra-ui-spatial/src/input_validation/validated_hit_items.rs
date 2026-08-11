@@ -64,6 +64,12 @@ impl<'a> ValidatedHitItemsProof<'a> {
         self.paints.limits()
     }
 
+    pub(super) fn dependency_islands(
+        &self,
+    ) -> impl Iterator<Item = super::islands::preflight::DependencyIslandInput<'_>> + '_ {
+        self.paints.dependency_islands()
+    }
+
     pub(super) fn validated_paths(&self) -> &[crate::geometry_kernel::ValidatedPathK1<'a>] {
         self.paints.validated_paths()
     }
