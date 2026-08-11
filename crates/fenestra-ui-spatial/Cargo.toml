@@ -1,0 +1,13 @@
+[package]
+name = "fenestra-ui-spatial"
+description = "Candidate-neutral hybrid spatial composition boundary for Fenestra"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+repository.workspace = true
+
+[dependencies]
+fenestra-ui-layout.workspace = true
+
+[lints]
+workspace = true

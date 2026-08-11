@@ -90,7 +90,7 @@ fn lockfile_has_the_exact_candidate_and_transitive_sections() {
     assert_package(
         &lock,
         "fenestra-ui-exp-0008-layout-conformance",
-        "0.1.1",
+        "0.2.0",
         Some(
             "dependencies = [\n \"fenestra-ui-ir\",\n \"fenestra-ui-layout\",\n \"fenestra-ui-runtime\",\n \"fenestra-ui-testkit\",\n \"taffy\",\n]",
         ),
