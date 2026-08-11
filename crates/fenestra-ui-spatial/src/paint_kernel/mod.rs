@@ -1,4 +1,4 @@
-// P1 is staged before validated paint consumers.
+// P1-P3 are staged before validated paint consumers.
 #![allow(dead_code)]
 
 use crate::brush::SpatialRgba8V2;
@@ -6,6 +6,7 @@ use crate::brush::SpatialRgba8V2;
 mod error;
 mod gradient;
 mod model;
+mod sample;
 
 #[cfg(test)]
 use error::{
@@ -14,6 +15,8 @@ use error::{
 };
 #[cfg(test)]
 use gradient::{prepare_gradient_p2, prepare_solid_p2};
+#[cfg(test)]
+use sample::sample_gradient_p3;
 
 fn scale_byte(channel: u8, factor: u8) -> u8 {
     ((u16::from(channel) * u16::from(factor) + 127) / 255) as u8
