@@ -20,8 +20,9 @@ items, hit items, and semantic geometry items. Ranges are contiguous
 `start + length` slices into a validated table. Path ranges partition the verb
 table in path-key order; polygon shapes partition the point table in shape-key
 order; gradient brushes partition the stop table in brush-key order. There are
-no gaps, overlaps, or unreferenced trailing records. Tables never contain
-pointers, runtime identities, candidate handles, or host paths.
+no gaps, overlaps, or unreferenced trailing records. Tables contain no borrowed
+pointers, runtime identities, candidate handles, or host paths; images may own
+bytes without making allocation identity part of the data.
 
 Every shape names one authored spatial node greater than zero. Its coordinates
 are node-local `SpatialScalarV2` values. A paint, hit, or semantic item may
@@ -207,8 +208,7 @@ premultiplied channels with `(channel * alpha + 127) / 255`. A paint item also
 has byte opacity in the inclusive range zero through 255. Effective
 premultiplied RGBA applies `(channel * opacity + 127) / 255` exactly once to
 each of its four channels before blending; alpha is not multiplied twice.
-The only blend mode is
-premultiplied `SourceOver` in sRGB byte space:
+The only blend mode is premultiplied `SourceOver` in sRGB byte space:
 
 ```text
 out = source + (destination * (255 - source_alpha) + 127) / 255

@@ -222,8 +222,10 @@ records is refreshed without changing its semantic or runtime claims.
    any content evaluator.
 5. Geometry and path API RED/GREEN: add shapes, verbs, flattening, clips, and
    exact fill/stroke coverage through an exclusive contract and literal cases.
-6. Paint and projection API RED/GREEN: add brushes, normalized images, paint,
-   hit, semantic geometry, CPU-reference boundaries, and their closed errors.
+6. Paint and projection API RED/GREEN: freeze the
+   [raw content API](hybrid-spatial-content-api-v2.md), then add brushes,
+   normalized images, paint, hit, semantic geometry, CPU-reference boundaries,
+   and their closed errors through granular exclusive cuts.
 7. Input validation RED/GREEN: global record limits, dense keys, spatial topology,
    island derivation, membership, anchor references, dependency cycles, scalar
    domains, path grammar, transform validity, ordering, and typed locations.

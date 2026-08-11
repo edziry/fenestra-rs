@@ -234,8 +234,9 @@ impl<'a> SpatialGeometryInputV2<'a> {
 ```
 
 The later full `SpatialInputV2` composes the existing topology view, this
-geometry view, and separately versioned paint/resource views. It does not
-replace or mutate this constructor.
+geometry view, and the separately versioned
+[paint/content view](hybrid-spatial-content-api-v2.md). It does not replace or
+mutate this constructor.
 
 ## Surface discipline and TDD
 

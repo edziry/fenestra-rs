@@ -386,6 +386,8 @@ runtime auto-trait set. All numeric constructors and operations are
 
 The raw geometry value surface is fixed separately in
 [hybrid-spatial-geometry-api-v2.md](hybrid-spatial-geometry-api-v2.md).
-Later REDs add validation, resolved geometry, the remaining content records,
-`SpatialInputV2`, and `SpatialResolveErrorV2`. Candidate types, logical
-identities, and renderer handles never enter this module.
+The remaining raw content values are fixed in
+[hybrid-spatial-content-api-v2.md](hybrid-spatial-content-api-v2.md).
+Later REDs add validation, resolved projections, `SpatialInputV2`, and
+`SpatialResolveErrorV2`. Candidate types, logical identities, and renderer
+handles never enter this module.
