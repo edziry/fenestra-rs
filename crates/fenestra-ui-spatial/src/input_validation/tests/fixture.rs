@@ -78,6 +78,16 @@ impl RawInputFixture {
         self
     }
 
+    pub(super) fn with_brushes(
+        mut self,
+        brushes: Vec<SpatialBrushV2>,
+        gradient_stops: Vec<SpatialGradientStopV2>,
+    ) -> Self {
+        self.brushes = brushes;
+        self.gradient_stops = gradient_stops;
+        self
+    }
+
     pub(super) fn input(&self) -> SpatialInputV2<'_> {
         self.input_with_viewport(SpatialViewportV2::new(-1, -1))
     }

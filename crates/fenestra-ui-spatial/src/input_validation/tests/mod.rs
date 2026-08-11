@@ -3,13 +3,15 @@ use std::error::Error;
 use super::{
     make_resolve_error, map_layout_preflight_error as map_layout_preflight_error_stage,
     map_path_k1_error as map_path_k1_error_stage, map_shape_k1_error as map_shape_k1_error_stage,
-    prepare_direct_counts, prepare_island_plan as prepare_island_plan_stage,
+    prepare_brush_structure as prepare_brush_structure_stage, prepare_direct_counts,
+    prepare_island_plan as prepare_island_plan_stage,
     prepare_layout_preflight as prepare_layout_preflight_stage,
     prepare_local_transforms as prepare_local_transforms_stage,
     prepare_path_structure as prepare_path_structure_stage,
     prepare_shape_structure as prepare_shape_structure_stage, prepare_topology,
     prepare_validated_paths as prepare_validated_paths_stage,
     prepare_validated_shapes as prepare_validated_shapes_stage, validate_direct_count,
+    validate_gradient_stop_range as validate_gradient_stop_range_stage,
     validate_island_fact as validate_island_fact_stage,
     validate_polygon_range as validate_polygon_range_stage,
 };
@@ -93,6 +95,18 @@ macro_rules! prepare_validated_shapes {
     }};
 }
 
+macro_rules! prepare_brush_structure {
+    ($fixture:expr, $viewport:expr, $limits:expr) => {{
+        prepare_validated_shapes!($fixture, $viewport, $limits)
+            .and_then($crate::input_validation::tests::prepare_brush_structure_stage)
+    }};
+}
+
+mod brush_structure_keys;
+mod brush_structure_priority;
+mod brush_structure_ranges;
+mod brush_structure_success;
+mod brush_structure_support;
 mod counts;
 mod errors;
 mod fixture;
@@ -151,6 +165,16 @@ fn check_polygon_range(
     point_count: u128,
 ) -> Result<u128, SpatialResolveErrorV2> {
     validate_polygon_range_stage(shape, cursor, start, length, point_count)
+}
+
+fn check_gradient_stop_range(
+    brush: u32,
+    cursor: u128,
+    start: u32,
+    length: u32,
+    stop_count: u128,
+) -> Result<u128, SpatialResolveErrorV2> {
+    validate_gradient_stop_range_stage(brush, cursor, start, length, stop_count)
 }
 
 fn limits_with_direct(maxima: [usize; DIRECT_COUNT]) -> SpatialLimitsV2 {
