@@ -335,7 +335,7 @@ trait AmbiguousIfClone<A> {
 }
 
 impl<T: ?Sized> AmbiguousIfClone<()> for T {}
-impl<T: ?Sized + Clone> AmbiguousIfClone<u8> for T {}
+impl<T: Clone> AmbiguousIfClone<u8> for T {}
 
 trait AmbiguousIfDebug<A> {
     fn marker() {}
