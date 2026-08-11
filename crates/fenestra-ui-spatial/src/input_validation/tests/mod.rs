@@ -6,9 +6,11 @@ use super::{
     prepare_island_plan as prepare_island_plan_stage,
     prepare_layout_preflight as prepare_layout_preflight_stage,
     prepare_local_transforms as prepare_local_transforms_stage,
-    prepare_path_structure as prepare_path_structure_stage, prepare_topology,
+    prepare_path_structure as prepare_path_structure_stage,
+    prepare_shape_structure as prepare_shape_structure_stage, prepare_topology,
     prepare_validated_paths as prepare_validated_paths_stage, validate_direct_count,
     validate_island_fact as validate_island_fact_stage,
+    validate_polygon_range as validate_polygon_range_stage,
 };
 use crate::error::SpatialErrorLocationV2;
 use crate::limits::{SpatialLimitKindV2, SpatialLimitsV2};
@@ -76,6 +78,13 @@ macro_rules! prepare_validated_paths {
     }};
 }
 
+macro_rules! prepare_shape_structure {
+    ($fixture:expr, $viewport:expr, $limits:expr) => {{
+        prepare_validated_paths!($fixture, $viewport, $limits)
+            .and_then($crate::input_validation::tests::prepare_shape_structure_stage)
+    }};
+}
+
 mod counts;
 mod errors;
 mod fixture;
@@ -97,6 +106,11 @@ mod path_structure_ranges;
 mod path_structure_success;
 mod path_structure_support;
 mod placement;
+mod shape_structure_keys;
+mod shape_structure_priority;
+mod shape_structure_ranges;
+mod shape_structure_success;
+mod shape_structure_support;
 mod topology;
 mod topology_limits;
 mod validated_path_grammar;
@@ -113,6 +127,16 @@ fn check_island_fact(
     limits: SpatialLimitsV2,
 ) -> Result<(), SpatialResolveErrorV2> {
     validate_island_fact_stage(kind, index, observed, limits)
+}
+
+fn check_polygon_range(
+    shape: u32,
+    cursor: u128,
+    start: u32,
+    length: u32,
+    point_count: u128,
+) -> Result<u128, SpatialResolveErrorV2> {
+    validate_polygon_range_stage(shape, cursor, start, length, point_count)
 }
 
 fn limits_with_direct(maxima: [usize; DIRECT_COUNT]) -> SpatialLimitsV2 {

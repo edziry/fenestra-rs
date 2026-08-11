@@ -68,6 +68,16 @@ impl RawInputFixture {
         self
     }
 
+    pub(super) fn with_shapes(
+        mut self,
+        shapes: Vec<SpatialShapeV2>,
+        polygon_points: Vec<SpatialPointV2>,
+    ) -> Self {
+        self.shapes = shapes;
+        self.polygon_points = polygon_points;
+        self
+    }
+
     pub(super) fn input(&self) -> SpatialInputV2<'_> {
         self.input_with_viewport(SpatialViewportV2::new(-1, -1))
     }
