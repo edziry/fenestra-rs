@@ -11,10 +11,8 @@ mod model;
 mod stroke;
 
 pub(crate) use base::derive_rect_bounds_k3;
-#[cfg(test)]
 pub(crate) use base::{derive_circle_bounds_k3, derive_path_bounds_k3, derive_polygon_bounds_k3};
 pub(crate) use error::GeometryK3Error;
-#[cfg(test)]
 pub(crate) use error::GeometryK3ErrorKind;
 pub(crate) use model::DerivedLocalBoundsK3;
 pub(crate) use stroke::stroke_bounds_k3;

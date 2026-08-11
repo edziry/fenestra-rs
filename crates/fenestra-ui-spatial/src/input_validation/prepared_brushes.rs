@@ -2,6 +2,7 @@
 
 use super::brush_structure::BrushStructureProof;
 use super::paint_p2_mapping::map_paint_p2_error;
+use super::validated_shapes::ShapeLocalBoundsInput;
 use crate::brush::{SpatialBrushContentV2, SpatialRgba8V2};
 use crate::limits::SpatialLimitKindV2;
 use crate::paint_kernel::{PreparedGradientP2, prepare_gradient_p2, prepare_solid_p2};
@@ -28,6 +29,12 @@ impl<'a> PreparedBrushesProof<'a> {
 
     pub(super) fn validated_paths(&self) -> &[crate::geometry_kernel::ValidatedPathK1<'a>] {
         self.structure.validated_paths()
+    }
+
+    pub(super) fn shape_local_bounds_inputs(
+        &self,
+    ) -> impl Iterator<Item = ShapeLocalBoundsInput<'a>> + '_ {
+        self.structure.shape_local_bounds_inputs()
     }
 }
 

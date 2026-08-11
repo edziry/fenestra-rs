@@ -98,7 +98,7 @@ pub(crate) fn prepare_image_paint_p5<'image>(
     ))
 }
 
-pub(super) fn finish_image_paint_bounds_after_item_phase_p5(
+pub(crate) fn finish_image_paint_bounds_after_item_phase_p5(
     preclip: PreclipImagePaintP5<'_>,
 ) -> Result<ValidatedImagePaintP5<'_>, PaintP5Error> {
     let destination = preclip.destination();

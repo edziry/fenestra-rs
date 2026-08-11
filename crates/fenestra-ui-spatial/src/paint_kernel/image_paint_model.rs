@@ -3,6 +3,7 @@ use crate::image::{SpatialImageDestinationRectV2, SpatialImageSourceRectV2};
 
 use super::image_model::ValidatedImageP4;
 
+#[derive(Clone)]
 pub(crate) struct PreclipImagePaintP5<'image> {
     paint_index: u32,
     image: ValidatedImageP4<'image>,
@@ -54,7 +55,7 @@ impl<'image> PreclipImagePaintP5<'image> {
     }
 }
 
-pub(super) struct ValidatedImagePaintP5<'image> {
+pub(crate) struct ValidatedImagePaintP5<'image> {
     preclip: PreclipImagePaintP5<'image>,
     local_bounds: SpatialAabbV2,
 }
@@ -70,15 +71,15 @@ impl<'image> ValidatedImagePaintP5<'image> {
         }
     }
 
-    pub(super) const fn source(&self) -> SpatialImageSourceRectV2 {
+    pub(crate) const fn source(&self) -> SpatialImageSourceRectV2 {
         self.preclip.source
     }
 
-    pub(super) const fn destination(&self) -> SpatialImageDestinationRectV2 {
+    pub(crate) const fn destination(&self) -> SpatialImageDestinationRectV2 {
         self.preclip.destination
     }
 
-    pub(super) const fn opacity(&self) -> u8 {
+    pub(crate) const fn opacity(&self) -> u8 {
         self.preclip.opacity
     }
 
@@ -94,11 +95,11 @@ impl<'image> ValidatedImagePaintP5<'image> {
         self.preclip.image.stride()
     }
 
-    pub(super) fn image_bytes(&self) -> &[u8] {
+    pub(crate) fn image_bytes(&self) -> &[u8] {
         self.preclip.image.bytes()
     }
 
-    pub(super) const fn local_bounds(&self) -> SpatialAabbV2 {
+    pub(crate) const fn local_bounds(&self) -> SpatialAabbV2 {
         self.local_bounds
     }
 }

@@ -27,13 +27,13 @@ pub(crate) use image_error::{
     PaintP4LimitKind, PaintP4Location,
 };
 pub(crate) use image_model::ValidatedImageP4;
-#[cfg(test)]
-use image_paint::finish_image_paint_bounds_after_item_phase_p5;
-pub(crate) use image_paint::prepare_image_paint_p5;
+pub(crate) use image_paint::{
+    finish_image_paint_bounds_after_item_phase_p5, prepare_image_paint_p5,
+};
 pub(crate) use image_paint_error::{
     PaintP5Error, PaintP5ErrorKind, PaintP5Field, PaintP5ImageKind, PaintP5Location,
 };
-pub(crate) use image_paint_model::PreclipImagePaintP5;
+pub(crate) use image_paint_model::{PreclipImagePaintP5, ValidatedImagePaintP5};
 #[cfg(test)]
 use image_sample::sample_image_p6;
 pub(crate) use image_validation::prepare_image_p4;

@@ -3,7 +3,7 @@
 use std::ops::Range;
 
 use super::make_resolve_error;
-use super::validated_shapes::ValidatedShapesProof;
+use super::validated_shapes::{ShapeLocalBoundsInput, ValidatedShapesProof};
 use crate::brush::{SpatialBrushContentV2, SpatialGradientStopV2};
 use crate::content_diagnostic::{SpatialKeyedContentTableV2, SpatialPayloadTableV2};
 use crate::content_error::SpatialContentErrorKindV2;
@@ -32,6 +32,12 @@ impl<'a> BrushStructureProof<'a> {
 
     pub(super) fn validated_paths(&self) -> &[crate::geometry_kernel::ValidatedPathK1<'a>] {
         self.shapes.validated_paths()
+    }
+
+    pub(super) fn shape_local_bounds_inputs(
+        &self,
+    ) -> impl Iterator<Item = ShapeLocalBoundsInput<'a>> + '_ {
+        self.shapes.shape_local_bounds_inputs()
     }
 
     pub(super) fn gradient_stops(

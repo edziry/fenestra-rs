@@ -2,7 +2,10 @@
 
 use super::path_k2_mapping::map_path_k2_error;
 use super::path_structure::trusted_path_ordinal;
+use super::validated_hit_items::HitLocalBoundsInput;
+use super::validated_paint_items::PaintLocalBoundsInput;
 use super::validated_semantic_items::ValidatedSemanticItemsProof;
+use super::validated_shapes::ShapeLocalBoundsInput;
 use crate::aggregate_input::SpatialInputV2;
 use crate::geometry_kernel::{FlattenedPathK2, flatten_path_k2};
 use crate::limits::{SpatialLimitKindV2, SpatialLimitsV2};
@@ -24,6 +27,26 @@ impl<'a> FlattenedPathsProof<'a> {
 
     pub(super) fn limits(&self) -> SpatialLimitsV2 {
         self.semantics.limits()
+    }
+
+    pub(super) fn validated_paths(&self) -> &[crate::geometry_kernel::ValidatedPathK1<'a>] {
+        self.semantics.validated_paths()
+    }
+
+    pub(super) fn shape_local_bounds_inputs(
+        &self,
+    ) -> impl Iterator<Item = ShapeLocalBoundsInput<'a>> + '_ {
+        self.semantics.shape_local_bounds_inputs()
+    }
+
+    pub(super) fn paint_local_bounds_inputs(
+        &self,
+    ) -> impl Iterator<Item = PaintLocalBoundsInput<'a>> + '_ {
+        self.semantics.paint_local_bounds_inputs()
+    }
+
+    pub(super) fn hit_local_bounds_inputs(&self) -> impl Iterator<Item = HitLocalBoundsInput> + '_ {
+        self.semantics.hit_local_bounds_inputs()
     }
 }
 

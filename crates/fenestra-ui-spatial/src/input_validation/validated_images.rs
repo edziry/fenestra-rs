@@ -3,6 +3,7 @@
 use super::make_resolve_error;
 use super::paint_p4_mapping::map_image_p4_error;
 use super::prepared_brushes::PreparedBrushesProof;
+use super::validated_shapes::ShapeLocalBoundsInput;
 use crate::content_diagnostic::SpatialKeyedContentTableV2;
 use crate::content_error::SpatialContentErrorKindV2;
 use crate::error::SpatialErrorLocationV2;
@@ -28,6 +29,12 @@ impl<'a> ValidatedImagesProof<'a> {
 
     pub(super) fn validated_paths(&self) -> &[crate::geometry_kernel::ValidatedPathK1<'a>] {
         self.brushes.validated_paths()
+    }
+
+    pub(super) fn shape_local_bounds_inputs(
+        &self,
+    ) -> impl Iterator<Item = ShapeLocalBoundsInput<'a>> + '_ {
+        self.brushes.shape_local_bounds_inputs()
     }
 
     pub(super) fn validated_image(&self, index: u32) -> Option<ValidatedImageP4<'a>> {

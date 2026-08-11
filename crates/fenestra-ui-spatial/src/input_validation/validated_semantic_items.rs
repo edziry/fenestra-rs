@@ -2,7 +2,9 @@
 
 use super::make_resolve_error;
 use super::ordered_items::OrderedItemCursor;
-use super::validated_hit_items::ValidatedHitItemsProof;
+use super::validated_hit_items::{HitLocalBoundsInput, ValidatedHitItemsProof};
+use super::validated_paint_items::PaintLocalBoundsInput;
+use super::validated_shapes::ShapeLocalBoundsInput;
 use crate::aggregate_input::SpatialInputV2;
 use crate::content_diagnostic::{
     SpatialClipErrorV2, SpatialContentReferenceV2, SpatialOrderedItemTableV2,
@@ -41,6 +43,22 @@ impl<'a> ValidatedSemanticItemsProof<'a> {
 
     pub(super) fn validated_paths(&self) -> &[crate::geometry_kernel::ValidatedPathK1<'a>] {
         self.hits.validated_paths()
+    }
+
+    pub(super) fn shape_local_bounds_inputs(
+        &self,
+    ) -> impl Iterator<Item = ShapeLocalBoundsInput<'a>> + '_ {
+        self.hits.shape_local_bounds_inputs()
+    }
+
+    pub(super) fn paint_local_bounds_inputs(
+        &self,
+    ) -> impl Iterator<Item = PaintLocalBoundsInput<'a>> + '_ {
+        self.hits.paint_local_bounds_inputs()
+    }
+
+    pub(super) fn hit_local_bounds_inputs(&self) -> impl Iterator<Item = HitLocalBoundsInput> + '_ {
+        self.hits.hit_local_bounds_inputs()
     }
 }
 

@@ -27,6 +27,13 @@ enum ValidatedShapeGeometry<'a> {
     Path(SpatialPathKeyV2),
 }
 
+pub(super) enum ShapeLocalBoundsInput<'a> {
+    Rect(ValidatedRectK1),
+    Circle(ValidatedCircleK1),
+    Polygon(ValidatedPolygonK1<'a>),
+    Path(SpatialPathKeyV2),
+}
+
 pub(super) struct ValidatedShapesProof<'a> {
     structure: ShapeStructureProof<'a>,
     shapes: Vec<ValidatedShape<'a>>,
@@ -43,6 +50,17 @@ impl<'a> ValidatedShapesProof<'a> {
 
     pub(super) fn validated_paths(&self) -> &[crate::geometry_kernel::ValidatedPathK1<'a>] {
         self.structure.validated_paths()
+    }
+
+    pub(super) fn shape_local_bounds_inputs(
+        &self,
+    ) -> impl Iterator<Item = ShapeLocalBoundsInput<'a>> + '_ {
+        self.shapes.iter().map(|shape| match &shape.geometry {
+            ValidatedShapeGeometry::Rect(rect) => ShapeLocalBoundsInput::Rect(*rect),
+            ValidatedShapeGeometry::Circle(circle) => ShapeLocalBoundsInput::Circle(*circle),
+            ValidatedShapeGeometry::Polygon(polygon) => ShapeLocalBoundsInput::Polygon(*polygon),
+            ValidatedShapeGeometry::Path(path) => ShapeLocalBoundsInput::Path(*path),
+        })
     }
 }
 

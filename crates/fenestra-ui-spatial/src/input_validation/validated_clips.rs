@@ -2,6 +2,7 @@
 
 use super::make_resolve_error;
 use super::validated_images::ValidatedImagesProof;
+use super::validated_shapes::ShapeLocalBoundsInput;
 use crate::aggregate_input::SpatialInputV2;
 use crate::content_diagnostic::{
     SpatialClipErrorV2, SpatialContentReferenceV2, SpatialKeyedContentTableV2,
@@ -39,6 +40,12 @@ impl<'a> ValidatedClipsProof<'a> {
 
     pub(super) fn validated_paths(&self) -> &[crate::geometry_kernel::ValidatedPathK1<'a>] {
         self.images.validated_paths()
+    }
+
+    pub(super) fn shape_local_bounds_inputs(
+        &self,
+    ) -> impl Iterator<Item = ShapeLocalBoundsInput<'a>> + '_ {
+        self.images.shape_local_bounds_inputs()
     }
 
     pub(super) fn validated_image(&self, index: u32) -> Option<ValidatedImageP4<'a>> {

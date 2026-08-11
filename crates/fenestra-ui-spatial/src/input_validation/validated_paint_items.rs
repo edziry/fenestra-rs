@@ -5,6 +5,7 @@ use super::ordered_items::OrderedItemCursor;
 use super::paint_p5_mapping::map_paint_p5_error;
 use super::stroke_k1_mapping::map_stroke_k1_error;
 use super::validated_clips::ValidatedClipsProof;
+use super::validated_shapes::ShapeLocalBoundsInput;
 use crate::aggregate_input::SpatialInputV2;
 use crate::content_diagnostic::{SpatialClipErrorV2, SpatialContentReferenceV2};
 use crate::content_error::SpatialContentErrorKindV2;
@@ -51,6 +52,19 @@ enum ValidatedPaintCoverage {
     },
 }
 
+pub(super) enum PaintLocalBoundsInput<'a> {
+    Fill {
+        shape: u32,
+    },
+    RoundStroke {
+        shape: u32,
+        stroke: ValidatedStrokeK1,
+    },
+    Image {
+        preclip: PreclipImagePaintP5<'a>,
+    },
+}
+
 pub(super) struct ValidatedPaintItemsProof<'a> {
     clips: ValidatedClipsProof<'a>,
     paints: Vec<ValidatedPaintItem<'a>>,
@@ -67,6 +81,33 @@ impl<'a> ValidatedPaintItemsProof<'a> {
 
     pub(super) fn validated_paths(&self) -> &[crate::geometry_kernel::ValidatedPathK1<'a>] {
         self.clips.validated_paths()
+    }
+
+    pub(super) fn shape_local_bounds_inputs(
+        &self,
+    ) -> impl Iterator<Item = ShapeLocalBoundsInput<'a>> + '_ {
+        self.clips.shape_local_bounds_inputs()
+    }
+
+    pub(super) fn paint_local_bounds_inputs(
+        &self,
+    ) -> impl Iterator<Item = PaintLocalBoundsInput<'a>> + '_ {
+        self.paints.iter().map(|paint| match &paint.content {
+            ValidatedPaintContent::Coverage { coverage, .. } => match coverage {
+                ValidatedPaintCoverage::Fill { shape, .. } => {
+                    PaintLocalBoundsInput::Fill { shape: *shape }
+                }
+                ValidatedPaintCoverage::RoundStroke { shape, stroke } => {
+                    PaintLocalBoundsInput::RoundStroke {
+                        shape: *shape,
+                        stroke: *stroke,
+                    }
+                }
+            },
+            ValidatedPaintContent::Image { preclip, .. } => PaintLocalBoundsInput::Image {
+                preclip: preclip.clone(),
+            },
+        })
     }
 
     pub(super) fn clip_owner_is_same_or_ancestor_of(&self, clip: u32, owner: u32) -> Option<bool> {

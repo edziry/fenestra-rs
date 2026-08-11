@@ -3,7 +3,8 @@
 use super::make_resolve_error;
 use super::ordered_items::OrderedItemCursor;
 use super::stroke_k1_mapping::map_stroke_k1_error;
-use super::validated_paint_items::ValidatedPaintItemsProof;
+use super::validated_paint_items::{PaintLocalBoundsInput, ValidatedPaintItemsProof};
+use super::validated_shapes::ShapeLocalBoundsInput;
 use crate::aggregate_input::SpatialInputV2;
 use crate::content_diagnostic::{
     SpatialClipErrorV2, SpatialContentReferenceV2, SpatialOrderedItemTableV2,
@@ -39,6 +40,16 @@ enum ValidatedHitCoverage {
     },
 }
 
+pub(super) enum HitLocalBoundsInput {
+    Fill {
+        shape: u32,
+    },
+    RoundStroke {
+        shape: u32,
+        stroke: ValidatedStrokeK1,
+    },
+}
+
 pub(super) struct ValidatedHitItemsProof<'a> {
     paints: ValidatedPaintItemsProof<'a>,
     hits: Vec<ValidatedHitItem>,
@@ -55,6 +66,30 @@ impl<'a> ValidatedHitItemsProof<'a> {
 
     pub(super) fn validated_paths(&self) -> &[crate::geometry_kernel::ValidatedPathK1<'a>] {
         self.paints.validated_paths()
+    }
+
+    pub(super) fn shape_local_bounds_inputs(
+        &self,
+    ) -> impl Iterator<Item = ShapeLocalBoundsInput<'a>> + '_ {
+        self.paints.shape_local_bounds_inputs()
+    }
+
+    pub(super) fn paint_local_bounds_inputs(
+        &self,
+    ) -> impl Iterator<Item = PaintLocalBoundsInput<'a>> + '_ {
+        self.paints.paint_local_bounds_inputs()
+    }
+
+    pub(super) fn hit_local_bounds_inputs(&self) -> impl Iterator<Item = HitLocalBoundsInput> + '_ {
+        self.hits.iter().map(|hit| match &hit.coverage {
+            ValidatedHitCoverage::Fill { shape, .. } => HitLocalBoundsInput::Fill { shape: *shape },
+            ValidatedHitCoverage::RoundStroke { shape, stroke } => {
+                HitLocalBoundsInput::RoundStroke {
+                    shape: *shape,
+                    stroke: *stroke,
+                }
+            }
+        })
     }
 
     pub(super) fn clip_owner_is_same_or_ancestor_of(&self, clip: u32, owner: u32) -> Option<bool> {

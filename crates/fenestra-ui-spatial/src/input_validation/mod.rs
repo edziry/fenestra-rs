@@ -10,7 +10,9 @@ use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};
 
 mod brush_structure;
 mod flattened_paths;
+mod geometry_k3_mapping;
 mod islands;
+mod local_bounds;
 mod ordered_items;
 mod paint_p2_mapping;
 mod paint_p4_mapping;
@@ -39,9 +41,15 @@ use brush_structure::{prepare_brush_structure, validate_gradient_stop_range};
 use flattened_paths::prepare_flattened_paths;
 
 #[cfg(test)]
+use geometry_k3_mapping::map_geometry_k3_error;
+
+#[cfg(test)]
 use islands::{
     map_layout_preflight_error, prepare_island_plan, prepare_layout_preflight, validate_island_fact,
 };
+
+#[cfg(test)]
+use local_bounds::prepare_local_bounds;
 
 #[cfg(test)]
 use placement::prepare_placement_input;
