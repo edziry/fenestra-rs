@@ -19,6 +19,12 @@ pub(super) struct ValidatedPathsProof<'a> {
     subpath_total: usize,
 }
 
+impl<'a> ValidatedPathsProof<'a> {
+    pub(super) fn input(&self) -> crate::aggregate_input::SpatialInputV2<'a> {
+        self.structure.input()
+    }
+}
+
 pub(super) fn prepare_validated_paths(
     structure: PathStructureProof<'_>,
 ) -> Result<ValidatedPathsProof<'_>, SpatialResolveErrorV2> {

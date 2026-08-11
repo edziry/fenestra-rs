@@ -11,6 +11,7 @@ use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};
 mod islands;
 mod path_structure;
 mod placement;
+mod shape_structure;
 mod topology;
 mod transforms;
 mod validated_paths;
@@ -25,6 +26,9 @@ use placement::prepare_placement_input;
 
 #[cfg(test)]
 use path_structure::prepare_path_structure;
+
+#[cfg(test)]
+use shape_structure::{prepare_shape_structure, validate_polygon_range};
 
 #[cfg(test)]
 use topology::{prepare_topology, prepare_topology_limits, validate_topology_fact};
