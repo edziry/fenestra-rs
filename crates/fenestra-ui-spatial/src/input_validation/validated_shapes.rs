@@ -32,6 +32,16 @@ pub(super) struct ValidatedShapesProof<'a> {
     shapes: Vec<ValidatedShape<'a>>,
 }
 
+impl<'a> ValidatedShapesProof<'a> {
+    pub(super) fn input(&self) -> crate::aggregate_input::SpatialInputV2<'a> {
+        self.structure.input()
+    }
+
+    pub(super) fn limits(&self) -> crate::limits::SpatialLimitsV2 {
+        self.structure.limits()
+    }
+}
+
 pub(super) fn prepare_validated_shapes<'a>(
     structure: ShapeStructureProof<'a>,
 ) -> Result<ValidatedShapesProof<'a>, SpatialResolveErrorV2> {

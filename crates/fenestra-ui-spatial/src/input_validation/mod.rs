@@ -8,6 +8,7 @@ use crate::error::SpatialErrorLocationV2;
 use crate::limits::{SpatialLimitKindV2, SpatialLimitsV2};
 use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};
 
+mod brush_structure;
 mod islands;
 mod path_structure;
 mod placement;
@@ -17,6 +18,9 @@ mod topology;
 mod transforms;
 mod validated_paths;
 mod validated_shapes;
+
+#[cfg(test)]
+use brush_structure::{prepare_brush_structure, validate_gradient_stop_range};
 
 #[cfg(test)]
 use islands::{
