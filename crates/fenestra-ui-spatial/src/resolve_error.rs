@@ -106,6 +106,36 @@ pub struct SpatialResolveErrorV2 {
 }
 
 impl SpatialResolveErrorV2 {
+    pub(crate) const fn non_limit(
+        kind: SpatialResolveErrorKindV2,
+        location: SpatialErrorLocationV2,
+    ) -> Self {
+        assert!(
+            !matches!(kind, SpatialResolveErrorKindV2::LimitExceeded(_)),
+            "limit errors require widened evidence"
+        );
+        Self {
+            kind,
+            location,
+            observed: None,
+            maximum: None,
+        }
+    }
+
+    pub(crate) const fn limit_exceeded(
+        limit: SpatialLimitKindV2,
+        location: SpatialErrorLocationV2,
+        observed: u128,
+        maximum: u128,
+    ) -> Self {
+        Self {
+            kind: SpatialResolveErrorKindV2::LimitExceeded(limit),
+            location,
+            observed: Some(observed),
+            maximum: Some(maximum),
+        }
+    }
+
     /// Returns the closed failure kind.
     #[must_use]
     pub const fn kind(self) -> SpatialResolveErrorKindV2 {
