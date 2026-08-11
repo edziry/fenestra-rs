@@ -93,14 +93,17 @@ Range `start + length` uses widened checked arithmetic before indexing. Paths
 partition the complete verb table in key order. A path has one or more nonempty
 subpaths:
 
-1. the first verb and every new subpath start with `MoveTo`;
-2. another `MoveTo` or end-of-path may follow only after at least one drawing
-   verb;
-3. line and curve verbs require an active subpath;
-4. `Close` requires an active subpath with a drawing verb and then ends it;
-5. an open final subpath is valid;
-6. fill containment closes every open nonempty subpath implicitly;
-7. stroke retains whether each subpath was explicitly closed.
+1. zero verbs is `Empty`; a first verb other than `MoveTo` is `FirstNotMove`;
+2. `MoveTo` starts a subpath; another before a drawing verb is `EmptySubpath`;
+3. line and curve verbs require an active subpath, otherwise the failure is
+   `DrawingWithoutSubpath`;
+4. `Close` requires an active subpath with a drawing verb, otherwise the
+   failure is `CloseWithoutSegment`, and a valid close ends that subpath;
+5. ending immediately after `MoveTo` is `TrailingMove`;
+6. another `MoveTo` after a drawing verb starts the next subpath, while an open
+   final subpath is valid;
+7. fill closes every open nonempty subpath implicitly, while stroke retains
+   whether each subpath was explicitly closed.
 
 Invalid grammar is rejected before any spatial evaluation or renderer call.
 Duplicate curve controls and zero-length drawn segments are retained and later

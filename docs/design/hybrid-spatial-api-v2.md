@@ -384,10 +384,8 @@ runtime auto-trait set. All numeric constructors and operations are
 
 ## Remaining later surface
 
-The content API RED adds the entity and payload records named by the content
-and field contracts, then `SpatialInputV2` combines topology and content views.
-Validation adds `SpatialResolveErrorV2`, which stores only closed kind, trusted
-location, and optional limit numbers; it never retains or renders authored
-keys, scalar values, or nested layout payloads. Resolution types appear only
-when their exclusive REDs exist. Candidate types, logical identities, and
-renderer handles never enter this module.
+The raw geometry value surface is fixed separately in
+[hybrid-spatial-geometry-api-v2.md](hybrid-spatial-geometry-api-v2.md).
+Later REDs add validation, resolved geometry, the remaining content records,
+`SpatialInputV2`, and `SpatialResolveErrorV2`. Candidate types, logical
+identities, and renderer handles never enter this module.

@@ -206,7 +206,6 @@ FirstNotMove
 EmptySubpath
 DrawingWithoutSubpath
 CloseWithoutSegment
-DrawingAfterClose
 TrailingMove
 ```
 
