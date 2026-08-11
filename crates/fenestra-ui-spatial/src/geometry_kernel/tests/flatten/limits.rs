@@ -187,3 +187,26 @@ fn registered_total_limit_is_inclusive_and_reports_the_first_crossing() {
         FLATTENED_TOTAL_MAXIMUM,
     );
 }
+
+#[test]
+fn cumulative_total_candidate_widens_past_usize_without_saturating() {
+    let verbs = [move_to(0, 0), line_to(1, 1)];
+    let error = match flatten(&verbs, usize::MAX, 1, usize::MAX) {
+        Ok(_) => panic!("expected widened K2 total-limit failure"),
+        Err(error) => error,
+    };
+
+    assert_eq!(
+        error.kind(),
+        GeometryK2ErrorKind::LimitExceeded(GeometryK2LimitKind::FlattenedSegmentsTotal)
+    );
+    assert_eq!(error.location(), path_location(1, GeometryK1Field::Kind));
+    assert_eq!(
+        error.observed().map(|value| value as u128),
+        Some(usize::MAX as u128 + 1)
+    );
+    assert_eq!(
+        error.maximum().map(|value| value as u128),
+        Some(usize::MAX as u128)
+    );
+}
