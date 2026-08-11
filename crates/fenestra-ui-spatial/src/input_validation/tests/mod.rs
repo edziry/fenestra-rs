@@ -25,6 +25,7 @@ use super::{
     prepare_validated_paths as prepare_validated_paths_stage,
     prepare_validated_semantic_items as prepare_validated_semantic_items_stage,
     prepare_validated_shapes as prepare_validated_shapes_stage,
+    prepare_world_aabbs as prepare_world_aabbs_stage,
     prepare_world_transforms as prepare_world_transforms_stage,
     validate_clip_depth as validate_clip_depth_stage,
     validate_dependency_fact as validate_dependency_fact_stage, validate_direct_count,
@@ -158,6 +159,11 @@ mod validated_shape_scalars;
 mod validated_shape_semantics;
 mod validated_shape_success;
 mod validated_shape_support;
+mod world_aabb_errors;
+mod world_aabb_priority;
+mod world_aabb_retention;
+mod world_aabb_success;
+mod world_aabb_support;
 mod world_transform_arithmetic;
 mod world_transform_priority;
 mod world_transform_retention;

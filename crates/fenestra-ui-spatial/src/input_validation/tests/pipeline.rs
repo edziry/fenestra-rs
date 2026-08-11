@@ -162,3 +162,10 @@ macro_rules! prepare_world_transforms {
             .and_then($crate::input_validation::tests::prepare_world_transforms_stage)
     }};
 }
+
+macro_rules! prepare_world_aabbs {
+    ($fixture:expr, $viewport:expr, $limits:expr, $engine:expr) => {{
+        prepare_world_transforms!($fixture, $viewport, $limits, $engine)
+            .and_then($crate::input_validation::tests::prepare_world_aabbs_stage)
+    }};
+}
