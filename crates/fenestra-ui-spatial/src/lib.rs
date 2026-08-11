@@ -7,6 +7,7 @@ mod affine;
 mod coverage;
 mod error;
 mod geometry_input;
+mod geometry_kernel;
 mod geometry_key;
 mod limits;
 mod model;
