@@ -38,11 +38,11 @@ The closed shape vocabulary is:
 - `Polygon`: a contiguous range of three or more points;
 - `Path`: one validated path key.
 
-A zero-width or zero-height rectangle and a zero-radius circle are empty only
-for fill coverage and clips. Round stroke retains their degenerate boundary: a
-zero rectangle axis is a line, two zero axes are a point, and a zero-radius
-circle is a point. A polygon does not repeat its first point at the end and has
-no equal adjacent points. Collinear edges, winding direction, concavity, and
+A zero-width or zero-height rectangle and a zero-radius circle use canonical
+empty fill/clip AABBs. Round stroke retains their degenerate boundary: one zero
+rectangle axis is a line, two zero axes are a point, and a zero-radius circle is
+a point. A polygon does not repeat its first point at the end and has no equal
+adjacent points. Collinear edges, winding direction, concavity, and
 self-intersection are retained. Fill rules decide self-intersection.
 
 Rect containment is left/top inclusive and right/bottom exclusive. Circle
@@ -63,12 +63,13 @@ cross product is `cross(edge, point - p0)`. An upward crossing requires
 downward subtracts one. Boundary membership first requires exact zero cross and
 a point coordinate inside both inclusive segment ranges.
 
-Local conservative bounds are closed: rect and circle use their analytic
-extrema, polygon uses every point, and path uses every move, endpoint, and
-control point. Round stroke expands that box by half its width with directed
-outward rounding. Image paint uses its destination. World AABBs transform the
-four corners of that local box; curves, circles, and strokes retain exact
-coverage for hit and clipping rather than promoting the AABB to geometry.
+Closed local base bounds use analytic rect/circle extrema, every polygon point,
+and every path move, endpoint, and control point. Fill/clip make a zero rect
+axis or zero-radius circle empty; stroke keeps its line or point. For positive
+raw width `w`, stroke expands by `e = ceil(w / 2) = (w + 1) / 2` ticks widened,
+subtracting `e` from minima and adding it to maxima. Image paint uses its
+destination; world AABBs transform the four corners of the local box. Curves,
+circles, and strokes retain exact coverage rather than promoting the AABB.
 Every expanded local bound must remain inside the canonical scalar domain.
 Failure is `LocalBoundsOutOfDomain`, with x checked before y, at the shape or
 projection item whose expansion crossed the boundary.
@@ -359,7 +360,8 @@ never a universal byte oracle.
 After spatial topology, node transforms, and table-count limits, content
 validation orders:
 
-1. dense path keys, verb ranges, and path grammar;
+1. dense path keys and verb ranges; then, per path, applicable verb scalar
+   domains, complete path grammar, and `PathSubpathsTotal`, in that order;
 2. dense shape keys, owner, kind, ranges, scalar domains, and per-record limits;
 3. dense brush keys, kinds, and gradient-range partition; gradient stops by
    trusted brush ordinal; then color, coordinate, stop-order, and normalization

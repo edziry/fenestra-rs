@@ -235,8 +235,8 @@ EmptyDestination
 ```
 
 Clip kinds are `ForwardParent, ShapeOwnerMismatch, OwnerNotAncestor,
-ItemOwnerNotDescendant`. Per-path and total flatten count failures use
-`LimitExceeded` with a trusted path/verb location.
+ItemOwnerNotDescendant`. `PathSubpathsTotal`, both flatten limits, and
+`NonFlatAtMaximumDepth` use the source `PathVerb { field: Kind }`.
 
 `ImageDecodeLimitKindV2::ALL` is
 `EncodedBytes, Edge(Width), Edge(Height), Pixels`.
@@ -319,10 +319,10 @@ The complete first-failure order is:
 5. `ISLAND_ALL`, then validation-only layout preflight for every container and
    island;
 6. local transform scalar fields and determinant in node and field order;
-7. path keys, ranges, and grammar; shape keys and records; brush keys and
-   ranges, gradient payloads, and brush semantics; images; clips; paint, hit,
-   and semantics; then flattening and local bounds, with `CONTENT_ALL` at the
-   exact companion-contract points;
+7. path keys and ranges, scalar domains, grammar, and `PathSubpathsTotal`;
+   shape keys and records; brush keys and ranges, gradient payloads, and brush
+   semantics; images; clips; paint, hit, and semantics; then flattening and
+   local bounds, with `CONTENT_ALL` at the exact companion-contract points;
 8. dependency target kinds, `DEPENDENCY_ALL`, and dry cycle detection;
 9. stable dependency execution and layout errors;
 10. world transform composition, closed AABBs, and clips;

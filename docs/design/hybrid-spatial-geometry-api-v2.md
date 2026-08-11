@@ -16,10 +16,11 @@ The first geometry API RED adds exactly the values in this document. It does
 not add validation, flattening results, local-bound or containment functions,
 resolved clip chains, paint, brushes, images, hit items, semantic items,
 candidate output, or raster types. The reference geometry kernel remains
-crate-private until its own behavioral RED. Clip-chain evaluation remains part
-of the later resolver because it requires topology ancestry and world
-transforms. No temporary public geometry error or validated-view type is
-introduced.
+crate-private under the versioned
+[geometry-kernel contract](hybrid-spatial-geometry-kernel-v2.md). Clip-chain
+evaluation remains part of the later resolver because it requires topology
+ancestry and world transforms. No temporary public geometry error or
+validated-view type is introduced.
 
 The prototype surface grows from 36 to exactly 50 reexports:
 
