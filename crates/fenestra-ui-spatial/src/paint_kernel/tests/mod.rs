@@ -4,7 +4,8 @@ use super::{
     PaintP4ImageKind, PaintP4LimitKind, PaintP4Location, PaintP5Error, PaintP5ErrorKind,
     PaintP5Field, PaintP5ImageKind, PaintP5Location, apply_opacity_p1,
     finish_image_paint_bounds_after_item_phase_p5, normalize_straight_p1, prepare_gradient_p2,
-    prepare_image_p4, prepare_image_paint_p5, prepare_solid_p2, sample_gradient_p3, source_over_p1,
+    prepare_image_p4, prepare_image_paint_p5, prepare_solid_p2, sample_gradient_p3,
+    sample_image_p6, source_over_p1,
 };
 
 use crate::aabb::SpatialAabbV2;

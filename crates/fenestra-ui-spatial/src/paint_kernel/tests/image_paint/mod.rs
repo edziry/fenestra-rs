@@ -21,6 +21,7 @@ macro_rules! with_p4_image {
 mod binding;
 mod bounds;
 mod destination;
+mod sampling;
 mod source;
 
 fn raw_image(key: u32, width: u32, height: u32, pixel: [u8; 4]) -> SpatialImageV2 {
