@@ -5,6 +5,8 @@ Semantics:
 [hybrid-spatial-content-reference-v2.md](hybrid-spatial-content-reference-v2.md)
 Diagnostics: [hybrid-spatial-diagnostics-v2.md](hybrid-spatial-diagnostics-v2.md)
 Fields: [hybrid-spatial-fields-v2.md](hybrid-spatial-fields-v2.md)
+Aggregate validation:
+[hybrid-spatial-input-validation-kernel-v2.md](hybrid-spatial-input-validation-kernel-v2.md)
 Format: private spatial geometry kernel version 2
 
 ## Boundary and slices

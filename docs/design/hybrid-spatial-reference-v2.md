@@ -1,9 +1,9 @@
 # WU-0013 hybrid spatial reference contract
 
-Parent plan: [hybrid-spatial-composition.md](hybrid-spatial-composition.md)
-Content contract: [hybrid-spatial-content-reference-v2.md](hybrid-spatial-content-reference-v2.md)
+Parents: [plan](hybrid-spatial-composition.md), [content](hybrid-spatial-content-reference-v2.md)
 Diagnostics: [hybrid-spatial-diagnostics-v2.md](hybrid-spatial-diagnostics-v2.md)
 Fields: [hybrid-spatial-fields-v2.md](hybrid-spatial-fields-v2.md)
+Input validation: [private kernel](hybrid-spatial-input-validation-kernel-v2.md)
 Format: spatial contract version 2
 
 ## Scope and authority

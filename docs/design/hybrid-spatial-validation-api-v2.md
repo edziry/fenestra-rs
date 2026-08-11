@@ -5,6 +5,8 @@ Core semantics: [hybrid-spatial-reference-v2.md](hybrid-spatial-reference-v2.md)
 Content semantics: [hybrid-spatial-content-reference-v2.md](hybrid-spatial-content-reference-v2.md)
 Diagnostics: [hybrid-spatial-diagnostics-v2.md](hybrid-spatial-diagnostics-v2.md)
 Fields: [hybrid-spatial-fields-v2.md](hybrid-spatial-fields-v2.md)
+Private behavior:
+[hybrid-spatial-input-validation-kernel-v2.md](hybrid-spatial-input-validation-kernel-v2.md)
 Format: spatial validation API version 2
 
 ## Boundary and staging

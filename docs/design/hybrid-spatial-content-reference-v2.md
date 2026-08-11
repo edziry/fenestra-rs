@@ -1,8 +1,8 @@
 # WU-0013 spatial content reference contract
 
-Parent contract: [hybrid-spatial-reference-v2.md](hybrid-spatial-reference-v2.md)
-Diagnostics: [hybrid-spatial-diagnostics-v2.md](hybrid-spatial-diagnostics-v2.md)
+Core: [reference](hybrid-spatial-reference-v2.md), [diagnostics](hybrid-spatial-diagnostics-v2.md)
 Fields: [hybrid-spatial-fields-v2.md](hybrid-spatial-fields-v2.md)
+Input validation: [private kernel](hybrid-spatial-input-validation-kernel-v2.md)
 Format: spatial content contract version 2
 
 ## Purpose and tables
