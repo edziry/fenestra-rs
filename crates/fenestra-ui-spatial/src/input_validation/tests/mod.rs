@@ -1,7 +1,8 @@
 use std::error::Error;
 
 use super::{
-    make_resolve_error, map_image_p4_error as map_image_p4_error_stage,
+    make_resolve_error, map_geometry_k3_error as map_geometry_k3_error_stage,
+    map_image_p4_error as map_image_p4_error_stage,
     map_layout_preflight_error as map_layout_preflight_error_stage,
     map_path_k1_error as map_path_k1_error_stage, map_path_k2_error as map_path_k2_error_stage,
     map_shape_k1_error as map_shape_k1_error_stage,
@@ -9,6 +10,7 @@ use super::{
     prepare_flattened_paths as prepare_flattened_paths_stage,
     prepare_island_plan as prepare_island_plan_stage,
     prepare_layout_preflight as prepare_layout_preflight_stage,
+    prepare_local_bounds as prepare_local_bounds_stage,
     prepare_local_transforms as prepare_local_transforms_stage,
     prepare_path_structure as prepare_path_structure_stage,
     prepare_prepared_brushes as prepare_prepared_brushes_stage,
@@ -163,6 +165,13 @@ macro_rules! prepare_flattened_paths {
     }};
 }
 
+macro_rules! prepare_local_bounds {
+    ($fixture:expr, $viewport:expr, $limits:expr) => {{
+        prepare_flattened_paths!($fixture, $viewport, $limits)
+            .and_then($crate::input_validation::tests::prepare_local_bounds_stage)
+    }};
+}
+
 mod brush_structure_keys;
 mod brush_structure_priority;
 mod brush_structure_ranges;
@@ -185,6 +194,10 @@ mod layout_preflight;
 mod layout_preflight_bridge;
 mod layout_preflight_mappings;
 mod layout_preflight_support;
+mod local_bounds_errors;
+mod local_bounds_priority;
+mod local_bounds_success;
+mod local_bounds_support;
 mod local_transform_deferral;
 mod local_transform_determinants;
 mod local_transform_priority;
