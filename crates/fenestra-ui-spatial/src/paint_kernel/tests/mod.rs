@@ -1,12 +1,17 @@
 use super::{
     PaintP2Error, PaintP2ErrorKind, PaintP2Field, PaintP2GradientKind, PaintP2LimitKind,
-    PaintP2Location, apply_opacity_p1, normalize_straight_p1, prepare_gradient_p2,
-    prepare_solid_p2, sample_gradient_p3, source_over_p1,
+    PaintP2Location, PaintP4Channel, PaintP4Error, PaintP4ErrorKind, PaintP4Field,
+    PaintP4ImageKind, PaintP4LimitKind, PaintP4Location, apply_opacity_p1, normalize_straight_p1,
+    prepare_gradient_p2, prepare_image_p4, prepare_solid_p2, sample_gradient_p3, source_over_p1,
 };
 
 use crate::brush::{SpatialGradientStopV2, SpatialRgba8V2};
+use crate::content_key::SpatialImageKeyV2;
+use crate::image::SpatialImageV2;
+use crate::limits::{REGISTERED_SPATIAL_LIMITS_V2, SpatialLimitKindV2};
 use crate::model::{SpatialPointV2, SpatialScalarV2};
 
+mod image_validation;
 mod invariants;
 mod normalize;
 mod opacity;
