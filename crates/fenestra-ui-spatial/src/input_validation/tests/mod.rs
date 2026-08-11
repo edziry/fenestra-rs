@@ -6,7 +6,8 @@ use super::{
     map_layout_preflight_error as map_layout_preflight_error_stage,
     map_path_k1_error as map_path_k1_error_stage, map_path_k2_error as map_path_k2_error_stage,
     map_shape_k1_error as map_shape_k1_error_stage,
-    prepare_brush_structure as prepare_brush_structure_stage, prepare_direct_counts,
+    prepare_brush_structure as prepare_brush_structure_stage,
+    prepare_dependency_graph as prepare_dependency_graph_stage, prepare_direct_counts,
     prepare_flattened_paths as prepare_flattened_paths_stage,
     prepare_island_plan as prepare_island_plan_stage,
     prepare_layout_preflight as prepare_layout_preflight_stage,
@@ -22,7 +23,8 @@ use super::{
     prepare_validated_paths as prepare_validated_paths_stage,
     prepare_validated_semantic_items as prepare_validated_semantic_items_stage,
     prepare_validated_shapes as prepare_validated_shapes_stage,
-    validate_clip_depth as validate_clip_depth_stage, validate_direct_count,
+    validate_clip_depth as validate_clip_depth_stage,
+    validate_dependency_fact as validate_dependency_fact_stage, validate_direct_count,
     validate_gradient_stop_range as validate_gradient_stop_range_stage,
     validate_hit_item_limit as validate_hit_item_limit_stage,
     validate_island_fact as validate_island_fact_stage,
@@ -172,12 +174,26 @@ macro_rules! prepare_local_bounds {
     }};
 }
 
+macro_rules! prepare_dependency_graph {
+    ($fixture:expr, $viewport:expr, $limits:expr) => {{
+        prepare_local_bounds!($fixture, $viewport, $limits)
+            .and_then($crate::input_validation::tests::prepare_dependency_graph_stage)
+    }};
+}
+
 mod brush_structure_keys;
 mod brush_structure_priority;
 mod brush_structure_ranges;
 mod brush_structure_success;
 mod brush_structure_support;
 mod counts;
+mod dependency_cycles;
+mod dependency_graph;
+mod dependency_limits;
+mod dependency_priority;
+mod dependency_success;
+mod dependency_support;
+mod dependency_targets;
 mod errors;
 mod fixture;
 mod flattened_path_errors;
@@ -319,6 +335,14 @@ fn check_hit_item_limit(
     limits: SpatialLimitsV2,
 ) -> Result<(), SpatialResolveErrorV2> {
     validate_hit_item_limit_stage(hit, observed, limits)
+}
+
+fn check_dependency_fact(
+    kind: SpatialLimitKindV2,
+    observed: u128,
+    limits: SpatialLimitsV2,
+) -> Result<(), SpatialResolveErrorV2> {
+    validate_dependency_fact_stage(kind, observed, limits)
 }
 
 fn limits_with_direct(maxima: [usize; DIRECT_COUNT]) -> SpatialLimitsV2 {
