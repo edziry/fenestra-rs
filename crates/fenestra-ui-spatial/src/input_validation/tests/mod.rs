@@ -10,6 +10,7 @@ use super::{
     map_shape_k1_error as map_shape_k1_error_stage,
     prepare_brush_structure as prepare_brush_structure_stage,
     prepare_dependency_graph as prepare_dependency_graph_stage, prepare_direct_counts,
+    prepare_effective_clip_aabbs as prepare_effective_clip_aabbs_stage,
     prepare_flattened_paths as prepare_flattened_paths_stage,
     prepare_island_plan as prepare_island_plan_stage,
     prepare_layout_preflight as prepare_layout_preflight_stage,
@@ -61,6 +62,9 @@ mod dependency_priority;
 mod dependency_success;
 mod dependency_support;
 mod dependency_targets;
+mod effective_clip_aabb_retention;
+mod effective_clip_aabb_success;
+mod effective_clip_aabb_support;
 mod errors;
 mod fixture;
 mod flattened_path_errors;

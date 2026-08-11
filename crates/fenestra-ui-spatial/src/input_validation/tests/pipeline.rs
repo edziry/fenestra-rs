@@ -169,3 +169,10 @@ macro_rules! prepare_world_aabbs {
             .and_then($crate::input_validation::tests::prepare_world_aabbs_stage)
     }};
 }
+
+macro_rules! prepare_effective_clip_aabbs {
+    ($fixture:expr, $viewport:expr, $limits:expr, $engine:expr) => {{
+        prepare_world_aabbs!($fixture, $viewport, $limits, $engine)
+            .map($crate::input_validation::tests::prepare_effective_clip_aabbs_stage)
+    }};
+}
