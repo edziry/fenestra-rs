@@ -29,6 +29,13 @@ impl<'a> WorldAabbProof<'a> {
     pub(super) fn limits(&self) -> SpatialLimitsV2 {
         self.transforms.limits()
     }
+
+    pub(super) fn clip_world_aabb(&self, index: usize) -> SpatialAabbV2 {
+        *self
+            .clips
+            .get(index)
+            .expect("clip projection retained one primitive bound per record")
+    }
 }
 
 pub(super) fn prepare_world_aabbs(

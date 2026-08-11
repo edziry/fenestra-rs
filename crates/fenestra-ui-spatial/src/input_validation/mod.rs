@@ -10,6 +10,7 @@ use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};
 
 mod brush_structure;
 mod dependencies;
+mod effective_clip_aabbs;
 mod flattened_paths;
 mod geometry_k3_mapping;
 mod islands;
@@ -45,6 +46,9 @@ use dependencies::{
     execute_dependency_graph, map_layout_execution_error, prepare_dependency_graph,
     validate_dependency_fact,
 };
+
+#[cfg(test)]
+use effective_clip_aabbs::prepare_effective_clip_aabbs;
 
 #[cfg(test)]
 use flattened_paths::prepare_flattened_paths;
