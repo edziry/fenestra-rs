@@ -9,6 +9,7 @@ mod faults;
 mod image_resource;
 mod limits;
 mod model;
+mod native_renderer;
 #[cfg(feature = "numeric-spatial")]
 mod numeric_spatial;
 #[cfg(feature = "path-hit")]
