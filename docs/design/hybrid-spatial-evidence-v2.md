@@ -7,6 +7,7 @@ Reference: [hybrid spatial reference](hybrid-spatial-reference-v2.md)
 Candidate screen: [hybrid spatial candidate screen](hybrid-spatial-candidate-screen.md)
 Authoring runtime equivalence: [format-2 runtime equivalence](hybrid-spatial-authoring-runtime-equivalence-v2.md)
 Presentation: [immutable spatial presentation](hybrid-spatial-presentation-v2.md)
+Verification: [WU-0013 hybrid spatial verification](../verification/WU-0013-hybrid-spatial.md)
 Format: hybrid spatial evidence version 2
 
 ## Purpose and experiment identity

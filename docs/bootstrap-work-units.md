@@ -233,6 +233,7 @@ Design: [hybrid spatial composition plan](design/hybrid-spatial-composition.md)
 Candidate screen: [hybrid spatial candidate screen](design/hybrid-spatial-candidate-screen.md)
 Reference: [hybrid spatial reference contract](design/hybrid-spatial-reference-v2.md)
 Evidence: [hybrid spatial evidence contract](design/hybrid-spatial-evidence-v2.md)
+Verification: [hybrid spatial verification](verification/WU-0013-hybrid-spatial.md)
 
 - Research: reconcile the original EXP-0008 rich-2D scope with the completed
   layout prerequisite; screen numeric, geometry, path, hit-test, raster, and
