@@ -5,7 +5,7 @@ use fenestra_ui_layout::prototype::LayoutEngineV1;
 use super::*;
 use crate::aabb::SpatialAabbV2;
 use crate::limits::SpatialLimitsV2;
-use crate::model::SpatialViewportV2;
+use crate::model::{SpatialPointV2, SpatialViewportV2};
 use crate::output_view::SpatialOutputV2;
 use crate::owned_input::SpatialOwnedInputV2;
 use crate::resolve_error::SpatialResolveErrorV2;
@@ -40,6 +40,8 @@ fn preparation_has_the_exact_lifetime_free_unsized_engine_signature() {
         SpatialResolvedSnapshotV2::output;
     let _: for<'a> fn(&'a SpatialResolvedSnapshotV2) -> &'a [SpatialAabbV2] =
         SpatialResolvedSnapshotV2::effective_clip_aabbs;
+    let _: for<'a> fn(&'a SpatialResolvedSnapshotV2, SpatialPointV2) -> Option<SpatialHitResultV2> =
+        SpatialResolvedSnapshotV2::hit_test;
 }
 
 fn assert_static<T: 'static>() {}

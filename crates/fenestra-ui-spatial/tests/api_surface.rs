@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-const EXPECTED_EXPORTS: [&str; 113] = [
+const EXPECTED_EXPORTS: [&str; 114] = [
     "Affine2V2",
     "REGISTERED_SPATIAL_LIMITS_V2",
     "SpatialAabbV2",
@@ -107,6 +107,7 @@ const EXPECTED_EXPORTS: [&str; 113] = [
     "SpatialClipOutputRecordV2",
     "SpatialPaintOutputRecordV2",
     "SpatialHitOutputRecordV2",
+    "SpatialHitResultV2",
     "SpatialSemanticOutputRecordV2",
     "SpatialOutputV2",
     "SpatialOwnedInputV2",
@@ -117,7 +118,7 @@ const EXPECTED_EXPORTS: [&str; 113] = [
     "resolve_spatial_v2",
     "validate_spatial_output_v2",
 ];
-const EXPECTED_STRUCTS: [&str; 47] = [
+const EXPECTED_STRUCTS: [&str; 48] = [
     "Affine2V2",
     "SpatialAabbV2",
     "SpatialAnchorV2",
@@ -160,6 +161,7 @@ const EXPECTED_STRUCTS: [&str; 47] = [
     "SpatialClipOutputRecordV2",
     "SpatialPaintOutputRecordV2",
     "SpatialHitOutputRecordV2",
+    "SpatialHitResultV2",
     "SpatialSemanticOutputRecordV2",
     "SpatialOutputV2",
     "SpatialOwnedInputV2",

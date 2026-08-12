@@ -6,6 +6,9 @@ fn prepared_and_snapshot_values_have_only_the_staged_public_surface() {
     let source = all_source();
     assert_private_fields(&source, "PreparedSpatialV2");
     assert_private_fields(&source, "SpatialResolvedSnapshotV2");
+    assert_private_fields(&source, "SpatialHitResultV2");
+    assert_hit_result_storage(&source);
+    assert_nongeneric_struct(&source, "SpatialHitResultV2");
     assert_nongeneric_struct(&source, "SpatialResolvedSnapshotV2");
     assert!(
         implementation_blocks(&source, "PreparedSpatialV2")
@@ -31,14 +34,34 @@ fn prepared_and_snapshot_values_have_only_the_staged_public_surface() {
         vec![
             "pub const fn viewport",
             "pub fn effective_clip_aabbs",
+            "pub fn hit_test",
             "pub fn output",
         ]
     );
     assert!(source.contains("pub const fn viewport(&self) -> SpatialViewportV2"));
     assert!(source.contains("pub fn output(&self) -> SpatialOutputV2<'_>"));
     assert!(source.contains("pub fn effective_clip_aabbs(&self) -> &[SpatialAabbV2]"));
-    for method in ["viewport", "output", "effective_clip_aabbs"] {
+    assert!(source.contains("pub fn hit_test("));
+    assert!(source.contains("scene_point: SpatialPointV2"));
+    assert!(source.contains(") -> Option<SpatialHitResultV2>"));
+    for method in ["viewport", "output", "effective_clip_aabbs", "hit_test"] {
         let item = public_method(&source, "SpatialResolvedSnapshotV2", method);
+        assert!(has_must_use(&source, item.start));
+    }
+
+    let mut result_methods = public_method_declarations(&source, "SpatialHitResultV2");
+    result_methods.sort_unstable();
+    assert_eq!(
+        result_methods,
+        vec![
+            "pub const fn item_ordinal",
+            "pub const fn key",
+            "pub const fn local_point",
+            "pub const fn owner",
+        ]
+    );
+    for method in ["key", "owner", "item_ordinal", "local_point"] {
+        let item = public_method(&source, "SpatialHitResultV2", method);
         assert!(has_must_use(&source, item.start));
     }
 
@@ -163,6 +186,28 @@ fn assert_braced_fields_private(declaration: &str, brace: usize) {
         !declaration[brace + 1..end]
             .lines()
             .any(|line| line.trim_start().starts_with("pub"))
+    );
+}
+
+fn assert_hit_result_storage(source: &str) {
+    let marker = "pub struct SpatialHitResultV2";
+    let declaration = &source[source.find(marker).expect("hit result struct")..];
+    let brace = declaration.find('{').expect("named hit result fields");
+    let end = matching_brace(declaration, brace);
+    let fields = declaration[brace + 1..end]
+        .lines()
+        .map(str::trim)
+        .filter(|line| !line.is_empty() && !line.starts_with("///"))
+        .map(|line| line.trim_end_matches(',').replace(' ', ""))
+        .collect::<Vec<_>>();
+    assert_eq!(
+        fields,
+        [
+            "key:u32",
+            "owner:SpatialNodeKeyV2",
+            "item_ordinal:u32",
+            "local_point:SpatialPointV2",
+        ]
     );
 }
 
