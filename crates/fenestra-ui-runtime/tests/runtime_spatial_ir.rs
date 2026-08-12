@@ -7,11 +7,13 @@ use fenestra_ui_runtime::prototype::{
 };
 use fenestra_ui_spatial::prototype::{SpatialLimitsV2, SpatialViewportV2};
 
+#[allow(dead_code)]
 #[path = "support/spatial/mod.rs"]
 mod spatial_support;
 #[path = "support/mod.rs"]
 mod support;
 
+#[allow(clippy::result_large_err)]
 fn new_ir(
     program: ValidatedSpatialProgramV2,
     viewport: SpatialViewportV2,
@@ -21,6 +23,7 @@ fn new_ir(
     UiRuntime::new_spatial_ir(program, viewport, limits, capacity)
 }
 
+#[allow(clippy::result_large_err)]
 fn new_ir_with_engine(
     program: ValidatedSpatialProgramV2,
     viewport: SpatialViewportV2,

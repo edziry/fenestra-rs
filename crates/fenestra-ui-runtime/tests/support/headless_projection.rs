@@ -34,6 +34,7 @@ pub fn runtime(surface: HeadlessSurface) -> UiRuntime {
     .expect("headless projection fixture should initialize")
 }
 
+#[allow(clippy::result_large_err)]
 pub fn try_runtime(
     style: ValidatedStyleProgram,
     surface: HeadlessSurface,
