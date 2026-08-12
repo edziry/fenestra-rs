@@ -319,6 +319,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "fenestra-ui-exp-0008-hybrid-spatial"
+version = "0.2.0"
+dependencies = [
+ "fenestra-ui-ir",
+ "fenestra-ui-layout",
+ "fenestra-ui-runtime",
+ "fenestra-ui-spatial",
+]
+
+[[package]]
 name = "fenestra-ui-exp-0008-layout-conformance"
 version = "0.2.0"
 dependencies = [

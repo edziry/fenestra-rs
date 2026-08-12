@@ -11,6 +11,7 @@ members = [
     "probes/exp-0001-native-spine",
     "probes/exp-0001-spine",
     "probes/exp-0007-typed-authoring",
+    "probes/exp-0008-hybrid-spatial",
     "probes/exp-0008-layout-conformance",
 ]
 resolver = "3"
