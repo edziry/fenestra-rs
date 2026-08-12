@@ -5,13 +5,13 @@ use fenestra_ui_authoring::prototype::{
     FenSourceV2, REFERENCE_AUTHORING_LIMITS_V2, canonical_rust_v2, compile_fen_v2,
 };
 use fenestra_ui_exp_0007_typed_authoring::{
-    HYBRID_SPATIAL_FEN_V2, HYBRID_SPATIAL_GENERATED_RUST_V2,
-    generated_hybrid_spatial_v2, macro_hybrid_spatial_v2,
+    HYBRID_SPATIAL_FEN_V2, HYBRID_SPATIAL_GENERATED_RUST_V2, generated_hybrid_spatial_v2,
+    macro_hybrid_spatial_v2,
 };
 use fenestra_ui_ir::prototype::{
-    ConstructionProgram, SchemaManifest, SourceId, SpatialProgramV2,
-    SpatialValidationLimitsV2, StyleProgram, StyleValidationLimits, ValidatedSpatialProgramV2,
-    ValidationLimits, validate_construction, validate_schema, validate_spatial, validate_style,
+    ConstructionProgram, SchemaManifest, SourceId, SpatialProgramV2, SpatialValidationLimitsV2,
+    StyleProgram, StyleValidationLimits, ValidatedSpatialProgramV2, ValidationLimits,
+    validate_construction, validate_schema, validate_spatial, validate_style,
 };
 use proc_macro2::{TokenStream, TokenTree};
 

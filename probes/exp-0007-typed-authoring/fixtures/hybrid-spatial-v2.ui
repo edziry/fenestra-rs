@@ -1,0 +1,252 @@
+ui! {
+format 2;
+schema namespace 13013 revision 2 {
+  component fixture = 0 {
+    property span_x = 0: scalar_i32 = 80 invalidates [layout, semantics, hit_test, paint, composition];
+    property span_y = 1: scalar_i32 = 48 invalidates [layout, semantics, hit_test, paint, composition];
+    property pad = 2: scalar_i32 = 2 invalidates [layout, hit_test, paint, composition];
+    property factor = 3: scalar_i32 = 1 invalidates [semantics, hit_test, paint, composition];
+    property tone = 4: rgba8 = rgba8(64, 48, 32, 255) invalidates [paint];
+    property accent_tone = 5: rgba8 = rgba8(16, 64, 96, 192) invalidates [paint];
+    property shown = 6: bool = true invalidates [semantics, hit_test, paint];
+    property policy = 7: input_policy = ignore invalidates [hit_test];
+  }
+}
+construction {
+  template root = 0: fixture {
+    set span_x = 180;
+    set span_y = 120;
+    set tone = rgba8(96, 72, 48, 255);
+    child template stack;
+    child template anchor_ref;
+  }
+  template stack = 1: fixture {
+    set span_x = 80;
+    set span_y = 60;
+    set factor = 1;
+    child template free_host;
+  }
+  template free_host = 2: fixture {
+    set span_x = 40;
+    set span_y = 30;
+    set factor = 1;
+    child template free_child;
+    child region tiles;
+  }
+  template free_child = 3: fixture {
+    set span_x = 12;
+    set span_y = 10;
+  }
+  template island = 4: fixture {
+    set span_x = 16;
+    set span_y = 12;
+    set tone = rgba8(40, 80, 120, 192);
+    set policy = accept;
+  }
+  template anchor_ref = 5: fixture {
+    set span_x = 50;
+    set span_y = 40;
+    child template overlay;
+  }
+  template overlay = 6: fixture {
+    set span_x = 20;
+    set span_y = 16;
+  }
+  region tiles = 0 owner free_host repeat island
+    keys [10, 20]
+    invalidates [structure, layout, semantics, hit_test, paint, composition];
+}
+style {
+  set stack.tone = rgba8(24, 48, 72, 255);
+  set island.tone = rgba8(80, 120, 160, 192);
+  set overlay.policy = accept;
+}
+spatial format 2 {
+  viewport container row padding (4, 4, 3, 3) gap 2;
+  resources {
+    image checker {
+      width 2;
+      height 2;
+      stride 8;
+      bytes [255, 0, 0, 255, 0, 128, 0, 128, 0, 0, 64, 64, 0, 0, 0, 0];
+    }
+  }
+  node scene : root {
+    container column padding (property pad, 2, property pad, 2) gap property pad;
+    placement layout
+      width dimension(0, property span_x, 240)
+      height dimension(0, property span_y, 180);
+    transform identity origin point(fixed(0), fixed(0));
+    shape frame rect {
+      origin point(fixed(0), fixed(0));
+      width property span_x;
+      height property span_y;
+    }
+    shape dot circle {
+      center point(fixed(327680), fixed(327680));
+      radius fixed(131072);
+    }
+    shape tri polygon {
+      point(fixed(0), fixed(0));
+      point(fixed(655360), fixed(0));
+      point(fixed(327680), fixed(524288));
+    }
+    shape curve path {
+      move_to point(fixed(0), fixed(0));
+      line_to point(fixed(655360), fixed(0));
+      quadratic_to point(fixed(983040), fixed(327680)) point(fixed(655360), fixed(655360));
+      cubic_to point(fixed(327680), fixed(983040)) point(fixed(0), fixed(983040)) point(fixed(0), fixed(655360));
+      close;
+    }
+    brush flat solid {
+      color property tone;
+    }
+    brush fade linear_gradient {
+      start point(fixed(0), fixed(0));
+      end point(fixed(655360), fixed(0));
+      stop 0 property accent_tone;
+      stop 32768 rgba8(128, 64, 32, 255);
+      stop 65535 property tone;
+    }
+    clip outer {
+      parent none;
+      shape frame;
+      fill_rule non_zero;
+    }
+    clip inner {
+      parent scene.outer;
+      shape tri;
+      fill_rule even_odd;
+    }
+    paint coverage {
+      fill frame rule non_zero;
+      brush flat;
+      opacity 255;
+      clip scene.inner;
+    }
+    paint coverage {
+      round_stroke curve width property pad;
+      brush fade;
+      opacity 200;
+      clip none;
+    }
+    paint image {
+      image checker;
+      source (0, 0, 2, 2);
+      destination point(fixed(131072), fixed(131072)) fixed(524288) fixed(524288);
+      opacity 192;
+      clip scene.outer;
+    }
+    hit {
+      fill tri rule even_odd;
+      clip scene.inner;
+      input property policy;
+    }
+    hit {
+      round_stroke curve width fixed(65536);
+      clip none;
+      input accept;
+    }
+    hit {
+      fill dot rule non_zero;
+      clip none;
+      input ignore;
+    }
+    semantic {
+      shape dot;
+      fill_rule non_zero;
+      clip scene.outer;
+    }
+    semantic {
+      shape tri;
+      fill_rule even_odd;
+      clip none;
+    }
+    node stack_node : stack {
+      container row padding (1, property pad, 1, property pad) gap 1;
+      placement layout
+        width dimension(0, property span_x, 120)
+        height dimension(0, property span_y, 90);
+      transform translate(point(property factor, fixed(32768)))
+        origin point(fixed(0), fixed(0));
+      node floating : free_host {
+        container column padding (property pad, 0, property pad, 0) gap property pad;
+        placement free
+          width property span_x height property span_y
+          self_anchor anchor(center, end)
+          target node guide
+          target_anchor anchor(start, center)
+          offset point(fixed(-65536), property factor);
+        transform scale(property factor, fixed(65536))
+          origin point(fixed(131072), fixed(131072));
+        node floating_child : free_child {
+          container row padding (0, 0, 0, 0) gap 0;
+          placement free
+            width property span_x height property span_y
+            self_anchor anchor(start, start)
+            target parent
+            target_anchor anchor(end, end)
+            offset point(fixed(65536), fixed(-65536));
+          transform quarter_turn(1)
+            origin point(fixed(393216), fixed(327680));
+        }
+        node tile_node : island {
+          container column padding (1, 1, property pad, property pad) gap 1;
+          placement layout
+            width dimension(0, property span_x, 32)
+            height dimension(0, property span_y, 24);
+          transform affine(fixed(65536), fixed(0), fixed(0), fixed(65536), property factor, fixed(-32768))
+            origin point(fixed(0), fixed(0));
+          shape frame circle {
+            center point(fixed(524288), fixed(393216));
+            radius fixed(262144);
+          }
+          brush flat solid {
+            color property tone;
+          }
+          clip local {
+            parent scene.outer;
+            shape frame;
+            fill_rule non_zero;
+          }
+          paint coverage {
+            fill frame rule non_zero;
+            brush flat;
+            opacity 128;
+            clip tile_node.local;
+          }
+          hit {
+            round_stroke frame width fixed(65536);
+            clip scene.outer;
+            input property policy;
+          }
+          semantic {
+            shape frame;
+            fill_rule even_odd;
+            clip tile_node.local;
+          }
+        }
+      }
+    }
+    node guide : anchor_ref {
+      container row padding (2, 2, 2, 2) gap property pad;
+      placement layout
+        width dimension(0, property span_x, 100)
+        height dimension(0, property span_y, 80);
+      transform quarter_turn(0)
+        origin point(fixed(0), fixed(0));
+      node viewport_layer : overlay {
+        container column padding (0, 0, 0, 0) gap 0;
+        placement free
+          width property span_x height property span_y
+          self_anchor anchor(end, center)
+          target viewport
+          target_anchor anchor(start, start)
+          offset point(fixed(131072), fixed(196608));
+        transform translate(point(fixed(32768), fixed(-32768)))
+          origin point(fixed(0), fixed(0));
+      }
+    }
+  }
+}
+}
