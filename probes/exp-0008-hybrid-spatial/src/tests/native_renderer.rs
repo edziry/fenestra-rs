@@ -124,7 +124,12 @@ fn native_oracle_and_candidate_sources_are_private_and_separate() {
         assert!(!oracle.contains(forbidden), "oracle contains {forbidden}");
     }
     let adapter = &files["candidates/vello.rs"];
-    for required in ["vello::Scene", ".fill(", ".push_clip(", ".draw_image("] {
+    for required in [
+        "vello::Scene",
+        ".fill(",
+        ".push_clip_layer(",
+        ".draw_image(",
+    ] {
         assert!(adapter.contains(required), "adapter misses {required}");
     }
     for (path, source) in &files {

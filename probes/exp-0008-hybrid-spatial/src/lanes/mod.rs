@@ -2,6 +2,8 @@
 pub(crate) mod cpu_reference;
 #[cfg(feature = "image-resource")]
 pub(crate) mod image_resource;
+#[cfg(feature = "native-renderer")]
+pub(crate) mod native_renderer;
 #[cfg(feature = "numeric-spatial")]
 pub(crate) mod numeric_spatial;
 #[cfg(feature = "path-hit")]

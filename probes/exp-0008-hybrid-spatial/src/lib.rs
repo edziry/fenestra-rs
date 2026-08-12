@@ -10,6 +10,7 @@ mod baseline;
     any(
         feature = "cpu-reference",
         feature = "image-resource",
+        feature = "native-renderer",
         feature = "numeric-spatial",
         feature = "path-hit"
     )

@@ -9,6 +9,7 @@ mod faults;
 mod image_resource;
 mod limits;
 mod model;
+#[cfg(feature = "native-renderer")]
 mod native_renderer;
 #[cfg(feature = "numeric-spatial")]
 mod numeric_spatial;

@@ -27,6 +27,11 @@ const IMAGE_RESOURCE_DEPENDENCIES: [&str; 2] = [
     "png = { version = \"=0.18.1\", default-features = false, optional = true }",
 ];
 
+const NATIVE_RENDERER_DEPENDENCIES: [&str; 2] = [
+    "vello = { version = \"=0.9.0\", default-features = false, features = [\"wgpu\"], optional = true }",
+    "wgpu = { version = \"=29.0.3\", default-features = false, features = [\"std\", \"parking_lot\", \"wgsl\", \"vulkan\", \"dx12\"], optional = true }",
+];
+
 #[test]
 fn package_is_an_additive_private_workspace_probe() {
     let workspace = source::workspace_manifest();
@@ -61,6 +66,7 @@ fn package_is_an_additive_private_workspace_probe() {
         .chain(PATH_HIT_DEPENDENCIES)
         .chain(CPU_REFERENCE_DEPENDENCIES)
         .chain(IMAGE_RESOURCE_DEPENDENCIES)
+        .chain(NATIVE_RENDERER_DEPENDENCIES)
         .collect::<Vec<_>>();
     assert_eq!(dependency_body.lines().collect::<Vec<_>>(), expected);
 }
@@ -140,6 +146,7 @@ fn baseline_has_no_candidate_or_native_dependency_seam() {
         .chain(PATH_HIT_DEPENDENCIES)
         .chain(CPU_REFERENCE_DEPENDENCIES)
         .chain(IMAGE_RESOURCE_DEPENDENCIES)
+        .chain(NATIVE_RENDERER_DEPENDENCIES)
     {
         assert!(dependency.contains("optional = true"));
         assert!(manifest.contains(dependency));
@@ -160,6 +167,8 @@ fn baseline_has_no_candidate_or_native_dependency_seam() {
             "raqote",
             "image::",
             "png::",
+            "vello::",
+            "wgpu::",
         ] {
             assert!(
                 !import.contains(candidate),
