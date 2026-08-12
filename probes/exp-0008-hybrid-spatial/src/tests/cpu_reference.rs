@@ -93,6 +93,24 @@ fn cpu_candidates_are_fresh_deterministic_and_exactly_classified() {
         assert_eq!(first, second, "{candidate:?} is nondeterministic");
         let classification = classify_cpu_run_v2(&literal, &first);
         assert_eq!(classification.candidate, candidate);
+        assert_eq!(classification.outcome, CpuOutcomeV2::Stop);
+        assert_eq!(classification.reason, "mismatch");
+        let mismatch = classification
+            .first_mismatch
+            .expect("registered CPU mismatch");
+        let expected_mismatch = match candidate {
+            CpuCandidateV2::TinySkia => (2, 48, 0, 40),
+            CpuCandidateV2::Raqote => (2, 40, 40, 0),
+        };
+        assert_eq!(
+            (
+                mismatch.case,
+                mismatch.byte,
+                mismatch.expected,
+                mismatch.observed,
+            ),
+            expected_mismatch
+        );
         match classification.outcome {
             CpuOutcomeV2::Pass => assert_eq!(classification.reason, "-"),
             CpuOutcomeV2::Adapt => assert_eq!(classification.reason, "premultiplied-rgba8"),

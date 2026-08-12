@@ -7,6 +7,7 @@ publish.workspace = true
 repository.workspace = true
 
 [features]
+cpu-reference = ["dep:raqote", "dep:tiny-skia"]
 default = []
 numeric-spatial = ["dep:euclid", "dep:fixed", "dep:kurbo"]
 path-hit = ["dep:kurbo", "dep:lyon_tessellation"]
@@ -23,3 +24,5 @@ euclid = { version = "=0.22.14", default-features = false, features = ["std"], o
 fixed = { version = "=1.30.0", default-features = false, optional = true }
 kurbo = { version = "=0.13.1", default-features = false, features = ["std"], optional = true }
 lyon_tessellation = { version = "=1.0.20", default-features = false, features = ["std"], optional = true }
+raqote = { version = "=0.8.5", default-features = false, optional = true }
+tiny-skia = { version = "=0.12.0", default-features = false, features = ["std"], optional = true }
