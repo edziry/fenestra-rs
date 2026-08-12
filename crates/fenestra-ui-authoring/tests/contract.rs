@@ -77,6 +77,7 @@ fn version_limits_and_closed_vocabularies_are_exact() {
     ];
     diagnostics.extend(kinds.map(AuthoringDiagnosticKindV1::LimitExceeded));
     diagnostics.extend(IrValidationErrorKind::ALL.map(AuthoringDiagnosticKindV1::IrValidation));
+    assert_eq!(AuthoringDiagnosticKindV1::ALL.len(), 110);
     assert_eq!(AuthoringDiagnosticKindV1::ALL.as_slice(), diagnostics);
 }
 

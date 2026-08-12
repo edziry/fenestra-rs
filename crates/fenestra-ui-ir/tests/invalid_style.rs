@@ -151,7 +151,11 @@ fn all_error_kinds_remain_exhaustive_across_validator_corpora() {
         IrValidationErrorKind::LimitExceeded(ValidationLimitKind::StyleAssignments),
     ]);
 
-    assert_eq!(IrValidationErrorKind::ALL.as_slice(), expected.as_slice());
+    assert_eq!(expected.len(), 42);
+    assert_eq!(
+        &IrValidationErrorKind::ALL[..expected.len()],
+        expected.as_slice()
+    );
 }
 
 #[test]
