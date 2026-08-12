@@ -12,6 +12,7 @@ use crate::output_view::SpatialOutputV2;
 #[cfg(test)]
 mod facts;
 mod materialize;
+mod validate;
 
 /// Immutable lifetime-free spatial state ready for downstream consumers.
 pub struct SpatialResolvedSnapshotV2 {
@@ -61,4 +62,13 @@ pub fn materialize_reference_spatial_v2(prepared: PreparedSpatialV2) -> SpatialR
         hits: tables.hits,
         semantics: tables.semantics,
     }
+}
+
+/// Validates supplied candidate tables against fully prepared spatial state.
+#[must_use = "candidate output validation errors must be handled before publication"]
+pub fn validate_spatial_output_v2(
+    prepared: PreparedSpatialV2,
+    supplied: SpatialOutputV2<'_>,
+) -> Result<SpatialResolvedSnapshotV2, crate::resolve_error::SpatialResolveErrorV2> {
+    validate::validate(prepared, supplied)
 }
