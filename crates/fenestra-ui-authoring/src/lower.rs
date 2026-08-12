@@ -9,6 +9,7 @@ mod semantics;
 mod validate;
 
 use semantics::resolve_semantics;
+pub(crate) use semantics::resolve_semantics as resolve_logical_semantics;
 use validate::{source_map, validate_programs};
 
 pub(crate) fn lower_document_v1(
