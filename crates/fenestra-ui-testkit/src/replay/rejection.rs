@@ -27,7 +27,9 @@ const fn map_kind(kind: TransactionErrorKind) -> CandidateRejectionV1 {
     match kind {
         TransactionErrorKind::CapacityExceeded(capacity) => map_capacity(capacity),
         TransactionErrorKind::Headless(_) => CandidateRejectionV1::InvariantViolation,
+        TransactionErrorKind::Spatial(_) => CandidateRejectionV1::InvariantViolation,
         TransactionErrorKind::HeadlessUnavailable => CandidateRejectionV1::InvariantViolation,
+        TransactionErrorKind::SpatialUnavailable => CandidateRejectionV1::InvariantViolation,
         TransactionErrorKind::StaleBase => CandidateRejectionV1::StaleBase,
         TransactionErrorKind::MissingNode => CandidateRejectionV1::MissingNode,
         TransactionErrorKind::MissingFragment => CandidateRejectionV1::MissingFragment,
@@ -54,4 +56,22 @@ const fn map_capacity(capacity: CapacityKind) -> CandidateRejectionV1 {
 
 fn trace_error() -> HarnessError {
     HarnessError::new(HarnessErrorKind::TraceMismatch)
+}
+
+#[cfg(test)]
+mod tests {
+    use fenestra_ui_runtime::prototype::{RuntimeSpatialErrorV2, TransactionErrorKind};
+
+    use super::map_kind;
+    use crate::trace::CandidateRejectionV1;
+
+    #[test]
+    fn logical_oracle_v1_folds_spatial_failures_to_its_closed_invariant() {
+        for error in [
+            TransactionErrorKind::Spatial(RuntimeSpatialErrorV2::ViewportMismatch),
+            TransactionErrorKind::SpatialUnavailable,
+        ] {
+            assert_eq!(map_kind(error), CandidateRejectionV1::InvariantViolation);
+        }
+    }
 }

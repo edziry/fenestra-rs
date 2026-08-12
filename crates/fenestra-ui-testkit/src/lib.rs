@@ -1,4 +1,8 @@
 #![forbid(unsafe_code)]
+#![allow(
+    clippy::result_large_err,
+    reason = "the frozen testkit APIs retain typed runtime errors by value"
+)]
 
 //! Deterministic test support for the experimental Fenestra runtime.
 //!

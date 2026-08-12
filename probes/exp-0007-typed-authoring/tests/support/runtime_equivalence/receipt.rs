@@ -195,5 +195,8 @@ fn normalize_mutation(
                 new_surface: change.new_surface(),
             }
         }
+        MutationRecordView::SpatialViewportChanged(_) => {
+            return Err("runtime-spatial-viewport");
+        }
     })
 }
