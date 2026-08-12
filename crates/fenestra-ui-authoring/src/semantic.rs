@@ -5,7 +5,10 @@ use crate::compiled::CompiledAuthoringV1;
 use crate::resolved::ResolvedDocumentV1;
 
 mod encode;
+mod logical;
+mod record;
 mod value;
+mod writer;
 
 /// Inclusive resource category bounded by semantic artifact generation.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
