@@ -77,7 +77,7 @@ pub(super) fn rich_engine() -> ScriptedLayoutEngine {
 }
 
 pub(super) fn successful_layout_engine() -> ScriptedLayoutEngine {
-    rich_engine()
+    ScriptedLayoutEngine::new(vec![Ok(output(&[(0, 0, 0, 20, 20), (1, 0, 0, 1, 1)]))])
 }
 
 pub(super) fn zero_call_engine() -> ScriptedLayoutEngine {

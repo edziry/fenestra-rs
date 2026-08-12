@@ -75,21 +75,18 @@ fn assert_braced_fields_private(declaration: &str, brace: usize) {
 fn implementation_blocks<'a>(source: &'a str, name: &str) -> Vec<&'a str> {
     let mut blocks = Vec::new();
     let mut remaining = source;
-    loop {
-        let Some(start) = remaining
-            .lines()
-            .scan(0_usize, |offset, line| {
-                let start = *offset;
-                *offset += line.len() + 1;
-                Some((start, line.trim_start()))
-            })
-            .find_map(|(offset, line)| {
-                (line.starts_with("impl") && line.contains(name) && !line.contains(" for "))
-                    .then_some(offset)
-            })
-        else {
-            break;
-        };
+    while let Some(start) = remaining
+        .lines()
+        .scan(0_usize, |offset, line| {
+            let start = *offset;
+            *offset += line.len() + 1;
+            Some((start, line.trim_start()))
+        })
+        .find_map(|(offset, line)| {
+            (line.starts_with("impl") && line.contains(name) && !line.contains(" for "))
+                .then_some(offset)
+        })
+    {
         let implementation = &remaining[start..];
         let brace = implementation.find('{').expect("impl body");
         let end = matching_brace(implementation, brace);

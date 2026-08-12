@@ -111,6 +111,18 @@ fn retained_fixture(
             valid_stops(),
         )
     };
+    let mut polygon_points = vec![
+        point(-logical(2), logical(3)),
+        point(logical(4), -logical(1)),
+        point(logical(1), logical(5)),
+    ];
+    if extended_clips {
+        polygon_points.extend([
+            point(logical(20), logical(20)),
+            point(logical(22), logical(20)),
+            point(logical(20), logical(22)),
+        ]);
+    }
 
     fixture(vec![
         dependency_root(),
@@ -119,17 +131,7 @@ fn retained_fixture(
         dependency_free(3, 2, SpatialAnchorTargetV2::Parent),
     ])
     .with_paths(paths, verbs)
-    .with_shapes(
-        shapes,
-        vec![
-            point(-logical(2), logical(3)),
-            point(logical(4), -logical(1)),
-            point(logical(1), logical(5)),
-            point(logical(20), logical(20)),
-            point(logical(22), logical(20)),
-            point(logical(20), logical(22)),
-        ],
-    )
+    .with_shapes(shapes, polygon_points)
     .with_brushes(brushes, stops)
     .with_images(if extended_clips {
         vec![blank_image(0, 1, 1), blank_image(1, 2, 1)]
