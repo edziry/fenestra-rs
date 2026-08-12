@@ -46,7 +46,7 @@ fn runtime_spatial_values_have_exact_public_methods() {
 }
 
 #[test]
-fn runtime_spatial_cut_preserves_exact_owner_method_sets() {
+fn runtime_spatial_cut_preserves_current_owner_method_sets() {
     let source = all_source();
     assert_eq!(
         public_methods(&source, "UiRuntime"),
@@ -58,6 +58,8 @@ fn runtime_spatial_cut_preserves_exact_owner_method_sets() {
             "new_headless",
             "new_headless_with_layout_engine",
             "new_spatial",
+            "new_spatial_ir",
+            "new_spatial_ir_with_layout_engine",
             "new_spatial_with_layout_engine",
         ])
     );
