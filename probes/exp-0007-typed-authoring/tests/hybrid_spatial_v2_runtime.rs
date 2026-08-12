@@ -1,3 +1,5 @@
+#[path = "support/hybrid_spatial_v2/runtime/mod.rs"]
+mod runtime;
 #[path = "support/hybrid_spatial_v2/mod.rs"]
 mod support;
 
@@ -8,7 +10,8 @@ use fenestra_ui_spatial::prototype::{
     SpatialViewportV2,
 };
 
-use support::{manual_hybrid_spatial_v2, run_authored_spatial_lane};
+use runtime::run_authored_spatial_lane;
+use support::manual_hybrid_spatial_v2;
 
 #[test]
 fn manual_fen_and_ui_lanes_publish_the_same_complete_spatial_log() {
