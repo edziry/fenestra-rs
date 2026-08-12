@@ -3,9 +3,10 @@ use fenestra_ui_spatial::prototype::ReferenceRasterLimitsV2;
 
 use super::fixture::{
     commit_root_property, headless_scheduler, ordinary_scheduler, reject, request_and_offer,
-    spatial_scheduler, take_offer,
+    spatial_scheduler, spatial_scheduler_with_source, take_offer,
 };
 use crate::spatial_support::VIEWPORT;
+use crate::spatial_support::program::SourcePlan;
 
 #[test]
 fn ordinary_and_headless_offers_have_no_paint_frame() {
@@ -105,6 +106,56 @@ fn old_and_noop_offers_retain_their_exact_generation_and_paint_data() {
     assert_eq!(retry_frame.generation(), latest_frame.generation());
     assert_identity_value(retry_frame.spatial().images(), latest_images);
     assert_identity_value(retry_frame.spatial().images()[0].bytes(), latest_bytes);
+}
+
+#[test]
+fn failed_rebuild_preserves_the_offered_paint_frame_and_retry_identity() {
+    let mut scheduler = spatial_scheduler_with_source(SourcePlan::MalformedCanonicalOnCall(3));
+    commit_root_property(&mut scheduler, crate::support::headless::WIDTH, 101, 10);
+    let offer = request_and_offer(&mut scheduler, 10);
+    let frame = offer
+        .paint_frame()
+        .expect("spatial offer should retain a paint frame");
+    let images = identity(frame.spatial().images());
+    let image_bytes = identity(frame.spatial().images()[0].bytes());
+    let raster = frame
+        .spatial()
+        .rasterize_reference(ReferenceRasterLimitsV2::new(6_300))
+        .expect("offered frame should rasterize");
+    reject(&mut scheduler, &offer, 12);
+    let before = scheduler.committed();
+
+    let root = before.root();
+    let mut transaction = scheduler.begin_transaction();
+    transaction
+        .set_property(
+            root,
+            crate::support::headless::WIDTH,
+            fenestra_ui_ir::prototype::PropertyValue::ScalarI32(102),
+        )
+        .expect("candidate rebuild property should stage");
+    scheduler
+        .commit(transaction, SchedulerTick::new(13))
+        .expect_err("malformed candidate should reject the rebuild");
+
+    let after = scheduler.committed();
+    assert!(before.shares_state_with(&after));
+    assert_eq!(frame.generation(), after.generation());
+    assert_identity_value(frame.spatial().images(), images);
+    assert_identity_value(frame.spatial().images()[0].bytes(), image_bytes);
+    let raster_after = frame
+        .spatial()
+        .rasterize_reference(ReferenceRasterLimitsV2::new(6_300))
+        .expect("retained frame should still rasterize");
+    assert_raster_eq(&raster, &raster_after);
+
+    let retry = take_offer(&mut scheduler, 13);
+    let retry_frame = retry
+        .paint_frame()
+        .expect("failed rebuild should preserve retriable paint work");
+    assert_eq!(retry_frame.generation(), frame.generation());
+    assert_identity_value(retry_frame.spatial().images(), images);
+    assert_identity_value(retry_frame.spatial().images()[0].bytes(), image_bytes);
 }
 
 fn identity<T>(slice: &[T]) -> (*const T, usize) {

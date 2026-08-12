@@ -27,7 +27,11 @@ pub(super) fn headless_scheduler() -> UiScheduler {
 }
 
 pub(super) fn spatial_scheduler() -> UiScheduler {
-    let (program, _) = ProgramSpy::new(SourcePlan::FreshCanonical, MappingPlan::Canonical);
+    spatial_scheduler_with_source(SourcePlan::FreshCanonical)
+}
+
+pub(super) fn spatial_scheduler_with_source(source: SourcePlan) -> UiScheduler {
+    let (program, _) = ProgramSpy::new(source, MappingPlan::Canonical);
     let runtime = UiRuntime::new_spatial(
         styled_program(),
         Box::new(program),
