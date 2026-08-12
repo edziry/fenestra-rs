@@ -5,7 +5,7 @@ use crate::*;
 
 use super::source::{all_source, source_dir};
 
-const EXPECTED_EXPORTS: [&str; 107] = [
+const EXPECTED_EXPORTS: [&str; 109] = [
     "Affine2V2",
     "REGISTERED_SPATIAL_LIMITS_V2",
     "SpatialAabbV2",
@@ -113,6 +113,8 @@ const EXPECTED_EXPORTS: [&str; 107] = [
     "SpatialSemanticOutputRecordV2",
     "SpatialOutputV2",
     "SpatialOwnedInputV2",
+    "PreparedSpatialV2",
+    "prepare_spatial_v2",
 ];
 
 const NEW_STRUCTS: [&str; 7] = [

@@ -1,22 +1,16 @@
 use std::ptr;
 
-use super::dependency_support::{free as dependency_free, layout, root as dependency_root};
 use super::effective_clip_aabb_support::{
     SCALE, ScriptedLayoutEngine, VIEWPORT, aabb, empty, expect_valid, fact, fill, fixture_with,
-    hit, identity, limits, nonzero_clip, owner_node, rect_values, root, semantic_fill,
+    hit, identity, limits, nonzero_clip, owner_node, rect_values, retained_phase_ten_fixture, root,
+    semantic_fill,
 };
-use super::flattened_path_support::{line_to, move_to, path, point};
-use super::prepared_brush_support::{color, gradient, solid_color, valid_stops};
-use super::validated_clip_support::root_clip;
 use super::validated_hit_support::fill as hit_fill;
-use super::validated_image_support::blank_image;
 use super::validated_paint_support::{destination, fill as paint_fill, image_paint, source};
 use super::validated_semantic_support::semantic;
-use super::validated_shape_support::{path_shape, polygon};
-use super::world_transform_support::{fixture, logical, output};
+use super::world_transform_support::{logical, output};
 use crate::content_item::SpatialInputPolicyV2;
 use crate::coverage::SpatialFillRuleV2;
-use crate::model::SpatialAnchorTargetV2;
 use crate::shape::SpatialShapeKindV2;
 
 #[test]
@@ -94,44 +88,18 @@ fn effective_clips_retain_the_complete_predecessor_and_exact_raw_borrows() {
             None,
         ),
     ];
-    let fixture = fixture(vec![
-        dependency_root(),
-        dependency_free(1, 0, SpatialAnchorTargetV2::Viewport),
-        layout(2, 1),
-        dependency_free(3, 2, SpatialAnchorTargetV2::Parent),
-    ])
-    .with_paths(
-        vec![path(0, 0, 2)],
-        vec![move_to(0, 0), line_to(logical(2), 0)],
-    )
-    .with_shapes(
-        vec![
-            rect_values(0, 1, logical(1), logical(2), logical(3), logical(4)),
-            polygon(1, 2, 0, 3),
-            path_shape(2, 3, 0),
-        ],
-        vec![
-            point(-logical(2), logical(3)),
-            point(logical(4), -logical(1)),
-            point(logical(1), logical(5)),
-        ],
-    )
-    .with_brushes(
-        vec![solid_color(0, color(10, 20, 30, 255)), gradient(1, 0, 2)],
-        valid_stops(),
-    )
-    .with_images(vec![blank_image(0, 1, 1)])
-    .with_clips(vec![root_clip(0, 1, 0)])
-    .with_paint_items(paints)
-    .with_hit_items(vec![hit_fill(
-        2,
-        0,
-        1,
-        None,
-        SpatialFillRuleV2::NonZero,
-        SpatialInputPolicyV2::Accept,
-    )])
-    .with_semantic_items(vec![semantic(3, 0, 2, SpatialFillRuleV2::EvenOdd, None)]);
+    let fixture = retained_phase_ten_fixture(
+        paints,
+        vec![hit_fill(
+            2,
+            0,
+            1,
+            None,
+            SpatialFillRuleV2::NonZero,
+            SpatialInputPolicyV2::Accept,
+        )],
+        vec![semantic(3, 0, 2, SpatialFillRuleV2::EvenOdd, None)],
+    );
     let requested_limits = limits();
     let raw_input = fixture.input_with_viewport(VIEWPORT);
     let raw_images = raw_input.resources().images();

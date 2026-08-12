@@ -10,6 +10,7 @@ use crate::geometry_input::SpatialGeometryInputV2;
 use crate::geometry_key::{SpatialClipKeyV2, SpatialPathKeyV2, SpatialShapeKeyV2};
 use crate::image::SpatialImageV2;
 use crate::model::{SpatialNodeKeyV2, SpatialPointV2, SpatialScalarV2, SpatialViewportV2};
+use crate::owned_input::SpatialOwnedInputV2;
 use crate::paint::{SpatialPaintContentV2, SpatialPaintV2};
 use crate::path::{SpatialPathV2, SpatialPathVerbV2};
 use crate::shape::{SpatialShapeGeometryV2, SpatialShapeV2};
@@ -132,6 +133,24 @@ impl RawInputFixture {
             ),
             SpatialResourceInputV2::new(&self.gradient_stops, &self.brushes, &self.images),
             SpatialItemInputV2::new(&self.paint_items, &self.hit_items, &self.semantic_items),
+        )
+    }
+
+    pub(super) fn into_owned(self, viewport: SpatialViewportV2) -> SpatialOwnedInputV2 {
+        SpatialOwnedInputV2::new(
+            viewport,
+            self.nodes.into_boxed_slice(),
+            self.polygon_points.into_boxed_slice(),
+            self.path_verbs.into_boxed_slice(),
+            self.paths.into_boxed_slice(),
+            self.shapes.into_boxed_slice(),
+            self.clips.into_boxed_slice(),
+            self.gradient_stops.into_boxed_slice(),
+            self.brushes.into_boxed_slice(),
+            self.images.into_boxed_slice(),
+            self.paint_items.into_boxed_slice(),
+            self.hit_items.into_boxed_slice(),
+            self.semantic_items.into_boxed_slice(),
         )
     }
 }

@@ -110,6 +110,7 @@ mod prepared_brush_scalars;
 mod prepared_brush_semantics;
 mod prepared_brush_success;
 mod prepared_brush_support;
+mod prepared_spatial_contract;
 mod shape_structure_keys;
 mod shape_structure_priority;
 mod shape_structure_ranges;
