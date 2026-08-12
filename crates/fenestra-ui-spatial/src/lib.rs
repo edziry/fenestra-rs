@@ -77,7 +77,7 @@ pub mod prototype {
         SpatialImageDestinationRectV2, SpatialImageSourceRectV2, SpatialImageV2,
     };
     pub use crate::input_validation::{
-        PreparedSpatialV2, SpatialHitResultV2, SpatialResolvedSnapshotV2,
+        PreparedSpatialV2, SpatialHitResultV2, SpatialPaintFrameV2, SpatialResolvedSnapshotV2,
         materialize_reference_spatial_v2, prepare_spatial_v2, resolve_spatial_v2,
         validate_spatial_output_v2,
     };

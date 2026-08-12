@@ -13,10 +13,12 @@ use crate::output_view::SpatialOutputV2;
 mod facts;
 mod hit;
 mod materialize;
+mod presentation;
 mod raster;
 mod validate;
 
 pub use hit::SpatialHitResultV2;
+pub use presentation::SpatialPaintFrameV2;
 
 /// Immutable lifetime-free spatial state ready for downstream consumers.
 pub struct SpatialResolvedSnapshotV2 {
