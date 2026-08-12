@@ -39,10 +39,10 @@ pub use mutation::{
 };
 pub use scheduler::{
     CallbackFinish, CallbackScope, CompletionWatermark, ControlAdmission, ControlSequence, FrameId,
-    FrameWork, NestedCallbackScope, QueueCapacity, QueueStats, RendererEpoch, ScheduledCommit,
-    SchedulerAction, SchedulerCapacity, SchedulerError, SchedulerErrorKind, SchedulerInput,
-    SchedulerInputResult, SchedulerLane, SchedulerState, SchedulerStats, SchedulerTick,
-    SubmissionId, UiScheduler, VisualCancelResult,
+    FrameWork, NestedCallbackScope, QueueCapacity, QueueStats, RendererEpoch, RuntimePaintFrameV2,
+    ScheduledCommit, SchedulerAction, SchedulerCapacity, SchedulerError, SchedulerErrorKind,
+    SchedulerInput, SchedulerInputResult, SchedulerLane, SchedulerState, SchedulerStats,
+    SchedulerTick, SubmissionId, UiScheduler, VisualCancelResult,
 };
 pub use spatial::{
     RuntimeSpatialBuildViewV2, RuntimeSpatialErrorV2, RuntimeSpatialInputV2,
