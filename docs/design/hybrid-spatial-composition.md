@@ -15,6 +15,8 @@ Authoring runtime equivalence:
 [format-2 runtime equivalence](hybrid-spatial-authoring-runtime-equivalence-v2.md)
 Presentation:
 [hybrid spatial presentation contract](hybrid-spatial-presentation-v2.md)
+Evidence:
+[hybrid spatial evidence contract](hybrid-spatial-evidence-v2.md)
 Target incompatible package line: `0.2.0`
 Research baseline: `fenestra-research` commit
 `176c42139776ed9f1ef879cd135bddadaf12a9da`
