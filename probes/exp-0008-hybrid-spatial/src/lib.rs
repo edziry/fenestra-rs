@@ -5,5 +5,8 @@
 #[cfg(test)]
 mod baseline;
 
+#[cfg(all(test, feature = "numeric-spatial"))]
+mod lanes;
+
 #[cfg(test)]
 mod tests;

@@ -34,6 +34,29 @@ fn numeric_candidate_registry_is_exact_and_closed() {
 }
 
 #[test]
+fn numeric_manifest_and_lock_use_only_the_exact_candidate_profiles() {
+    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let manifest =
+        fs::read_to_string(root.join("Cargo.toml")).expect("manifest should be readable");
+    for declaration in [
+        "numeric-spatial = [\"dep:euclid\", \"dep:fixed\", \"dep:kurbo\"]",
+        "euclid = { version = \"=0.22.14\", default-features = false, features = [\"std\"], optional = true }",
+        "fixed = { version = \"=1.30.0\", default-features = false, optional = true }",
+        "kurbo = { version = \"=0.13.1\", default-features = false, features = [\"std\"], optional = true }",
+    ] {
+        assert!(manifest.contains(declaration), "missing {declaration}");
+    }
+    let lock = fs::read_to_string(root.join("../../Cargo.lock")).expect("lock should be readable");
+    for package in [
+        "name = \"euclid\"\nversion = \"0.22.14\"",
+        "name = \"fixed\"\nversion = \"1.30.0\"",
+        "name = \"kurbo\"\nversion = \"0.13.1\"",
+    ] {
+        assert_eq!(lock.matches(package).count(), 1, "{package}");
+    }
+}
+
+#[test]
 fn every_numeric_candidate_matches_two_fresh_literal_reconstructions() {
     let first_inputs = numeric_inputs_v2();
     let second_inputs = numeric_inputs_v2();

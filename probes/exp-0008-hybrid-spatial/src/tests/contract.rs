@@ -7,6 +7,12 @@ const DEPENDENCIES: [&str; 4] = [
     "fenestra-ui-spatial.workspace = true",
 ];
 
+const NUMERIC_DEPENDENCIES: [&str; 3] = [
+    "euclid = { version = \"=0.22.14\", default-features = false, features = [\"std\"], optional = true }",
+    "fixed = { version = \"=1.30.0\", default-features = false, optional = true }",
+    "kurbo = { version = \"=0.13.1\", default-features = false, features = [\"std\"], optional = true }",
+];
+
 #[test]
 fn package_is_an_additive_private_workspace_probe() {
     let workspace = source::workspace_manifest();
@@ -35,7 +41,11 @@ fn package_is_an_additive_private_workspace_probe() {
         .expect("dependency section")
         .1
         .trim();
-    assert_eq!(dependency_body.lines().collect::<Vec<_>>(), DEPENDENCIES);
+    let expected = DEPENDENCIES
+        .into_iter()
+        .chain(NUMERIC_DEPENDENCIES)
+        .collect::<Vec<_>>();
+    assert_eq!(dependency_body.lines().collect::<Vec<_>>(), expected);
 }
 
 #[test]
@@ -102,29 +112,30 @@ fn literal_oracle_imports_only_std_and_probe_private_literal_types() {
 #[test]
 fn baseline_has_no_candidate_or_native_dependency_seam() {
     let manifest = source::manifest();
-    for forbidden in [
-        "euclid",
-        "kurbo",
-        "fixed",
-        "lyon",
-        "rstar",
-        "tiny-skia",
-        "raqote",
-        "vello",
-        "wgpu",
-        "png",
-        "image",
-        "testkit",
-        "authoring",
-        "macros",
-        "native-spine",
-    ] {
+    for forbidden in ["testkit", "authoring", "macros", "native-spine"] {
         assert!(
             !manifest.contains(forbidden),
             "baseline dependency leaked: {forbidden}"
         );
     }
-    assert!(!PathLikeSources::baseline_text().contains("lanes/"));
+    for dependency in NUMERIC_DEPENDENCIES {
+        assert!(dependency.contains("optional = true"));
+        assert!(manifest.contains(dependency));
+    }
+    let baseline = PathLikeSources::baseline_text();
+    assert!(!baseline.contains("crate::lanes"));
+    for import in baseline
+        .lines()
+        .map(str::trim)
+        .filter(|line| line.starts_with("use "))
+    {
+        for candidate in ["euclid", "kurbo", "fixed::"] {
+            assert!(
+                !import.contains(candidate),
+                "baseline import leaked: {import}"
+            );
+        }
+    }
 }
 
 struct PathLikeSources;
