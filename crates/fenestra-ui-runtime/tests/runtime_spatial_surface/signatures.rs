@@ -45,12 +45,12 @@ fn runtime_spatial_input_constructor_signature_is_exact() {
 
 #[test]
 fn runtime_spatial_build_view_signatures_are_exact() {
-    assert_runtime_spatial_build_view_signatures();
+    assert_runtime_spatial_build_view_signatures(&());
 }
 
 #[test]
 fn runtime_spatial_observation_signatures_are_exact() {
-    assert_runtime_spatial_observation_signatures();
+    assert_runtime_spatial_observation_signatures(&());
 }
 
 #[allow(clippy::type_complexity)]
@@ -77,7 +77,7 @@ fn runtime_spatial_owner_method_signatures_are_exact() {
         CommittedRuntimeSnapshot::spatial;
 }
 
-fn assert_runtime_spatial_build_view_signatures<'a>() {
+fn assert_runtime_spatial_build_view_signatures<'a>(_: &'a ()) {
     let _: fn(RuntimeSpatialBuildViewV2<'a>) -> NodeId = RuntimeSpatialBuildViewV2::root;
     let _: fn(RuntimeSpatialBuildViewV2<'a>) -> usize = RuntimeSpatialBuildViewV2::node_count;
     let _: fn(RuntimeSpatialBuildViewV2<'a>, NodeId) -> Option<TemplateNodeId> =
@@ -98,7 +98,7 @@ fn assert_runtime_spatial_build_view_signatures<'a>() {
         RuntimeSpatialBuildViewV2::keyed_member;
 }
 
-fn assert_runtime_spatial_observation_signatures<'a>() {
+fn assert_runtime_spatial_observation_signatures<'a>(_: &'a ()) {
     let _: fn(RuntimeSpatialViewV2<'a>) -> &'a SpatialResolvedSnapshotV2 =
         RuntimeSpatialViewV2::snapshot;
     let _: fn(RuntimeSpatialViewV2<'a>, SpatialNodeKeyV2) -> Option<NodeId> =

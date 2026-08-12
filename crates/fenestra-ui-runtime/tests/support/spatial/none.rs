@@ -2,11 +2,12 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 
 use fenestra_ui_ir::prototype::{
-    ComponentSchema, ComponentTypeId, ConstructionProgram, InvalidationSet, PropertyId,
-    PropertySchema, PropertyValue, SUPPORTED_CONSTRUCTION_FORMAT, SUPPORTED_SCHEMA_FORMAT,
-    SUPPORTED_STYLE_FORMAT, SchemaManifest, SchemaNamespace, SchemaRevision, SourceSpan,
-    StyleProgram, StyleValidationLimits, TemplateNode, TemplateNodeId, ValidatedStyleProgram,
-    ValidationLimits, ValueType, validate_construction, validate_schema, validate_style,
+    ComponentSchema, ComponentTypeId, ConstructionProgram, InvalidationClass, InvalidationSet,
+    PropertyId, PropertySchema, PropertyValue, SUPPORTED_CONSTRUCTION_FORMAT,
+    SUPPORTED_SCHEMA_FORMAT, SUPPORTED_STYLE_FORMAT, SchemaManifest, SchemaNamespace,
+    SchemaRevision, SourceSpan, StyleProgram, StyleValidationLimits, TemplateNode, TemplateNodeId,
+    ValidatedStyleProgram, ValidationLimits, ValueType, validate_construction, validate_schema,
+    validate_style,
 };
 use fenestra_ui_spatial::prototype::SpatialViewportV2;
 
@@ -35,7 +36,7 @@ pub fn style() -> ValidatedStyleProgram {
                     VALUE,
                     ValueType::ScalarI32,
                     PropertyValue::ScalarI32(0),
-                    InvalidationSet::NONE,
+                    InvalidationSet::from_class(InvalidationClass::StyleMatch),
                     span,
                 )],
                 span,
@@ -44,7 +45,7 @@ pub fn style() -> ValidatedStyleProgram {
         ),
         IR_LIMITS,
     )
-    .expect("zero-invalidation schema should validate");
+    .expect("style-match-only schema should validate");
     let construction = validate_construction(
         &schema,
         ConstructionProgram::new(
@@ -63,7 +64,7 @@ pub fn style() -> ValidatedStyleProgram {
         ),
         IR_LIMITS,
     )
-    .expect("zero-invalidation construction should validate");
+    .expect("style-match-only construction should validate");
     validate_style(
         &construction,
         StyleProgram::new(
@@ -75,7 +76,7 @@ pub fn style() -> ValidatedStyleProgram {
         ),
         StyleValidationLimits::new(0),
     )
-    .expect("zero-invalidation style should validate")
+    .expect("style-match-only style should validate")
 }
 
 #[derive(Default)]

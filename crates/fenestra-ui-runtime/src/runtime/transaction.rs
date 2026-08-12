@@ -2,9 +2,9 @@ use std::fmt;
 use std::sync::{Arc, Weak};
 
 use fenestra_ui_ir::prototype::{
-    InvalidationSet, PropertyId, PropertyValue, ValidatedConstruction, ValidatedStyleProgram,
+    InvalidationSet, PropertyId, PropertyValue, ValidatedConstruction,
 };
-use fenestra_ui_layout::prototype::{LayoutEngineV1, ReferenceStackEngineV1};
+use fenestra_ui_spatial::prototype::SpatialViewportV2;
 
 use crate::logical_tree::NodeId;
 
@@ -12,17 +12,15 @@ use super::capacity::RuntimeCapacity;
 #[cfg(test)]
 pub(super) use super::commit_control::CommitTestHook;
 use super::commit_control::{CommitCheckpoint, CommitControl};
-use super::error::{
-    CapacityKind, RuntimeInitializationError, RuntimeInitializationErrorKind, TransactionError,
-    TransactionErrorKind,
-};
+use super::error::{CapacityKind, TransactionError, TransactionErrorKind};
 use super::fragment::FragmentId;
-use super::headless::{
-    HeadlessProjectionErrorKind, HeadlessProjectionSpec, HeadlessRuntimeConfig, HeadlessSurface,
-};
+use super::headless::{HeadlessProjectionErrorKind, HeadlessRuntimeConfig, HeadlessSurface};
 use super::mutation::{MutationIter, MutationRecord};
+use super::spatial::SpatialRuntimeConfig;
 use super::state::{RuntimeGeneration, RuntimeState};
 use super::view::CommittedRuntimeSnapshot;
+
+mod construct;
 
 pub(super) enum Operation {
     SetProperty {
@@ -52,6 +50,9 @@ pub(super) enum Operation {
     },
     ResizeHeadless {
         surface: HeadlessSurface,
+    },
+    ResizeSpatial {
+        viewport: SpatialViewportV2,
     },
 }
 
@@ -136,6 +137,11 @@ impl UiTransaction {
         self.stage(Operation::ResizeHeadless { surface })
     }
 
+    /// Stages one spatial viewport extent change.
+    pub fn resize_spatial(&mut self, viewport: SpatialViewportV2) -> Result<(), TransactionError> {
+        self.stage(Operation::ResizeSpatial { viewport })
+    }
+
     fn stage(&mut self, operation: Operation) -> Result<(), TransactionError> {
         if let Some(error) = self.poison {
             return Err(error);
@@ -158,66 +164,12 @@ pub struct UiRuntime {
     pub(super) construction: ValidatedConstruction,
     pub(super) capacity: RuntimeCapacity,
     pub(super) headless: Option<HeadlessRuntimeConfig>,
+    pub(super) spatial: Option<SpatialRuntimeConfig>,
     state: Arc<RuntimeState>,
     retired: Vec<Weak<RuntimeState>>,
 }
 
 impl UiRuntime {
-    /// Materializes generation zero from one exact validated construction.
-    pub fn new(
-        construction: ValidatedConstruction,
-        capacity: RuntimeCapacity,
-    ) -> Result<Self, RuntimeInitializationError> {
-        let state = RuntimeState::initialize(&construction, capacity)?;
-        Ok(Self {
-            construction,
-            capacity,
-            headless: None,
-            state: Arc::new(state),
-            retired: Vec::new(),
-        })
-    }
-
-    /// Materializes generation zero with a provisional headless projection.
-    pub fn new_headless(
-        style: ValidatedStyleProgram,
-        spec: HeadlessProjectionSpec,
-        surface: HeadlessSurface,
-        capacity: RuntimeCapacity,
-    ) -> Result<Self, RuntimeInitializationError> {
-        Self::new_headless_with_layout_engine(
-            style,
-            spec,
-            surface,
-            capacity,
-            Box::new(ReferenceStackEngineV1::new()),
-        )
-    }
-
-    /// Materializes generation zero with an injected provisional layout engine.
-    #[doc(hidden)]
-    pub fn new_headless_with_layout_engine(
-        style: ValidatedStyleProgram,
-        spec: HeadlessProjectionSpec,
-        surface: HeadlessSurface,
-        capacity: RuntimeCapacity,
-        layout_engine: Box<dyn LayoutEngineV1>,
-    ) -> Result<Self, RuntimeInitializationError> {
-        let construction = style.construction().clone();
-        let headless =
-            HeadlessRuntimeConfig::new(style, spec, surface, layout_engine).map_err(|kind| {
-                RuntimeInitializationError::new(RuntimeInitializationErrorKind::Headless(kind))
-            })?;
-        let state = RuntimeState::initialize_headless(&construction, capacity, &headless, surface)?;
-        Ok(Self {
-            construction,
-            capacity,
-            headless: Some(headless),
-            state: Arc::new(state),
-            retired: Vec::new(),
-        })
-    }
-
     /// Returns an immutable handle to the current committed state.
     #[must_use]
     pub fn committed(&self) -> CommittedRuntimeSnapshot {
@@ -273,6 +225,8 @@ impl UiRuntime {
             .fold(InvalidationSet::NONE, |set, record| {
                 set.union(record.invalidation())
             });
+        #[cfg(test)]
+        let invalidation = control.override_invalidation(invalidation);
         if applied.records.is_empty() {
             return Ok(CommitReceipt {
                 generation: self.state.generation,
@@ -302,6 +256,15 @@ impl UiRuntime {
                         operation_index,
                     )
                 })?;
+        }
+
+        if let Some(spatial) = &self.spatial {
+            let viewport = applied.candidate_spatial_viewport().ok_or_else(|| {
+                TransactionError::new(TransactionErrorKind::InvariantViolation, None)
+            })?;
+            draft.spatial = Some(spatial.build(&draft, viewport).map_err(|error| {
+                TransactionError::new(TransactionErrorKind::Spatial(error), None)
+            })?);
         }
 
         self.retired.retain(|state| state.strong_count() != 0);

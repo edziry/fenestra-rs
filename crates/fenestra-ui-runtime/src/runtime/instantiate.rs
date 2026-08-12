@@ -1,4 +1,4 @@
-use fenestra_ui_ir::prototype::ValidatedConstruction;
+use fenestra_ui_ir::prototype::{ValidatedConstruction, ValidatedStyleProgram};
 
 use crate::logical_tree::LogicalTree;
 
@@ -15,7 +15,7 @@ impl RuntimeState {
         construction: &ValidatedConstruction,
         capacity: RuntimeCapacity,
     ) -> Result<Self, RuntimeInitializationError> {
-        Self::initialize_with(construction, capacity, None, None)
+        Self::initialize_with(construction, capacity, None, None, None)
     }
 
     pub(crate) fn initialize_headless(
@@ -24,12 +24,21 @@ impl RuntimeState {
         config: &HeadlessRuntimeConfig,
         surface: HeadlessSurface,
     ) -> Result<Self, RuntimeInitializationError> {
-        Self::initialize_with(construction, capacity, Some(config), Some(surface))
+        Self::initialize_with(construction, capacity, None, Some(config), Some(surface))
+    }
+
+    pub(crate) fn initialize_styled(
+        construction: &ValidatedConstruction,
+        capacity: RuntimeCapacity,
+        style: &ValidatedStyleProgram,
+    ) -> Result<Self, RuntimeInitializationError> {
+        Self::initialize_with(construction, capacity, Some(style), None, None)
     }
 
     fn initialize_with(
         construction: &ValidatedConstruction,
         capacity: RuntimeCapacity,
+        style: Option<&ValidatedStyleProgram>,
         headless: Option<&HeadlessRuntimeConfig>,
         surface: Option<HeadlessSurface>,
     ) -> Result<Self, RuntimeInitializationError> {
@@ -39,9 +48,13 @@ impl RuntimeState {
             fragments: FragmentStore::new(),
             property_slot_count: 0,
             headless: None,
+            spatial: None,
         };
         let root_factory = construction.root_factory();
-        let expansion = ExpansionContext::new(construction, headless);
+        let expansion = style.map_or_else(
+            || ExpansionContext::new(construction, headless),
+            |style| ExpansionContext::styled(construction, style),
+        );
         let footprint = Self::factory_footprint(root_factory);
         state
             .preflight_initial(footprint, capacity)

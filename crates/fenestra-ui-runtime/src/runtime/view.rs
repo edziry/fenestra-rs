@@ -10,6 +10,7 @@ use crate::logical_tree::NodeId;
 
 use super::fragment::{FragmentId, KeyedMember};
 use super::headless::HeadlessProjectionView;
+use super::spatial::RuntimeSpatialViewV2;
 use super::state::{RuntimeGeneration, RuntimeState};
 
 /// Immutable handle to one exact committed logical runtime generation.
@@ -85,6 +86,12 @@ impl CommittedRuntimeSnapshot {
             .map(|state| HeadlessProjectionView::new(state, self.state.generation))
     }
 
+    /// Returns the optional spatial publication for this exact generation.
+    #[must_use]
+    pub fn spatial(&self) -> Option<RuntimeSpatialViewV2<'_>> {
+        self.state.spatial.as_deref().map(RuntimeSpatialViewV2::new)
+    }
+
     /// Returns a live non-root node's parent.
     #[must_use]
     pub fn parent(&self, node: NodeId) -> Option<NodeId> {
@@ -106,9 +113,9 @@ impl CommittedRuntimeSnapshot {
     /// Iterates one fragment's keyed members in committed order.
     #[must_use]
     pub fn keyed_members(&self, fragment: FragmentId) -> Option<KeyedMemberIter<'_>> {
-        Some(KeyedMemberIter {
-            members: self.state.fragments.get(fragment)?.members.iter(),
-        })
+        Some(KeyedMemberIter::new(
+            &self.state.fragments.get(fragment)?.members,
+        ))
     }
 
     /// Resolves one key to its committed member root.
@@ -141,6 +148,14 @@ impl fmt::Debug for CommittedRuntimeSnapshot {
 /// Iterator over committed `(key, member root)` pairs.
 pub struct KeyedMemberIter<'a> {
     members: slice::Iter<'a, KeyedMember>,
+}
+
+impl<'a> KeyedMemberIter<'a> {
+    pub(crate) fn new(members: &'a [KeyedMember]) -> Self {
+        Self {
+            members: members.iter(),
+        }
+    }
 }
 
 impl Iterator for KeyedMemberIter<'_> {

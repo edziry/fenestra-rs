@@ -176,8 +176,8 @@ fn runtime_spatial_closed_enums_have_exact_variants_and_order() {
     assert!(source.contains(concat!(
         "pubenumRuntimeSpatialErrorV2{",
         "ViewportMismatch,MappingLengthMismatch,",
-        "MissingLogicalNode{key:SpatialNodeKeyV2},",
-        "DuplicateLogicalNode{key:SpatialNodeKeyV2},",
+        "MissingLogicalNode{key:SpatialNodeKeyV2,},",
+        "DuplicateLogicalNode{key:SpatialNodeKeyV2,},",
         "Resolve(SpatialResolveErrorV2),}"
     )));
     assert!(source.contains(concat!(
@@ -359,7 +359,10 @@ fn has_must_use(source: &str, item_offset: usize) -> bool {
 fn significant(source: &str) -> String {
     source
         .lines()
-        .filter(|line| !line.trim_start().starts_with("///"))
+        .filter(|line| {
+            let line = line.trim_start();
+            !line.starts_with("///") && !line.starts_with("#[doc =")
+        })
         .flat_map(str::chars)
         .filter(|character| !character.is_whitespace())
         .collect()

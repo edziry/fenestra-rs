@@ -1,15 +1,18 @@
 use std::collections::HashSet;
+use std::sync::Arc;
 
 use fenestra_ui_ir::prototype::{
     ChildFactory, ComponentTypeId, InvalidationSet, PropertyId, PropertyValue, StructuralRegionId,
     TemplateNodeId, ValidatedConstruction,
 };
+use fenestra_ui_spatial::prototype::SpatialViewportV2;
 
 use crate::logical_tree::{LogicalTree, NodeId};
 
 use super::capacity::RuntimeCapacity;
 use super::fragment::{FragmentId, FragmentStore};
 use super::headless::HeadlessProjectionState;
+use super::spatial::SpatialPublication;
 
 /// Monotonic identity of one committed logical runtime state.
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -56,9 +59,14 @@ pub(crate) struct RuntimeState {
     pub(crate) fragments: FragmentStore,
     pub(crate) property_slot_count: usize,
     pub(crate) headless: Option<HeadlessProjectionState>,
+    pub(crate) spatial: Option<Arc<SpatialPublication>>,
 }
 
 impl RuntimeState {
+    pub(crate) fn spatial_viewport(&self) -> Option<SpatialViewportV2> {
+        self.spatial.as_deref().map(SpatialPublication::viewport)
+    }
+
     #[cfg(test)]
     pub(crate) fn set_generation_for_test(&mut self, value: u64) {
         self.generation = RuntimeGeneration(value);
@@ -106,6 +114,7 @@ impl RuntimeState {
             fragments: self.fragments.fork_for_transaction(),
             property_slot_count: self.property_slot_count,
             headless: self.headless.clone(),
+            spatial: self.spatial.clone(),
         }
     }
 

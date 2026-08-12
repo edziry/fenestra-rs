@@ -1,3 +1,6 @@
+#[cfg(test)]
+use fenestra_ui_ir::prototype::InvalidationSet;
+
 use super::state::RuntimeState;
 
 #[derive(Clone, Copy, Eq, PartialEq)]
@@ -21,6 +24,10 @@ pub(super) struct CommitControl {
     panic_at: Option<CommitCheckpoint>,
     #[cfg(test)]
     corruption: Option<DraftCorruption>,
+    // Validated IR rejects empty authored invalidation, so tests override only
+    // the aggregate after applying a real effective mutation.
+    #[cfg(test)]
+    empty_invalidation: bool,
 }
 
 impl CommitControl {
@@ -28,6 +35,8 @@ impl CommitControl {
         panic_at: None,
         #[cfg(test)]
         corruption: None,
+        #[cfg(test)]
+        empty_invalidation: false,
     };
 
     pub(super) fn panic_if(self, checkpoint: CommitCheckpoint) {
@@ -47,10 +56,22 @@ impl CommitControl {
     }
 
     #[cfg(test)]
+    pub(super) const fn override_invalidation(
+        self,
+        invalidation: InvalidationSet,
+    ) -> InvalidationSet {
+        if self.empty_invalidation {
+            return InvalidationSet::NONE;
+        }
+        invalidation
+    }
+
+    #[cfg(test)]
     const fn panic_at(checkpoint: CommitCheckpoint) -> Self {
         Self {
             panic_at: Some(checkpoint),
             corruption: None,
+            empty_invalidation: false,
         }
     }
 
@@ -59,6 +80,16 @@ impl CommitControl {
         Self {
             panic_at: None,
             corruption: Some(corruption),
+            empty_invalidation: false,
+        }
+    }
+
+    #[cfg(test)]
+    const fn empty_invalidation() -> Self {
+        Self {
+            panic_at: None,
+            corruption: None,
+            empty_invalidation: true,
         }
     }
 }
@@ -73,6 +104,7 @@ pub(super) enum CommitTestHook {
     CorruptPropertiesBeforeValidation,
     CorruptTreeBeforeValidation,
     CorruptFragmentBeforeValidation,
+    EmptyInvalidationBeforeRebuild,
 }
 
 #[cfg(test)]
@@ -90,6 +122,7 @@ impl CommitTestHook {
             Self::CorruptFragmentBeforeValidation => {
                 CommitControl::corrupt(DraftCorruption::Fragment)
             }
+            Self::EmptyInvalidationBeforeRebuild => CommitControl::empty_invalidation(),
         }
     }
 }

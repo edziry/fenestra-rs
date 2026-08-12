@@ -217,7 +217,7 @@ fn every_logical_and_spatial_true_noop_skips_both_callbacks() {
 }
 
 #[test]
-fn every_effective_commit_rebuilds_even_when_invalidation_is_empty() {
+fn every_effective_commit_rebuilds_when_only_style_match_is_invalidated() {
     let (program, state) = RootOnlyProgram::new();
     let (engine, engine_state) = EngineSpy::new(EnginePlan::Panic);
     let mut runtime = UiRuntime::new_spatial_with_layout_engine(
@@ -245,7 +245,21 @@ fn every_effective_commit_rebuilds_even_when_invalidation_is_empty() {
     let after = runtime.committed();
 
     assert!(!receipt.is_empty());
-    assert!(receipt.invalidation().is_empty());
+    assert_eq!(
+        receipt.invalidation(),
+        InvalidationSet::from_class(InvalidationClass::StyleMatch)
+    );
+    for class in [
+        InvalidationClass::Structure,
+        InvalidationClass::Intrinsic,
+        InvalidationClass::Layout,
+        InvalidationClass::Semantics,
+        InvalidationClass::HitTest,
+        InvalidationClass::Paint,
+        InvalidationClass::Composition,
+    ] {
+        assert!(!receipt.invalidation().contains(class));
+    }
     assert_eq!(state.calls(), 2);
     assert_eq!(state.values(), vec![0, 1]);
     assert_eq!(engine_state.calls(), 0);

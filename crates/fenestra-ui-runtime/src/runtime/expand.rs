@@ -1,5 +1,6 @@
 use fenestra_ui_ir::prototype::{
     ChildFactory, PropertyId, PropertyValue, TemplateFactory, ValidatedConstruction,
+    ValidatedStyleProgram,
 };
 
 use crate::logical_tree::NodeId;
@@ -15,17 +16,30 @@ use super::state::{ChildGroup, PropertySlot, RuntimeNode, RuntimeState};
 #[derive(Clone, Copy)]
 pub(crate) struct ExpansionContext<'a> {
     construction: &'a ValidatedConstruction,
+    style: Option<&'a ValidatedStyleProgram>,
     headless: Option<&'a HeadlessRuntimeConfig>,
 }
 
 impl<'a> ExpansionContext<'a> {
-    pub(crate) const fn new(
+    pub(crate) fn new(
         construction: &'a ValidatedConstruction,
         headless: Option<&'a HeadlessRuntimeConfig>,
     ) -> Self {
         Self {
             construction,
+            style: headless.map(HeadlessRuntimeConfig::style),
             headless,
+        }
+    }
+
+    pub(crate) const fn styled(
+        construction: &'a ValidatedConstruction,
+        style: &'a ValidatedStyleProgram,
+    ) -> Self {
+        Self {
+            construction,
+            style: Some(style),
+            headless: None,
         }
     }
 
@@ -48,10 +62,10 @@ impl<'a> ExpansionContext<'a> {
         template: TemplateFactory<'_>,
         property: PropertyId,
     ) -> Option<PropertyValue> {
-        match self.headless {
-            Some(config) => config.materialized_value(template, property),
-            None => template.effective_value(property).cloned(),
-        }
+        self.style
+            .and_then(|style| style.assignment(template.id(), property))
+            .map(|assignment| assignment.replacement().clone())
+            .or_else(|| template.effective_value(property).cloned())
     }
 }
 
