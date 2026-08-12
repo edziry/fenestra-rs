@@ -22,9 +22,23 @@ mod initialization_cleanup;
 mod initialization_errors;
 #[path = "runtime_spatial_surface/registry.rs"]
 mod registry;
+#[path = "runtime_spatial_surface/scheduler.rs"]
+mod scheduler;
+#[path = "runtime_spatial_surface/scheduler_submission.rs"]
+mod scheduler_submission;
 #[path = "runtime_spatial_surface/signatures.rs"]
 mod signatures;
 #[path = "runtime_spatial_surface/source.rs"]
 mod source;
 #[path = "runtime_spatial_surface/traits.rs"]
 mod traits;
+#[path = "runtime_spatial_surface/transaction_dynamic.rs"]
+mod transaction_dynamic;
+#[path = "runtime_spatial_surface/transaction_failures.rs"]
+mod transaction_failures;
+#[path = "runtime_spatial_surface/transaction_mapping.rs"]
+mod transaction_mapping;
+#[path = "runtime_spatial_surface/transaction_order.rs"]
+mod transaction_order;
+#[path = "runtime_spatial_surface/transaction_resize.rs"]
+mod transaction_resize;

@@ -76,6 +76,28 @@ pub fn free_source(viewport: SpatialViewportV2) -> Arc<SpatialOwnedInputV2> {
     )
 }
 
+pub fn layout_source(
+    viewport: SpatialViewportV2,
+    dimensions: &[(i32, i32)],
+) -> Arc<SpatialOwnedInputV2> {
+    let mut nodes = Vec::with_capacity(dimensions.len() + 1);
+    nodes.push(root(0));
+    nodes.extend(
+        dimensions
+            .iter()
+            .enumerate()
+            .map(|(index, &(width, height))| {
+                layout(
+                    u32::try_from(index + 1).expect("fixture key should fit"),
+                    0,
+                    width,
+                    height,
+                )
+            }),
+    );
+    owned(viewport, nodes, false)
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct SourceIdentity {
     pub owner: usize,

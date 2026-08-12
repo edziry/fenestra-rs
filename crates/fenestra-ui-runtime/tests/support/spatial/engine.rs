@@ -21,6 +21,7 @@ pub struct LayoutInputFact {
 pub struct EngineState {
     calls: AtomicUsize,
     inputs: Mutex<Vec<LayoutInputFact>>,
+    trace: Option<Arc<Mutex<Vec<&'static str>>>>,
 }
 
 impl EngineState {
@@ -39,6 +40,12 @@ impl EngineState {
 
     fn record(&self, input: ValidatedLayoutInputV1<'_>) {
         self.calls.fetch_add(1, Ordering::SeqCst);
+        if let Some(trace) = &self.trace {
+            trace
+                .lock()
+                .expect("callback trace should be available")
+                .push("engine");
+        }
         self.inputs
             .lock()
             .expect("engine inputs should be available")
@@ -66,7 +73,9 @@ pub enum EnginePlan {
     Reference,
     Distinct,
     Reject,
+    RejectOnCall(usize),
     Panic,
+    PanicOnCall(usize),
 }
 
 pub struct EngineSpy {
@@ -82,6 +91,25 @@ impl EngineSpy {
 
     pub fn with_drops(plan: EnginePlan, drops: Arc<AtomicUsize>) -> (Self, Arc<EngineState>) {
         Self::with_drop_probe(plan, Some(drops))
+    }
+
+    pub fn with_trace(
+        plan: EnginePlan,
+        trace: Arc<Mutex<Vec<&'static str>>>,
+    ) -> (Self, Arc<EngineState>) {
+        let state = Arc::new(EngineState {
+            calls: AtomicUsize::new(0),
+            inputs: Mutex::new(Vec::new()),
+            trace: Some(trace),
+        });
+        (
+            Self {
+                state: Arc::clone(&state),
+                plan,
+                drops: None,
+            },
+            state,
+        )
     }
 
     fn with_drop_probe(
@@ -109,13 +137,21 @@ impl LayoutEngineV1 for EngineSpy {
         match self.plan {
             EnginePlan::Reference => ReferenceStackEngineV1::new().compute(input),
             EnginePlan::Distinct => Ok(distinct_output(input)),
-            EnginePlan::Reject => Err(LayoutEngineErrorV1::new(
-                LayoutEngineErrorKindV1::RejectedInput,
-                LayoutErrorLocationV1::InputNode { index: 2 },
-            )),
+            EnginePlan::Reject => Err(rejection()),
+            EnginePlan::RejectOnCall(call) if self.state.calls() == call => Err(rejection()),
+            EnginePlan::RejectOnCall(_) => ReferenceStackEngineV1::new().compute(input),
             EnginePlan::Panic => panic_any(EngineMarker),
+            EnginePlan::PanicOnCall(call) if self.state.calls() == call => panic_any(EngineMarker),
+            EnginePlan::PanicOnCall(_) => ReferenceStackEngineV1::new().compute(input),
         }
     }
+}
+
+fn rejection() -> LayoutEngineErrorV1 {
+    LayoutEngineErrorV1::new(
+        LayoutEngineErrorKindV1::RejectedInput,
+        LayoutErrorLocationV1::InputNode { index: 2 },
+    )
 }
 
 impl Drop for EngineSpy {
