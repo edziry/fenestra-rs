@@ -112,6 +112,8 @@ impl SpatialLowerer<'_> {
                 offset,
                 ..
             } => {
+                let width = self.binding_field(width, component, ValueType::ScalarI32)?;
+                let height = self.binding_field(height, component, ValueType::ScalarI32)?;
                 let target = match target {
                     crate::parsed_v2::ParsedAnchorTargetV2::Viewport => {
                         SpatialAnchorTargetRecipeV2::Viewport
@@ -124,8 +126,8 @@ impl SpatialLowerer<'_> {
                     }
                 };
                 SpatialPlacementRecipeV2::Free(SpatialFreePlacementRecipeV2::new(
-                    self.binding_field(width, component, ValueType::ScalarI32)?,
-                    self.binding_field(height, component, ValueType::ScalarI32)?,
+                    width,
+                    height,
                     [self_anchor.horizontal, self_anchor.vertical],
                     target,
                     [target_anchor.horizontal, target_anchor.vertical],
