@@ -155,7 +155,7 @@ fn named_fields(source: &str, type_name: &str) -> BTreeSet<(String, String)> {
                 "public field {significant}"
             );
             let (name, field_type) = significant.split_once(':').expect("named field");
-            Some((name.to_owned(), field_type.to_owned()))
+            Some((name.trim().to_owned(), field_type.trim().to_owned()))
         })
         .collect()
 }
