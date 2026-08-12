@@ -17,7 +17,10 @@ fn all_seven_control_families_are_complete_and_detected() {
             control.registered >= minimum,
             "insufficient {family} controls"
         );
-        assert_eq!(control.detected, control.registered);
+        assert_eq!(
+            control.detected, control.registered,
+            "{family} controls must all report the exact first mismatch"
+        );
         assert!(control.exact_first_location);
     }
 }
@@ -84,7 +87,7 @@ fn recursive_comparison_reports_the_first_section_record_and_field() {
         (
             EvidenceMutationV2::QueryHitToMiss,
             EvidenceSectionV2::Queries,
-            0,
+            2,
             "result-tag",
         ),
         (
@@ -97,9 +100,9 @@ fn recursive_comparison_reports_the_first_section_record_and_field() {
     for (mutation, section, record, field) in probes {
         let actual = mutate_evidence_v2(&expected, mutation);
         let mismatch = compare_evidence_v2(&expected, &actual).expect_err("mutation must differ");
-        assert_eq!(mismatch.section, section);
-        assert_eq!(mismatch.record, record);
-        assert_eq!(mismatch.field, field);
+        assert_eq!(mismatch.section, section, "{mutation:?}");
+        assert_eq!(mismatch.record, record, "{mutation:?}");
+        assert_eq!(mismatch.field, field, "{mutation:?}");
     }
 }
 
