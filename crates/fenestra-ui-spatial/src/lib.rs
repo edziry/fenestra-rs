@@ -29,6 +29,7 @@ mod output_field;
 mod output_geometry;
 mod output_item;
 mod output_view;
+mod owned_input;
 mod paint;
 mod paint_kernel;
 mod path;
@@ -91,6 +92,7 @@ pub mod prototype {
         SpatialSemanticOutputRecordV2,
     };
     pub use crate::output_view::SpatialOutputV2;
+    pub use crate::owned_input::SpatialOwnedInputV2;
     pub use crate::paint::{SpatialPaintContentV2, SpatialPaintKindV2, SpatialPaintV2};
     pub use crate::path::{SpatialPathV2, SpatialPathVerbKindV2, SpatialPathVerbV2};
     pub use crate::resolve_error::{
