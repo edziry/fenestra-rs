@@ -32,8 +32,9 @@ The implementation sequence is:
    materialization;
 5. the one-shot reference resolver;
 6. candidate-output validation;
-7. exact clip coverage, reverse hit selection, rasterization, and runtime
-   publication in their own later RED/GREEN cuts.
+7. exact clip coverage and reverse hit selection under the versioned
+   [hit-query contract](hybrid-spatial-hit-api-v2.md), followed by
+   rasterization and runtime publication in their own later RED/GREEN cuts.
 
 The completed slice adds exactly 15 `prototype` exports, taking the exact
 surface from 98 to 113 names: the eight raw output values below,
@@ -356,7 +357,8 @@ the resolver signatures are fixed in
 The candidate-output global passes and exact diagnostic attribution are fixed
 in [hybrid-spatial-output-validation-v2.md](hybrid-spatial-output-validation-v2.md).
 
-Exact clip containment, hit result type, reverse hit selection, CPU
+The later exact clip-containment behavior and reverse-hit result/query surface
+is fixed by [hybrid-spatial-hit-api-v2.md](hybrid-spatial-hit-api-v2.md). CPU
 rasterization, semantic runtime joins, candidate adapters, runtime generations,
 invalidation, rollback, presentation, artifacts, and authoring remain later
 boundaries.

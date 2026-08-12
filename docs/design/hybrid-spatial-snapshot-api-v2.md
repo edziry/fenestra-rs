@@ -49,10 +49,15 @@ impl SpatialResolvedSnapshotV2 {
     pub const fn viewport(&self) -> SpatialViewportV2;
     pub fn output(&self) -> SpatialOutputV2<'_>;
     pub fn effective_clip_aabbs(&self) -> &[SpatialAabbV2];
+    pub fn hit_test(&self, scene_point: SpatialPointV2)
+        -> Option<SpatialHitResultV2>;
 }
 ```
 
-All three snapshot getters are `#[must_use]`. `PreparedSpatialV2` owns the
+The three snapshot getters and the hit query are `#[must_use]`. The hit result,
+selection, and exact-coverage contract is fixed separately in
+[hybrid-spatial-hit-api-v2.md](hybrid-spatial-hit-api-v2.md).
+`PreparedSpatialV2` owns the
 immutable source `Arc` and private unforgeable validated keys, ranges, tokens,
 and derived phase-10 results. It contains no borrow into that source and no
 candidate handle. Preparation borrows the source only inside its call, consumes
@@ -125,6 +130,6 @@ prior source, snapshot, generation, and presented frame. This requires no
 `ArcSwap`, new dependency, unsafe code, pinning, or self-referential storage.
 
 The snapshot does not expose its raw owner or private normalized-resource
-store. Later exact hit and raster APIs consume only the snapshot; they do not
-accept raw input, prepared proofs, candidate output, logical identities, or
-renderer handles.
+store. The exact hit API and later raster APIs consume only the snapshot; they
+do not accept raw input, prepared proofs, candidate output, logical identities,
+or renderer handles.
