@@ -25,6 +25,8 @@ use fenestra_ui_ir::prototype::{
 
 #[path = "spatial_ir_validation/counts_source.rs"]
 mod counts_source;
+#[path = "spatial_ir_validation/deep_context.rs"]
+mod deep_context;
 #[path = "spatial_ir_validation/deferred_semantics.rs"]
 mod deferred_semantics;
 #[path = "spatial_ir_validation/error_registry.rs"]

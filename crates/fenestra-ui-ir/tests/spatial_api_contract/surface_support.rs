@@ -123,11 +123,9 @@ pub(super) fn assert_enum_body(source: &str, type_name: &str, expected: &str) {
     let declaration = &source[start..];
     let brace = declaration.find('{').expect("enum body");
     let end = matching_delimiter(declaration, brace, '}');
-    assert_eq!(
-        significant(&declaration[brace + 1..end]),
-        compact(expected),
-        "variant inventory for {type_name}"
-    );
+    let observed = significant(&declaration[brace + 1..end]).replace(",}", "}");
+    let expected = compact(expected).replace(",}", "}");
+    assert_eq!(observed, expected, "variant inventory for {type_name}");
     let attributes = source[..start]
         .lines()
         .rev()
@@ -188,10 +186,18 @@ pub(super) fn implementation_blocks<'a>(source: &'a str, type_name: &str) -> Vec
         let mut start = None;
         for line in remaining.split_inclusive('\n') {
             let trimmed = line.trim_start();
-            if trimmed.starts_with("impl")
-                && trimmed.contains(type_name)
-                && !trimmed.contains(" for ")
-            {
+            let declaration = trimmed.strip_prefix("impl").map(str::trim_start);
+            let self_type = declaration.map(|declaration| {
+                if declaration.starts_with('<') {
+                    let end = matching_delimiter(declaration, 0, '>');
+                    declaration[end + 1..].trim_start()
+                } else {
+                    declaration
+                }
+            });
+            let impl_target =
+                self_type.and_then(|self_type| self_type.split(['<', ' ', '{']).next());
+            if impl_target == Some(type_name) && !trimmed.contains(" for ") {
                 start = Some(line_offset + line.len() - trimmed.len());
                 break;
             }
@@ -226,7 +232,13 @@ fn balanced_block_end(source: &str) -> usize {
 }
 
 fn has_must_use(source: &str, item_offset: usize) -> bool {
-    for line in source[..item_offset].lines().rev() {
+    let line_start = source[..item_offset]
+        .rfind('\n')
+        .map_or(0, |offset| offset + 1);
+    if source[line_start..item_offset].contains("#[must_use") {
+        return true;
+    }
+    for line in source[..line_start].lines().rev() {
         let line = line.trim();
         if line == "#[must_use]" || line.starts_with("#[must_use = ") {
             return true;

@@ -269,3 +269,31 @@ fn clip_resolution_subchecks_have_an_observable_priority_ladder() {
         assert_error(&style, program(nodes), kind, source);
     }
 }
+
+#[test]
+fn a_later_duplicate_clip_does_not_retarget_an_earlier_parent() {
+    let style = style();
+    let program = program(vec![node_with(
+        0,
+        ROOT,
+        SpatialNodeParentV2::Viewport,
+        placement(5700),
+        vec![shape(0, 5710)],
+        Vec::new(),
+        vec![
+            clip(0, None, 0, 5720),
+            clip(1, Some(address(0, 5730, 0, 5731)), 0, 5725),
+            clip(0, None, 0, 5735),
+        ],
+        Vec::new(),
+        Vec::new(),
+        Vec::new(),
+        5699,
+    )]);
+    assert_error(
+        &style,
+        program,
+        IrValidationErrorKind::DuplicateSpatialClip,
+        span(5735),
+    );
+}

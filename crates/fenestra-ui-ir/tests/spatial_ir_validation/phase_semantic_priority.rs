@@ -1,6 +1,7 @@
 use super::*;
 use support::*;
 
+#[allow(clippy::too_many_arguments)]
 fn custom_node(
     symbol: u32,
     target: TemplateNodeId,

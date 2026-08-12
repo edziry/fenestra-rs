@@ -132,3 +132,19 @@ impl StyleValidationLimits {
         self.assignments
     }
 }
+
+/// Inclusive resource limits applied while validating symbolic spatial IR.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct SpatialValidationLimitsV2([usize; 13]);
+
+impl SpatialValidationLimitsV2 {
+    /// Creates a complete set of explicit inclusive spatial limits.
+    #[must_use]
+    pub const fn new(values: [usize; 13]) -> Self {
+        Self(values)
+    }
+
+    pub(crate) const fn get(self, index: usize) -> usize {
+        self.0[index]
+    }
+}

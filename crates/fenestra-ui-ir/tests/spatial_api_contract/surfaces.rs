@@ -37,7 +37,7 @@ fn every_record_and_payload_has_only_its_registered_methods() {
         "SpatialAnchorComponentV2",
         "SpatialFillRuleV2",
     ] {
-        assert_payload_surface(&source, vocabulary, &[]);
+        assert!(super::surface_support::public_methods(&source, vocabulary).is_empty());
         assert_eq!(
             super::surface_support::public_constants(&source, vocabulary),
             super::surface_support::names(&["ALL"])

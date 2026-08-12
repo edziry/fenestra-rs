@@ -31,6 +31,7 @@ fn owned_shape_brush_and_image_signatures_are_exact() {
     assert_image_signatures();
 }
 
+#[allow(clippy::type_complexity)]
 fn assert_image_signatures() {
     let _: fn(
         SpatialFieldV2<SpatialImageSymbolV2>,
@@ -98,6 +99,7 @@ fn assert_node_signatures() {
 }
 
 #[test]
+#[allow(clippy::type_complexity)]
 fn program_validation_and_validated_view_signatures_are_exact() {
     let _: fn(
         SpatialFormatVersion,

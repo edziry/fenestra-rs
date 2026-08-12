@@ -296,6 +296,7 @@ pub fn paint(shape: u32, brush: u32, index: u32) -> SpatialPaintRecipeV2 {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn node_with(
     symbol: u32,
     target: TemplateNodeId,

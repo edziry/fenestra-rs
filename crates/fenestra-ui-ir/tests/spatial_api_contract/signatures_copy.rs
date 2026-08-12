@@ -67,6 +67,7 @@ fn point_padding_dimension_and_transform_signatures_are_exact() {
 }
 
 #[test]
+#[allow(clippy::type_complexity)]
 fn container_and_placement_signatures_are_exact() {
     let _: fn(
         SpatialAxisV2,
@@ -134,6 +135,7 @@ fn copy_content_record_signatures_are_exact() {
     assert_clip_hit_semantic_signatures();
 }
 
+#[allow(clippy::type_complexity)]
 fn assert_free_placement_signatures() {
     let _: fn(
         Integer,
@@ -158,6 +160,7 @@ fn assert_free_placement_signatures() {
         SpatialFreePlacementRecipeV2::transform;
 }
 
+#[allow(clippy::type_complexity)]
 fn assert_clip_hit_semantic_signatures() {
     let _: fn(
         SpatialFieldV2<SpatialClipSymbolV2>,
