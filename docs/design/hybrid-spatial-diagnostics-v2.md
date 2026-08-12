@@ -4,6 +4,7 @@ Core contract: [hybrid-spatial-reference-v2.md](hybrid-spatial-reference-v2.md)
 Content contract: [hybrid-spatial-content-reference-v2.md](hybrid-spatial-content-reference-v2.md)
 Fields: [hybrid-spatial-fields-v2.md](hybrid-spatial-fields-v2.md)
 Validation API: [hybrid-spatial-validation-api-v2.md](hybrid-spatial-validation-api-v2.md)
+Raster API: [hybrid-spatial-raster-api-v2.md](hybrid-spatial-raster-api-v2.md)
 Private input validation:
 [hybrid-spatial-input-validation-kernel-v2.md](hybrid-spatial-input-validation-kernel-v2.md)
 Format: spatial diagnostics version 2
@@ -50,7 +51,9 @@ DEPENDENCY_ALL = DependencyVertices, DependencyEdges
 The encoded-image boundary has `EncodedBytes`; the raster boundary has
 `Pixels`; the artifact boundary has `Records, LineBytes, ArtifactBytes`.
 Canonical RGBA byte counts are checked arithmetic derived from pixel counts,
-not duplicate limits.
+not duplicate limits. The raster API fixes the effective allocation maximum
+at the largest four-byte pixel count whose packed allocation is at most
+`isize::MAX`, plus the exact zero-area stride representation.
 
 Each registered limit has an exact accepted fixture and a valid one-over
 fixture that reaches its named check before any earlier failure. Limits that

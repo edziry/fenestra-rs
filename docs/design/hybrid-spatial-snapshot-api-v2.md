@@ -3,6 +3,7 @@
 Output records: [hybrid-spatial-output-api-v2.md](hybrid-spatial-output-api-v2.md)
 Raw input: [hybrid-spatial-validation-api-v2.md](hybrid-spatial-validation-api-v2.md)
 Reference semantics: [hybrid-spatial-reference-v2.md](hybrid-spatial-reference-v2.md)
+Reference raster: [hybrid-spatial-raster-api-v2.md](hybrid-spatial-raster-api-v2.md)
 Format: immutable spatial snapshot API version 2
 
 ## Immutable input ownership
@@ -51,12 +52,18 @@ impl SpatialResolvedSnapshotV2 {
     pub fn effective_clip_aabbs(&self) -> &[SpatialAabbV2];
     pub fn hit_test(&self, scene_point: SpatialPointV2)
         -> Option<SpatialHitResultV2>;
+    pub fn rasterize_reference(
+        &self,
+        limits: ReferenceRasterLimitsV2,
+    ) -> Result<ReferenceRasterV2, ReferenceRasterErrorV2>;
 }
 ```
 
-The three snapshot getters and the hit query are `#[must_use]`. The hit result,
-selection, and exact-coverage contract is fixed separately in
-[hybrid-spatial-hit-api-v2.md](hybrid-spatial-hit-api-v2.md).
+The three snapshot getters, hit query, and reference raster result are
+`#[must_use]`. The hit result, selection, and exact-coverage contract is fixed
+separately in [hybrid-spatial-hit-api-v2.md](hybrid-spatial-hit-api-v2.md).
+The bounded raster result and sampling contract are fixed separately in
+[hybrid-spatial-raster-api-v2.md](hybrid-spatial-raster-api-v2.md).
 `PreparedSpatialV2` owns the
 immutable source `Arc` and private unforgeable validated keys, ranges, tokens,
 and derived phase-10 results. It contains no borrow into that source and no
@@ -130,6 +137,6 @@ prior source, snapshot, generation, and presented frame. This requires no
 `ArcSwap`, new dependency, unsafe code, pinning, or self-referential storage.
 
 The snapshot does not expose its raw owner or private normalized-resource
-store. The exact hit API and later raster APIs consume only the snapshot; they
+store. The exact hit and raster APIs consume only the snapshot; they
 do not accept raw input, prepared proofs, candidate output, logical identities,
 or renderer handles.

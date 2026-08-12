@@ -127,6 +127,10 @@ The implementation uses no candidate library, unsafe code, cache, spatial
 index, or new dependency.
 
 Public clip-only queries, all-hit collection, logical identity joins, pointer
-capture, semantic joins, CPU rasterization, paint frames, runtime generation
+capture, semantic joins, paint frames, runtime generation
 publication, invalidation, rollback, artifacts, and authoring remain separate
 later RED/GREEN boundaries.
+
+The snapshot-only CPU reference raster is fixed independently by
+[hybrid-spatial-raster-api-v2.md](hybrid-spatial-raster-api-v2.md); it does not
+participate in hit selection.
