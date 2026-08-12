@@ -158,7 +158,9 @@ fn raw_output_slice_has_exact_explicit_prototype_exports() {
             assert!(observed.insert(name), "duplicate reexport {name}");
         }
     }
-    assert_eq!(observed, EXPECTED_EXPORTS.into_iter().collect());
+    let mut expected = EXPECTED_EXPORTS.into_iter().collect::<BTreeSet<_>>();
+    assert!(expected.insert("preflight_spatial_direct_counts_v2"));
+    assert_eq!(observed, expected);
 }
 
 #[test]

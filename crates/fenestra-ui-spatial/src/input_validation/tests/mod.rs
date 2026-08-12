@@ -29,13 +29,14 @@ use super::{
     prepare_world_aabbs as prepare_world_aabbs_stage,
     prepare_world_transforms as prepare_world_transforms_stage,
     validate_clip_depth as validate_clip_depth_stage,
-    validate_dependency_fact as validate_dependency_fact_stage, validate_direct_count,
+    validate_dependency_fact as validate_dependency_fact_stage,
     validate_gradient_stop_range as validate_gradient_stop_range_stage,
     validate_hit_item_limit as validate_hit_item_limit_stage,
     validate_island_fact as validate_island_fact_stage,
     validate_paint_item_limit as validate_paint_item_limit_stage,
     validate_polygon_range as validate_polygon_range_stage,
 };
+use crate::direct_counts::preflight_spatial_direct_counts_v2;
 use crate::error::SpatialErrorLocationV2;
 use crate::limits::{SpatialLimitKindV2, SpatialLimitsV2};
 use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};

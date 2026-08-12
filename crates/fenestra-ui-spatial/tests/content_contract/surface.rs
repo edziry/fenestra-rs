@@ -174,7 +174,9 @@ fn content_slice_reexports_exactly_the_registered_surface() {
             }
         }
     }
-    assert_eq!(observed, EXPECTED_EXPORTS.into_iter().collect());
+    let mut expected = EXPECTED_EXPORTS.into_iter().collect::<BTreeSet<_>>();
+    assert!(expected.insert("preflight_spatial_direct_counts_v2"));
+    assert_eq!(observed, expected);
 }
 
 #[test]

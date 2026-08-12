@@ -12,6 +12,7 @@ mod content_input;
 mod content_item;
 mod content_key;
 mod coverage;
+mod direct_counts;
 mod error;
 mod geometry_field;
 mod geometry_input;
@@ -60,6 +61,7 @@ pub mod prototype {
     pub use crate::coverage::{
         SpatialClipV2, SpatialCoverageKindV2, SpatialCoverageV2, SpatialFillRuleV2,
     };
+    pub use crate::direct_counts::preflight_spatial_direct_counts_v2;
     pub use crate::error::{
         SpatialContainerErrorKindV2, SpatialDependencyErrorKindV2, SpatialErrorLocationV2,
         SpatialInputErrorKindV2, SpatialLayoutDimensionErrorKindV2,

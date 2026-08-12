@@ -5,11 +5,14 @@ fn every_direct_count_accepts_equality_and_rejects_one_over() {
     const MAXIMUM: usize = 3;
     let limits = limits_with_direct([MAXIMUM; DIRECT_COUNT]);
 
-    for kind in SpatialLimitKindV2::DIRECT_ALL {
-        expect_valid(validate_direct_count(kind, MAXIMUM, limits));
+    for (index, kind) in SpatialLimitKindV2::DIRECT_ALL.into_iter().enumerate() {
+        expect_valid(preflight_spatial_direct_counts_v2(
+            observed(index, MAXIMUM as u128),
+            limits,
+        ));
 
         expect_limit(
-            validate_direct_count(kind, MAXIMUM + 1, limits),
+            preflight_spatial_direct_counts_v2(observed(index, MAXIMUM as u128 + 1), limits),
             kind,
             MAXIMUM as u128 + 1,
             MAXIMUM as u128,
@@ -25,10 +28,13 @@ fn globally_indexed_tables_use_the_u32_row_capacity_ceiling() {
 
     for index in GLOBALLY_INDEXED_DIRECT_INDICES {
         let kind = SpatialLimitKindV2::DIRECT_ALL[index];
-        expect_valid(validate_direct_count(kind, capacity, limits));
+        expect_valid(preflight_spatial_direct_counts_v2(
+            observed(index, capacity as u128),
+            limits,
+        ));
 
         expect_limit(
-            validate_direct_count(kind, capacity + 1, limits),
+            preflight_spatial_direct_counts_v2(observed(index, capacity as u128 + 1), limits),
             kind,
             U32_ROW_CAPACITY + 1,
             U32_ROW_CAPACITY,
@@ -50,13 +56,22 @@ fn payload_tables_use_the_caller_maximum_above_u32_capacity() {
 
     for index in PAYLOAD_DIRECT_INDICES {
         let kind = SpatialLimitKindV2::DIRECT_ALL[index];
-        expect_valid(validate_direct_count(kind, caller_maximum, limits));
+        expect_valid(preflight_spatial_direct_counts_v2(
+            observed(index, caller_maximum as u128),
+            limits,
+        ));
 
         expect_limit(
-            validate_direct_count(kind, caller_maximum + 1, limits),
+            preflight_spatial_direct_counts_v2(observed(index, caller_maximum as u128 + 1), limits),
             kind,
             caller_maximum as u128 + 1,
             caller_maximum as u128,
         );
     }
+}
+
+fn observed(index: usize, count: u128) -> [u128; DIRECT_COUNT] {
+    let mut observed = [0; DIRECT_COUNT];
+    observed[index] = count;
+    observed
 }

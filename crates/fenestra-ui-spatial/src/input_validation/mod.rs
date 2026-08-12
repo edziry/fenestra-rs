@@ -4,8 +4,9 @@
 #![allow(dead_code)]
 
 use crate::aggregate_input::SpatialInputV2;
+use crate::direct_counts::preflight_spatial_direct_counts_v2;
 use crate::error::SpatialErrorLocationV2;
-use crate::limits::{SpatialLimitKindV2, SpatialLimitsV2};
+use crate::limits::SpatialLimitsV2;
 use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};
 
 mod brush_structure;
@@ -125,8 +126,6 @@ use validated_paths::{map_path_k1_error, prepare_validated_paths};
 #[cfg(test)]
 use validated_shapes::prepare_validated_shapes;
 
-const U32_ROW_CAPACITY: u128 = u32::MAX as u128 + 1;
-
 struct DirectCountProof<'a> {
     input: SpatialInputV2<'a>,
     limits: SpatialLimitsV2,
@@ -149,60 +148,23 @@ fn prepare_direct_counts(
     let resources = input.resources();
     let items = input.items();
     let observed = [
-        topology.nodes().len(),
-        geometry.shapes().len(),
-        resources.brushes().len(),
-        geometry.clips().len(),
-        items.paint_items().len(),
-        items.hit_items().len(),
-        items.semantic_items().len(),
-        geometry.paths().len(),
-        geometry.path_verbs().len(),
-        geometry.polygon_points().len(),
-        resources.gradient_stops().len(),
-        resources.images().len(),
+        topology.nodes().len() as u128,
+        geometry.shapes().len() as u128,
+        resources.brushes().len() as u128,
+        geometry.clips().len() as u128,
+        items.paint_items().len() as u128,
+        items.hit_items().len() as u128,
+        items.semantic_items().len() as u128,
+        geometry.paths().len() as u128,
+        geometry.path_verbs().len() as u128,
+        geometry.polygon_points().len() as u128,
+        resources.gradient_stops().len() as u128,
+        resources.images().len() as u128,
     ];
 
-    for (kind, count) in SpatialLimitKindV2::DIRECT_ALL.into_iter().zip(observed) {
-        validate_direct_count(kind, count, limits)?;
-    }
+    preflight_spatial_direct_counts_v2(observed, limits)?;
 
     Ok(DirectCountProof { input, limits })
-}
-
-fn validate_direct_count(
-    kind: SpatialLimitKindV2,
-    observed: usize,
-    limits: SpatialLimitsV2,
-) -> Result<(), SpatialResolveErrorV2> {
-    let caller_maximum = limits.limit(kind) as u128;
-    let maximum = match kind {
-        SpatialLimitKindV2::Nodes
-        | SpatialLimitKindV2::Shapes
-        | SpatialLimitKindV2::Brushes
-        | SpatialLimitKindV2::Clips
-        | SpatialLimitKindV2::PaintItems
-        | SpatialLimitKindV2::HitItems
-        | SpatialLimitKindV2::SemanticItems
-        | SpatialLimitKindV2::Paths
-        | SpatialLimitKindV2::Images => caller_maximum.min(U32_ROW_CAPACITY),
-        SpatialLimitKindV2::PathVerbsTotal
-        | SpatialLimitKindV2::PolygonPointsTotal
-        | SpatialLimitKindV2::GradientStopsTotal => caller_maximum,
-        _ => unreachable!("non-direct spatial limit in direct-count validation"),
-    };
-    let observed = observed as u128;
-
-    if observed > maximum {
-        return Err(SpatialResolveErrorV2::limit_exceeded(
-            kind,
-            SpatialErrorLocationV2::Input,
-            observed,
-            maximum,
-        ));
-    }
-
-    Ok(())
 }
 
 fn make_resolve_error(
