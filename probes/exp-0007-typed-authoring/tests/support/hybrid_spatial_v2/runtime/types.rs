@@ -95,6 +95,10 @@ impl AuthoredSpatialLaneLog {
     pub const fn failure(&self) -> &NormalizedFailure {
         &self.failure
     }
+
+    pub fn authored_factor_span(&self) -> SourceSpan {
+        self.failure.authored_factor_span
+    }
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -116,6 +120,18 @@ impl NoopChecks {
     pub const fn all_preserved(self) -> bool {
         self.empty && self.same_value && self.round_trip
     }
+
+    pub const fn empty_preserved(self) -> bool {
+        self.empty
+    }
+
+    pub const fn same_value_preserved(self) -> bool {
+        self.same_value
+    }
+
+    pub const fn round_trip_preserved(self) -> bool {
+        self.round_trip
+    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -127,6 +143,7 @@ pub struct NormalizedFailure {
     outer_state_preserved: bool,
     spatial_snapshot_preserved: bool,
     complete_observation_preserved: bool,
+    authored_factor_span: SourceSpan,
 }
 
 impl NormalizedFailure {
@@ -139,6 +156,7 @@ impl NormalizedFailure {
         outer_state_preserved: bool,
         spatial_snapshot_preserved: bool,
         complete_observation_preserved: bool,
+        authored_factor_span: SourceSpan,
     ) -> Self {
         Self {
             resolve_kind,
@@ -148,6 +166,7 @@ impl NormalizedFailure {
             outer_state_preserved,
             spatial_snapshot_preserved,
             complete_observation_preserved,
+            authored_factor_span,
         }
     }
 

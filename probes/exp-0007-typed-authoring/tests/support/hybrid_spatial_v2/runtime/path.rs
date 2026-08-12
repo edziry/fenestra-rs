@@ -36,6 +36,19 @@ impl NodePath {
         path.segments.push(PathSegment::Member { slot, key });
         path
     }
+
+    pub(super) fn render(&self) -> String {
+        let mut output = String::from("root");
+        for segment in &self.segments {
+            match segment {
+                PathSegment::Static(slot) => output.push_str(&format!("/s:{slot}")),
+                PathSegment::Member { slot, key } => {
+                    output.push_str(&format!("/m:{slot}:{key}"));
+                }
+            }
+        }
+        output
+    }
 }
 
 impl FragmentPath {
@@ -49,6 +62,10 @@ impl FragmentPath {
 
     pub(super) const fn slot(&self) -> u16 {
         self.slot
+    }
+
+    pub(super) fn render(&self) -> String {
+        format!("{}/r:{}", self.owner.render(), self.slot)
     }
 }
 

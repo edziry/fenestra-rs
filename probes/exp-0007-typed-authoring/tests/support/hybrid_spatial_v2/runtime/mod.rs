@@ -1,3 +1,4 @@
+mod oracle_bridge;
 mod path;
 mod projection;
 mod queries;
@@ -40,6 +41,7 @@ const CAPACITY: RuntimeCapacity = RuntimeCapacity::new(4, 4, 12, 2, 96, 3);
 pub fn run_authored_spatial_lane(programs: RawProgramsV2) -> AuthoredSpatialLaneLog {
     let program = validate(programs);
     let construction = program.style().construction().clone();
+    let authored_factor_span = authored_factor_span(&program);
     let mut runtime = UiRuntime::new_spatial_ir(
         program,
         SpatialViewportV2::new(192, 128),
@@ -145,7 +147,12 @@ pub fn run_authored_spatial_lane(programs: RawProgramsV2) -> AuthoredSpatialLane
         .map(|(key, _)| key)
         .collect();
     let noop = verify_noops(&mut runtime);
-    let failure = verify_singular_rollback(&mut runtime, &construction, &observations);
+    let failure = verify_singular_rollback(
+        &mut runtime,
+        &construction,
+        &observations,
+        authored_factor_span,
+    );
     AuthoredSpatialLaneLog {
         observations,
         final_keys,
@@ -273,6 +280,7 @@ fn verify_singular_rollback(
     runtime: &mut UiRuntime,
     construction: &ValidatedConstruction,
     observations: &[NormalizedObservation],
+    authored_factor_span: fenestra_ui_ir::prototype::SourceSpan,
 ) -> NormalizedFailure {
     let before = runtime.committed();
     let before_spatial = before
@@ -317,5 +325,22 @@ fn verify_singular_rollback(
                 .snapshot(),
         ),
         observations.last() == Some(&after_observation),
+        authored_factor_span,
     )
+}
+
+fn authored_factor_span(
+    program: &ValidatedSpatialProgramV2,
+) -> fenestra_ui_ir::prototype::SourceSpan {
+    let declaration = program
+        .program()
+        .nodes()
+        .get(2)
+        .expect("the fixture should retain its floating declaration");
+    let fenestra_ui_ir::prototype::SpatialPlacementRecipeV2::Free(placement) =
+        declaration.placement()
+    else {
+        panic!("the floating declaration should use free placement");
+    };
+    placement.transform().a().span()
 }
