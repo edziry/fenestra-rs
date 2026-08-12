@@ -1,6 +1,6 @@
 use fenestra_ui_authoring::prototype::{
     AnchorKindV2, AuthoringDiagnosticKindV2, AuthoringLimitKindV2, AuthoringLimitsV2,
-    DiagnosticLocationV2, FenSourceV2, compile_fen_v2,
+    DiagnosticLocationV2, FenSourceV2, REFERENCE_AUTHORING_LIMITS_V2, compile_fen_v2,
 };
 
 use super::support::{
@@ -44,6 +44,11 @@ fn limit_vocabulary_constructor_and_reference_values_are_exact() {
     let limits = AuthoringLimitsV2::new(LIMIT_VALUES);
     for (index, kind) in KINDS.into_iter().enumerate() {
         assert_eq!(limits.limit(kind), LIMIT_VALUES[index]);
+    }
+    let mut expected = LIMIT_VALUES;
+    expected[AuthoringLimitKindV2::GeneratedRustBytes as usize] = 107_789;
+    for (index, kind) in KINDS.into_iter().enumerate() {
+        assert_eq!(REFERENCE_AUTHORING_LIMITS_V2.limit(kind), expected[index]);
     }
 }
 

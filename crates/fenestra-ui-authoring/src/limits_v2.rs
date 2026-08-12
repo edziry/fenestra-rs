@@ -145,3 +145,11 @@ impl AuthoringLimitsV2 {
         self.values[kind as usize]
     }
 }
+
+/// Exact bounded profile measured from the format-2 reference fixture.
+///
+/// This experiment profile is not an unbounded default or a product budget.
+pub const REFERENCE_AUTHORING_LIMITS_V2: AuthoringLimitsV2 = AuthoringLimitsV2::new([
+    8_192, 2_048, 15, 12, 1, 8, 7, 1, 6, 19, 2, 3, 1, 16, 7, 264, 5, 1, 5, 3, 3, 3, 3, 4, 4, 3,
+    512, 107_789,
+]);

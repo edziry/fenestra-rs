@@ -15,9 +15,8 @@ one LF, contains only ASCII grammar characters, and is copied token-for-token
 into the `ui!` reference lane. This document records its measured compiler
 resources and the semantic branches that it must continue to cover.
 
-`GeneratedRustBytes` remains deferred until the canonical format-2 emitter and
-its mutation controls exist. The other 27 reference limits are frozen here for
-the parser, resolver, source-map, and IR-lowering cuts.
+The canonical format-2 emitter and its mutation controls fix the final
+`GeneratedRustBytes` measurement. All 28 reference limits are frozen here.
 
 ## Exact source measurements and limits
 
@@ -55,13 +54,13 @@ parentheses together.
 | HitItems | 4 | 4 |
 | SemanticItems | 3 | 3 |
 | SourceAnchors | 380 | 512 |
-| GeneratedRustBytes | deferred | deferred |
+| GeneratedRustBytes | 107,789 | 107,789 |
 
 The longest identifier is `linear_gradient`, at 15 bytes. Deliberate
 headroom is limited to 478 source bytes, 438 tokens, four delimiter levels,
 and 132 source anchors. All other frozen limits are exact authored counts.
 
-The first 27 values of `REFERENCE_AUTHORING_LIMITS_V2`, in
+The 28 values of `REFERENCE_AUTHORING_LIMITS_V2`, in
 `AuthoringLimitKindV2::ALL` order, are:
 
 ```text
@@ -69,12 +68,11 @@ The first 27 values of `REFERENCE_AUTHORING_LIMITS_V2`, in
   8192, 2048, 15, 12,
   1, 8, 7, 1, 6, 19, 2, 3,
   1, 16, 7, 264, 5, 1, 5, 3, 3, 3, 3, 4, 4, 3,
-  512,
+  512, 107789,
 ]
 ```
 
-The final value is added only after measuring canonical format-2 Rust,
-including its required final LF.
+The final value includes canonical format-2 Rust's required final LF.
 
 ## Private construction-validation profile
 

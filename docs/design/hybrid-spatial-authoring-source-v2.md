@@ -27,12 +27,10 @@ SemanticItems, SourceAnchors, GeneratedRustBytes
 inclusive limits. The versioned format-2 fixture fixes the first 27 entries
 from its recorded source and authored counts before parser RED. Static record
 limits equal or deliberately bound those counts, and every deliberate headroom
-choice is recorded beside its measurement. The final `GeneratedRustBytes`
-entry is the exact canonical-Rust byte length, including its one final LF. It
-is measured only after the emitter and its mutation controls pass. The final
-`REFERENCE_AUTHORING_LIMITS_V2` constant lands with that emitter cut; earlier
-tests use explicit local limits. These are compiler safety limits, not runtime
-expansion limits or product budgets.
+choice is recorded beside its measurement. `GeneratedRustBytes` is the exact
+canonical-Rust byte length, including its one final LF, measured after the
+emitter and its mutation controls pass. These are compiler safety limits, not
+runtime expansion limits or product budgets.
 
 The bridge constructs `SpatialValidationLimitsV2` in this exact order:
 

@@ -64,7 +64,9 @@ pub mod prototype {
     pub use crate::limits::{
         AuthoringLimitKindV1, AuthoringLimitsV1, REFERENCE_AUTHORING_LIMITS_V1,
     };
-    pub use crate::limits_v2::{AuthoringLimitKindV2, AuthoringLimitsV2};
+    pub use crate::limits_v2::{
+        AuthoringLimitKindV2, AuthoringLimitsV2, REFERENCE_AUTHORING_LIMITS_V2,
+    };
     pub use crate::semantic::{
         REFERENCE_SEMANTIC_ARTIFACT_LIMITS_V1, SemanticArtifactErrorKindV1,
         SemanticArtifactErrorV1, SemanticArtifactLimitKindV1, SemanticArtifactLimitsV1,
