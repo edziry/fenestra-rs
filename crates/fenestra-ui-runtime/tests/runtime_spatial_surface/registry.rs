@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 
 use super::source::{all_source, read, source_dir};
 
-const EXPECTED_EXPORTS: [&str; 72] = [
+const EXPECTED_EXPORTS: [&str; 74] = [
     "CallbackFinish",
     "CallbackScope",
     "CapacityKind",
@@ -52,6 +52,8 @@ const EXPECTED_EXPORTS: [&str; 72] = [
     "RuntimeSpatialBuildViewV2",
     "RuntimeSpatialErrorV2",
     "RuntimeSpatialInputV2",
+    "RuntimeSpatialIrErrorKindV2",
+    "RuntimeSpatialIrErrorV2",
     "RuntimeSpatialProgramV2",
     "RuntimeSpatialViewV2",
     "ScheduledCommit",
@@ -77,7 +79,7 @@ const EXPECTED_EXPORTS: [&str; 72] = [
     "VisualCancelResult",
 ];
 
-const EXPECTED_STRUCTS: [&str; 51] = [
+const EXPECTED_STRUCTS: [&str; 52] = [
     "CallbackScope",
     "CommitReceipt",
     "CommittedRuntimeSnapshot",
@@ -116,6 +118,7 @@ const EXPECTED_STRUCTS: [&str; 51] = [
     "RuntimeInitializationError",
     "RuntimeSpatialBuildViewV2",
     "RuntimeSpatialInputV2",
+    "RuntimeSpatialIrErrorV2",
     "RuntimeSpatialViewV2",
     "ScheduledCommit",
     "SchedulerCapacity",

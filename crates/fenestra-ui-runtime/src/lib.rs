@@ -25,10 +25,10 @@ pub mod prototype {
         PropertyChangeView, QueueCapacity, QueueStats, RendererEpoch, RuntimeCapacity,
         RuntimeGeneration, RuntimeInitializationError, RuntimeInitializationErrorKind,
         RuntimeSpatialBuildViewV2, RuntimeSpatialErrorV2, RuntimeSpatialInputV2,
-        RuntimeSpatialProgramV2, RuntimeSpatialViewV2, ScheduledCommit, SchedulerAction,
-        SchedulerCapacity, SchedulerError, SchedulerErrorKind, SchedulerInput,
-        SchedulerInputResult, SchedulerLane, SchedulerState, SchedulerStats, SchedulerTick,
-        SpatialViewportChangeViewV2, SubmissionId, TransactionError, TransactionErrorKind,
-        UiRuntime, UiScheduler, UiTransaction, VisualCancelResult,
+        RuntimeSpatialIrErrorKindV2, RuntimeSpatialIrErrorV2, RuntimeSpatialProgramV2,
+        RuntimeSpatialViewV2, ScheduledCommit, SchedulerAction, SchedulerCapacity, SchedulerError,
+        SchedulerErrorKind, SchedulerInput, SchedulerInputResult, SchedulerLane, SchedulerState,
+        SchedulerStats, SchedulerTick, SpatialViewportChangeViewV2, SubmissionId, TransactionError,
+        TransactionErrorKind, UiRuntime, UiScheduler, UiTransaction, VisualCancelResult,
     };
 }

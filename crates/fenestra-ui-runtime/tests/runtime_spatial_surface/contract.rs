@@ -178,6 +178,7 @@ fn runtime_spatial_closed_enums_have_exact_variants_and_order() {
         "ViewportMismatch,MappingLengthMismatch,",
         "MissingLogicalNode{key:SpatialNodeKeyV2,},",
         "DuplicateLogicalNode{key:SpatialNodeKeyV2,},",
+        "Ir(RuntimeSpatialIrErrorV2),",
         "Resolve(SpatialResolveErrorV2),}"
     )));
     assert!(source.contains(concat!(

@@ -68,6 +68,7 @@ fn runtime_spatial_errors_retain_only_typed_nonidentity_payloads() {
             | RuntimeSpatialErrorV2::DuplicateLogicalNode { key } => {
                 assert!(key.get() > 0);
             }
+            RuntimeSpatialErrorV2::Ir(_) => panic!("manual inputs do not produce IR errors"),
             RuntimeSpatialErrorV2::Resolve(actual) => assert_eq!(actual, resolve),
         }
     }

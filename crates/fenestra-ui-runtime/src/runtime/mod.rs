@@ -46,7 +46,8 @@ pub use scheduler::{
 };
 pub use spatial::{
     RuntimeSpatialBuildViewV2, RuntimeSpatialErrorV2, RuntimeSpatialInputV2,
-    RuntimeSpatialProgramV2, RuntimeSpatialViewV2,
+    RuntimeSpatialIrErrorKindV2, RuntimeSpatialIrErrorV2, RuntimeSpatialProgramV2,
+    RuntimeSpatialViewV2,
 };
 pub use state::RuntimeGeneration;
 pub use transaction::{CommitReceipt, UiRuntime, UiTransaction};
