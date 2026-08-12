@@ -30,8 +30,8 @@ fn path_hit_candidate_registry_and_profiles_are_exact() {
                 "kurbo",
                 "0.13.1",
                 "std",
-                PathHitOutcomeV2::Pass,
-                "-",
+                PathHitOutcomeV2::Adapt,
+                "edge-rounding",
             ),
             (
                 PathHitCandidateV2::Lyon,

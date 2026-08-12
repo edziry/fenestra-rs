@@ -13,6 +13,10 @@ const NUMERIC_DEPENDENCIES: [&str; 3] = [
     "kurbo = { version = \"=0.13.1\", default-features = false, features = [\"std\"], optional = true }",
 ];
 
+const PATH_HIT_DEPENDENCIES: [&str; 1] = [
+    "lyon_tessellation = { version = \"=1.0.20\", default-features = false, features = [\"std\"], optional = true }",
+];
+
 #[test]
 fn package_is_an_additive_private_workspace_probe() {
     let workspace = source::workspace_manifest();
@@ -44,6 +48,7 @@ fn package_is_an_additive_private_workspace_probe() {
     let expected = DEPENDENCIES
         .into_iter()
         .chain(NUMERIC_DEPENDENCIES)
+        .chain(PATH_HIT_DEPENDENCIES)
         .collect::<Vec<_>>();
     assert_eq!(dependency_body.lines().collect::<Vec<_>>(), expected);
 }
@@ -118,7 +123,10 @@ fn baseline_has_no_candidate_or_native_dependency_seam() {
             "baseline dependency leaked: {forbidden}"
         );
     }
-    for dependency in NUMERIC_DEPENDENCIES {
+    for dependency in NUMERIC_DEPENDENCIES
+        .into_iter()
+        .chain(PATH_HIT_DEPENDENCIES)
+    {
         assert!(dependency.contains("optional = true"));
         assert!(manifest.contains(dependency));
     }
@@ -129,7 +137,7 @@ fn baseline_has_no_candidate_or_native_dependency_seam() {
         .map(str::trim)
         .filter(|line| line.starts_with("use "))
     {
-        for candidate in ["euclid", "kurbo", "fixed::"] {
+        for candidate in ["euclid", "kurbo", "fixed::", "lyon"] {
             assert!(
                 !import.contains(candidate),
                 "baseline import leaked: {import}"
