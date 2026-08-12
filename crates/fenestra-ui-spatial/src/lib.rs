@@ -33,6 +33,7 @@ mod owned_input;
 mod paint;
 mod paint_kernel;
 mod path;
+mod reference_raster;
 mod resolve_error;
 mod shape;
 mod topology;
@@ -100,6 +101,10 @@ pub mod prototype {
     pub use crate::owned_input::SpatialOwnedInputV2;
     pub use crate::paint::{SpatialPaintContentV2, SpatialPaintKindV2, SpatialPaintV2};
     pub use crate::path::{SpatialPathV2, SpatialPathVerbKindV2, SpatialPathVerbV2};
+    pub use crate::reference_raster::{
+        REGISTERED_REFERENCE_RASTER_LIMITS_V2, ReferenceRasterErrorKindV2, ReferenceRasterErrorV2,
+        ReferenceRasterLimitKindV2, ReferenceRasterLimitsV2, ReferenceRasterV2,
+    };
     pub use crate::resolve_error::{
         SpatialLayoutErrorKindV2, SpatialOutputErrorKindV2, SpatialResolveErrorKindV2,
         SpatialResolveErrorV2,

@@ -13,6 +13,7 @@ use crate::output_view::SpatialOutputV2;
 mod facts;
 mod hit;
 mod materialize;
+mod raster;
 mod validate;
 
 pub use hit::SpatialHitResultV2;

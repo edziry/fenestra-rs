@@ -10,10 +10,10 @@ mod image_model;
 mod image_paint;
 mod image_paint_error;
 mod image_paint_model;
-mod image_sample;
+pub(crate) mod image_sample;
 mod image_validation;
 mod model;
-mod sample;
+pub(crate) mod sample;
 
 pub(crate) use error::{
     PaintP2Error, PaintP2ErrorKind, PaintP2Field, PaintP2GradientKind, PaintP2LimitKind,
@@ -55,7 +55,7 @@ fn normalize_straight_p1(straight: SpatialRgba8V2) -> SpatialRgba8V2 {
     )
 }
 
-fn apply_opacity_p1(premultiplied: SpatialRgba8V2, opacity: u8) -> SpatialRgba8V2 {
+pub(crate) fn apply_opacity_p1(premultiplied: SpatialRgba8V2, opacity: u8) -> SpatialRgba8V2 {
     SpatialRgba8V2::new(
         scale_byte(premultiplied.r(), opacity),
         scale_byte(premultiplied.g(), opacity),
@@ -69,7 +69,10 @@ fn source_over_channel(source: u8, destination: u8, inverse_source_alpha: u8) ->
     u8::try_from(output).expect("validated premultiplied SourceOver stays in byte range")
 }
 
-fn source_over_p1(source: SpatialRgba8V2, destination: SpatialRgba8V2) -> SpatialRgba8V2 {
+pub(crate) fn source_over_p1(
+    source: SpatialRgba8V2,
+    destination: SpatialRgba8V2,
+) -> SpatialRgba8V2 {
     let inverse_source_alpha = u8::MAX - source.a();
     SpatialRgba8V2::new(
         source_over_channel(source.r(), destination.r(), inverse_source_alpha),

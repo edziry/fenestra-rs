@@ -3,7 +3,6 @@ use std::sync::Arc;
 use super::super::fixture::RawInputFixture;
 use super::super::world_aabb_support::owner_node;
 use super::super::world_transform_support::{identity, root};
-pub(super) use super::ReferenceRasterRedBridge;
 use super::support::{requested_limits, zero_call_engine};
 use super::validator_support::CandidateTables;
 use super::*;

@@ -99,7 +99,7 @@ impl SpatialResolvedSnapshotV2 {
         None
     }
 
-    fn clip_chain_contains(
+    pub(super) fn clip_chain_contains(
         &self,
         state: &PreparedSpatialState,
         terminal: u32,
@@ -129,7 +129,7 @@ impl SpatialResolvedSnapshotV2 {
         true
     }
 
-    fn coverage_contains(
+    pub(super) fn coverage_contains(
         &self,
         state: &PreparedSpatialState,
         coverage: &PreparedCoverage,
@@ -216,7 +216,10 @@ impl SpatialResolvedSnapshotV2 {
     }
 }
 
-const fn output_bounds_contains(bounds: SpatialOutputAabbV2, point: SpatialPointV2) -> bool {
+pub(super) const fn output_bounds_contains(
+    bounds: SpatialOutputAabbV2,
+    point: SpatialPointV2,
+) -> bool {
     if bounds.is_empty() {
         return false;
     }

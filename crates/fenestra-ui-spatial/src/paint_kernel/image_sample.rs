@@ -1,4 +1,6 @@
+use crate::aabb::SpatialAabbV2;
 use crate::brush::SpatialRgba8V2;
+use crate::image::{SpatialImageDestinationRectV2, SpatialImageSourceRectV2};
 use crate::model::SpatialPointV2;
 
 use super::apply_opacity_p1;
@@ -8,7 +10,27 @@ pub(super) fn sample_image_p6(
     paint: &ValidatedImagePaintP5<'_>,
     point: SpatialPointV2,
 ) -> Option<SpatialRgba8V2> {
-    let bounds = paint.local_bounds();
+    sample_image_fields_p6(
+        paint.image_stride(),
+        paint.image_bytes(),
+        paint.source(),
+        paint.destination(),
+        paint.opacity(),
+        paint.local_bounds(),
+        point,
+    )
+}
+
+pub(crate) fn sample_image_fields_p6(
+    stride: u32,
+    bytes: &[u8],
+    source: SpatialImageSourceRectV2,
+    destination: SpatialImageDestinationRectV2,
+    opacity: u8,
+    local_bounds: SpatialAabbV2,
+    point: SpatialPointV2,
+) -> Option<SpatialRgba8V2> {
+    let bounds = local_bounds;
     let point_x = point.x().raw();
     let point_y = point.y().raw();
     if point_x < bounds.min_x().raw()
@@ -19,8 +41,6 @@ pub(super) fn sample_image_p6(
         return None;
     }
 
-    let source = paint.source();
-    let destination = paint.destination();
     let source_x = mapped_source_coordinate(
         point_x,
         destination.x().raw(),
@@ -35,18 +55,16 @@ pub(super) fn sample_image_p6(
         source.y(),
         source.height(),
     );
-    let byte_ordinal =
-        u128::from(source_y) * u128::from(paint.image_stride()) + u128::from(source_x) * 4;
+    let byte_ordinal = u128::from(source_y) * u128::from(stride) + u128::from(source_x) * 4;
     let byte_ordinal = usize::try_from(byte_ordinal)
         .expect("a P4 image proof keeps every sampled byte ordinal representable");
-    let bytes = paint.image_bytes();
     let premultiplied = SpatialRgba8V2::new(
         bytes[byte_ordinal],
         bytes[byte_ordinal + 1],
         bytes[byte_ordinal + 2],
         bytes[byte_ordinal + 3],
     );
-    Some(apply_opacity_p1(premultiplied, paint.opacity()))
+    Some(apply_opacity_p1(premultiplied, opacity))
 }
 
 fn mapped_source_coordinate(

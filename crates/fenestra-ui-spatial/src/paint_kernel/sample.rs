@@ -8,8 +8,34 @@ pub(super) fn sample_gradient_p3(
     gradient: &PreparedGradientP2,
     point: SpatialPointV2,
 ) -> SpatialRgba8V2 {
-    let start = gradient.start();
-    let end = gradient.end();
+    sample_gradient_stops_p3(
+        gradient.start(),
+        gradient.end(),
+        gradient.stop_count(),
+        |index| {
+            let stop = gradient.stop(index);
+            (stop.offset(), stop.color())
+        },
+        point,
+    )
+}
+
+pub(crate) fn sample_gradient_fields_p3(
+    start: SpatialPointV2,
+    end: SpatialPointV2,
+    stops: &[(u16, SpatialRgba8V2)],
+    point: SpatialPointV2,
+) -> SpatialRgba8V2 {
+    sample_gradient_stops_p3(start, end, stops.len(), |index| stops[index], point)
+}
+
+fn sample_gradient_stops_p3(
+    start: SpatialPointV2,
+    end: SpatialPointV2,
+    stop_count: usize,
+    stop: impl Fn(usize) -> (u16, SpatialRgba8V2),
+    point: SpatialPointV2,
+) -> SpatialRgba8V2 {
     let delta_x = i128::from(end.x().raw()) - i128::from(start.x().raw());
     let delta_y = i128::from(end.y().raw()) - i128::from(start.y().raw());
     let relative_x = i128::from(point.x().raw()) - i128::from(start.x().raw());
@@ -22,23 +48,23 @@ pub(super) fn sample_gradient_p3(
         .expect("the gradient parameter is clamped to u16");
 
     let mut lower_index = 0;
-    for index in 1..gradient.stop_count() {
-        if gradient.stop(index).offset() > parameter {
+    for index in 1..stop_count {
+        if stop(index).0 > parameter {
             break;
         }
         lower_index = index;
     }
 
-    let lower = gradient.stop(lower_index);
+    let lower = stop(lower_index);
     let upper_index = lower_index + 1;
-    if upper_index == gradient.stop_count() {
-        return lower.color();
+    if upper_index == stop_count {
+        return lower.1;
     }
-    let upper = gradient.stop(upper_index);
-    let local = parameter - lower.offset();
-    let span = upper.offset() - lower.offset();
-    let lower_color = lower.color();
-    let upper_color = upper.color();
+    let upper = stop(upper_index);
+    let local = parameter - lower.0;
+    let span = upper.0 - lower.0;
+    let lower_color = lower.1;
+    let upper_color = upper.1;
     SpatialRgba8V2::new(
         interpolate_channel(lower_color.r(), upper_color.r(), local, span),
         interpolate_channel(lower_color.g(), upper_color.g(), local, span),

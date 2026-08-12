@@ -50,20 +50,3 @@ mod validator_rounding;
 mod validator_scalars_extents;
 mod validator_success;
 mod validator_support;
-
-#[allow(dead_code)]
-trait ReferenceRasterRedBridge {
-    fn rasterize_reference(
-        &self,
-        limits: ReferenceRasterLimitsV2,
-    ) -> Result<ReferenceRasterV2, ReferenceRasterErrorV2>;
-}
-
-impl ReferenceRasterRedBridge for SpatialResolvedSnapshotV2 {
-    fn rasterize_reference(
-        &self,
-        _limits: ReferenceRasterLimitsV2,
-    ) -> Result<ReferenceRasterV2, ReferenceRasterErrorV2> {
-        panic!("SpatialResolvedSnapshotV2::rasterize_reference is not implemented")
-    }
-}
