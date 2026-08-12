@@ -5,6 +5,7 @@ mod corpus;
 #[cfg(feature = "cpu-reference")]
 mod cpu_reference;
 mod faults;
+mod image_resource;
 mod limits;
 mod model;
 #[cfg(feature = "numeric-spatial")]
