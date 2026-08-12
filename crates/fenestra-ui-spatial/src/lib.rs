@@ -73,7 +73,10 @@ pub mod prototype {
     pub use crate::image::{
         SpatialImageDestinationRectV2, SpatialImageSourceRectV2, SpatialImageV2,
     };
-    pub use crate::input_validation::{PreparedSpatialV2, prepare_spatial_v2};
+    pub use crate::input_validation::{
+        PreparedSpatialV2, SpatialResolvedSnapshotV2, materialize_reference_spatial_v2,
+        prepare_spatial_v2,
+    };
     pub use crate::item_field::{
         SpatialClipFieldV2, SpatialHitFieldV2, SpatialPaintFieldV2, SpatialSemanticFieldV2,
     };

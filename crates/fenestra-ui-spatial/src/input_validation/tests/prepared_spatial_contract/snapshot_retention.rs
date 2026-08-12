@@ -26,6 +26,16 @@ type FillPaintFact = (
     Option<u32>,
 );
 type StrokePaintFact = (u32, u32, i64, u32, u8, Option<u32>);
+type FlattenedPathFact = (u32, usize, Vec<(i64, i64)>, Vec<(usize, usize, bool)>);
+type ShapePlanFact = (
+    u32,
+    u32,
+    crate::shape::SpatialShapeKindV2,
+    Option<u32>,
+    usize,
+    crate::aabb::SpatialAabbV2,
+    crate::aabb::SpatialAabbV2,
+);
 type ImagePaintFact = (
     u32,
     u32,
@@ -40,17 +50,9 @@ type StrokeHitFact = (u32, u32, i64);
 struct RetainedFacts {
     paths: Vec<(u32, u128, u128)>,
     path_k1: Vec<(u32, usize, usize)>,
-    flattened: Vec<(u32, usize, Vec<(i64, i64)>, Vec<(usize, usize, bool)>)>,
+    flattened: Vec<FlattenedPathFact>,
     polygons: Vec<(u32, u128, u128)>,
-    shapes: Vec<(
-        u32,
-        u32,
-        crate::shape::SpatialShapeKindV2,
-        Option<u32>,
-        usize,
-        crate::aabb::SpatialAabbV2,
-        crate::aabb::SpatialAabbV2,
-    )>,
+    shapes: Vec<ShapePlanFact>,
     gradients: Vec<(u32, u128, u128)>,
     brushes: Vec<(u32, crate::brush::SpatialBrushKindV2, usize)>,
     solid: crate::brush::SpatialRgba8V2,

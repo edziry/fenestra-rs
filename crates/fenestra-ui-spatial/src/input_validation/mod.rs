@@ -39,7 +39,10 @@ mod validated_shapes;
 mod world_aabbs;
 mod world_transforms;
 
-pub use prepared::{PreparedSpatialV2, prepare_spatial_v2};
+pub use prepared::{
+    PreparedSpatialV2, SpatialResolvedSnapshotV2, materialize_reference_spatial_v2,
+    prepare_spatial_v2,
+};
 
 #[cfg(test)]
 use brush_structure::{prepare_brush_structure, validate_gradient_stop_range};

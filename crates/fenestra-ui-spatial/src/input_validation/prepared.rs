@@ -38,6 +38,9 @@ mod extract;
 #[cfg(test)]
 mod facts;
 mod model;
+mod snapshot;
+
+pub use snapshot::{SpatialResolvedSnapshotV2, materialize_reference_spatial_v2};
 
 /// Opaque lifetime-free result of complete spatial phase-10 preparation.
 pub struct PreparedSpatialV2 {
