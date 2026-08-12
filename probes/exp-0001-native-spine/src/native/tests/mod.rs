@@ -1,6 +1,7 @@
 mod driver;
 mod raster;
 mod shell;
+mod spatial_v2;
 mod surface;
 mod trace;
 mod trace_applicability;

@@ -288,7 +288,9 @@ dependencies = [
 name = "fenestra-ui-exp-0001-native-spine"
 version = "0.2.0"
 dependencies = [
+ "fenestra-ui-layout",
  "fenestra-ui-runtime",
+ "fenestra-ui-spatial",
  "fenestra-ui-testkit",
  "softbuffer",
  "winit",
