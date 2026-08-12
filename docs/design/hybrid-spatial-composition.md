@@ -11,6 +11,8 @@ Runtime API:
 [hybrid spatial runtime publication contract](hybrid-spatial-runtime-api-v2.md)
 IR: [hybrid spatial symbolic IR contract](hybrid-spatial-ir-v2.md)
 Authoring: [hybrid spatial authoring format 2](hybrid-spatial-authoring-v2.md)
+Presentation:
+[hybrid spatial presentation contract](hybrid-spatial-presentation-v2.md)
 Target incompatible package line: `0.2.0`
 Research baseline: `fenestra-research` commit
 `176c42139776ed9f1ef879cd135bddadaf12a9da`
