@@ -311,6 +311,7 @@ dependencies = [
  "fenestra-ui-ir",
  "fenestra-ui-macros",
  "fenestra-ui-runtime",
+ "fenestra-ui-spatial",
  "fenestra-ui-testkit",
  "proc-macro2",
 ]
