@@ -1,13 +1,15 @@
 # WU-0013 hybrid spatial composition verification
 
-Status: Linux and Windows GNU verification complete; Windows MSVC gate pending
+Status: verification complete
 Linux result: pass
 Windows GNU result: pass
-Required target-pair result: pending Windows MSVC
+Windows MSVC result: pass
+Required target-pair result: pass
 Date: 2026-08-12
 Branch: `feat/hybrid-spatial-composition`
 Linux evidence source commit: `0ee2ebe7a2a6873fa98670846d225c32cd2c3543`
 Windows GNU evidence source commit: `52234d2ba09fff2f282f618ff346e039689ef458`
+Windows MSVC evidence source commit: `81919175a6d63d30bfd74874c10662d551684c7f`
 Research baseline: `fenestra-research` commit
 `176c42139776ed9f1ef879cd135bddadaf12a9da`
 
@@ -117,8 +119,8 @@ image-resource-v2.txt         25846    335       273  4c3977c8fb79f5f9f539e101ea
 The baseline SHA-256 appears in every candidate row. Candidate rows pair the
 required Linux and Windows target labels and contain the same lock-closure
 digest for each pair. The Windows GNU run below confirms that all six artifact
-files remain byte identical on a native Windows host. It does not convert the
-registered `x86_64-pc-windows-msvc` rows into executed MSVC evidence.
+files remain byte identical on native Windows GNU and MSVC hosts. The executed
+MSVC gate below directly covers the registered Windows target rows.
 
 ## Linux verification
 
@@ -146,7 +148,7 @@ lockfile fingerprint for the new optional dependencies.
 
 ## Windows verification
 
-Status: Windows GNU pass; Windows MSVC pending.
+Status: Windows GNU and Windows MSVC pass.
 
 An isolated `git archive` of the Windows evidence source commit was copied to
 a temporary directory on a Windows 11 Home host. The host reported build
@@ -172,30 +174,47 @@ after the gate: 1,491 files, 8,201,038 bytes, and SHA-256
 `d8a623e8b5b1fa843f6858783981c467cc93acc6fa8de5c91f7049398e9fca7e`.
 The temporary source and target directories were then removed.
 
-The host has only the GNU Rust toolchain installed. This run therefore makes
-no MSVC, DX12 execution, or GPU pixel claim. It establishes native Windows GNU
-build, test, lint, documentation, and artifact reproducibility only.
+The GNU run establishes native Windows GNU build, test, lint, documentation,
+and artifact reproducibility. It makes no DX12 execution or GPU pixel claim.
+
+For the required MSVC tuple, Visual Studio 2022 Community C++ x64 tools
+`14.44.35207` and the Windows SDK were discovered read-only. Rust
+`1.97.1-x86_64-pc-windows-msvc`, Rustfmt, and Clippy were installed into an
+isolated temporary `RUSTUP_HOME`; the host's persistent GNU toolchain was not
+changed. A fresh `git archive` of the MSVC evidence source commit and a
+separate temporary target directory were used. The same serial commands above
+passed with the explicit MSVC toolchain, except that rustdoc and Clippy also
+used the explicit `+1.97.1-x86_64-pc-windows-msvc` selector.
+
+The MSVC workspace gate passed all retained tests, including the 62-test
+hybrid evidence probe. Its dependency tree and all six artifact measurements
+matched the canonical table exactly, again with zero CR bytes. The source tree
+was unchanged before and after execution: 1,491 files, 8,202,730 bytes, and
+manifest SHA-256
+`20264c1a839b497fe6eea3a18721bd478b32d86775596c97efe04e2f3d57d9f0`.
+The temporary source, target, archive, and MSVC Rust toolchain were removed
+after verification.
 
 The versioned [CI workflow](../../.github/workflows/ci.yml) already runs the
 locked workspace all-target/all-feature test gate on `windows-2025`, followed
 by workspace Clippy, rustdoc with missing documentation denied, metadata,
 dependency trees, diff checks, and a clean-tree assertion. WU-0013 remains
-open until its MSVC lane passes on the exact source tree. The GNU result above
-does not substitute for that required target tuple.
+covered by that workflow for future changes; this evidence cut independently
+executed the same required MSVC target tuple without publishing or pushing.
 
 ## Result and nonclaims
 
 ```text
 WU-0013 Linux result: pass
 WU-0013 Windows GNU result: pass
-WU-0013 required target-pair result: pending Windows MSVC gate
-EXP-0008 hybrid spatial status: open pending Windows MSVC verification
+WU-0013 Windows MSVC result: pass
+WU-0013 required target-pair result: pass
+EXP-0008 hybrid spatial status: verified
 ```
 
 The result does not publish crates, expose the probe, select a final
 dependency, promise incremental performance, stabilize the API or MSRV, or
 claim GPU pixels, interactive Wayland, interactive Win32, accessibility
 platform integration, mobile lifecycle, installer behavior, or product
-support. The branch is verified on Linux and Windows GNU, but it is not ready
-for the authorized squash merge until the required Windows MSVC gate is
-versioned.
+support. The branch is verified on Linux, Windows GNU, and Windows MSVC. No
+remote push, pull request, merge, release, or publication was performed.
