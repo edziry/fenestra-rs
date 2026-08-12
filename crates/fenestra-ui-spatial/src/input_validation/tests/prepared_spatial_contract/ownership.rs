@@ -5,7 +5,7 @@ use super::*;
 
 type SliceIdentity = (*const (), usize);
 
-struct SourceIdentities {
+pub(super) struct SourceIdentities {
     nodes: SliceIdentity,
     polygon_points: SliceIdentity,
     path_verbs: SliceIdentity,
@@ -42,7 +42,9 @@ fn successful_preparation_moves_the_exact_source_arc_into_lifetime_free_state() 
     assert!(weak.upgrade().is_none());
 }
 
-fn identities(source: &Arc<crate::owned_input::SpatialOwnedInputV2>) -> SourceIdentities {
+pub(super) fn identities(
+    source: &Arc<crate::owned_input::SpatialOwnedInputV2>,
+) -> SourceIdentities {
     let input = source.as_input();
     SourceIdentities {
         nodes: identity(input.topology().nodes()),
@@ -62,7 +64,7 @@ fn identities(source: &Arc<crate::owned_input::SpatialOwnedInputV2>) -> SourceId
     }
 }
 
-fn assert_identities(
+pub(super) fn assert_identities(
     source: &Arc<crate::owned_input::SpatialOwnedInputV2>,
     expected: &SourceIdentities,
 ) {

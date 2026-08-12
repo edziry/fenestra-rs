@@ -77,6 +77,18 @@ fn prepared_value_has_only_the_registered_runtime_traits() {
     assert_not_hash!(PreparedSpatialV2);
     assert_not_ord!(PreparedSpatialV2);
     assert_not_partial_ord!(PreparedSpatialV2);
+
+    assert_runtime::<SpatialResolvedSnapshotV2>();
+    assert_not_clone!(SpatialResolvedSnapshotV2);
+    assert_not_copy!(SpatialResolvedSnapshotV2);
+    assert_not_debug!(SpatialResolvedSnapshotV2);
+    assert_not_default!(SpatialResolvedSnapshotV2);
+    assert_not_display!(SpatialResolvedSnapshotV2);
+    assert_not_eq!(SpatialResolvedSnapshotV2);
+    assert_not_partial_eq!(SpatialResolvedSnapshotV2);
+    assert_not_hash!(SpatialResolvedSnapshotV2);
+    assert_not_ord!(SpatialResolvedSnapshotV2);
+    assert_not_partial_ord!(SpatialResolvedSnapshotV2);
 }
 
 fn assert_runtime<T>()

@@ -2,9 +2,11 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 #[test]
-fn prepared_value_is_opaque_and_preparation_is_the_only_new_public_seam() {
+fn prepared_and_snapshot_values_have_only_the_staged_public_surface() {
     let source = all_source();
     assert_private_fields(&source, "PreparedSpatialV2");
+    assert_private_fields(&source, "SpatialResolvedSnapshotV2");
+    assert_nongeneric_struct(&source, "SpatialResolvedSnapshotV2");
     assert!(
         implementation_blocks(&source, "PreparedSpatialV2")
             .iter()
@@ -13,16 +15,69 @@ fn prepared_value_is_opaque_and_preparation_is_the_only_new_public_seam() {
 
     let function = public_function(&source, "prepare_spatial_v2");
     assert!(has_must_use(&source, function.start));
+    let function = public_function(&source, "materialize_reference_spatial_v2");
+    assert!(has_must_use(&source, function.start));
 
-    for forbidden in [
-        "SpatialResolvedSnapshotV2",
-        "materialize_reference_spatial_v2",
-        "resolve_spatial_v2",
-        "validate_spatial_output_v2",
-    ] {
+    let mut methods = public_method_declarations(&source, "SpatialResolvedSnapshotV2");
+    methods.sort_unstable();
+    assert_eq!(
+        methods,
+        vec![
+            "pub const fn viewport",
+            "pub fn effective_clip_aabbs",
+            "pub fn output",
+        ]
+    );
+    assert!(source.contains("pub const fn viewport(&self) -> SpatialViewportV2"));
+    assert!(source.contains("pub fn output(&self) -> SpatialOutputV2<'_>"));
+    assert!(source.contains("pub fn effective_clip_aabbs(&self) -> &[SpatialAabbV2]"));
+    for method in ["viewport", "output", "effective_clip_aabbs"] {
+        let item = public_method(&source, "SpatialResolvedSnapshotV2", method);
+        assert!(has_must_use(&source, item.start));
+    }
+
+    for forbidden in ["resolve_spatial_v2", "validate_spatial_output_v2"] {
         assert!(!source.contains(&format!("pub struct {forbidden}")));
         assert!(!source.contains(&format!("pub fn {forbidden}")));
     }
+}
+
+fn public_method<'a>(source: &'a str, owner: &str, name: &str) -> SourceItem<'a> {
+    implementation_blocks(source, owner)
+        .into_iter()
+        .find_map(|block| {
+            let plain = format!("pub fn {name}");
+            let constant = format!("pub const fn {name}");
+            let relative = block.find(&plain).or_else(|| block.find(&constant))?;
+            let absolute = block.as_ptr() as usize - source.as_ptr() as usize + relative;
+            Some(SourceItem {
+                start: absolute,
+                _body: block,
+            })
+        })
+        .unwrap_or_else(|| panic!("missing {owner}::{name}"))
+}
+
+fn public_method_declarations<'a>(source: &'a str, owner: &str) -> Vec<&'a str> {
+    implementation_blocks(source, owner)
+        .into_iter()
+        .flat_map(str::lines)
+        .map(str::trim)
+        .filter(|line| line.starts_with("pub "))
+        .map(|line| line.split('(').next().expect("method declaration"))
+        .collect()
+}
+
+fn assert_nongeneric_struct(source: &str, name: &str) {
+    let marker = format!("pub struct {name}");
+    let declaration = &source[source.find(&marker).expect("snapshot struct") + marker.len()..];
+    assert!(
+        matches!(
+            declaration.trim_start().chars().next(),
+            Some('{') | Some('(')
+        ),
+        "{name} must not have lifetime or type parameters"
+    );
 }
 
 struct SourceItem<'a> {

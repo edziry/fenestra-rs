@@ -12,11 +12,12 @@ use super::super::validated_paint_support::{
 use super::super::validated_semantic_support::semantic;
 use super::super::world_aabb_support::{MAXIMUM, owner_node, transform};
 use super::super::world_transform_support::{
-    SCALE, ScriptedLayoutEngine, VIEWPORT, identity, limits, logical, output,
+    SCALE, ScriptedLayoutEngine, VIEWPORT, free, identity, limits, logical, output, root,
 };
 use crate::content_item::SpatialInputPolicyV2;
 use crate::coverage::SpatialFillRuleV2;
 use crate::limits::SpatialLimitsV2;
+use crate::model::SpatialAnchorTargetV2;
 use crate::owned_input::SpatialOwnedInputV2;
 
 pub(super) fn direct_limit_owned() -> Arc<SpatialOwnedInputV2> {
@@ -70,6 +71,92 @@ pub(super) fn root_only_owned() -> Arc<SpatialOwnedInputV2> {
         super::super::dependency_support::fixture(vec![super::super::dependency_support::root()])
             .into_owned(VIEWPORT),
     )
+}
+
+pub(super) fn distinct_viewport_root_owned() -> Arc<SpatialOwnedInputV2> {
+    Arc::new(
+        super::super::dependency_support::fixture(vec![super::super::dependency_support::root()])
+            .into_owned(crate::model::SpatialViewportV2::new(7, 9)),
+    )
+}
+
+pub(super) fn computed_layout_owned() -> Arc<SpatialOwnedInputV2> {
+    Arc::new(
+        super::super::world_transform_support::fixture(vec![
+            root(),
+            super::super::world_transform_support::layout(1, 0, 3, 4, identity()),
+        ])
+        .into_owned(VIEWPORT),
+    )
+}
+
+pub(super) fn computed_layout_engine() -> ScriptedLayoutEngine {
+    ScriptedLayoutEngine::new(vec![Ok(output(&[(0, 0, 0, 20, 20), (1, 7, 8, 5, 6)]))])
+}
+
+pub(super) fn cross_axis_empty_owned() -> Arc<SpatialOwnedInputV2> {
+    let q = 1_i64 << 32;
+    let nodes = vec![
+        root(),
+        free(
+            1,
+            0,
+            SpatialAnchorTargetV2::Viewport,
+            3 * SCALE,
+            4 * SCALE,
+            0,
+            0,
+            transform([0, q, q, 0, 5 * SCALE, 7 * SCALE], 0, 0),
+        ),
+    ];
+    Arc::new(
+        super::super::world_aabb_support::fixture_with(
+            nodes,
+            vec![super::super::validated_shape_support::rect_values(
+                0, 1, 0, 0, 0, SCALE,
+            )],
+            vec![super::super::validated_clip_support::root_clip(0, 1, 0)],
+            vec![fill(1, 0, 0, 0, Some(0), SpatialFillRuleV2::NonZero)],
+            vec![hit_fill(
+                1,
+                0,
+                0,
+                Some(0),
+                SpatialFillRuleV2::EvenOdd,
+                SpatialInputPolicyV2::Accept,
+            )],
+            vec![semantic(1, 0, 0, SpatialFillRuleV2::NonZero, Some(0))],
+        )
+        .into_owned(VIEWPORT),
+    )
+}
+
+pub(super) fn disjoint_clips_owned() -> Arc<SpatialOwnedInputV2> {
+    let fixture = super::super::effective_clip_aabb_support::clips_only_fixture(
+        vec![
+            super::super::effective_clip_aabb_support::rect_values(
+                0,
+                1,
+                0,
+                0,
+                2 * SCALE,
+                2 * SCALE,
+            ),
+            super::super::effective_clip_aabb_support::rect_values(
+                1,
+                1,
+                10 * SCALE,
+                10 * SCALE,
+                SCALE,
+                SCALE,
+            ),
+        ],
+        vec![
+            super::super::effective_clip_aabb_support::nonzero_clip(0, 1, None, 0),
+            super::super::effective_clip_aabb_support::even_odd_clip(1, 1, Some(0), 1),
+        ],
+    );
+    Arc::new(fixture.into_owned(VIEWPORT))
 }
 
 pub(super) fn rich_engine() -> ScriptedLayoutEngine {
