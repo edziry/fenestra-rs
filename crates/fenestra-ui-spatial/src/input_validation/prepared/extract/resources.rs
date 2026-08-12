@@ -73,15 +73,8 @@ pub(super) fn extract_shapes(
         .map(|(index, (shape, bounds))| {
             let (owner, geometry) = shape.into_parts();
             let geometry = match geometry {
-                ValidatedShapeGeometry::Rect(rect) => PreparedShapeGeometry::Rect {
-                    origin: rect.origin(),
-                    width: rect.width(),
-                    height: rect.height(),
-                },
-                ValidatedShapeGeometry::Circle(circle) => PreparedShapeGeometry::Circle {
-                    center: circle.center(),
-                    radius: circle.radius(),
-                },
+                ValidatedShapeGeometry::Rect(rect) => PreparedShapeGeometry::Rect { rect },
+                ValidatedShapeGeometry::Circle(circle) => PreparedShapeGeometry::Circle { circle },
                 ValidatedShapeGeometry::Polygon(polygon) => {
                     let point_range = ranges[index]
                         .take()

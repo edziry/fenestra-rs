@@ -11,8 +11,11 @@ use crate::output_view::SpatialOutputV2;
 
 #[cfg(test)]
 mod facts;
+mod hit;
 mod materialize;
 mod validate;
+
+pub use hit::SpatialHitResultV2;
 
 /// Immutable lifetime-free spatial state ready for downstream consumers.
 pub struct SpatialResolvedSnapshotV2 {

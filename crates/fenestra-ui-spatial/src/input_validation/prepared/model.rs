@@ -4,7 +4,9 @@ use crate::aabb::SpatialAabbV2;
 use crate::brush::SpatialRgba8V2;
 use crate::content_item::SpatialInputPolicyV2;
 use crate::coverage::SpatialFillRuleV2;
-use crate::geometry_kernel::FlattenedPathK2;
+use crate::geometry_kernel::{
+    FlattenedPathK2, ValidatedCircleK1, ValidatedRectK1, ValidatedStrokeK1,
+};
 use crate::image::{SpatialImageDestinationRectV2, SpatialImageSourceRectV2};
 use crate::limits::SpatialLimitsV2;
 use crate::model::{Affine2V2, SpatialPointV2, SpatialScalarV2, SpatialViewportV2};
@@ -47,21 +49,10 @@ pub(super) struct PreparedShapePlan {
 }
 
 pub(super) enum PreparedShapeGeometry {
-    Rect {
-        origin: SpatialPointV2,
-        width: SpatialScalarV2,
-        height: SpatialScalarV2,
-    },
-    Circle {
-        center: SpatialPointV2,
-        radius: SpatialScalarV2,
-    },
-    Polygon {
-        point_range: Range<usize>,
-    },
-    Path {
-        path: u32,
-    },
+    Rect { rect: ValidatedRectK1 },
+    Circle { circle: ValidatedCircleK1 },
+    Polygon { point_range: Range<usize> },
+    Path { path: u32 },
 }
 
 pub(super) struct PreparedBrushPlan {
@@ -116,8 +107,14 @@ pub(super) enum PreparedPaintContent {
 }
 
 pub(super) enum PreparedCoverage {
-    Fill { shape: u32, rule: SpatialFillRuleV2 },
-    RoundStroke { shape: u32, width: SpatialScalarV2 },
+    Fill {
+        shape: u32,
+        rule: SpatialFillRuleV2,
+    },
+    RoundStroke {
+        shape: u32,
+        stroke: ValidatedStrokeK1,
+    },
 }
 
 pub(super) struct PreparedHitPlan {

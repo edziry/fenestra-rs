@@ -40,14 +40,3 @@ mod validator_rounding;
 mod validator_scalars_extents;
 mod validator_success;
 mod validator_support;
-
-#[allow(dead_code)]
-trait HitTestRedBridge {
-    fn hit_test(&self, scene_point: crate::model::SpatialPointV2) -> Option<SpatialHitResultV2>;
-}
-
-impl HitTestRedBridge for SpatialResolvedSnapshotV2 {
-    fn hit_test(&self, _scene_point: crate::model::SpatialPointV2) -> Option<SpatialHitResultV2> {
-        panic!("SpatialResolvedSnapshotV2::hit_test is not implemented")
-    }
-}

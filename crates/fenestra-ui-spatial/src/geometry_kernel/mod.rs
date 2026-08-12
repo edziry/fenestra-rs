@@ -17,7 +17,6 @@ pub(crate) use bounds::{
     derive_circle_bounds_k3, derive_path_bounds_k3, derive_polygon_bounds_k3,
     derive_rect_bounds_k3, fill_bounds_k3, stroke_bounds_k3,
 };
-#[cfg(test)]
 pub(crate) use coverage::{
     circle_fill_contains_k4, path_fill_contains_k4, polygon_fill_contains_k4, rect_fill_contains_k4,
 };
@@ -29,7 +28,6 @@ pub(crate) use flatten::{
     FlattenedPathK2, GeometryK2Error, GeometryK2ErrorKind, GeometryK2LimitKind, flatten_path_k2,
 };
 pub(crate) use path::{ValidatedPathK1, validate_path_k1};
-#[cfg(test)]
 pub(crate) use round_stroke::{
     circle_round_stroke_contains_k5, path_round_stroke_contains_k5,
     polygon_round_stroke_contains_k5, rect_round_stroke_contains_k5,

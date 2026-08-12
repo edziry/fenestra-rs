@@ -153,20 +153,18 @@ pub(super) fn extract_semantics(
 fn paint_coverage(coverage: ValidatedPaintCoverage) -> PreparedCoverage {
     match coverage {
         ValidatedPaintCoverage::Fill { shape, rule } => PreparedCoverage::Fill { shape, rule },
-        ValidatedPaintCoverage::RoundStroke { shape, stroke } => PreparedCoverage::RoundStroke {
-            shape,
-            width: stroke.width(),
-        },
+        ValidatedPaintCoverage::RoundStroke { shape, stroke } => {
+            PreparedCoverage::RoundStroke { shape, stroke }
+        }
     }
 }
 
 fn hit_coverage(coverage: ValidatedHitCoverage) -> PreparedCoverage {
     match coverage {
         ValidatedHitCoverage::Fill { shape, rule } => PreparedCoverage::Fill { shape, rule },
-        ValidatedHitCoverage::RoundStroke { shape, stroke } => PreparedCoverage::RoundStroke {
-            shape,
-            width: stroke.width(),
-        },
+        ValidatedHitCoverage::RoundStroke { shape, stroke } => {
+            PreparedCoverage::RoundStroke { shape, stroke }
+        }
     }
 }
 

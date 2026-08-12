@@ -73,11 +73,18 @@ impl PreparedSpatialV2 {
             .enumerate()
             .filter_map(|(index, paint)| match &paint.content {
                 PreparedPaintContent::Coverage {
-                    coverage: PreparedCoverage::RoundStroke { shape, width },
+                    coverage: PreparedCoverage::RoundStroke { shape, stroke },
                     brush,
                     opacity,
                     clip,
-                } => Some((ordinal(index), *shape, width.raw(), *brush, *opacity, *clip)),
+                } => Some((
+                    ordinal(index),
+                    *shape,
+                    stroke.width().raw(),
+                    *brush,
+                    *opacity,
+                    *clip,
+                )),
                 _ => None,
             })
             .collect()
@@ -216,8 +223,8 @@ impl PreparedSpatialV2 {
             .iter()
             .enumerate()
             .filter_map(|(index, hit)| match &hit.coverage {
-                PreparedCoverage::RoundStroke { shape, width } => {
-                    Some((ordinal(index), *shape, width.raw()))
+                PreparedCoverage::RoundStroke { shape, stroke } => {
+                    Some((ordinal(index), *shape, stroke.width().raw()))
                 }
                 PreparedCoverage::Fill { .. } => None,
             })

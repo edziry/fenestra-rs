@@ -48,6 +48,10 @@ pub(crate) struct ValidatedPolygonK1<'a> {
 }
 
 impl<'a> ValidatedPolygonK1<'a> {
+    pub(crate) const fn from_trusted_points(points: &'a [SpatialPointV2]) -> Self {
+        Self { points }
+    }
+
     pub(crate) const fn points(self) -> &'a [SpatialPointV2] {
         self.points
     }
