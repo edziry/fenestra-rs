@@ -1,8 +1,8 @@
 use std::collections::HashSet;
 
 use fenestra_ui_ir::prototype::{
-    ChildFactory, PropertyId, PropertyValue, TemplateFactory, TemplateNodeId,
-    ValidatedConstruction, ValidatedStyleProgram, ValueType,
+    ChildFactory, PropertyId, TemplateFactory, TemplateNodeId, ValidatedConstruction,
+    ValidatedStyleProgram, ValueType,
 };
 use fenestra_ui_layout::prototype::LayoutEngineV1;
 
@@ -280,15 +280,8 @@ impl HeadlessRuntimeConfig {
         Ok(())
     }
 
-    pub(crate) fn materialized_value(
-        &self,
-        template: TemplateFactory<'_>,
-        property: PropertyId,
-    ) -> Option<PropertyValue> {
-        self.style
-            .assignment(template.id(), property)
-            .map(|assignment| assignment.replacement().clone())
-            .or_else(|| template.effective_value(property).cloned())
+    pub(crate) const fn style(&self) -> &ValidatedStyleProgram {
+        &self.style
     }
 }
 

@@ -18,8 +18,8 @@ pub use callback::{CallbackFinish, CallbackScope, NestedCallbackScope};
 use control::{CONTROL_ENVELOPE_BYTES, ControlQueue};
 pub use control::{ControlAdmission, ControlSequence};
 pub use frame::{
-    CompletionWatermark, FrameId, FrameWork, RendererEpoch, SchedulerInput, SchedulerInputResult,
-    SubmissionId,
+    CompletionWatermark, FrameId, FrameWork, RendererEpoch, RuntimePaintFrameV2, SchedulerInput,
+    SchedulerInputResult, SubmissionId,
 };
 use frame::{SubmittedFrame, VisualState, VisualWork};
 pub use stats::{QueueStats, SchedulerStats};

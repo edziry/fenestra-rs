@@ -3,6 +3,7 @@ mod driver;
 mod raster;
 mod runner;
 mod shell;
+mod spatial_v2;
 mod surface;
 mod trace;
 mod types;

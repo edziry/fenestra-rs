@@ -164,7 +164,7 @@ versioned bytes; it is not an authenticity mechanism.
 | UI map | 1,250 | 36 | 47 | `baba40d517ee79dcc102c6562bfb9d2053924feee4d815c9b1e8f8b2fd5fc224` |
 | semantic | 3,020 | 35 | 157 | `013d2c66d9858db5a5bcfb0b62fb060b373a081b20f19e27ea433864445a3871` |
 | runtime | 26,400 | 478 | 111 | `8e3dc45ff29ed49ee9426cb0b907e11665fb7dc3335bd25f8a0179ec5325d9fa` |
-| evidence summary | 4,723 | 36 | 250 | `3fb5a2ce18642e467fe6af8b4c959ecad3a0afc56e55151b6633e0ec99708ad4` |
+| evidence summary | 4,723 | 36 | 250 | `a810b24d82b78e6dd93a9ac09e380bdcdc1bd72d888f789c0900b0fd8fe40050` |
 
 The [evidence summary](../../probes/exp-0007-typed-authoring/tests/artifacts/layout-board-evidence-v1.txt)
 also pins limits, counts, the three diagnostic snapshot hashes, `Cargo.lock`,

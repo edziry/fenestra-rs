@@ -1,10 +1,12 @@
 mod construction;
 mod graph;
 mod schema;
+mod spatial;
 mod style;
 
 pub use construction::validate_construction;
 pub use schema::validate_schema;
+pub use spatial::validate_spatial;
 pub use style::validate_style;
 
 use crate::error::{IrValidationError, IrValidationErrorKind, ValidationLimitKind};

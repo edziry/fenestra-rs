@@ -1,14 +1,15 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-const FIRST_PRE_ALPHA_VERSION: &str = "0.1.1";
-const MEMBER_MANIFESTS: [&str; 11] = [
+const CURRENT_PRE_ALPHA_VERSION: &str = "0.2.0";
+const MEMBER_MANIFESTS: [&str; 12] = [
     "crates/fenestra-ui/Cargo.toml",
     "crates/fenestra-ui-authoring/Cargo.toml",
     "crates/fenestra-ui-ir/Cargo.toml",
     "crates/fenestra-ui-layout/Cargo.toml",
     "crates/fenestra-ui-macros/Cargo.toml",
     "crates/fenestra-ui-runtime/Cargo.toml",
+    "crates/fenestra-ui-spatial/Cargo.toml",
     "crates/fenestra-ui-testkit/Cargo.toml",
     "probes/exp-0001-native-spine/Cargo.toml",
     "probes/exp-0001-spine/Cargo.toml",
@@ -18,16 +19,16 @@ const MEMBER_MANIFESTS: [&str; 11] = [
 
 #[test]
 fn workspace_uses_one_explicit_pre_alpha_semver_line() {
-    assert_eq!(env!("CARGO_PKG_VERSION"), FIRST_PRE_ALPHA_VERSION);
+    assert_eq!(env!("CARGO_PKG_VERSION"), CURRENT_PRE_ALPHA_VERSION);
 
     let root = workspace_root();
     let workspace_manifest = read(&root.join("Cargo.toml"));
-    assert!(workspace_manifest.contains("version = \"0.1.1\""));
+    assert!(workspace_manifest.contains("version = \"0.2.0\""));
     assert_eq!(
-        workspace_manifest.matches("version = \"=0.1.1\"").count(),
-        7
+        workspace_manifest.matches("version = \"=0.2.0\"").count(),
+        8
     );
-    assert_eq!(workspace_dependency_count(&workspace_manifest), 7);
+    assert_eq!(workspace_dependency_count(&workspace_manifest), 8);
 
     for relative in MEMBER_MANIFESTS {
         let manifest = read(&root.join(relative));

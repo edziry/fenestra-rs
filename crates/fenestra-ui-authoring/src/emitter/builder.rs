@@ -1,6 +1,6 @@
 use proc_macro2::{Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree};
 
-pub(super) fn ir_path(segments: &[&str]) -> TokenStream {
+pub(crate) fn ir_path(segments: &[&str]) -> TokenStream {
     let mut stream = TokenStream::new();
     push_double_colon(&mut stream);
     push_ident(&mut stream, "fenestra_ui_ir");
@@ -13,7 +13,7 @@ pub(super) fn ir_path(segments: &[&str]) -> TokenStream {
     stream
 }
 
-pub(super) fn ir_call(
+pub(crate) fn ir_call(
     segments: &[&str],
     arguments: Vec<TokenStream>,
     trailing_comma: bool,
@@ -21,7 +21,7 @@ pub(super) fn ir_call(
     call(ir_path(segments), arguments, trailing_comma)
 }
 
-pub(super) fn call(
+pub(crate) fn call(
     mut callee: TokenStream,
     arguments: Vec<TokenStream>,
     trailing_comma: bool,
@@ -33,7 +33,7 @@ pub(super) fn call(
     callee
 }
 
-pub(super) fn method_call(
+pub(crate) fn method_call(
     mut receiver: TokenStream,
     method: &str,
     arguments: Vec<TokenStream>,
@@ -48,29 +48,29 @@ pub(super) fn method_call(
     receiver
 }
 
-pub(super) fn array(items: Vec<TokenStream>, trailing_comma: bool) -> TokenStream {
+pub(crate) fn array(items: Vec<TokenStream>, trailing_comma: bool) -> TokenStream {
     TokenStream::from(TokenTree::Group(Group::new(
         Delimiter::Bracket,
         separated(items, trailing_comma),
     )))
 }
 
-pub(super) fn array_into(items: Vec<TokenStream>, trailing_comma: bool) -> TokenStream {
+pub(crate) fn array_into(items: Vec<TokenStream>, trailing_comma: bool) -> TokenStream {
     method_call(array(items, trailing_comma), "into", Vec::new(), false)
 }
 
-pub(super) fn tuple(items: Vec<TokenStream>, trailing_comma: bool) -> TokenStream {
+pub(crate) fn tuple(items: Vec<TokenStream>, trailing_comma: bool) -> TokenStream {
     TokenStream::from(TokenTree::Group(Group::new(
         Delimiter::Parenthesis,
         separated(items, trailing_comma),
     )))
 }
 
-pub(super) fn bool_literal(value: bool) -> TokenStream {
+pub(crate) fn bool_literal(value: bool) -> TokenStream {
     ident(if value { "true" } else { "false" })
 }
 
-pub(super) fn i32_literal(value: i32) -> TokenStream {
+pub(crate) fn i32_literal(value: i32) -> TokenStream {
     let mut stream = TokenStream::new();
     if value.is_negative() {
         stream.extend([TokenTree::Punct(Punct::new('-', Spacing::Alone))]);
@@ -81,16 +81,44 @@ pub(super) fn i32_literal(value: i32) -> TokenStream {
     stream
 }
 
-pub(super) fn u32_literal(value: u32) -> TokenStream {
+pub(crate) fn i64_literal(value: i64) -> TokenStream {
+    let mut stream = TokenStream::new();
+    if value.is_negative() {
+        stream.extend([TokenTree::Punct(Punct::new('-', Spacing::Alone))]);
+    }
+    stream.extend([TokenTree::Literal(Literal::u64_unsuffixed(
+        value.unsigned_abs(),
+    ))]);
+    stream
+}
+
+pub(crate) fn u16_literal(value: u16) -> TokenStream {
+    TokenStream::from(TokenTree::Literal(Literal::u16_unsuffixed(value)))
+}
+
+pub(crate) fn u32_literal(value: u32) -> TokenStream {
     TokenStream::from(TokenTree::Literal(Literal::u32_unsuffixed(value)))
 }
 
-pub(super) fn u64_literal(value: u64) -> TokenStream {
+pub(crate) fn u64_literal(value: u64) -> TokenStream {
     TokenStream::from(TokenTree::Literal(Literal::u64_unsuffixed(value)))
 }
 
-pub(super) fn u8_literal(value: u8) -> TokenStream {
+pub(crate) fn u8_literal(value: u8) -> TokenStream {
     TokenStream::from(TokenTree::Literal(Literal::u8_unsuffixed(value)))
+}
+
+pub(crate) fn ir_record(segments: &[&str], fields: Vec<(&str, TokenStream)>) -> TokenStream {
+    let mut body = TokenStream::new();
+    for (name, value) in fields {
+        push_ident(&mut body, name);
+        body.extend([TokenTree::Punct(Punct::new(':', Spacing::Alone))]);
+        body.extend(value);
+        body.extend([TokenTree::Punct(Punct::new(',', Spacing::Alone))]);
+    }
+    let mut expression = ir_path(segments);
+    expression.extend([TokenTree::Group(Group::new(Delimiter::Brace, body))]);
+    expression
 }
 
 fn ident(value: &str) -> TokenStream {

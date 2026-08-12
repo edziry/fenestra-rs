@@ -1,30 +1,31 @@
 use crate::source::PhysicalOriginV1;
 
 #[derive(Clone)]
-pub(crate) struct AbstractTokenV1 {
-    pub(crate) kind: AbstractTokenKindV1,
-    pub(crate) physical: PhysicalOriginV1,
+pub(crate) struct AbstractToken<O> {
+    pub(crate) kind: AbstractTokenKind,
+    pub(crate) physical: O,
 }
 
-impl AbstractTokenV1 {
+impl<O> AbstractToken<O> {
     pub(crate) fn label(&self) -> &str {
         match &self.kind {
-            AbstractTokenKindV1::Identifier(label)
-            | AbstractTokenKindV1::UnsignedDecimal(label) => label,
-            AbstractTokenKindV1::Punctuation(punctuation) => punctuation.label(),
+            AbstractTokenKind::Identifier(label) | AbstractTokenKind::UnsignedDecimal(label) => {
+                label
+            }
+            AbstractTokenKind::Punctuation(punctuation) => punctuation.label(),
         }
     }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub(crate) enum AbstractTokenKindV1 {
+pub(crate) enum AbstractTokenKind {
     Identifier(Box<str>),
     UnsignedDecimal(Box<str>),
-    Punctuation(PunctuationV1),
+    Punctuation(Punctuation),
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(crate) enum PunctuationV1 {
+pub(crate) enum Punctuation {
     OpenBrace,
     CloseBrace,
     OpenBracket,
@@ -39,7 +40,7 @@ pub(crate) enum PunctuationV1 {
     Minus,
 }
 
-impl PunctuationV1 {
+impl Punctuation {
     pub(crate) const fn label(self) -> &'static str {
         match self {
             Self::OpenBrace => "{",
@@ -57,3 +58,7 @@ impl PunctuationV1 {
         }
     }
 }
+
+pub(crate) type AbstractTokenV1 = AbstractToken<PhysicalOriginV1>;
+pub(crate) type AbstractTokenKindV1 = AbstractTokenKind;
+pub(crate) type PunctuationV1 = Punctuation;

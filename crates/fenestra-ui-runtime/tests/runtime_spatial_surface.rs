@@ -1,0 +1,44 @@
+use fenestra_ui_runtime::prototype::{
+    RuntimeSpatialBuildViewV2, RuntimeSpatialErrorV2, RuntimeSpatialInputV2,
+    RuntimeSpatialProgramV2, RuntimeSpatialViewV2, SpatialViewportChangeViewV2,
+};
+
+#[path = "support/spatial/mod.rs"]
+mod spatial_support;
+#[path = "support/mod.rs"]
+mod support;
+
+#[path = "runtime_spatial_surface/contract.rs"]
+mod contract;
+#[path = "runtime_spatial_surface/dependency.rs"]
+mod dependency;
+#[path = "runtime_spatial_surface/errors.rs"]
+mod errors;
+#[path = "runtime_spatial_surface/initialization.rs"]
+mod initialization;
+#[path = "runtime_spatial_surface/initialization_cleanup.rs"]
+mod initialization_cleanup;
+#[path = "runtime_spatial_surface/initialization_errors.rs"]
+mod initialization_errors;
+#[path = "runtime_spatial_surface/registry.rs"]
+mod registry;
+#[path = "runtime_spatial_surface/scheduler.rs"]
+mod scheduler;
+#[path = "runtime_spatial_surface/scheduler_submission.rs"]
+mod scheduler_submission;
+#[path = "runtime_spatial_surface/signatures.rs"]
+mod signatures;
+#[path = "runtime_spatial_surface/source.rs"]
+mod source;
+#[path = "runtime_spatial_surface/traits.rs"]
+mod traits;
+#[path = "runtime_spatial_surface/transaction_dynamic.rs"]
+mod transaction_dynamic;
+#[path = "runtime_spatial_surface/transaction_failures.rs"]
+mod transaction_failures;
+#[path = "runtime_spatial_surface/transaction_mapping.rs"]
+mod transaction_mapping;
+#[path = "runtime_spatial_surface/transaction_order.rs"]
+mod transaction_order;
+#[path = "runtime_spatial_surface/transaction_resize.rs"]
+mod transaction_resize;

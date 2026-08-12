@@ -133,6 +133,7 @@ impl LayoutEngineV1 for ScriptedFaultEngineV1 {
     }
 }
 
+#[allow(clippy::result_large_err)]
 pub fn try_runtime_with_engine(
     style: ValidatedStyleProgram,
     spec: HeadlessProjectionSpec,
@@ -147,6 +148,7 @@ pub fn exact_runtime_with_engine(engine: Box<dyn LayoutEngineV1>) -> UiRuntime {
     try_exact_runtime_with_engine(engine).expect("injected headless runtime should initialize")
 }
 
+#[allow(clippy::result_large_err)]
 pub fn try_exact_runtime_with_engine(
     engine: Box<dyn LayoutEngineV1>,
 ) -> Result<UiRuntime, RuntimeInitializationError> {

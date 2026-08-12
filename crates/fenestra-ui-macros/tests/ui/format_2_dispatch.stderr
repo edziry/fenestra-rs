@@ -1,0 +1,5 @@
+error: unexpected-eof
+ --> tests/ui/format_2_dispatch.rs:4:27
+  |
+4 |     let _ = ui! { format 2; };
+  |                           ^

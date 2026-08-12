@@ -8,6 +8,11 @@ use crate::logical_tree::NodeId;
 use super::fragment::FragmentId;
 use super::headless::HeadlessSurface;
 
+mod spatial;
+
+pub(crate) use spatial::SpatialViewportChange;
+pub use spatial::SpatialViewportChangeViewV2;
+
 const HEADLESS_RESIZE_INVALIDATION: InvalidationSet = InvalidationSet::NONE
     .union(InvalidationSet::from_class(InvalidationClass::Surface))
     .union(InvalidationSet::from_class(InvalidationClass::Layout))
@@ -80,6 +85,7 @@ pub(crate) enum MutationRecord {
     KeyMoved(KeyMove),
     KeyRemoved(KeyRemove),
     HeadlessSurfaceChanged(HeadlessSurfaceChange),
+    SpatialViewportChanged(SpatialViewportChange),
 }
 
 impl MutationRecord {
@@ -90,6 +96,7 @@ impl MutationRecord {
             Self::KeyMoved(movement) => movement.invalidation,
             Self::KeyRemoved(removal) => removal.invalidation,
             Self::HeadlessSurfaceChanged(change) => change.invalidation(),
+            Self::SpatialViewportChanged(change) => change.invalidation(),
         }
     }
 
@@ -97,6 +104,7 @@ impl MutationRecord {
         match self {
             Self::PropertyChanged(change) => change.old_value != change.new_value,
             Self::HeadlessSurfaceChanged(change) => change.old_surface != change.new_surface,
+            Self::SpatialViewportChanged(change) => change.old_viewport != change.new_viewport,
             Self::KeyInserted(_) | Self::KeyMoved(_) | Self::KeyRemoved(_) => true,
         }
     }
@@ -115,6 +123,8 @@ pub enum MutationRecordView<'a> {
     KeyRemoved(KeyRemoveView<'a>),
     /// The provisional headless surface extent changed.
     HeadlessSurfaceChanged(HeadlessSurfaceChangeView<'a>),
+    /// The runtime spatial viewport extent changed.
+    SpatialViewportChanged(SpatialViewportChangeViewV2<'a>),
 }
 
 impl fmt::Debug for MutationRecordView<'_> {
@@ -125,6 +135,7 @@ impl fmt::Debug for MutationRecordView<'_> {
             Self::KeyMoved(_) => "KeyMoved",
             Self::KeyRemoved(_) => "KeyRemoved",
             Self::HeadlessSurfaceChanged(_) => "HeadlessSurfaceChanged",
+            Self::SpatialViewportChanged(_) => "SpatialViewportChanged",
         };
         formatter.write_str(kind)
     }
@@ -365,6 +376,9 @@ impl<'a> Iterator for MutationIter<'a> {
             }
             MutationRecord::HeadlessSurfaceChanged(change) => {
                 MutationRecordView::HeadlessSurfaceChanged(HeadlessSurfaceChangeView { change })
+            }
+            MutationRecord::SpatialViewportChanged(change) => {
+                MutationRecordView::SpatialViewportChanged(SpatialViewportChangeViewV2::new(change))
             }
         })
     }

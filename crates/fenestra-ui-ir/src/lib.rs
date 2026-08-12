@@ -12,6 +12,7 @@ mod invalidation;
 mod limits;
 mod schema;
 mod source;
+mod spatial;
 mod style;
 mod validated;
 mod validation;
@@ -43,4 +44,28 @@ pub mod prototype {
     };
     pub use crate::validation::{validate_construction, validate_schema, validate_style};
     pub use crate::value::{InputPolicy, PropertyValue, ValueType};
+    #[rustfmt::skip]
+    pub use crate::ids::{
+        SpatialFormatVersion, SUPPORTED_SPATIAL_FORMAT, SpatialNodeSymbolV2,
+        SpatialShapeSymbolV2, SpatialBrushSymbolV2, SpatialClipSymbolV2,
+        SpatialImageSymbolV2,
+    };
+    #[rustfmt::skip]
+    pub use crate::spatial::{
+        SpatialFieldV2, SpatialBindingV2, SpatialAxisV2,
+        SpatialAnchorComponentV2, SpatialFillRuleV2, SpatialNodeParentV2,
+        SpatialAnchorTargetRecipeV2, SpatialClipAddressV2, SpatialPointRecipeV2,
+        SpatialPaddingRecipeV2, SpatialDimensionRecipeV2, SpatialTransformRecipeV2,
+        SpatialViewportContainerV2, SpatialContainerRecipeV2,
+        SpatialLayoutPlacementRecipeV2, SpatialFreePlacementRecipeV2,
+        SpatialPlacementRecipeV2, SpatialPathVerbRecipeV2, SpatialPolygonPointV2,
+        SpatialShapeGeometryV2, SpatialShapeDeclarationV2, SpatialGradientStopV2,
+        SpatialBrushContentV2, SpatialBrushDeclarationV2, SpatialCoverageRecipeV2,
+        SpatialClipDeclarationV2, SpatialPaintRecipeV2, SpatialHitRecipeV2,
+        SpatialSemanticRecipeV2, SpatialImageDeclarationV2,
+        SpatialNodeDeclarationV2, SpatialProgramV2,
+    };
+    pub use crate::limits::SpatialValidationLimitsV2;
+    pub use crate::validated::ValidatedSpatialProgramV2;
+    pub use crate::validation::validate_spatial;
 }

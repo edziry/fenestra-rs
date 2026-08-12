@@ -1,5 +1,6 @@
 mod construction;
 mod schema;
+mod spatial;
 mod style;
 
 pub use construction::{
@@ -9,6 +10,7 @@ pub use construction::{
 pub use schema::{
     ComponentPropertiesIter, ComponentSchemaView, PropertySchemaView, ValidatedSchema,
 };
+pub use spatial::ValidatedSpatialProgramV2;
 pub use style::{
     LinkedStyleValueView, StyleAssignmentIter, StyleAssignmentView, StyleValueOrigin,
     ValidatedStyleProgram,

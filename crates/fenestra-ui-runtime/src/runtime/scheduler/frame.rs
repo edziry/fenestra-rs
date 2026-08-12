@@ -1,6 +1,7 @@
 use std::fmt;
 
 use fenestra_ui_ir::prototype::InvalidationSet;
+use fenestra_ui_spatial::prototype::SpatialPaintFrameV2;
 
 use super::super::state::RuntimeGeneration;
 use super::super::view::CommittedRuntimeSnapshot;
@@ -147,6 +148,37 @@ impl FrameWork {
     #[must_use]
     pub const fn accounted_bytes(&self) -> usize {
         VISUAL_ENVELOPE_BYTES
+    }
+
+    /// Returns the optional paint frame sealed to this offered generation.
+    #[must_use]
+    pub fn paint_frame(&self) -> Option<RuntimePaintFrameV2<'_>> {
+        let spatial = self.work.snapshot.spatial()?.snapshot().paint_frame();
+        Some(RuntimePaintFrameV2 {
+            generation: self.work.snapshot.generation(),
+            spatial,
+        })
+    }
+}
+
+/// Borrowed spatial paint frame sealed to one offered runtime generation.
+#[derive(Clone, Copy)]
+pub struct RuntimePaintFrameV2<'a> {
+    generation: RuntimeGeneration,
+    spatial: SpatialPaintFrameV2<'a>,
+}
+
+impl<'a> RuntimePaintFrameV2<'a> {
+    /// Returns the committed generation represented by this frame.
+    #[must_use]
+    pub const fn generation(self) -> RuntimeGeneration {
+        self.generation
+    }
+
+    /// Returns the immutable spatial paint projection for this frame.
+    #[must_use]
+    pub const fn spatial(self) -> SpatialPaintFrameV2<'a> {
+        self.spatial
     }
 }
 

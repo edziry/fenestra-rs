@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use fenestra_ui_ir::prototype::{PropertyId, PropertyValue};
+use fenestra_ui_spatial::prototype::SpatialViewportV2;
 
 use crate::logical_tree::NodeId;
 
@@ -10,11 +11,12 @@ use super::expand::ExpansionContext;
 use super::fragment::FragmentId;
 use super::headless::HeadlessSurface;
 use super::mutation::{
-    HeadlessSurfaceChange, KeyInsert, KeyMove, KeyRemove, ManifestItem, MutationRecord,
-    PropertyChange,
+    KeyInsert, KeyMove, KeyRemove, ManifestItem, MutationRecord, PropertyChange,
 };
 use super::state::RuntimeState;
 use super::transaction::{Operation, UiRuntime};
+
+mod resize;
 
 struct DraftApplication<'a> {
     runtime: &'a UiRuntime,
@@ -26,6 +28,8 @@ struct DraftApplication<'a> {
     candidate_surface: Option<HeadlessSurface>,
     surface_record: Option<usize>,
     surface_source: Option<usize>,
+    candidate_spatial_viewport: Option<SpatialViewportV2>,
+    spatial_viewport_record: Option<usize>,
     structural: StructuralTracker,
 }
 
@@ -35,6 +39,7 @@ pub(super) struct AppliedDraft {
     created_sources: HashMap<NodeId, usize>,
     candidate_surface: Option<HeadlessSurface>,
     surface_source: Option<usize>,
+    candidate_spatial_viewport: Option<SpatialViewportV2>,
 }
 
 impl AppliedDraft {
@@ -59,6 +64,10 @@ impl AppliedDraft {
     pub(super) const fn surface_operation_index(&self) -> Option<usize> {
         self.surface_source
     }
+
+    pub(super) const fn candidate_spatial_viewport(&self) -> Option<SpatialViewportV2> {
+        self.candidate_spatial_viewport
+    }
 }
 
 impl UiRuntime {
@@ -68,6 +77,7 @@ impl UiRuntime {
         operations: Vec<Operation>,
     ) -> Result<AppliedDraft, TransactionError> {
         let candidate_surface = state.headless_surface();
+        let candidate_spatial_viewport = state.spatial_viewport();
         let mut application = DraftApplication {
             runtime: self,
             state,
@@ -78,6 +88,8 @@ impl UiRuntime {
             candidate_surface,
             surface_record: None,
             surface_source: None,
+            candidate_spatial_viewport,
+            spatial_viewport_record: None,
             structural: StructuralTracker::new(self.capacity.structural_changes()),
         };
         for (index, operation) in operations.into_iter().enumerate() {
@@ -89,6 +101,7 @@ impl UiRuntime {
             created_sources: application.created_sources,
             candidate_surface: application.candidate_surface,
             surface_source: application.surface_source,
+            candidate_spatial_viewport: application.candidate_spatial_viewport,
         })
     }
 }
@@ -119,44 +132,8 @@ impl DraftApplication<'_> {
             } => self.keyed_property(fragment, key, property, value, index),
             Operation::RemoveKeyed { fragment, key } => self.remove(fragment, key, index),
             Operation::ResizeHeadless { surface } => self.resize(surface, index),
+            Operation::ResizeSpatial { viewport } => self.resize_spatial(viewport, index),
         }
-    }
-
-    fn resize(
-        &mut self,
-        surface: HeadlessSurface,
-        operation_index: usize,
-    ) -> Result<(), TransactionError> {
-        let old_surface = self.candidate_surface.ok_or_else(|| {
-            TransactionError::new(
-                TransactionErrorKind::HeadlessUnavailable,
-                Some(operation_index),
-            )
-        })?;
-        if old_surface == surface {
-            return Ok(());
-        }
-        if let Some(record_index) = self.surface_record {
-            let MutationRecord::HeadlessSurfaceChanged(change) = &mut self.records[record_index]
-            else {
-                return Err(TransactionError::new(
-                    TransactionErrorKind::InvariantViolation,
-                    None,
-                ));
-            };
-            change.new_surface = surface;
-        } else {
-            self.surface_record = Some(self.records.len());
-            self.records.push(MutationRecord::HeadlessSurfaceChanged(
-                HeadlessSurfaceChange {
-                    old_surface,
-                    new_surface: surface,
-                },
-            ));
-        }
-        self.candidate_surface = Some(surface);
-        self.surface_source = Some(operation_index);
-        Ok(())
     }
 
     fn property(
@@ -243,8 +220,12 @@ impl DraftApplication<'_> {
             ));
         }
         let invalidation = self.region_invalidation(stored.descriptor)?;
-        let expansion =
-            ExpansionContext::new(&self.runtime.construction, self.runtime.headless.as_ref());
+        let expansion = match &self.runtime.spatial {
+            Some(spatial) => ExpansionContext::styled(&self.runtime.construction, spatial.style()),
+            None => {
+                ExpansionContext::new(&self.runtime.construction, self.runtime.headless.as_ref())
+            }
+        };
         let (root, created) = self
             .state
             .insert_member(

@@ -50,7 +50,7 @@ pub enum AuthoringDiagnosticKindV1 {
 
 impl AuthoringDiagnosticKindV1 {
     /// Every concrete diagnostic outcome in deterministic vocabulary order.
-    pub const ALL: [Self; 72] = [
+    pub const ALL: [Self; 110] = [
         Self::InvalidUtf8,
         Self::UnsupportedToken,
         Self::UnsupportedAuthoringFormat,
@@ -143,6 +143,70 @@ impl AuthoringDiagnosticKindV1 {
         Self::IrValidation(IrValidationErrorKind::LimitExceeded(
             ValidationLimitKind::StyleAssignments,
         )),
+        Self::IrValidation(IrValidationErrorKind::UnsupportedSpatialFormat),
+        Self::IrValidation(IrValidationErrorKind::LimitExceeded(
+            ValidationLimitKind::SpatialNodes,
+        )),
+        Self::IrValidation(IrValidationErrorKind::LimitExceeded(
+            ValidationLimitKind::SpatialShapes,
+        )),
+        Self::IrValidation(IrValidationErrorKind::LimitExceeded(
+            ValidationLimitKind::SpatialBrushes,
+        )),
+        Self::IrValidation(IrValidationErrorKind::LimitExceeded(
+            ValidationLimitKind::SpatialClips,
+        )),
+        Self::IrValidation(IrValidationErrorKind::LimitExceeded(
+            ValidationLimitKind::SpatialPaintItems,
+        )),
+        Self::IrValidation(IrValidationErrorKind::LimitExceeded(
+            ValidationLimitKind::SpatialHitItems,
+        )),
+        Self::IrValidation(IrValidationErrorKind::LimitExceeded(
+            ValidationLimitKind::SpatialSemanticItems,
+        )),
+        Self::IrValidation(IrValidationErrorKind::LimitExceeded(
+            ValidationLimitKind::SpatialPaths,
+        )),
+        Self::IrValidation(IrValidationErrorKind::LimitExceeded(
+            ValidationLimitKind::SpatialPathVerbs,
+        )),
+        Self::IrValidation(IrValidationErrorKind::LimitExceeded(
+            ValidationLimitKind::SpatialPolygonPoints,
+        )),
+        Self::IrValidation(IrValidationErrorKind::LimitExceeded(
+            ValidationLimitKind::SpatialGradientStops,
+        )),
+        Self::IrValidation(IrValidationErrorKind::LimitExceeded(
+            ValidationLimitKind::SpatialImages,
+        )),
+        Self::IrValidation(IrValidationErrorKind::LimitExceeded(
+            ValidationLimitKind::SpatialImageBytes,
+        )),
+        Self::IrValidation(IrValidationErrorKind::DuplicateSpatialNode),
+        Self::IrValidation(IrValidationErrorKind::DuplicateSpatialTemplate),
+        Self::IrValidation(IrValidationErrorKind::MissingSpatialTemplate),
+        Self::IrValidation(IrValidationErrorKind::MissingSpatialParent),
+        Self::IrValidation(IrValidationErrorKind::SpatialParentContextMismatch),
+        Self::IrValidation(IrValidationErrorKind::SpatialParentNotEarlier),
+        Self::IrValidation(IrValidationErrorKind::InvalidSpatialPreorder),
+        Self::IrValidation(IrValidationErrorKind::UnknownSpatialProperty),
+        Self::IrValidation(IrValidationErrorKind::SpatialPropertyTypeMismatch),
+        Self::IrValidation(IrValidationErrorKind::SpatialFixed16OutOfRange),
+        Self::IrValidation(IrValidationErrorKind::DuplicateSpatialShape),
+        Self::IrValidation(IrValidationErrorKind::DuplicateSpatialBrush),
+        Self::IrValidation(IrValidationErrorKind::DuplicateSpatialClip),
+        Self::IrValidation(IrValidationErrorKind::DuplicateSpatialImage),
+        Self::IrValidation(IrValidationErrorKind::MissingSpatialShape),
+        Self::IrValidation(IrValidationErrorKind::MissingSpatialBrush),
+        Self::IrValidation(IrValidationErrorKind::MissingSpatialImage),
+        Self::IrValidation(IrValidationErrorKind::MissingSpatialClipOwner),
+        Self::IrValidation(IrValidationErrorKind::MissingSpatialClip),
+        Self::IrValidation(IrValidationErrorKind::SpatialClipOwnerNotAncestor),
+        Self::IrValidation(IrValidationErrorKind::SpatialClipParentNotEarlier),
+        Self::IrValidation(IrValidationErrorKind::MissingSpatialAnchorTarget),
+        Self::IrValidation(IrValidationErrorKind::SelfAnchorTarget),
+        Self::IrValidation(IrValidationErrorKind::SpatialAnchorContextMismatch),
     ];
 }
 

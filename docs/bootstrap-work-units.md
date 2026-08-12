@@ -201,7 +201,7 @@ Verification: [layout conformance verification](verification/WU-0011-layout-conf
 - Implementation: add the unpublished neutral boundary, reference engine,
   independent oracle, disposable candidate adapter, and atomic runtime seam
   through focused RED/GREEN commits.
-- Verification: compare every supported case and the registered runtime script
+- Verification: compare every required registered case and the runtime script
   field by field, retain negative controls and deterministic artifacts, and run
   Linux plus Windows pure gates.
 
@@ -225,3 +225,32 @@ Decision: [mobile lifecycle preparation](design/mobile-lifecycle-preparation.md)
 Exit: preparation records a separate post-WU-0011 unit and makes no mobile
 support claim. If a trigger becomes true, WU-0011 stops and WU-0012 becomes its
 prerequisite.
+
+## WU-0013: Hybrid spatial composition
+
+Branch: `feat/hybrid-spatial-composition`
+Design: [hybrid spatial composition plan](design/hybrid-spatial-composition.md)
+Candidate screen: [hybrid spatial candidate screen](design/hybrid-spatial-candidate-screen.md)
+Reference: [hybrid spatial reference contract](design/hybrid-spatial-reference-v2.md)
+Evidence: [hybrid spatial evidence contract](design/hybrid-spatial-evidence-v2.md)
+Verification: [hybrid spatial verification](verification/WU-0013-hybrid-spatial.md)
+
+- Research: reconcile the original EXP-0008 rich-2D scope with the completed
+  layout prerequisite; screen numeric, geometry, path, hit-test, raster, and
+  renderer candidates without selecting backend types as Fenestra contracts.
+- Planning: define logical, spatial, and layout ownership separately; freeze
+  peer `Layout` and `Free` placement, recursively nested layout islands,
+  anchors, transforms, clips, paint, hit, semantic bounds, ordering, limits,
+  diagnostics, independent oracles, and versioned evidence.
+- Implementation: add a bounded candidate-neutral spatial boundary, reference
+  resolver, independent paint and hit projections, atomic runtime integration,
+  equivalent manual, `.fen`, and `ui!` authoring, and a disposable native
+  presentation lane through focused RED/GREEN commits.
+- Verification: prove all-layout, all-free, and both mixed nesting directions;
+  compare clean reconstruction and candidate lanes field by field; exercise
+  transformed hit testing, keyed mutation, resize, failure, rollback, artifact
+  bounds, and Linux plus Windows pure gates.
+
+Exit: layout and free placement are optional peer capabilities that can contain
+one another without coupling layout allocation, visual geometry, hit shape, or
+semantic bounds. WU-0012 remains deferred and no mobile support claim is made.

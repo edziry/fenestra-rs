@@ -2,6 +2,7 @@ use std::error::Error;
 use std::fmt;
 
 use super::headless::HeadlessProjectionErrorKind;
+use super::spatial::RuntimeSpatialErrorV2;
 
 /// Bounded resource categories in deterministic diagnostic order.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -39,6 +40,8 @@ pub enum RuntimeInitializationErrorKind {
     CapacityExceeded(CapacityKind),
     /// A provisional headless specification or projection failed.
     Headless(HeadlessProjectionErrorKind),
+    /// Spatial wrapper validation or reference resolution failed.
+    Spatial(RuntimeSpatialErrorV2),
     /// The materialized runtime state violated an internal invariant.
     InvariantViolation,
 }
@@ -85,8 +88,12 @@ pub enum TransactionErrorKind {
     CapacityExceeded(CapacityKind),
     /// Provisional headless projection work failed.
     Headless(HeadlessProjectionErrorKind),
+    /// Spatial wrapper validation or reference resolution failed.
+    Spatial(RuntimeSpatialErrorV2),
     /// A headless-only operation targeted an ordinary runtime.
     HeadlessUnavailable,
+    /// A spatial-only operation targeted an ordinary or headless runtime.
+    SpatialUnavailable,
     /// The transaction no longer targets the exact committed base.
     StaleBase,
     /// A node identity is absent, foreign, or stale.

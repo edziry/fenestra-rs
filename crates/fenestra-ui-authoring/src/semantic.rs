@@ -5,7 +5,14 @@ use crate::compiled::CompiledAuthoringV1;
 use crate::resolved::ResolvedDocumentV1;
 
 mod encode;
+mod logical;
+mod record;
 mod value;
+mod writer;
+
+pub(crate) use logical::{collect_logical_records_v1, logical_record_count_v1};
+pub(crate) use record::{InvalidRecord, Record, sort_and_validate, validate_name};
+pub(crate) use writer::{BoundedAsciiWriter, BoundedAsciiWriterError};
 
 /// Inclusive resource category bounded by semantic artifact generation.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

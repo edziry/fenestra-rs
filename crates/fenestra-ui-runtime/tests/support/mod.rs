@@ -6,6 +6,7 @@ pub mod headless_projection_state;
 pub mod headless_spec;
 pub mod model;
 pub mod multiplicity;
+pub mod spatial_ir;
 
 use fenestra_ui_ir::prototype::{
     ChildSlot, ComponentSchema, ComponentTypeId, ConstructionProgram, InitialKey, InitialProperty,

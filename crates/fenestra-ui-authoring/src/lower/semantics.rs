@@ -86,7 +86,7 @@ impl NameIndexesV1 {
     }
 }
 
-pub(super) fn resolve_semantics(
+pub(crate) fn resolve_semantics(
     parsed: &ParsedDocumentV1,
 ) -> Result<ResolvedDocumentV1, AuthoringDiagnosticV1> {
     let indexes = NameIndexesV1::new(parsed);

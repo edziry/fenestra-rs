@@ -26,6 +26,32 @@ pub enum ValidationLimitKind {
     InitialInstances,
     /// Exact style assignments.
     StyleAssignments,
+    /// Spatial node declarations.
+    SpatialNodes,
+    /// Spatial shape declarations across all nodes.
+    SpatialShapes,
+    /// Spatial brush declarations across all nodes.
+    SpatialBrushes,
+    /// Spatial clip declarations across all nodes.
+    SpatialClips,
+    /// Spatial paint item recipes across all nodes.
+    SpatialPaintItems,
+    /// Spatial hit item recipes across all nodes.
+    SpatialHitItems,
+    /// Spatial semantic item recipes across all nodes.
+    SpatialSemanticItems,
+    /// Path-shaped spatial declarations across all nodes.
+    SpatialPaths,
+    /// Path verbs across all spatial paths.
+    SpatialPathVerbs,
+    /// Polygon points across all spatial polygons.
+    SpatialPolygonPoints,
+    /// Gradient stops across all spatial brushes.
+    SpatialGradientStops,
+    /// Spatial image declarations.
+    SpatialImages,
+    /// Bytes across all spatial images.
+    SpatialImageBytes,
 }
 
 impl ValidationLimitKind {
@@ -41,6 +67,19 @@ impl ValidationLimitKind {
             Self::TemplateDepth => "template-depth",
             Self::InitialInstances => "initial-instances",
             Self::StyleAssignments => "style-assignments",
+            Self::SpatialNodes => "spatial-nodes",
+            Self::SpatialShapes => "spatial-shapes",
+            Self::SpatialBrushes => "spatial-brushes",
+            Self::SpatialClips => "spatial-clips",
+            Self::SpatialPaintItems => "spatial-paint-items",
+            Self::SpatialHitItems => "spatial-hit-items",
+            Self::SpatialSemanticItems => "spatial-semantic-items",
+            Self::SpatialPaths => "spatial-paths",
+            Self::SpatialPathVerbs => "spatial-path-verbs",
+            Self::SpatialPolygonPoints => "spatial-polygon-points",
+            Self::SpatialGradientStops => "spatial-gradient-stops",
+            Self::SpatialImages => "spatial-images",
+            Self::SpatialImageBytes => "spatial-image-bytes",
         }
     }
 }
@@ -112,13 +151,63 @@ pub enum IrValidationErrorKind {
     StylePropertyTypeMismatch,
     /// A target-property pair is assigned more than once.
     DuplicateStyleAssignment,
+    /// Unsupported symbolic spatial program format.
+    UnsupportedSpatialFormat,
+    /// A spatial node symbol is declared more than once.
+    DuplicateSpatialNode,
+    /// A construction template has more than one spatial node.
+    DuplicateSpatialTemplate,
+    /// A spatial node names an absent construction template.
+    MissingSpatialTemplate,
+    /// A spatial node names an absent spatial parent.
+    MissingSpatialParent,
+    /// A spatial parent is outside the node's structural context.
+    SpatialParentContextMismatch,
+    /// A spatial parent does not precede the child.
+    SpatialParentNotEarlier,
+    /// Spatial declarations do not form the required preorder.
+    InvalidSpatialPreorder,
+    /// A spatial binding names no property in its component scope.
+    UnknownSpatialProperty,
+    /// A spatial binding property has the wrong value type.
+    SpatialPropertyTypeMismatch,
+    /// A fixed-point literal is outside the canonical scalar domain.
+    SpatialFixed16OutOfRange,
+    /// A spatial shape symbol is repeated within one node.
+    DuplicateSpatialShape,
+    /// A spatial brush symbol is repeated within one node.
+    DuplicateSpatialBrush,
+    /// A spatial clip symbol is repeated within one node.
+    DuplicateSpatialClip,
+    /// A spatial image symbol is declared more than once.
+    DuplicateSpatialImage,
+    /// A spatial item names an absent shape in its owner scope.
+    MissingSpatialShape,
+    /// A spatial item names an absent brush in its owner scope.
+    MissingSpatialBrush,
+    /// A spatial item names an absent image.
+    MissingSpatialImage,
+    /// A qualified spatial clip address names an absent owner.
+    MissingSpatialClipOwner,
+    /// A qualified spatial clip address names an absent clip.
+    MissingSpatialClip,
+    /// A qualified clip owner is not a spatial ancestor.
+    SpatialClipOwnerNotAncestor,
+    /// A same-owner clip parent does not precede its child.
+    SpatialClipParentNotEarlier,
+    /// A spatial anchor names an absent target.
+    MissingSpatialAnchorTarget,
+    /// A spatial node anchors to itself.
+    SelfAnchorTarget,
+    /// A spatial anchor target is outside the node's structural context.
+    SpatialAnchorContextMismatch,
     /// A bounded validation resource was exceeded.
     LimitExceeded(ValidationLimitKind),
 }
 
 impl IrValidationErrorKind {
     /// Every concrete error kind, including each typed limit category.
-    pub const ALL: [Self; 42] = [
+    pub const ALL: [Self; 80] = [
         Self::UnsupportedSchemaFormat,
         Self::UnsupportedConstructionFormat,
         Self::SchemaIdentityMismatch,
@@ -161,6 +250,44 @@ impl IrValidationErrorKind {
         Self::StylePropertyTypeMismatch,
         Self::DuplicateStyleAssignment,
         Self::LimitExceeded(ValidationLimitKind::StyleAssignments),
+        Self::UnsupportedSpatialFormat,
+        Self::LimitExceeded(ValidationLimitKind::SpatialNodes),
+        Self::LimitExceeded(ValidationLimitKind::SpatialShapes),
+        Self::LimitExceeded(ValidationLimitKind::SpatialBrushes),
+        Self::LimitExceeded(ValidationLimitKind::SpatialClips),
+        Self::LimitExceeded(ValidationLimitKind::SpatialPaintItems),
+        Self::LimitExceeded(ValidationLimitKind::SpatialHitItems),
+        Self::LimitExceeded(ValidationLimitKind::SpatialSemanticItems),
+        Self::LimitExceeded(ValidationLimitKind::SpatialPaths),
+        Self::LimitExceeded(ValidationLimitKind::SpatialPathVerbs),
+        Self::LimitExceeded(ValidationLimitKind::SpatialPolygonPoints),
+        Self::LimitExceeded(ValidationLimitKind::SpatialGradientStops),
+        Self::LimitExceeded(ValidationLimitKind::SpatialImages),
+        Self::LimitExceeded(ValidationLimitKind::SpatialImageBytes),
+        Self::DuplicateSpatialNode,
+        Self::DuplicateSpatialTemplate,
+        Self::MissingSpatialTemplate,
+        Self::MissingSpatialParent,
+        Self::SpatialParentContextMismatch,
+        Self::SpatialParentNotEarlier,
+        Self::InvalidSpatialPreorder,
+        Self::UnknownSpatialProperty,
+        Self::SpatialPropertyTypeMismatch,
+        Self::SpatialFixed16OutOfRange,
+        Self::DuplicateSpatialShape,
+        Self::DuplicateSpatialBrush,
+        Self::DuplicateSpatialClip,
+        Self::DuplicateSpatialImage,
+        Self::MissingSpatialShape,
+        Self::MissingSpatialBrush,
+        Self::MissingSpatialImage,
+        Self::MissingSpatialClipOwner,
+        Self::MissingSpatialClip,
+        Self::SpatialClipOwnerNotAncestor,
+        Self::SpatialClipParentNotEarlier,
+        Self::MissingSpatialAnchorTarget,
+        Self::SelfAnchorTarget,
+        Self::SpatialAnchorContextMismatch,
     ];
 
     const fn as_str(self) -> &'static str {
@@ -197,6 +324,31 @@ impl IrValidationErrorKind {
             Self::UnknownStyleProperty => "unknown-style-property",
             Self::StylePropertyTypeMismatch => "style-property-type-mismatch",
             Self::DuplicateStyleAssignment => "duplicate-style-assignment",
+            Self::UnsupportedSpatialFormat => "unsupported-spatial-format",
+            Self::DuplicateSpatialNode => "duplicate-spatial-node",
+            Self::DuplicateSpatialTemplate => "duplicate-spatial-template",
+            Self::MissingSpatialTemplate => "missing-spatial-template",
+            Self::MissingSpatialParent => "missing-spatial-parent",
+            Self::SpatialParentContextMismatch => "spatial-parent-context-mismatch",
+            Self::SpatialParentNotEarlier => "spatial-parent-not-earlier",
+            Self::InvalidSpatialPreorder => "invalid-spatial-preorder",
+            Self::UnknownSpatialProperty => "unknown-spatial-property",
+            Self::SpatialPropertyTypeMismatch => "spatial-property-type-mismatch",
+            Self::SpatialFixed16OutOfRange => "spatial-fixed16-out-of-range",
+            Self::DuplicateSpatialShape => "duplicate-spatial-shape",
+            Self::DuplicateSpatialBrush => "duplicate-spatial-brush",
+            Self::DuplicateSpatialClip => "duplicate-spatial-clip",
+            Self::DuplicateSpatialImage => "duplicate-spatial-image",
+            Self::MissingSpatialShape => "missing-spatial-shape",
+            Self::MissingSpatialBrush => "missing-spatial-brush",
+            Self::MissingSpatialImage => "missing-spatial-image",
+            Self::MissingSpatialClipOwner => "missing-spatial-clip-owner",
+            Self::MissingSpatialClip => "missing-spatial-clip",
+            Self::SpatialClipOwnerNotAncestor => "spatial-clip-owner-not-ancestor",
+            Self::SpatialClipParentNotEarlier => "spatial-clip-parent-not-earlier",
+            Self::MissingSpatialAnchorTarget => "missing-spatial-anchor-target",
+            Self::SelfAnchorTarget => "self-anchor-target",
+            Self::SpatialAnchorContextMismatch => "spatial-anchor-context-mismatch",
             Self::LimitExceeded(_) => "limit-exceeded",
         }
     }

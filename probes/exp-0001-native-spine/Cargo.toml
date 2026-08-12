@@ -11,7 +11,11 @@ workspace = true
 
 [dependencies]
 fenestra-ui-runtime.workspace = true
+fenestra-ui-spatial.workspace = true
 fenestra-ui-testkit.workspace = true
+
+[dev-dependencies]
+fenestra-ui-layout.workspace = true
 
 [target.'cfg(target_os = "linux")'.dependencies]
 winit = { version = "=0.30.13", default-features = false, features = [

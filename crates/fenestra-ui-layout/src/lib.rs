@@ -14,7 +14,8 @@ mod vocabulary;
 #[doc(hidden)]
 pub mod prototype {
     pub use crate::engine::{
-        LayoutEngineV1, ReferenceStackEngineV1, ValidatedLayoutInputV1, compute_layout_v1,
+        LayoutEngineV1, PreparedLayoutInputV1, ReferenceStackEngineV1, ValidatedLayoutInputV1,
+        compute_layout_v1, compute_prepared_layout_v1, prepare_layout_v1,
     };
     pub use crate::error::{
         LayoutEngineErrorKindV1, LayoutEngineErrorV1, LayoutErrorKindV1, LayoutErrorLocationV1,

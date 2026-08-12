@@ -18,7 +18,7 @@ const ROOT_TEMPLATE: TemplateNodeId = TemplateNodeId::new(0);
 const MEMBER_TEMPLATE: TemplateNodeId = TemplateNodeId::new(1);
 const REGION: StructuralRegionId = StructuralRegionId::new(0);
 
-fn runtime(retained_generations: usize) -> UiRuntime {
+fn construction() -> fenestra_ui_ir::prototype::ValidatedConstruction {
     let span = SourceSpan::synthetic();
     let namespace = SchemaNamespace::new(99);
     let revision = SchemaRevision::new(1);
@@ -65,9 +65,12 @@ fn runtime(retained_generations: usize) -> UiRuntime {
     );
     let ir_limits = ValidationLimits::new(4, 4, 4, 4, 4, 4, 4, 4, 4);
     let schema = validate_schema(manifest, ir_limits).unwrap();
-    let construction = validate_construction(&schema, program, ir_limits).unwrap();
+    validate_construction(&schema, program, ir_limits).unwrap()
+}
+
+fn runtime(retained_generations: usize) -> UiRuntime {
     UiRuntime::new(
-        construction,
+        construction(),
         RuntimeCapacity::new(8, 8, 8, 8, 8, retained_generations),
     )
     .unwrap()
@@ -165,3 +168,5 @@ fn retained_generation_capacity_precedes_generation_exhaustion() {
     );
     assert_eq!(error.operation_index(), None);
 }
+
+mod spatial;

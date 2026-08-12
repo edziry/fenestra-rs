@@ -247,7 +247,9 @@ fn transaction(error: TransactionErrorKind) -> String {
             format!("capacity-exceeded-{}", capacity(kind))
         }
         TransactionErrorKind::Headless(kind) => format!("headless-{}", headless(kind)),
+        TransactionErrorKind::Spatial(_) => "invariant-violation".into(),
         TransactionErrorKind::HeadlessUnavailable => "headless-unavailable".into(),
+        TransactionErrorKind::SpatialUnavailable => "invariant-violation".into(),
         TransactionErrorKind::StaleBase => "stale-base".into(),
         TransactionErrorKind::MissingNode => "missing-node".into(),
         TransactionErrorKind::MissingFragment => "missing-fragment".into(),
@@ -310,4 +312,21 @@ const fn projection_limit(limit: HeadlessProjectionLimitKind) -> &'static str {
 
 fn number(value: u64) -> String {
     value.to_string()
+}
+
+#[cfg(test)]
+mod tests {
+    use fenestra_ui_runtime::prototype::{RuntimeSpatialErrorV2, TransactionErrorKind};
+
+    use super::transaction;
+
+    #[test]
+    fn headless_artifact_v1_folds_unrepresented_spatial_failures_closed() {
+        for error in [
+            TransactionErrorKind::Spatial(RuntimeSpatialErrorV2::ViewportMismatch),
+            TransactionErrorKind::SpatialUnavailable,
+        ] {
+            assert_eq!(transaction(error), "invariant-violation");
+        }
+    }
 }
