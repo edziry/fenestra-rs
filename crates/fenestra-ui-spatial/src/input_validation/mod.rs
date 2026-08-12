@@ -41,7 +41,7 @@ mod world_transforms;
 
 pub use prepared::{
     PreparedSpatialV2, SpatialResolvedSnapshotV2, materialize_reference_spatial_v2,
-    prepare_spatial_v2,
+    prepare_spatial_v2, resolve_spatial_v2,
 };
 
 #[cfg(test)]

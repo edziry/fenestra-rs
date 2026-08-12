@@ -66,6 +66,17 @@ pub fn prepare_spatial_v2<E: LayoutEngineV1 + ?Sized>(
     })
 }
 
+/// Prepares and materializes one immutable reference spatial snapshot.
+#[must_use = "spatial resolution errors must be handled before publication"]
+pub fn resolve_spatial_v2<E: LayoutEngineV1 + ?Sized>(
+    engine: &E,
+    input: Arc<SpatialOwnedInputV2>,
+    limits: SpatialLimitsV2,
+) -> Result<SpatialResolvedSnapshotV2, SpatialResolveErrorV2> {
+    let prepared = prepare_spatial_v2(engine, input, limits)?;
+    Ok(materialize_reference_spatial_v2(prepared))
+}
+
 fn prepare_phase_10<'a, E: LayoutEngineV1 + ?Sized>(
     engine: &E,
     input: SpatialInputV2<'a>,

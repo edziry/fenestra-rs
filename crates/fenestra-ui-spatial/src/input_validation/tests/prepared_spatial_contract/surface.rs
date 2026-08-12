@@ -39,10 +39,9 @@ fn prepared_and_snapshot_values_have_only_the_staged_public_surface() {
         assert!(has_must_use(&source, item.start));
     }
 
-    for forbidden in ["validate_spatial_output_v2"] {
-        assert!(!source.contains(&format!("pub struct {forbidden}")));
-        assert!(!source.contains(&format!("pub fn {forbidden}")));
-    }
+    let forbidden = "validate_spatial_output_v2";
+    assert!(!source.contains(&format!("pub struct {forbidden}")));
+    assert!(!source.contains(&format!("pub fn {forbidden}")));
 }
 
 fn assert_one_shot_delegation(body: &str) {
