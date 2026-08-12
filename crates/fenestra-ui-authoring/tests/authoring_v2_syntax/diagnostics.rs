@@ -11,6 +11,9 @@ use super::support::{
     assert_diagnostic_with_limits, replace_once,
 };
 
+#[path = "diagnostics/priority.rs"]
+mod priority;
+
 #[test]
 fn duplicate_and_unknown_names_report_the_exact_spatial_field() {
     let cases = [
@@ -167,33 +170,6 @@ fn duplicate_and_unknown_names_report_the_exact_spatial_field() {
         std::panic::catch_unwind(assertion)
             .unwrap_or_else(|_| panic!("diagnostic case failed: {name}"));
     }
-}
-
-#[test]
-fn free_placement_reports_fields_before_its_later_anchor_target() {
-    let before = concat!(
-        "placement free\n",
-        "          width property span_x height property span_y\n",
-        "          self_anchor anchor(center, end)\n",
-        "          target node guide",
-    );
-    let after = concat!(
-        "placement free\n",
-        "          width property missing_width height property span_y\n",
-        "          self_anchor anchor(center, end)\n",
-        "          target node missing_target",
-    );
-    let source = replace_once(FIXTURE, before, after);
-    assert_diagnostic(
-        &source,
-        expected(
-            AuthoringDiagnosticKindV2::UnknownPropertyName,
-            AnchorKindV2::SpatialField,
-            237,
-            "missing_width",
-            0,
-        ),
-    );
 }
 
 #[test]
