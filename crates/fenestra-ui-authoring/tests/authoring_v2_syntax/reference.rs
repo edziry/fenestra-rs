@@ -142,7 +142,7 @@ fn reference_source_map_preserves_records_fields_and_shared_origins() {
             "viewport_layer",
             0,
         ),
-        (377, AnchorKindV2::SpatialField, "-32768", "-32768", 0),
+        (377, AnchorKindV2::SpatialField, "-32768", "-32768", 1),
         (379, AnchorKindV2::SpatialField, "0", "0", 116),
     ];
 
