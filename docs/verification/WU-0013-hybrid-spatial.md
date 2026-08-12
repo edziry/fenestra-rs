@@ -1,11 +1,13 @@
 # WU-0013 hybrid spatial composition verification
 
-Status: Linux verification complete; Windows pure gate pending
+Status: Linux and Windows GNU verification complete; Windows MSVC gate pending
 Linux result: pass
-Cross-platform result: pending
+Windows GNU result: pass
+Required target-pair result: pending Windows MSVC
 Date: 2026-08-12
 Branch: `feat/hybrid-spatial-composition`
 Linux evidence source commit: `0ee2ebe7a2a6873fa98670846d225c32cd2c3543`
+Windows GNU evidence source commit: `52234d2ba09fff2f282f618ff346e039689ef458`
 Research baseline: `fenestra-research` commit
 `176c42139776ed9f1ef879cd135bddadaf12a9da`
 
@@ -114,8 +116,9 @@ image-resource-v2.txt         25846    335       273  4c3977c8fb79f5f9f539e101ea
 
 The baseline SHA-256 appears in every candidate row. Candidate rows pair the
 required Linux and Windows target labels and contain the same lock-closure
-digest for each pair. Those Windows rows are registered evidence tuples, not a
-claim that the pending target-native Windows gate has passed.
+digest for each pair. The Windows GNU run below confirms that all six artifact
+files remain byte identical on a native Windows host. It does not convert the
+registered `x86_64-pc-windows-msvc` rows into executed MSVC evidence.
 
 ## Linux verification
 
@@ -143,31 +146,56 @@ lockfile fingerprint for the new optional dependencies.
 
 ## Windows verification
 
-Status: pending.
+Status: Windows GNU pass; Windows MSVC pending.
 
-Only `x86_64-unknown-linux-gnu` is installed on the local host. No Windows
-command was executed for this evidence source commit, so this document makes
-no Windows build, MSVC, GNU-Windows, Win32, DX12, or cross-platform
-reproducibility claim.
+An isolated `git archive` of the Windows evidence source commit was copied to
+a temporary directory on a Windows 11 Home host. The host reported build
+`10.0.26200`, `x86_64-pc-windows-gnu`, rustc and Cargo 1.97.1, and LLVM 22.1.6.
+Commands were run serially with one Cargo build job and one test thread. The
+build target directory was outside the exported source tree.
+
+These commands passed:
+
+```text
+cargo fmt --all -- --check
+cargo metadata --format-version 1 --no-deps --locked
+cargo tree -p fenestra-ui-exp-0008-hybrid-spatial --depth 1 --all-features --locked
+CARGO_BUILD_JOBS=1 CARGO_PROFILE_TEST_DEBUG=0 RUSTFLAGS="-D warnings" cargo test --workspace --all-targets --all-features --locked -- --test-threads=1
+CARGO_BUILD_JOBS=1 CARGO_PROFILE_DEV_DEBUG=0 cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+CARGO_BUILD_JOBS=1 CARGO_PROFILE_DEV_DEBUG=0 RUSTDOCFLAGS="-D warnings -D missing-docs" cargo doc --workspace --all-features --no-deps --locked
+```
+
+The complete workspace and the 62-test hybrid evidence probe passed. The six
+artifact measurements matched the canonical table exactly, including zero CR
+bytes. A sorted manifest of every exported source file matched before and
+after the gate: 1,491 files, 8,201,038 bytes, and SHA-256
+`d8a623e8b5b1fa843f6858783981c467cc93acc6fa8de5c91f7049398e9fca7e`.
+The temporary source and target directories were then removed.
+
+The host has only the GNU Rust toolchain installed. This run therefore makes
+no MSVC, DX12 execution, or GPU pixel claim. It establishes native Windows GNU
+build, test, lint, documentation, and artifact reproducibility only.
 
 The versioned [CI workflow](../../.github/workflows/ci.yml) already runs the
 locked workspace all-target/all-feature test gate on `windows-2025`, followed
 by workspace Clippy, rustdoc with missing documentation denied, metadata,
 dependency trees, diff checks, and a clean-tree assertion. WU-0013 remains
-open until that target-native Windows lane passes on the exact source tree and
-the six artifact measurements above are confirmed unchanged.
+open until its MSVC lane passes on the exact source tree. The GNU result above
+does not substitute for that required target tuple.
 
 ## Result and nonclaims
 
 ```text
 WU-0013 Linux result: pass
-WU-0013 cross-platform result: pending Windows pure gate
-EXP-0008 hybrid spatial status: open pending Windows verification
+WU-0013 Windows GNU result: pass
+WU-0013 required target-pair result: pending Windows MSVC gate
+EXP-0008 hybrid spatial status: open pending Windows MSVC verification
 ```
 
 The result does not publish crates, expose the probe, select a final
 dependency, promise incremental performance, stabilize the API or MSRV, or
 claim GPU pixels, interactive Wayland, interactive Win32, accessibility
 platform integration, mobile lifecycle, installer behavior, or product
-support. The branch is locally clean and verified, but it is not ready for the
-authorized squash merge until the required Windows gate is versioned.
+support. The branch is verified on Linux and Windows GNU, but it is not ready
+for the authorized squash merge until the required Windows MSVC gate is
+versioned.
