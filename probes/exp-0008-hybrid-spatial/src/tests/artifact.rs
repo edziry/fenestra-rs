@@ -107,6 +107,30 @@ fn two_fresh_models_encode_identically_and_decoder_is_canonical() {
 }
 
 #[test]
+fn committed_baseline_is_the_exact_fresh_host_neutral_encoding() {
+    let path =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/artifacts/spatial-v2.txt");
+    let committed = std::fs::read(path).expect("versioned spatial-v2 baseline artifact");
+    let literal = artifact_from_evidence_v2(
+        &reconstruct_literal_v2().expect("fresh literal committed evidence"),
+    )
+    .expect("literal artifact model");
+    let reference = artifact_from_evidence_v2(
+        &reconstruct_reference_v2().expect("fresh reference committed evidence"),
+    )
+    .expect("reference artifact model");
+    let literal_bytes = encode_spatial_evidence_artifact_v2(&literal).expect("literal encoding");
+    let reference_bytes =
+        encode_spatial_evidence_artifact_v2(&reference).expect("reference encoding");
+
+    assert_eq!(literal_bytes, reference_bytes);
+    assert_eq!(committed, literal_bytes);
+    let decoded = decode_spatial_evidence_artifact_v2(&committed).expect("committed decode");
+    verify_spatial_evidence_artifact_v2(&decoded).expect("committed semantic replay");
+    assert_eq!(decoded, literal);
+}
+
+#[test]
 fn grammar_values_are_canonical_and_baseline_has_no_lane_rows() {
     let evidence = reconstruct_literal_v2().expect("literal evidence");
     let artifact = artifact_from_evidence_v2(&evidence).expect("typed artifact");

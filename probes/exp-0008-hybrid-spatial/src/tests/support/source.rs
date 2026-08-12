@@ -26,12 +26,24 @@ pub(crate) fn rust_sources(relative: &str) -> Vec<(PathBuf, String)> {
 }
 
 fn collect(path: &Path, output: &mut Vec<PathBuf>) {
-    if path.is_file() {
+    let metadata = fs::symlink_metadata(path)
+        .unwrap_or_else(|_| panic!("missing source path {}", path.display()));
+    assert!(
+        !metadata.file_type().is_symlink(),
+        "source scan rejects symlink {}",
+        path.display()
+    );
+    if metadata.is_file() {
         if path.extension().and_then(|value| value.to_str()) == Some("rs") {
             output.push(path.to_path_buf());
         }
         return;
     }
+    assert!(
+        metadata.is_dir(),
+        "source path must be a file or directory {}",
+        path.display()
+    );
     let entries =
         fs::read_dir(path).unwrap_or_else(|_| panic!("missing source root {}", path.display()));
     for entry in entries {
