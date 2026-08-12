@@ -9,6 +9,7 @@ mod baseline;
     test,
     any(
         feature = "cpu-reference",
+        feature = "image-resource",
         feature = "numeric-spatial",
         feature = "path-hit"
     )

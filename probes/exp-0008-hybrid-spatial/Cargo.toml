@@ -9,6 +9,7 @@ repository.workspace = true
 [features]
 cpu-reference = ["dep:raqote", "dep:tiny-skia"]
 default = []
+image-resource = ["dep:image", "dep:png"]
 numeric-spatial = ["dep:euclid", "dep:fixed", "dep:kurbo"]
 path-hit = ["dep:kurbo", "dep:lyon_tessellation"]
 
@@ -26,3 +27,5 @@ kurbo = { version = "=0.13.1", default-features = false, features = ["std"], opt
 lyon_tessellation = { version = "=1.0.20", default-features = false, features = ["std"], optional = true }
 raqote = { version = "=0.8.5", default-features = false, optional = true }
 tiny-skia = { version = "=0.12.0", default-features = false, features = ["std"], optional = true }
+image = { version = "=0.25.10", default-features = false, features = ["png"], optional = true }
+png = { version = "=0.18.1", default-features = false, optional = true }

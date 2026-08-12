@@ -1,5 +1,7 @@
 #[cfg(feature = "cpu-reference")]
 pub(crate) mod cpu_reference;
+#[cfg(feature = "image-resource")]
+pub(crate) mod image_resource;
 #[cfg(feature = "numeric-spatial")]
 pub(crate) mod numeric_spatial;
 #[cfg(feature = "path-hit")]

@@ -83,16 +83,18 @@ fn image_candidates_are_fresh_deterministic_and_exactly_classified() {
         );
     }
 
-    for (candidate, expected, first, second) in [
+    for (candidate, expected, expected_mismatch, first, second) in [
         (
             ImageCandidateV2::Png,
             (ImageOutcomeV2::Adapt, "orientation-normalization"),
+            None,
             png_image_run_v2(&first_cases).expect("PNG run"),
             png_image_run_v2(&second_cases).expect("fresh PNG run"),
         ),
         (
             ImageCandidateV2::Image,
-            (ImageOutcomeV2::Pass, "-"),
+            (ImageOutcomeV2::Stop, "mismatch"),
+            Some((1, "gamma")),
             image_crate_run_v2(&first_cases).expect("Image run"),
             image_crate_run_v2(&second_cases).expect("fresh Image run"),
         ),
@@ -101,8 +103,42 @@ fn image_candidates_are_fresh_deterministic_and_exactly_classified() {
         let classification = classify_image_run_v2(&literal, &first);
         assert_eq!(classification.candidate, candidate);
         assert_eq!((classification.outcome, classification.reason), expected);
-        assert_eq!(classification.first_mismatch, None);
-        assert_eq!(first.records, literal.records);
+        assert_eq!(
+            classification
+                .first_mismatch
+                .map(|mismatch| (mismatch.record, mismatch.field)),
+            expected_mismatch
+        );
+        assert_eq!(
+            first.records == literal.records,
+            expected_mismatch.is_none()
+        );
+        if candidate == ImageCandidateV2::Image {
+            for (observed, expected) in first.records.iter().zip(&literal.records) {
+                assert_eq!(
+                    (
+                        observed.ordinal,
+                        observed.width,
+                        observed.height,
+                        observed.stride,
+                        &observed.rgba8,
+                        observed.profile_fingerprint,
+                        observed.orientation,
+                    ),
+                    (
+                        expected.ordinal,
+                        expected.width,
+                        expected.height,
+                        expected.stride,
+                        &expected.rgba8,
+                        expected.profile_fingerprint,
+                        expected.orientation,
+                    )
+                );
+            }
+            assert_eq!(first.records[1].gamma_scaled, None);
+            assert_eq!(literal.records[1].gamma_scaled, Some(45_455));
+        }
     }
 }
 

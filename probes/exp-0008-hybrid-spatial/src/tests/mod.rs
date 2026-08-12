@@ -5,6 +5,7 @@ mod corpus;
 #[cfg(feature = "cpu-reference")]
 mod cpu_reference;
 mod faults;
+#[cfg(feature = "image-resource")]
 mod image_resource;
 mod limits;
 mod model;
