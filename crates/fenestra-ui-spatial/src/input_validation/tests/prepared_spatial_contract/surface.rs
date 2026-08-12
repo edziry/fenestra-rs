@@ -58,6 +58,7 @@ fn prepared_and_snapshot_values_have_only_the_staged_public_surface() {
             "pub fn effective_clip_aabbs",
             "pub fn hit_test",
             "pub fn output",
+            "pub fn paint_frame",
             "pub fn rasterize_reference",
         ]
     );
@@ -74,6 +75,7 @@ fn prepared_and_snapshot_values_have_only_the_staged_public_surface() {
         "output",
         "effective_clip_aabbs",
         "hit_test",
+        "paint_frame",
         "rasterize_reference",
     ] {
         let item = public_method(&source, "SpatialResolvedSnapshotV2", method);

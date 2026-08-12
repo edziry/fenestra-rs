@@ -7,17 +7,17 @@ const HELPER: &str = "preflight_spatial_direct_counts_v2";
 #[test]
 fn helper_is_the_only_prototype_surface_delta_and_adds_no_struct() {
     let baseline = read(&manifest_dir().join("tests/api_surface.rs"));
-    let mut expected_exports = quoted_array(&baseline, "EXPECTED_EXPORTS", 120);
+    let mut expected_exports = quoted_array(&baseline, "EXPECTED_EXPORTS", 121);
     assert!(!expected_exports.iter().any(|name| name == HELPER));
     expected_exports.push(HELPER.to_owned());
-    assert_eq!(expected_exports.len(), 121);
+    assert_eq!(expected_exports.len(), 122);
 
     let source = read(&source_dir().join("lib.rs"));
     let exports = prototype_exports(&source);
-    assert_eq!(exports.len(), 121);
+    assert_eq!(exports.len(), 122);
     assert_eq!(exports, expected_exports.into_iter().collect());
 
-    let expected_structs = quoted_array(&baseline, "EXPECTED_STRUCTS", 51)
+    let expected_structs = quoted_array(&baseline, "EXPECTED_STRUCTS", 52)
         .into_iter()
         .collect::<BTreeSet<_>>();
     assert_eq!(public_structs(&all_source()), expected_structs);

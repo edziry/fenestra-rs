@@ -32,6 +32,7 @@ const UI_FIXTURE: &str = include_str!("../fixtures/hybrid-spatial-v2.ui");
 #[test]
 fn registered_format_two_fixtures_and_generated_rust_are_exact() {
     assert_eq!(HYBRID_SPATIAL_FEN_V2.len(), 7_714);
+    assert_eq!(fnv1a64(HYBRID_SPATIAL_FEN_V2), 0x4a6f_15b1_b7bf_b015);
     assert_eq!(HYBRID_SPATIAL_FEN_V2.last(), Some(&b'\n'));
     assert!(!HYBRID_SPATIAL_FEN_V2.contains(&b'\r'));
     assert!(HYBRID_SPATIAL_FEN_V2.iter().all(u8::is_ascii));
@@ -54,6 +55,12 @@ fn registered_format_two_fixtures_and_generated_rust_are_exact() {
     assert!(HYBRID_SPATIAL_GENERATED_RUST_V2.is_ascii());
     assert!(HYBRID_SPATIAL_GENERATED_RUST_V2.ends_with('\n'));
     assert!(!HYBRID_SPATIAL_GENERATED_RUST_V2.contains('\r'));
+}
+
+fn fnv1a64(bytes: &[u8]) -> u64 {
+    bytes.iter().fold(0xcbf2_9ce4_8422_2325, |hash, byte| {
+        (hash ^ u64::from(*byte)).wrapping_mul(0x0000_0100_0000_01b3)
+    })
 }
 
 #[test]
