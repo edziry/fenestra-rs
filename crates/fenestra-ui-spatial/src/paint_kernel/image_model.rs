@@ -26,6 +26,15 @@ impl<'a> ValidatedImageP4<'a> {
         self.image.bytes()
     }
 
+    pub(crate) const fn into_parts(self) -> (u32, u32, u32, u32) {
+        (
+            self.image.key().get(),
+            self.image.width(),
+            self.image.height(),
+            self.image.stride(),
+        )
+    }
+
     #[cfg(test)]
     pub(crate) fn facts(&self) -> (u32, u32, u32, Vec<u8>) {
         (

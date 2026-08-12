@@ -44,6 +44,12 @@ impl<'a> ValidatedPathsProof<'a> {
     pub(super) fn validated_paths(&self) -> &[ValidatedPathK1<'a>] {
         &self.paths
     }
+
+    pub(in crate::input_validation) fn into_parts(
+        self,
+    ) -> (PathStructureProof<'a>, Vec<ValidatedPathK1<'a>>) {
+        (self.structure, self.paths)
+    }
 }
 
 pub(super) fn prepare_validated_paths(

@@ -9,8 +9,10 @@ use crate::topology::SpatialPlacementV2;
 
 pub(super) mod preflight;
 
+pub(super) use preflight::prepare_layout_preflight;
+
 #[cfg(test)]
-pub(super) use preflight::{map_layout_preflight_error, prepare_layout_preflight};
+pub(super) use preflight::map_layout_preflight_error;
 
 struct IslandMemberPlan {
     node: u32,

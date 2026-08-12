@@ -15,16 +15,22 @@ use crate::model::SpatialPointV2;
 #[cfg(test)]
 use crate::shape::SpatialShapeKindV2;
 
-struct ValidatedShape<'a> {
+pub(in crate::input_validation) struct ValidatedShape<'a> {
     owner: u32,
     geometry: ValidatedShapeGeometry<'a>,
 }
 
-enum ValidatedShapeGeometry<'a> {
+pub(in crate::input_validation) enum ValidatedShapeGeometry<'a> {
     Rect(ValidatedRectK1),
     Circle(ValidatedCircleK1),
     Polygon(ValidatedPolygonK1<'a>),
     Path(SpatialPathKeyV2),
+}
+
+impl<'a> ValidatedShape<'a> {
+    pub(in crate::input_validation) fn into_parts(self) -> (u32, ValidatedShapeGeometry<'a>) {
+        (self.owner, self.geometry)
+    }
 }
 
 pub(super) enum ShapeLocalBoundsInput<'a> {
@@ -74,6 +80,12 @@ impl<'a> ValidatedShapesProof<'a> {
             ValidatedShapeGeometry::Polygon(polygon) => ShapeLocalBoundsInput::Polygon(*polygon),
             ValidatedShapeGeometry::Path(path) => ShapeLocalBoundsInput::Path(*path),
         })
+    }
+
+    pub(in crate::input_validation) fn into_parts(
+        self,
+    ) -> (ShapeStructureProof<'a>, Vec<ValidatedShape<'a>>) {
+        (self.structure, self.shapes)
     }
 }
 

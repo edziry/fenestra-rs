@@ -21,6 +21,12 @@ impl<'a> EffectiveClipAabbProof<'a> {
     pub(super) fn limits(&self) -> SpatialLimitsV2 {
         self.world.limits()
     }
+
+    pub(in crate::input_validation) fn into_parts(
+        self,
+    ) -> (WorldAabbProof<'a>, Vec<SpatialAabbV2>) {
+        (self.world, self.effective_clips)
+    }
 }
 
 pub(super) fn prepare_effective_clip_aabbs(

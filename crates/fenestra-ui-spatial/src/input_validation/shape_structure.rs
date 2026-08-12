@@ -15,9 +15,15 @@ use crate::model::SpatialPointV2;
 use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};
 use crate::shape::SpatialShapeGeometryV2;
 
-struct PolygonRange {
+pub(in crate::input_validation) struct PolygonRange {
     shape: u32,
     points: Range<usize>,
+}
+
+impl PolygonRange {
+    pub(in crate::input_validation) fn into_parts(self) -> (u32, Range<usize>) {
+        (self.shape, self.points)
+    }
 }
 
 pub(super) struct ShapeStructureProof<'a> {
@@ -61,6 +67,12 @@ impl<'a> ShapeStructureProof<'a> {
             "trusted polygon ranges remain aligned with shape order"
         );
         &self.input().geometry().polygon_points()[range.points.clone()]
+    }
+
+    pub(in crate::input_validation) fn into_parts(
+        self,
+    ) -> (ValidatedPathsProof<'a>, Vec<PolygonRange>) {
+        (self.paths, self.polygon_ranges)
     }
 }
 

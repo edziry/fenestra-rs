@@ -61,6 +61,12 @@ impl<'a> FlattenedPathsProof<'a> {
     pub(super) fn hit_local_bounds_inputs(&self) -> impl Iterator<Item = HitLocalBoundsInput> + '_ {
         self.semantics.hit_local_bounds_inputs()
     }
+
+    pub(in crate::input_validation) fn into_parts(
+        self,
+    ) -> (ValidatedSemanticItemsProof<'a>, Vec<FlattenedPathK2>) {
+        (self.semantics, self.paths)
+    }
 }
 
 pub(super) fn prepare_flattened_paths<'a>(

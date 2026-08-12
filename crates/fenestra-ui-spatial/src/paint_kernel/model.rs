@@ -51,6 +51,17 @@ impl PreparedGradientP2 {
         &self.stops[index]
     }
 
+    pub(crate) fn into_parts(self) -> (SpatialPointV2, SpatialPointV2, Vec<(u16, SpatialRgba8V2)>) {
+        (
+            self.start,
+            self.end,
+            self.stops
+                .into_iter()
+                .map(|stop| (stop.offset, stop.color))
+                .collect(),
+        )
+    }
+
     #[cfg(test)]
     pub(crate) fn facts(&self) -> (SpatialPointV2, SpatialPointV2, Vec<(u16, SpatialRgba8V2)>) {
         (

@@ -8,7 +8,7 @@ use crate::limits::SpatialLimitKindV2;
 use crate::paint_kernel::{PreparedGradientP2, prepare_gradient_p2, prepare_solid_p2};
 use crate::resolve_error::SpatialResolveErrorV2;
 
-enum PreparedBrush {
+pub(in crate::input_validation) enum PreparedBrush {
     Solid(SpatialRgba8V2),
     LinearGradient(PreparedGradientP2),
 }
@@ -48,6 +48,12 @@ impl<'a> PreparedBrushesProof<'a> {
         &self,
     ) -> impl Iterator<Item = ShapeLocalBoundsInput<'a>> + '_ {
         self.structure.shape_local_bounds_inputs()
+    }
+
+    pub(in crate::input_validation) fn into_parts(
+        self,
+    ) -> (BrushStructureProof<'a>, Vec<PreparedBrush>) {
+        (self.structure, self.brushes)
     }
 }
 

@@ -20,7 +20,7 @@ use crate::resolve_error::SpatialResolveErrorV2;
 #[cfg(test)]
 mod facts;
 
-enum PaintLocalBounds<'a> {
+pub(in crate::input_validation) enum PaintLocalBounds<'a> {
     Coverage(SpatialAabbV2),
     Image(ValidatedImagePaintP5<'a>),
 }
@@ -83,6 +83,17 @@ impl<'a> LocalBoundsProof<'a> {
             .hits
             .get(index)
             .expect("hit validation retained one local bound per record")
+    }
+
+    pub(in crate::input_validation) fn into_parts(
+        self,
+    ) -> (
+        FlattenedPathsProof<'a>,
+        Vec<DerivedLocalBoundsK3>,
+        Vec<PaintLocalBounds<'a>>,
+        Vec<SpatialAabbV2>,
+    ) {
+        (self.flattened, self.shapes, self.paints, self.hits)
     }
 }
 

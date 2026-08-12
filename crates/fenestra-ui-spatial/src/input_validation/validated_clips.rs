@@ -16,12 +16,26 @@ use crate::paint_kernel::ValidatedImageP4;
 use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};
 use crate::topology::SpatialNodeV2;
 
-struct ValidatedClipPlan {
+pub(in crate::input_validation) struct ValidatedClipPlan {
     owner: u32,
     parent: Option<u32>,
     shape: u32,
     fill_rule: SpatialFillRuleV2,
     depth: usize,
+}
+
+impl ValidatedClipPlan {
+    pub(in crate::input_validation) const fn into_parts(
+        self,
+    ) -> (u32, Option<u32>, u32, SpatialFillRuleV2, usize) {
+        (
+            self.owner,
+            self.parent,
+            self.shape,
+            self.fill_rule,
+            self.depth,
+        )
+    }
 }
 
 pub(super) struct ValidatedClipsProof<'a> {
@@ -72,6 +86,12 @@ impl<'a> ValidatedClipsProof<'a> {
             clip.owner,
             owner,
         ))
+    }
+
+    pub(in crate::input_validation) fn into_parts(
+        self,
+    ) -> (ValidatedImagesProof<'a>, Vec<ValidatedClipPlan>) {
+        (self.images, self.clips)
     }
 }
 

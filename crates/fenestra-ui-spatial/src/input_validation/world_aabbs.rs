@@ -21,6 +21,15 @@ pub(super) struct WorldAabbProof<'a> {
     semantics: Vec<SpatialAabbV2>,
 }
 
+pub(in crate::input_validation) type WorldAabbParts<'a> = (
+    WorldTransformProof<'a>,
+    Vec<SpatialAabbV2>,
+    Vec<SpatialAabbV2>,
+    Vec<SpatialAabbV2>,
+    Vec<SpatialAabbV2>,
+    Vec<SpatialAabbV2>,
+);
+
 impl<'a> WorldAabbProof<'a> {
     pub(super) fn input(&self) -> SpatialInputV2<'a> {
         self.transforms.input()
@@ -35,6 +44,17 @@ impl<'a> WorldAabbProof<'a> {
             .clips
             .get(index)
             .expect("clip projection retained one primitive bound per record")
+    }
+
+    pub(in crate::input_validation) fn into_parts(self) -> WorldAabbParts<'a> {
+        (
+            self.transforms,
+            self.geometry,
+            self.clips,
+            self.paints,
+            self.hits,
+            self.semantics,
+        )
     }
 }
 

@@ -26,6 +26,18 @@ impl<'a> TopologyLimitsProof<'a> {
     pub(super) fn limits(&self) -> SpatialLimitsV2 {
         self.topology.direct_counts.limits
     }
+
+    pub(in crate::input_validation) fn into_parts(self) -> TopologyProof<'a> {
+        self.topology
+    }
+}
+
+impl<'a> TopologyProof<'a> {
+    pub(in crate::input_validation) fn into_parts(
+        self,
+    ) -> (DirectCountProof<'a>, Vec<usize>, Vec<usize>) {
+        (self.direct_counts, self.depths, self.child_counts)
+    }
 }
 
 #[cfg(test)]

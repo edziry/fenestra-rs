@@ -21,7 +21,7 @@ use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};
 #[cfg(test)]
 mod facts;
 
-struct ValidatedHitItem {
+pub(in crate::input_validation) struct ValidatedHitItem {
     owner: u32,
     item_ordinal: u32,
     coverage: ValidatedHitCoverage,
@@ -29,7 +29,7 @@ struct ValidatedHitItem {
     input_policy: SpatialInputPolicyV2,
 }
 
-enum ValidatedHitCoverage {
+pub(in crate::input_validation) enum ValidatedHitCoverage {
     Fill {
         shape: u32,
         rule: SpatialFillRuleV2,
@@ -38,6 +38,26 @@ enum ValidatedHitCoverage {
         shape: u32,
         stroke: ValidatedStrokeK1,
     },
+}
+
+impl ValidatedHitItem {
+    pub(in crate::input_validation) fn into_parts(
+        self,
+    ) -> (
+        u32,
+        u32,
+        ValidatedHitCoverage,
+        Option<u32>,
+        SpatialInputPolicyV2,
+    ) {
+        (
+            self.owner,
+            self.item_ordinal,
+            self.coverage,
+            self.clip,
+            self.input_policy,
+        )
+    }
 }
 
 pub(super) enum HitLocalBoundsInput {
@@ -107,6 +127,12 @@ impl<'a> ValidatedHitItemsProof<'a> {
 
     pub(super) fn clip_owner_is_same_or_ancestor_of(&self, clip: u32, owner: u32) -> Option<bool> {
         self.paints.clip_owner_is_same_or_ancestor_of(clip, owner)
+    }
+
+    pub(in crate::input_validation) fn into_parts(
+        self,
+    ) -> (ValidatedPaintItemsProof<'a>, Vec<ValidatedHitItem>) {
+        (self.paints, self.hits)
     }
 }
 

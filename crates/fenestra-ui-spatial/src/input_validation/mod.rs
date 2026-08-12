@@ -22,6 +22,7 @@ mod paint_p5_mapping;
 mod path_k2_mapping;
 mod path_structure;
 mod placement;
+mod prepared;
 mod prepared_brushes;
 mod shape_k1_mapping;
 mod shape_structure;
@@ -37,6 +38,8 @@ mod validated_semantic_items;
 mod validated_shapes;
 mod world_aabbs;
 mod world_transforms;
+
+pub use prepared::{PreparedSpatialV2, prepare_spatial_v2};
 
 #[cfg(test)]
 use brush_structure::{prepare_brush_structure, validate_gradient_stop_range};
@@ -123,6 +126,14 @@ const U32_ROW_CAPACITY: u128 = u32::MAX as u128 + 1;
 struct DirectCountProof<'a> {
     input: SpatialInputV2<'a>,
     limits: SpatialLimitsV2,
+}
+
+impl<'a> DirectCountProof<'a> {
+    pub(in crate::input_validation) const fn into_parts(
+        self,
+    ) -> (SpatialInputV2<'a>, SpatialLimitsV2) {
+        (self.input, self.limits)
+    }
 }
 
 fn prepare_direct_counts(

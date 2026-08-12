@@ -20,6 +20,10 @@ impl<'a> PlacementInputProof<'a> {
     pub(super) fn limits(&self) -> SpatialLimitsV2 {
         self.topology_limits.limits()
     }
+
+    pub(in crate::input_validation) fn into_parts(self) -> TopologyLimitsProof<'a> {
+        self.topology_limits
+    }
 }
 
 pub(super) fn prepare_placement_input(

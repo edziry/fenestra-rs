@@ -53,6 +53,12 @@ impl<'a> ValidatedImagesProof<'a> {
     pub(super) fn validated_image(&self, index: u32) -> Option<ValidatedImageP4<'a>> {
         self.images.get(index as usize).copied()
     }
+
+    pub(in crate::input_validation) fn into_parts(
+        self,
+    ) -> (PreparedBrushesProof<'a>, Vec<ValidatedImageP4<'a>>) {
+        (self.brushes, self.images)
+    }
 }
 
 pub(super) fn prepare_validated_images<'a>(

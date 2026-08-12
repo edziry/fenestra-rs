@@ -37,6 +37,24 @@ impl<'image> PreclipImagePaintP5<'image> {
         self.destination
     }
 
+    pub(crate) fn into_parts(
+        self,
+    ) -> (
+        u32,
+        ValidatedImageP4<'image>,
+        SpatialImageSourceRectV2,
+        SpatialImageDestinationRectV2,
+        u8,
+    ) {
+        (
+            self.paint_index,
+            self.image,
+            self.source,
+            self.destination,
+            self.opacity,
+        )
+    }
+
     #[cfg(test)]
     pub(crate) fn facts(
         &self,
@@ -101,5 +119,9 @@ impl<'image> ValidatedImagePaintP5<'image> {
 
     pub(crate) const fn local_bounds(&self) -> SpatialAabbV2 {
         self.local_bounds
+    }
+
+    pub(crate) fn into_parts(self) -> (PreclipImagePaintP5<'image>, SpatialAabbV2) {
+        (self.preclip, self.local_bounds)
     }
 }

@@ -19,12 +19,26 @@ use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};
 #[cfg(test)]
 mod facts;
 
-struct ValidatedSemanticItem {
+pub(in crate::input_validation) struct ValidatedSemanticItem {
     owner: u32,
     item_ordinal: u32,
     shape: u32,
     fill_rule: SpatialFillRuleV2,
     clip: Option<u32>,
+}
+
+impl ValidatedSemanticItem {
+    pub(in crate::input_validation) const fn into_parts(
+        self,
+    ) -> (u32, u32, u32, SpatialFillRuleV2, Option<u32>) {
+        (
+            self.owner,
+            self.item_ordinal,
+            self.shape,
+            self.fill_rule,
+            self.clip,
+        )
+    }
 }
 
 pub(super) struct ValidatedSemanticItemsProof<'a> {
@@ -72,6 +86,12 @@ impl<'a> ValidatedSemanticItemsProof<'a> {
 
     pub(super) fn hit_local_bounds_inputs(&self) -> impl Iterator<Item = HitLocalBoundsInput> + '_ {
         self.hits.hit_local_bounds_inputs()
+    }
+
+    pub(in crate::input_validation) fn into_parts(
+        self,
+    ) -> (ValidatedHitItemsProof<'a>, Vec<ValidatedSemanticItem>) {
+        (self.hits, self.semantics)
     }
 }
 

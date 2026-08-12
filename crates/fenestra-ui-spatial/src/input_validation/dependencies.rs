@@ -13,10 +13,10 @@ mod execution;
 mod order;
 mod targets;
 
-pub(super) use execution::BasePlacementProof;
+pub(super) use execution::{BasePlacementProof, execute_dependency_graph};
 
 #[cfg(test)]
-pub(super) use execution::{execute_dependency_graph, map_layout_execution_error};
+pub(super) use execution::map_layout_execution_error;
 
 #[cfg(test)]
 mod facts;
@@ -62,6 +62,10 @@ impl<'a> DependencyGraphProof<'a> {
         index: u32,
     ) -> fenestra_ui_layout::prototype::PreparedLayoutInputV1 {
         self.bounds.take_prepared_island(index)
+    }
+
+    pub(in crate::input_validation) fn into_parts(self) -> LocalBoundsProof<'a> {
+        self.bounds
     }
 }
 

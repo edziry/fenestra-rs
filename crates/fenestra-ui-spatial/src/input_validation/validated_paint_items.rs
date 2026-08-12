@@ -21,13 +21,13 @@ use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};
 #[cfg(test)]
 mod facts;
 
-struct ValidatedPaintItem<'a> {
+pub(in crate::input_validation) struct ValidatedPaintItem<'a> {
     owner: u32,
     item_ordinal: u32,
     content: ValidatedPaintContent<'a>,
 }
 
-enum ValidatedPaintContent<'a> {
+pub(in crate::input_validation) enum ValidatedPaintContent<'a> {
     Coverage {
         coverage: ValidatedPaintCoverage,
         brush: u32,
@@ -41,7 +41,7 @@ enum ValidatedPaintContent<'a> {
     },
 }
 
-enum ValidatedPaintCoverage {
+pub(in crate::input_validation) enum ValidatedPaintCoverage {
     Fill {
         shape: u32,
         rule: SpatialFillRuleV2,
@@ -50,6 +50,12 @@ enum ValidatedPaintCoverage {
         shape: u32,
         stroke: ValidatedStrokeK1,
     },
+}
+
+impl<'a> ValidatedPaintItem<'a> {
+    pub(in crate::input_validation) fn into_parts(self) -> (u32, u32, ValidatedPaintContent<'a>) {
+        (self.owner, self.item_ordinal, self.content)
+    }
 }
 
 pub(super) enum PaintLocalBoundsInput<'a> {
@@ -125,6 +131,12 @@ impl<'a> ValidatedPaintItemsProof<'a> {
 
     pub(super) fn clip_owner_is_same_or_ancestor_of(&self, clip: u32, owner: u32) -> Option<bool> {
         self.clips.clip_owner_is_same_or_ancestor_of(clip, owner)
+    }
+
+    pub(in crate::input_validation) fn into_parts(
+        self,
+    ) -> (ValidatedClipsProof<'a>, Vec<ValidatedPaintItem<'a>>) {
+        (self.clips, self.paints)
     }
 }
 

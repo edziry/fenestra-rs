@@ -22,7 +22,7 @@ mod facts;
 pub(in crate::input_validation) use layout::map_layout_execution_error;
 
 #[derive(Clone, Copy)]
-struct BasePlacement {
+pub(in crate::input_validation) struct BasePlacement {
     x: SpatialScalarV2,
     y: SpatialScalarV2,
     width: i32,
@@ -54,6 +54,30 @@ impl BasePlacement {
         let zero = SpatialScalarV2::new(0);
         SpatialAabbV2::from_edges(zero, zero, fixed(self.width), fixed(self.height))
             .expect("validated base extents form closed local bounds")
+    }
+
+    pub(in crate::input_validation) const fn into_parts(
+        self,
+    ) -> (
+        SpatialScalarV2,
+        SpatialScalarV2,
+        i32,
+        i32,
+        SpatialScalarV2,
+        SpatialScalarV2,
+        SpatialScalarV2,
+        SpatialScalarV2,
+    ) {
+        (
+            self.x,
+            self.y,
+            self.width,
+            self.height,
+            self.far_x,
+            self.far_y,
+            self.local_x,
+            self.local_y,
+        )
     }
 }
 
@@ -104,6 +128,12 @@ impl<'a> BasePlacementProof<'a> {
 
     pub(in crate::input_validation) fn hit_local_bounds(&self, index: usize) -> SpatialAabbV2 {
         self.graph.bounds.hit_local_bounds(index)
+    }
+
+    pub(in crate::input_validation) fn into_parts(
+        self,
+    ) -> (DependencyGraphProof<'a>, Vec<BasePlacement>) {
+        (self.graph, self.placements)
     }
 }
 

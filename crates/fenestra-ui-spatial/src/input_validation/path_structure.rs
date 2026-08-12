@@ -47,6 +47,12 @@ impl<'a> PathStructureProof<'a> {
             .clone();
         &self.transforms.input().geometry().path_verbs()[range]
     }
+
+    pub(in crate::input_validation) fn into_parts(
+        self,
+    ) -> (LocalTransformProof<'a>, Vec<Range<usize>>) {
+        (self.transforms, self.ranges)
+    }
 }
 
 pub(super) fn prepare_path_structure(

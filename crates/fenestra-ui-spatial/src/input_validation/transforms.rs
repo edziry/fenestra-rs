@@ -36,6 +36,10 @@ impl<'a> LocalTransformProof<'a> {
     ) -> fenestra_ui_layout::prototype::PreparedLayoutInputV1 {
         self.preflight.take_prepared_island(index)
     }
+
+    pub(in crate::input_validation) fn into_parts(self) -> LayoutPreflightProof<'a> {
+        self.preflight
+    }
 }
 
 pub(super) fn prepare_local_transforms(

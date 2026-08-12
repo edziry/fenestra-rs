@@ -11,9 +11,15 @@ use crate::error::SpatialErrorLocationV2;
 use crate::geometry_field::SpatialBrushFieldV2;
 use crate::resolve_error::{SpatialResolveErrorKindV2, SpatialResolveErrorV2};
 
-struct GradientRange {
+pub(in crate::input_validation) struct GradientRange {
     brush: u32,
     stops: Range<usize>,
+}
+
+impl GradientRange {
+    pub(in crate::input_validation) fn into_parts(self) -> (u32, Range<usize>) {
+        (self.brush, self.stops)
+    }
 }
 
 pub(super) struct BrushStructureProof<'a> {
@@ -67,6 +73,12 @@ impl<'a> BrushStructureProof<'a> {
             "trusted gradient ranges remain aligned with brush order"
         );
         &self.input().resources().gradient_stops()[range.stops.clone()]
+    }
+
+    pub(in crate::input_validation) fn into_parts(
+        self,
+    ) -> (ValidatedShapesProof<'a>, Vec<GradientRange>) {
+        (self.shapes, self.gradient_ranges)
     }
 }
 

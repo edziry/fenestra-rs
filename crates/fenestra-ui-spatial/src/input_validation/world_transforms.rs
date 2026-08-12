@@ -56,6 +56,12 @@ impl<'a> WorldTransformProof<'a> {
     pub(super) fn hit_local_bounds(&self, index: usize) -> SpatialAabbV2 {
         self.placements.hit_local_bounds(index)
     }
+
+    pub(in crate::input_validation) fn into_parts(
+        self,
+    ) -> (BasePlacementProof<'a>, Vec<Affine2V2>) {
+        (self.placements, self.world)
+    }
 }
 
 pub(super) fn prepare_world_transforms(

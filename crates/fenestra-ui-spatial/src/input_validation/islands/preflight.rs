@@ -85,6 +85,12 @@ impl<'a> LayoutPreflightProof<'a> {
             .take()
             .expect("each prepared island executes exactly once")
     }
+
+    pub(in crate::input_validation) fn into_parts(
+        self,
+    ) -> super::super::placement::PlacementInputProof<'a> {
+        self.placement
+    }
 }
 
 struct LayoutDraft {
