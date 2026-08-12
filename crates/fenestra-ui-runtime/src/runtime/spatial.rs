@@ -1,5 +1,6 @@
 mod build;
 mod error;
+mod ir;
 mod types;
 mod view;
 

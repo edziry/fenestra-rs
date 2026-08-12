@@ -62,6 +62,20 @@ fn validate_mapping(
     Ok(())
 }
 
+pub(super) fn generated_wrapper_matches(
+    state: &RuntimeState,
+    source: &SpatialOwnedInputV2,
+    logical_nodes: &[crate::logical_tree::NodeId],
+    viewport: SpatialViewportV2,
+) -> bool {
+    let topology = source.as_input().topology();
+    topology.viewport() == viewport
+        && !topology.nodes().is_empty()
+        && logical_nodes.len() == topology.nodes().len().saturating_sub(1)
+        && !spatial_node_count_exceeds_key_capacity(topology.nodes().len() as u128)
+        && validate_mapping(state, logical_nodes).is_ok()
+}
+
 fn resolve_oversized(
     layout_engine: &dyn LayoutEngineV1,
     source: Arc<SpatialOwnedInputV2>,

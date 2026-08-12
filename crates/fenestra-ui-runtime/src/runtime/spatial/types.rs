@@ -1,7 +1,7 @@
 use std::panic::{RefUnwindSafe, UnwindSafe};
 use std::sync::Arc;
 
-use fenestra_ui_ir::prototype::ValidatedStyleProgram;
+use fenestra_ui_ir::prototype::{ValidatedSpatialProgramV2, ValidatedStyleProgram};
 use fenestra_ui_layout::prototype::LayoutEngineV1;
 use fenestra_ui_spatial::prototype::{
     SpatialLimitsV2, SpatialOwnedInputV2, SpatialResolvedSnapshotV2, SpatialViewportV2,
@@ -45,10 +45,17 @@ impl RuntimeSpatialInputV2 {
 }
 
 pub(crate) struct SpatialRuntimeConfig {
-    style: ValidatedStyleProgram,
-    program: Box<dyn RuntimeSpatialProgramV2>,
+    source: SpatialRuntimeSource,
     limits: SpatialLimitsV2,
     layout_engine: Box<dyn LayoutEngineV1>,
+}
+
+enum SpatialRuntimeSource {
+    Manual {
+        style: ValidatedStyleProgram,
+        program: Box<dyn RuntimeSpatialProgramV2>,
+    },
+    Ir(ValidatedSpatialProgramV2),
 }
 
 impl SpatialRuntimeConfig {
@@ -59,15 +66,29 @@ impl SpatialRuntimeConfig {
         layout_engine: Box<dyn LayoutEngineV1>,
     ) -> Self {
         Self {
-            style,
-            program,
+            source: SpatialRuntimeSource::Manual { style, program },
             limits,
             layout_engine,
         }
     }
 
-    pub(crate) const fn style(&self) -> &ValidatedStyleProgram {
-        &self.style
+    pub(crate) fn new_ir(
+        program: ValidatedSpatialProgramV2,
+        limits: SpatialLimitsV2,
+        layout_engine: Box<dyn LayoutEngineV1>,
+    ) -> Self {
+        Self {
+            source: SpatialRuntimeSource::Ir(program),
+            limits,
+            layout_engine,
+        }
+    }
+
+    pub(crate) fn style(&self) -> &ValidatedStyleProgram {
+        match &self.source {
+            SpatialRuntimeSource::Manual { style, .. } => style,
+            SpatialRuntimeSource::Ir(program) => program.style(),
+        }
     }
 
     pub(crate) fn build(
@@ -75,17 +96,26 @@ impl SpatialRuntimeConfig {
         state: &RuntimeState,
         viewport: SpatialViewportV2,
     ) -> Result<Arc<SpatialPublication>, RuntimeSpatialErrorV2> {
-        let input = self
-            .program
-            .build(RuntimeSpatialBuildViewV2::new(state), viewport);
-        build_publication(
-            state,
-            input,
-            viewport,
-            self.limits,
-            self.layout_engine.as_ref(),
-        )
-        .map(Arc::new)
+        let publication = match &self.source {
+            SpatialRuntimeSource::Manual { program, .. } => {
+                let input = program.build(RuntimeSpatialBuildViewV2::new(state), viewport);
+                build_publication(
+                    state,
+                    input,
+                    viewport,
+                    self.limits,
+                    self.layout_engine.as_ref(),
+                )
+            }
+            SpatialRuntimeSource::Ir(program) => super::ir::build_publication(
+                program,
+                state,
+                viewport,
+                self.limits,
+                self.layout_engine.as_ref(),
+            ),
+        }?;
+        Ok(Arc::new(publication))
     }
 }
 

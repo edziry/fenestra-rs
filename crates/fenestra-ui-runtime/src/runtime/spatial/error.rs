@@ -23,7 +23,6 @@ pub struct RuntimeSpatialIrErrorV2 {
 }
 
 impl RuntimeSpatialIrErrorV2 {
-    #[allow(dead_code, reason = "reserved for symbolic spatial materialization")]
     pub(crate) const fn new(kind: RuntimeSpatialIrErrorKindV2, span: SourceSpan) -> Self {
         Self { kind, span }
     }
