@@ -1,9 +1,11 @@
 use crate::prototype::{
     PreparedSpatialV2, SpatialResolvedSnapshotV2, materialize_reference_spatial_v2,
-    prepare_spatial_v2,
+    prepare_spatial_v2, resolve_spatial_v2,
 };
 
 mod errors;
+mod one_shot_errors;
+mod one_shot_success;
 mod ownership;
 mod retention_derived;
 mod retention_resources;

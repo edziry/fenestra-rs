@@ -44,18 +44,39 @@ fn snapshot_retains_a_distinct_input_viewport_and_its_root_extent() {
     )
     .unwrap();
     let snapshot = materialize_reference_spatial_v2(prepared);
-    let geometry = snapshot.output().geometry()[0];
+    assert_distinct_root_snapshot(&snapshot);
+}
 
+pub(super) fn assert_distinct_root_snapshot(snapshot: &SpatialResolvedSnapshotV2) {
+    let output = snapshot.output();
     assert_eq!(
         snapshot.viewport(),
         crate::model::SpatialViewportV2::new(7, 9)
     );
+    assert_eq!(output.geometry().len(), 1);
+    let geometry = output.geometry()[0];
+    assert_eq!(geometry.key(), crate::model::SpatialNodeKeyV2::new(0));
+    assert_eq!(geometry.base_x().raw(), 0);
+    assert_eq!(geometry.base_y().raw(), 0);
     assert_eq!(geometry.base_width().raw(), 7 * SCALE);
     assert_eq!(geometry.base_height().raw(), 9 * SCALE);
+    assert_eq!(
+        geometry.world_from_local(),
+        crate::model::Affine2V2::identity()
+    );
+    assert_eq!(
+        geometry.world_determinant(),
+        (SCALE as i128) * (SCALE as i128)
+    );
     assert_eq!(
         geometry.world_aabb(),
         raw(false, 0, 0, 7 * SCALE, 9 * SCALE)
     );
+    assert!(output.clips().is_empty());
+    assert!(output.paints().is_empty());
+    assert!(output.hits().is_empty());
+    assert!(output.semantics().is_empty());
+    assert!(snapshot.effective_clip_aabbs().is_empty());
 }
 
 #[test]

@@ -16,10 +16,16 @@ type DynPrepare = fn(
     SpatialLimitsV2,
 ) -> Result<PreparedSpatialV2, SpatialResolveErrorV2>;
 type Materialize = fn(PreparedSpatialV2) -> SpatialResolvedSnapshotV2;
+type DynResolve = fn(
+    &dyn LayoutEngineV1,
+    Arc<SpatialOwnedInputV2>,
+    SpatialLimitsV2,
+) -> Result<SpatialResolvedSnapshotV2, SpatialResolveErrorV2>;
 
 #[test]
 fn preparation_has_the_exact_lifetime_free_unsized_engine_signature() {
     let _: DynPrepare = prepare_spatial_v2::<dyn LayoutEngineV1>;
+    let _: DynResolve = resolve_spatial_v2::<dyn LayoutEngineV1>;
     let _: Materialize = materialize_reference_spatial_v2;
     assert_static::<PreparedSpatialV2>();
     assert_static::<SpatialResolvedSnapshotV2>();

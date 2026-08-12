@@ -47,7 +47,7 @@ type ImagePaintFact = (
 type FillHitFact = (u32, u32, crate::coverage::SpatialFillRuleV2);
 type StrokeHitFact = (u32, u32, i64);
 
-struct RetainedFacts {
+pub(super) struct RetainedFacts {
     paths: Vec<(u32, u128, u128)>,
     path_k1: Vec<(u32, usize, usize)>,
     flattened: Vec<FlattenedPathFact>,
@@ -100,7 +100,7 @@ struct RetainedFacts {
 }
 
 impl RetainedFacts {
-    fn capture(value: &PreparedSpatialV2) -> Self {
+    pub(super) fn capture(value: &PreparedSpatialV2) -> Self {
         Self {
             paths: value.path_range_facts(),
             path_k1: value.validated_path_facts(),
@@ -125,7 +125,7 @@ impl RetainedFacts {
         }
     }
 
-    fn assert_snapshot(self, value: &SpatialResolvedSnapshotV2) {
+    pub(super) fn assert_snapshot(self, value: &SpatialResolvedSnapshotV2) {
         assert_eq!(value.path_range_facts(), self.paths);
         assert_eq!(value.validated_path_facts(), self.path_k1);
         assert_eq!(value.flattened_path_facts(), self.flattened);

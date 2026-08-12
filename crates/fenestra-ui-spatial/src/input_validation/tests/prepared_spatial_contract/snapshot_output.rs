@@ -18,6 +18,10 @@ fn reference_materialization_emits_every_exact_rich_output_row_in_table_order() 
     let prepared = prepare_spatial_v2(&rich_engine(), rich_owned(), requested_limits())
         .expect("rich owned input prepares successfully");
     let snapshot = materialize_reference_spatial_v2(prepared);
+    assert_rich_snapshot(&snapshot);
+}
+
+pub(super) fn assert_rich_snapshot(snapshot: &SpatialResolvedSnapshotV2) {
     let output = snapshot.output();
 
     assert_eq!(

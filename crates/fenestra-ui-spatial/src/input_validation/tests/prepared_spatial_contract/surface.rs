@@ -17,6 +17,9 @@ fn prepared_and_snapshot_values_have_only_the_staged_public_surface() {
     assert!(has_must_use(&source, function.start));
     let function = public_function(&source, "materialize_reference_spatial_v2");
     assert!(has_must_use(&source, function.start));
+    let one_shot = public_function(&source, "resolve_spatial_v2");
+    assert!(has_must_use(&source, one_shot.start));
+    assert_one_shot_delegation(one_shot._body);
 
     let mut methods = public_method_declarations(&source, "SpatialResolvedSnapshotV2");
     methods.sort_unstable();
@@ -36,9 +39,28 @@ fn prepared_and_snapshot_values_have_only_the_staged_public_surface() {
         assert!(has_must_use(&source, item.start));
     }
 
-    for forbidden in ["resolve_spatial_v2", "validate_spatial_output_v2"] {
+    for forbidden in ["validate_spatial_output_v2"] {
         assert!(!source.contains(&format!("pub struct {forbidden}")));
         assert!(!source.contains(&format!("pub fn {forbidden}")));
+    }
+}
+
+fn assert_one_shot_delegation(body: &str) {
+    assert_eq!(body.matches("prepare_spatial_v2").count(), 1);
+    assert_eq!(body.matches("materialize_reference_spatial_v2").count(), 1);
+    let prepare = body.find("prepare_spatial_v2").expect("preparation call");
+    let materialize = body
+        .find("materialize_reference_spatial_v2")
+        .expect("materialization call");
+    assert!(prepare < materialize);
+    for forbidden in [
+        "prepare_phase_10",
+        "materialize_tables",
+        "validate_spatial_output_v2",
+        "as_input(",
+        "Arc::clone",
+    ] {
+        assert!(!body.contains(forbidden), "one-shot duplicated {forbidden}");
     }
 }
 
