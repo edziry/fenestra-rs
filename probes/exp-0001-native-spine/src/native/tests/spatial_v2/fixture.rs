@@ -129,8 +129,8 @@ fn source(viewport: SpatialViewportV2) -> Arc<SpatialOwnedInputV2> {
         SpatialPlacementV2::Root,
         container,
     );
-    let width = i32::try_from(viewport.width()).expect("fixture width should fit");
-    let height = i32::try_from(viewport.height()).expect("fixture height should fit");
+    let width = viewport.width();
+    let height = viewport.height();
     let owner = SpatialNodeV2::new(
         SpatialNodeKeyV2::new(1),
         Some(SpatialNodeKeyV2::new(0)),
