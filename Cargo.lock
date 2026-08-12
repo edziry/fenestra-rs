@@ -348,6 +348,7 @@ version = "0.2.0"
 dependencies = [
  "fenestra-ui-ir",
  "fenestra-ui-layout",
+ "fenestra-ui-spatial",
 ]
 
 [[package]]

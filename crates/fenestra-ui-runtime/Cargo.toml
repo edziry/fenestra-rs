@@ -12,3 +12,4 @@ workspace = true
 [dependencies]
 fenestra-ui-ir.workspace = true
 fenestra-ui-layout.workspace = true
+fenestra-ui-spatial.workspace = true
