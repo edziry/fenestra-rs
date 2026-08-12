@@ -7,4 +7,5 @@ mod limits;
 mod model;
 #[cfg(feature = "numeric-spatial")]
 mod numeric_spatial;
+mod path_hit;
 pub(crate) mod support;
