@@ -180,8 +180,10 @@ fn enum_declarations_and_private_labels_are_exact() {
     for (variant, label) in NAME_LABELS {
         let fragment = format!("AuthoringDiagnosticKindV2::{variant}=>");
         let offset = compact.find(&fragment).expect("diagnostic display arm");
+        let suffix = &compact[offset + fragment.len()..];
         assert!(
-            compact[offset..].starts_with(&format!("{fragment}formatter.write_str(\"{label}\")"))
+            suffix.starts_with(&format!("formatter.write_str(\"{label}\")"))
+                || suffix.starts_with(&format!("{{formatter.write_str(\"{label}\")"))
         );
     }
 }

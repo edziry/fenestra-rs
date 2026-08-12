@@ -3,9 +3,8 @@ use std::fmt::{Debug, Display};
 use std::panic::{RefUnwindSafe, UnwindSafe};
 
 use crate::api::{
-    AnchorKindV2, AuthoringDiagnosticKindV2, AuthoringDiagnosticV2, AuthoringFrontendV2,
-    AuthoringLimitKindV2, AuthoringLimitsV2, SemanticArtifactErrorKindV2, SemanticArtifactErrorV2,
-    SemanticArtifactLimitKindV2, SemanticArtifactLimitsV2, SemanticArtifactV2,
+    SemanticArtifactErrorKindV2, SemanticArtifactErrorV2, SemanticArtifactLimitKindV2,
+    SemanticArtifactLimitsV2, SemanticArtifactV2,
 };
 
 use super::source::{all_source, significant};

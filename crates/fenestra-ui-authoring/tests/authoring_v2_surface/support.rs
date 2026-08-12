@@ -76,13 +76,19 @@ pub(super) fn assert_method_surface(
     assert!(public_constants(source, type_name).is_empty());
     let implementations = implementation_blocks(source, type_name);
     for name in expected {
-        let marker = format!("fn {name}(");
+        let marker = format!("fn {name}");
         let (implementation, offset) = implementations
             .iter()
             .find_map(|implementation| {
                 implementation
-                    .find(&marker)
-                    .map(|offset| (*implementation, offset))
+                    .match_indices(&marker)
+                    .find(|(offset, _)| {
+                        implementation[offset + marker.len()..]
+                            .chars()
+                            .next()
+                            .is_some_and(|character| matches!(character, '(' | '<'))
+                    })
+                    .map(|(offset, _)| (*implementation, offset))
             })
             .unwrap_or_else(|| panic!("missing method {type_name}::{name}"));
         assert!(has_must_use(implementation, offset), "{type_name}::{name}");
@@ -194,7 +200,10 @@ fn split_top_level(source: &str) -> Vec<&str> {
 }
 
 fn has_must_use(source: &str, item_offset: usize) -> bool {
-    source[..item_offset]
+    let item_start = source[..item_offset]
+        .rfind('\n')
+        .map_or(0, |offset| offset + 1);
+    source[..item_start]
         .trim_end()
         .lines()
         .rev()
