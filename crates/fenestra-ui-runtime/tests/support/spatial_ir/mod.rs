@@ -1,4 +1,6 @@
 mod construction;
+mod mapper_content;
+mod mapper_program;
 mod program;
 
 use fenestra_ui_ir::prototype::{
@@ -43,6 +45,13 @@ pub struct Fixture {
     pub spans: SpatialSpans,
 }
 
+pub use mapper_program::{MapperFault, MapperSpans};
+
+pub struct MapperFixture {
+    pub program: ValidatedSpatialProgramV2,
+    pub spans: MapperSpans,
+}
+
 pub fn fixture() -> Fixture {
     fixture_with_outer_values(
         PropertyValue::ScalarI32(STYLED_WIDTH),
@@ -73,6 +82,22 @@ fn fixture_with_outer_values(
     )
     .expect("runtime spatial IR fixture should validate");
     Fixture { program, spans }
+}
+
+pub fn mapper_fixture(fault: MapperFault) -> MapperFixture {
+    let style = construction::style(
+        PropertyValue::ScalarI32(STYLED_WIDTH),
+        PropertyValue::Rgba8(STYLED_COLOR),
+        PropertyValue::InputPolicy(InputPolicy::Accept),
+    );
+    let (raw, spans) = mapper_program::program(fault);
+    let program = fenestra_ui_ir::prototype::validate_spatial(
+        &style,
+        raw,
+        fenestra_ui_ir::prototype::SpatialValidationLimitsV2::new([128; 13]),
+    )
+    .expect("runtime mapper branch fixture should validate symbolically");
+    MapperFixture { program, spans }
 }
 
 pub const fn span(index: u32) -> SourceSpan {

@@ -37,5 +37,7 @@ mod generation;
 mod limits_and_failures;
 #[path = "runtime_spatial_ir/manual_compatibility.rs"]
 mod manual_compatibility;
+#[path = "runtime_spatial_ir/mapper_branches.rs"]
+mod mapper_branches;
 #[path = "runtime_spatial_ir/transactions.rs"]
 mod transactions;
