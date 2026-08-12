@@ -9,7 +9,7 @@ use super::surface_support::{
     public_methods,
 };
 
-const EXPECTED_EXPORTS: [&str; 112] = [
+const EXPECTED_EXPORTS: [&str; 113] = [
     "Affine2V2",
     "REGISTERED_SPATIAL_LIMITS_V2",
     "SpatialAabbV2",
@@ -122,6 +122,7 @@ const EXPECTED_EXPORTS: [&str; 112] = [
     "SpatialResolvedSnapshotV2",
     "materialize_reference_spatial_v2",
     "resolve_spatial_v2",
+    "validate_spatial_output_v2",
 ];
 
 #[test]

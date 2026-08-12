@@ -20,6 +20,9 @@ fn prepared_and_snapshot_values_have_only_the_staged_public_surface() {
     let one_shot = public_function(&source, "resolve_spatial_v2");
     assert!(has_must_use(&source, one_shot.start));
     assert_one_shot_delegation(one_shot._body);
+    let validator = public_function(&source, "validate_spatial_output_v2");
+    assert!(has_must_use(&source, validator.start));
+    assert_validator_boundary(validator._body);
 
     let mut methods = public_method_declarations(&source, "SpatialResolvedSnapshotV2");
     methods.sort_unstable();
@@ -39,9 +42,24 @@ fn prepared_and_snapshot_values_have_only_the_staged_public_surface() {
         assert!(has_must_use(&source, item.start));
     }
 
-    let forbidden = "validate_spatial_output_v2";
-    assert!(!source.contains(&format!("pub struct {forbidden}")));
-    assert!(!source.contains(&format!("pub fn {forbidden}")));
+    let forbidden_type = "ValidatedSpatialOutputV2";
+    assert!(!source.contains(&format!("pub struct {forbidden_type}")));
+}
+
+fn assert_validator_boundary(body: &str) {
+    for forbidden in [
+        "prepare_phase_10",
+        "prepare_spatial_v2",
+        "resolve_spatial_v2",
+        "materialize_reference_spatial_v2",
+        "materialize_tables",
+        "as_input(",
+    ] {
+        assert!(
+            !body.contains(forbidden),
+            "validator duplicated {forbidden}"
+        );
+    }
 }
 
 fn assert_one_shot_delegation(body: &str) {

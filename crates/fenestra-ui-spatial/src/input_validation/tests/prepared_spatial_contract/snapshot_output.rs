@@ -54,7 +54,7 @@ fn identity<T>(slice: &[T]) -> (*const T, usize) {
     (slice.as_ptr(), slice.len())
 }
 
-fn expected_geometry() -> Vec<SpatialGeometryOutputRecordV2> {
+pub(super) fn expected_geometry() -> Vec<SpatialGeometryOutputRecordV2> {
     let worlds = worlds();
     [
         (0, 0, 0, 20, 20, bounds(0, 0, 20 * SCALE, 20 * SCALE)),
@@ -99,7 +99,7 @@ fn expected_geometry() -> Vec<SpatialGeometryOutputRecordV2> {
     .collect()
 }
 
-fn expected_clips() -> Vec<SpatialClipOutputRecordV2> {
+pub(super) fn expected_clips() -> Vec<SpatialClipOutputRecordV2> {
     let world = worlds()[1];
     [
         (0, None, 0, bounds(SCALE, 12 * SCALE, 4 * SCALE, 16 * SCALE)),
@@ -121,7 +121,7 @@ fn expected_clips() -> Vec<SpatialClipOutputRecordV2> {
     .collect()
 }
 
-fn expected_paints() -> Vec<SpatialPaintOutputRecordV2> {
+pub(super) fn expected_paints() -> Vec<SpatialPaintOutputRecordV2> {
     let worlds = worlds();
     vec![
         paint(
@@ -162,7 +162,7 @@ fn expected_paints() -> Vec<SpatialPaintOutputRecordV2> {
     ]
 }
 
-fn expected_hits() -> Vec<SpatialHitOutputRecordV2> {
+pub(super) fn expected_hits() -> Vec<SpatialHitOutputRecordV2> {
     let worlds = worlds();
     vec![
         hit(
@@ -195,7 +195,7 @@ fn expected_hits() -> Vec<SpatialHitOutputRecordV2> {
     ]
 }
 
-fn expected_semantics() -> Vec<SpatialSemanticOutputRecordV2> {
+pub(super) fn expected_semantics() -> Vec<SpatialSemanticOutputRecordV2> {
     let world = worlds()[3];
     [Some(2), Some(1)]
         .into_iter()

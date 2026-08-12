@@ -21,12 +21,17 @@ type DynResolve = fn(
     Arc<SpatialOwnedInputV2>,
     SpatialLimitsV2,
 ) -> Result<SpatialResolvedSnapshotV2, SpatialResolveErrorV2>;
+type Validate = for<'a> fn(
+    PreparedSpatialV2,
+    SpatialOutputV2<'a>,
+) -> Result<SpatialResolvedSnapshotV2, SpatialResolveErrorV2>;
 
 #[test]
 fn preparation_has_the_exact_lifetime_free_unsized_engine_signature() {
     let _: DynPrepare = prepare_spatial_v2::<dyn LayoutEngineV1>;
     let _: DynResolve = resolve_spatial_v2::<dyn LayoutEngineV1>;
     let _: Materialize = materialize_reference_spatial_v2;
+    let _: Validate = validate_spatial_output_v2;
     assert_static::<PreparedSpatialV2>();
     assert_static::<SpatialResolvedSnapshotV2>();
     let _: for<'a> fn(&'a SpatialResolvedSnapshotV2) -> SpatialViewportV2 =
