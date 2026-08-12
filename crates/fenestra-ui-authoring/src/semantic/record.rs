@@ -1,12 +1,12 @@
-pub(super) struct InvalidRecord;
+pub(crate) struct InvalidRecord;
 
-pub(super) struct Record {
+pub(crate) struct Record {
     anchor: u32,
     line: String,
 }
 
 impl Record {
-    pub(super) fn new(anchor: u32, kind: &str, fields: String) -> Result<Self, InvalidRecord> {
+    pub(crate) fn new(anchor: u32, kind: &str, fields: String) -> Result<Self, InvalidRecord> {
         let end = anchor.checked_add(1).ok_or(InvalidRecord)?;
         Ok(Self {
             anchor,
@@ -14,12 +14,12 @@ impl Record {
         })
     }
 
-    pub(super) fn line(&self) -> &str {
+    pub(crate) fn line(&self) -> &str {
         &self.line
     }
 }
 
-pub(super) fn validate_name(name: &str) -> Result<(), InvalidRecord> {
+pub(crate) fn validate_name(name: &str) -> Result<(), InvalidRecord> {
     let mut bytes = name.bytes();
     let valid_start = bytes
         .next()
@@ -33,7 +33,7 @@ pub(super) fn validate_name(name: &str) -> Result<(), InvalidRecord> {
     Ok(())
 }
 
-pub(super) fn sort_and_validate(
+pub(crate) fn sort_and_validate(
     records: &mut [Record],
     expected_count: usize,
 ) -> Result<(), InvalidRecord> {

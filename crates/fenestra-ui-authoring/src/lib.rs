@@ -71,8 +71,9 @@ pub mod prototype {
         SemanticArtifactV1, canonical_semantics_v1,
     };
     pub use crate::semantic_v2::{
-        SemanticArtifactErrorKindV2, SemanticArtifactErrorV2, SemanticArtifactLimitKindV2,
-        SemanticArtifactLimitsV2, SemanticArtifactV2,
+        REFERENCE_SEMANTIC_ARTIFACT_LIMITS_V2, SemanticArtifactErrorKindV2,
+        SemanticArtifactErrorV2, SemanticArtifactLimitKindV2, SemanticArtifactLimitsV2,
+        SemanticArtifactV2, canonical_semantics_v2,
     };
     pub use crate::source::{DiagnosticLocationV1, FenSourceV1, PhysicalOriginV1};
     pub use crate::source_v2::{DiagnosticLocationV2, FenSourceV2, PhysicalOriginV2};

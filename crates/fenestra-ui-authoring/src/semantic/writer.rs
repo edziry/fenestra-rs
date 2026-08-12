@@ -1,17 +1,17 @@
-pub(super) enum BoundedAsciiWriterError {
+pub(crate) enum BoundedAsciiWriterError {
     LineBytes,
     ArtifactBytes,
     InvalidOutput,
 }
 
-pub(super) struct BoundedAsciiWriter {
+pub(crate) struct BoundedAsciiWriter {
     output: String,
     line_bytes: usize,
     artifact_bytes: usize,
 }
 
 impl BoundedAsciiWriter {
-    pub(super) const fn new(line_bytes: usize, artifact_bytes: usize) -> Self {
+    pub(crate) const fn new(line_bytes: usize, artifact_bytes: usize) -> Self {
         Self {
             output: String::new(),
             line_bytes,
@@ -19,7 +19,7 @@ impl BoundedAsciiWriter {
         }
     }
 
-    pub(super) fn push_line(&mut self, line: &str) -> Result<(), BoundedAsciiWriterError> {
+    pub(crate) fn push_line(&mut self, line: &str) -> Result<(), BoundedAsciiWriterError> {
         if line.len() > self.line_bytes {
             return Err(BoundedAsciiWriterError::LineBytes);
         }
@@ -40,7 +40,7 @@ impl BoundedAsciiWriter {
         Ok(())
     }
 
-    pub(super) fn finish(self) -> String {
+    pub(crate) fn finish(self) -> String {
         self.output
     }
 }

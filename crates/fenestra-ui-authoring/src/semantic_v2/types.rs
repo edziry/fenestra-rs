@@ -72,6 +72,10 @@ pub struct SemanticArtifactErrorV2 {
 }
 
 impl SemanticArtifactErrorV2 {
+    pub(crate) const fn new(kind: SemanticArtifactErrorKindV2) -> Self {
+        Self { kind }
+    }
+
     /// Returns the closed semantic artifact failure category.
     #[must_use]
     pub const fn kind(&self) -> SemanticArtifactErrorKindV2 {
@@ -106,6 +110,10 @@ pub struct SemanticArtifactV2 {
 }
 
 impl SemanticArtifactV2 {
+    pub(crate) const fn new(source: Box<str>) -> Self {
+        Self { source }
+    }
+
     /// Returns the canonical ASCII artifact with exactly one final line feed.
     #[must_use]
     pub fn as_str(&self) -> &str {

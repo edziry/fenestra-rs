@@ -6,7 +6,7 @@ use crate::resolved::{
 use super::record::{InvalidRecord, Record, validate_name};
 use super::value::{invalidation_name, value_name, value_type_name};
 
-pub(super) fn collect_logical_records_v1(
+pub(crate) fn collect_logical_records_v1(
     document: &ResolvedDocumentV1,
     records: &mut Vec<Record>,
 ) -> Result<(), InvalidRecord> {
@@ -62,7 +62,7 @@ pub(super) fn collect_logical_records_v1(
     Ok(())
 }
 
-pub(super) fn logical_record_count_v1(document: &ResolvedDocumentV1) -> Option<usize> {
+pub(crate) fn logical_record_count_v1(document: &ResolvedDocumentV1) -> Option<usize> {
     let mut count = 4usize;
     for component in &document.schema.components {
         count = count
