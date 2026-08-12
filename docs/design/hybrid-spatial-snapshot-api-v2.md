@@ -4,6 +4,8 @@ Output records: [hybrid-spatial-output-api-v2.md](hybrid-spatial-output-api-v2.m
 Raw input: [hybrid-spatial-validation-api-v2.md](hybrid-spatial-validation-api-v2.md)
 Reference semantics: [hybrid-spatial-reference-v2.md](hybrid-spatial-reference-v2.md)
 Reference raster: [hybrid-spatial-raster-api-v2.md](hybrid-spatial-raster-api-v2.md)
+Runtime publication:
+[hybrid-spatial-runtime-api-v2.md](hybrid-spatial-runtime-api-v2.md)
 Format: immutable spatial snapshot API version 2
 
 ## Immutable input ownership
@@ -129,12 +131,13 @@ the evidence contract. Structural output validation alone never admits a lane.
 
 ## Runtime ownership and nonclaims
 
-Runtime retains `Arc<SpatialResolvedSnapshotV2>` inside its immutable generation
-and exposes only borrowed snapshot access. A no-op may share the same Arc; a
-spatial rebuild allocates a complete replacement before the outer runtime
-generation is published. Failure drops that replacement and preserves the
-prior source, snapshot, generation, and presented frame. This requires no
-`ArcSwap`, new dependency, unsafe code, pinning, or self-referential storage.
+The exact logical mapping, rebuild, invalidation, resize, rollback, borrowed
+access, and scheduler-retention rules are frozen in the
+[runtime spatial publication contract](hybrid-spatial-runtime-api-v2.md).
+Runtime retains `Arc<SpatialResolvedSnapshotV2>` inside one private spatial
+publication owned by its immutable generation and exposes only borrowed
+snapshot access. This requires no `ArcSwap`, unsafe code, pinning, or
+self-referential storage.
 
 The snapshot does not expose its raw owner or private normalized-resource
 store. The exact hit and raster APIs consume only the snapshot; they

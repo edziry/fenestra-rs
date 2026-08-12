@@ -1,12 +1,14 @@
 # WU-0013 hybrid spatial composition plan
 
-Status: planning
+Status: active
 Work unit: WU-0013
 Branch: `feat/hybrid-spatial-composition`
 Depends on: [WU-0011 layout conformance](layout-conformance.md)
 Candidate screen: [hybrid spatial candidate screen](hybrid-spatial-candidate-screen.md)
 Reference: [hybrid spatial reference contract](hybrid-spatial-reference-v2.md)
 API: [hybrid spatial API contract](hybrid-spatial-api-v2.md)
+Runtime API:
+[hybrid spatial runtime publication contract](hybrid-spatial-runtime-api-v2.md)
 Target incompatible package line: `0.2.0`
 Research baseline: `fenestra-research` commit
 `176c42139776ed9f1ef879cd135bddadaf12a9da`
@@ -232,9 +234,11 @@ records is refreshed without changing its semantic or runtime claims.
 8. Reference resolver RED/GREEN: all-layout, all-free, free-to-layout,
    layout-to-free, forward anchors, nested transforms, explicit clips, visual
    overflow, and independent paint, hit, and semantic geometry.
-9. Runtime RED/GREEN: pass-local identity mapping, exact invalidation, one
-   immutable generation, engine calls per island, no-op behavior, mutation,
-   resize, failure mapping, and exact rollback.
+9. Runtime RED/GREEN: implement the
+   [runtime spatial publication contract](hybrid-spatial-runtime-api-v2.md),
+   including pass-local identity mapping, exact invalidation, one immutable
+   generation, engine calls per island, no-op behavior, mutation, resize,
+   failure mapping, and exact rollback.
 10. Authoring RED/GREEN: new IR and authoring formats, manual raw programs,
    `.fen`, and `ui!` lower independently to byte-identical typed semantics and
    the same runtime behavior.
