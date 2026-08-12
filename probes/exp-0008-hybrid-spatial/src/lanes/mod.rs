@@ -1,3 +1,11 @@
+#[cfg(all(
+    feature = "cpu-reference",
+    feature = "image-resource",
+    feature = "native-renderer",
+    feature = "numeric-spatial",
+    feature = "path-hit"
+))]
+pub(crate) mod artifact;
 #[cfg(feature = "cpu-reference")]
 pub(crate) mod cpu_reference;
 #[cfg(feature = "image-resource")]
