@@ -170,6 +170,33 @@ fn duplicate_and_unknown_names_report_the_exact_spatial_field() {
 }
 
 #[test]
+fn free_placement_reports_fields_before_its_later_anchor_target() {
+    let before = concat!(
+        "placement free\n",
+        "          width property span_x height property span_y\n",
+        "          self_anchor anchor(center, end)\n",
+        "          target node guide",
+    );
+    let after = concat!(
+        "placement free\n",
+        "          width property missing_width height property span_y\n",
+        "          self_anchor anchor(center, end)\n",
+        "          target node missing_target",
+    );
+    let source = replace_once(FIXTURE, before, after);
+    assert_diagnostic(
+        &source,
+        expected(
+            AuthoringDiagnosticKindV2::UnknownPropertyName,
+            AnchorKindV2::SpatialField,
+            237,
+            "missing_width",
+            0,
+        ),
+    );
+}
+
+#[test]
 fn primitive_numeric_bounds_and_special_attribution_are_exact() {
     let valid = [
         (
