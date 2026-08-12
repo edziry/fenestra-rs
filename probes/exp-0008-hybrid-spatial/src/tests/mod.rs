@@ -7,6 +7,14 @@ mod cpu_reference;
 mod faults;
 #[cfg(feature = "image-resource")]
 mod image_resource;
+#[cfg(all(
+    feature = "cpu-reference",
+    feature = "image-resource",
+    feature = "native-renderer",
+    feature = "numeric-spatial",
+    feature = "path-hit"
+))]
+mod lane_artifacts;
 mod limits;
 mod model;
 #[cfg(feature = "native-renderer")]
