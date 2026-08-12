@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 
 use super::source::{all_source, read, source_dir};
 
-const EXPORTS: [&str; 74] = [
+const EXPORTS: [&str; 75] = [
     "CallbackFinish",
     "CallbackScope",
     "CapacityKind",
@@ -49,6 +49,7 @@ const EXPORTS: [&str; 74] = [
     "RuntimeGeneration",
     "RuntimeInitializationError",
     "RuntimeInitializationErrorKind",
+    "RuntimePaintFrameV2",
     "RuntimeSpatialBuildViewV2",
     "RuntimeSpatialErrorV2",
     "RuntimeSpatialInputV2",
@@ -79,7 +80,7 @@ const EXPORTS: [&str; 74] = [
     "VisualCancelResult",
 ];
 
-const STRUCTS: [&str; 52] = [
+const STRUCTS: [&str; 53] = [
     "CallbackScope",
     "CommitReceipt",
     "CommittedRuntimeSnapshot",
@@ -116,6 +117,7 @@ const STRUCTS: [&str; 52] = [
     "RuntimeCapacity",
     "RuntimeGeneration",
     "RuntimeInitializationError",
+    "RuntimePaintFrameV2",
     "RuntimeSpatialBuildViewV2",
     "RuntimeSpatialInputV2",
     "RuntimeSpatialIrErrorV2",
@@ -135,7 +137,7 @@ const STRUCTS: [&str; 52] = [
 ];
 
 #[test]
-fn runtime_ir_adapter_has_exact_74_name_prototype_registry() {
+fn runtime_ir_adapter_has_exact_75_name_prototype_registry() {
     let source = read(&source_dir().join("lib.rs"));
     let all_source = all_source();
     for forbidden in ["include!", "#[macro_export]"] {
@@ -181,7 +183,7 @@ fn runtime_ir_adapter_has_exact_74_name_prototype_registry() {
 }
 
 #[test]
-fn runtime_ir_adapter_has_exact_52_struct_registry() {
+fn runtime_ir_adapter_has_exact_53_struct_registry() {
     let source = all_source();
     let lines = source.lines().collect::<Vec<_>>();
     let mut observed = BTreeSet::new();
