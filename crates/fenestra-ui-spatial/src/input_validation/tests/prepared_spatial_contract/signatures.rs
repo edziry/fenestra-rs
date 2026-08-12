@@ -42,6 +42,11 @@ fn preparation_has_the_exact_lifetime_free_unsized_engine_signature() {
         SpatialResolvedSnapshotV2::effective_clip_aabbs;
     let _: for<'a> fn(&'a SpatialResolvedSnapshotV2, SpatialPointV2) -> Option<SpatialHitResultV2> =
         SpatialResolvedSnapshotV2::hit_test;
+    let _: for<'a> fn(
+        &'a SpatialResolvedSnapshotV2,
+        ReferenceRasterLimitsV2,
+    ) -> Result<ReferenceRasterV2, ReferenceRasterErrorV2> =
+        SpatialResolvedSnapshotV2::rasterize_reference;
 }
 
 fn assert_static<T: 'static>() {}

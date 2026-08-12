@@ -7,7 +7,7 @@ use super::surface_support::{
     public_methods,
 };
 
-const EXPECTED_EXPORTS: [&str; 114] = [
+const EXPECTED_EXPORTS: [&str; 120] = [
     "Affine2V2",
     "REGISTERED_SPATIAL_LIMITS_V2",
     "SpatialAabbV2",
@@ -113,6 +113,12 @@ const EXPECTED_EXPORTS: [&str; 114] = [
     "SpatialPaintOutputRecordV2",
     "SpatialHitOutputRecordV2",
     "SpatialHitResultV2",
+    "ReferenceRasterLimitKindV2",
+    "ReferenceRasterLimitsV2",
+    "REGISTERED_REFERENCE_RASTER_LIMITS_V2",
+    "ReferenceRasterErrorKindV2",
+    "ReferenceRasterErrorV2",
+    "ReferenceRasterV2",
     "SpatialSemanticOutputRecordV2",
     "SpatialOutputV2",
     "SpatialOwnedInputV2",

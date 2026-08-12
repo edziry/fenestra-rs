@@ -7,7 +7,7 @@ use super::surface_support::{
     public_methods,
 };
 
-const EXPECTED_EXPORTS: [&str; 114] = [
+const EXPECTED_EXPORTS: [&str; 120] = [
     "Affine2V2",
     "REGISTERED_SPATIAL_LIMITS_V2",
     "SpatialAabbV2",
@@ -113,6 +113,12 @@ const EXPECTED_EXPORTS: [&str; 114] = [
     "SpatialPaintOutputRecordV2",
     "SpatialHitOutputRecordV2",
     "SpatialHitResultV2",
+    "ReferenceRasterLimitKindV2",
+    "ReferenceRasterLimitsV2",
+    "REGISTERED_REFERENCE_RASTER_LIMITS_V2",
+    "ReferenceRasterErrorKindV2",
+    "ReferenceRasterErrorV2",
+    "ReferenceRasterV2",
     "SpatialSemanticOutputRecordV2",
     "SpatialOutputV2",
     "SpatialOwnedInputV2",
@@ -124,7 +130,7 @@ const EXPECTED_EXPORTS: [&str; 114] = [
     "validate_spatial_output_v2",
 ];
 
-const EXPECTED_STRUCTS: [&str; 48] = [
+const EXPECTED_STRUCTS: [&str; 51] = [
     "Affine2V2",
     "SpatialAabbV2",
     "SpatialAnchorV2",
@@ -168,6 +174,9 @@ const EXPECTED_STRUCTS: [&str; 48] = [
     "SpatialPaintOutputRecordV2",
     "SpatialHitOutputRecordV2",
     "SpatialHitResultV2",
+    "ReferenceRasterLimitsV2",
+    "ReferenceRasterErrorV2",
+    "ReferenceRasterV2",
     "SpatialSemanticOutputRecordV2",
     "SpatialOutputV2",
     "SpatialOwnedInputV2",
@@ -316,6 +325,30 @@ fn new_enum_surfaces_expose_only_all_and_locations_expose_nothing() {
     }
     assert!(public_methods(&source, "SpatialErrorLocationV2").is_empty());
     assert!(public_constants(&source, "SpatialErrorLocationV2").is_empty());
+}
+
+#[test]
+fn reference_raster_enums_are_externally_exhaustive() {
+    fn limit(kind: fenestra_ui_spatial::prototype::ReferenceRasterLimitKindV2) {
+        match kind {
+            fenestra_ui_spatial::prototype::ReferenceRasterLimitKindV2::Pixels => {}
+        }
+    }
+
+    fn error(kind: fenestra_ui_spatial::prototype::ReferenceRasterErrorKindV2) {
+        match kind {
+            fenestra_ui_spatial::prototype::ReferenceRasterErrorKindV2::LimitExceeded(kind) => {
+                limit(kind);
+            }
+        }
+    }
+
+    for kind in fenestra_ui_spatial::prototype::ReferenceRasterLimitKindV2::ALL {
+        limit(kind);
+    }
+    for kind in fenestra_ui_spatial::prototype::ReferenceRasterErrorKindV2::ALL {
+        error(kind);
+    }
 }
 
 fn assert_struct_surface(source: &str, type_name: &str, methods: &[&str]) {

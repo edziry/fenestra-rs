@@ -7,9 +7,31 @@ fn prepared_and_snapshot_values_have_only_the_staged_public_surface() {
     assert_private_fields(&source, "PreparedSpatialV2");
     assert_private_fields(&source, "SpatialResolvedSnapshotV2");
     assert_private_fields(&source, "SpatialHitResultV2");
+    assert_private_fields(&source, "ReferenceRasterLimitsV2");
+    assert_private_fields(&source, "ReferenceRasterErrorV2");
+    assert_private_fields(&source, "ReferenceRasterV2");
     assert_hit_result_storage(&source);
+    assert_named_storage(&source, "ReferenceRasterLimitsV2", &["values:[usize;1]"]);
+    assert_named_storage(
+        &source,
+        "ReferenceRasterErrorV2",
+        &[
+            "kind:ReferenceRasterErrorKindV2",
+            "location:SpatialErrorLocationV2",
+            "observed:Option<u128>",
+            "maximum:Option<u128>",
+        ],
+    );
+    assert_named_storage(
+        &source,
+        "ReferenceRasterV2",
+        &["width:u32", "height:u32", "stride:u64", "bytes:Box<[u8]>"],
+    );
     assert_nongeneric_struct(&source, "SpatialHitResultV2");
     assert_nongeneric_struct(&source, "SpatialResolvedSnapshotV2");
+    assert_nongeneric_struct(&source, "ReferenceRasterLimitsV2");
+    assert_nongeneric_struct(&source, "ReferenceRasterErrorV2");
+    assert_nongeneric_struct(&source, "ReferenceRasterV2");
     assert!(
         implementation_blocks(&source, "PreparedSpatialV2")
             .iter()
@@ -36,6 +58,7 @@ fn prepared_and_snapshot_values_have_only_the_staged_public_surface() {
             "pub fn effective_clip_aabbs",
             "pub fn hit_test",
             "pub fn output",
+            "pub fn rasterize_reference",
         ]
     );
     assert!(source.contains("pub const fn viewport(&self) -> SpatialViewportV2"));
@@ -44,7 +67,15 @@ fn prepared_and_snapshot_values_have_only_the_staged_public_surface() {
     assert!(source.contains("pub fn hit_test("));
     assert!(source.contains("scene_point: SpatialPointV2"));
     assert!(source.contains(") -> Option<SpatialHitResultV2>"));
-    for method in ["viewport", "output", "effective_clip_aabbs", "hit_test"] {
+    assert!(source.contains("limits: ReferenceRasterLimitsV2"));
+    assert!(source.contains(") -> Result<ReferenceRasterV2, ReferenceRasterErrorV2>"));
+    for method in [
+        "viewport",
+        "output",
+        "effective_clip_aabbs",
+        "hit_test",
+        "rasterize_reference",
+    ] {
         let item = public_method(&source, "SpatialResolvedSnapshotV2", method);
         assert!(has_must_use(&source, item.start));
     }
@@ -64,6 +95,35 @@ fn prepared_and_snapshot_values_have_only_the_staged_public_surface() {
         let item = public_method(&source, "SpatialHitResultV2", method);
         assert!(has_must_use(&source, item.start));
     }
+
+    assert_exact_methods(
+        &source,
+        "ReferenceRasterLimitsV2",
+        &["pub const fn limit", "pub const fn new"],
+        &["new", "limit"],
+    );
+    assert_exact_methods(
+        &source,
+        "ReferenceRasterErrorV2",
+        &[
+            "pub const fn kind",
+            "pub const fn location",
+            "pub const fn maximum",
+            "pub const fn observed",
+        ],
+        &["kind", "location", "observed", "maximum"],
+    );
+    assert_exact_methods(
+        &source,
+        "ReferenceRasterV2",
+        &[
+            "pub const fn height",
+            "pub const fn stride",
+            "pub const fn width",
+            "pub fn bytes",
+        ],
+        &["width", "height", "stride", "bytes"],
+    );
 
     let forbidden_type = "ValidatedSpatialOutputV2";
     assert!(!source.contains(&format!("pub struct {forbidden_type}")));
@@ -209,6 +269,30 @@ fn assert_hit_result_storage(source: &str) {
             "local_point:SpatialPointV2",
         ]
     );
+}
+
+fn assert_named_storage(source: &str, name: &str, expected: &[&str]) {
+    let marker = format!("pub struct {name}");
+    let declaration = &source[source.find(&marker).expect("named public struct")..];
+    let brace = declaration.find('{').expect("named fields");
+    let end = matching_brace(declaration, brace);
+    let fields = declaration[brace + 1..end]
+        .lines()
+        .map(str::trim)
+        .filter(|line| !line.is_empty() && !line.starts_with("///"))
+        .map(|line| line.trim_end_matches(',').replace(' ', ""))
+        .collect::<Vec<_>>();
+    assert_eq!(fields, expected);
+}
+
+fn assert_exact_methods(source: &str, owner: &str, expected: &[&str], must_use: &[&str]) {
+    let mut methods = public_method_declarations(source, owner);
+    methods.sort_unstable();
+    assert_eq!(methods, expected);
+    for method in must_use {
+        let item = public_method(source, owner, method);
+        assert!(has_must_use(source, item.start), "{owner}::{method}");
+    }
 }
 
 fn implementation_blocks<'a>(source: &'a str, name: &str) -> Vec<&'a str> {
