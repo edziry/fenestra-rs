@@ -103,7 +103,7 @@ fn runtime_owned_viewport_failures_use_synthetic_source_attribution() {
 #[test]
 fn late_layout_failure_rolls_back_with_no_operation_attribution() {
     let fixture = fixture();
-    let expected_span = fixture.spans.program;
+    let expected_span = fixture.spans.inner_node;
     let (engine, engine_state) = EngineSpy::new(EnginePlan::RejectOnCall(2));
     let mut runtime = new_ir_with_engine(
         fixture.program,
@@ -145,7 +145,7 @@ fn late_layout_failure_rolls_back_with_no_operation_attribution() {
     );
     assert_eq!(
         resolve.location(),
-        SpatialErrorLocationV2::Island { index: 0 }
+        SpatialErrorLocationV2::Node { index: 2 }
     );
     assert_eq!(ir.span(), expected_span);
     assert_eq!(error.operation_index(), None);
