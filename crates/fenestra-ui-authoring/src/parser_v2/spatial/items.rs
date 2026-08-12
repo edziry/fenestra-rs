@@ -159,7 +159,7 @@ impl ParserV2 {
             self.expect_punctuation(Punctuation::CloseBrace)?;
             ParsedPaintKindV2::Image {
                 image,
-                source: [source_x, source_y, source_width, source_height],
+                source: Box::new([source_x, source_y, source_width, source_height]),
                 destination,
                 destination_width,
                 destination_height,

@@ -57,7 +57,7 @@ pub(crate) enum ParsedPaintKindV2 {
     },
     Image {
         image: ParsedNameFieldV2,
-        source: [ParsedU32FieldV2; 4],
+        source: Box<[ParsedU32FieldV2; 4]>,
         destination: ParsedPointV2,
         destination_width: ParsedFixedBindingFieldV2,
         destination_height: ParsedFixedBindingFieldV2,

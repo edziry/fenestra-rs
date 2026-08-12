@@ -65,7 +65,6 @@ pub(crate) struct ParsedContainerV2 {
     pub(crate) axis: SpatialAxisV2,
     pub(crate) padding: ParsedPaddingV2,
     pub(crate) gap: ParsedI32BindingFieldV2,
-    pub(crate) anchor: u32,
 }
 
 #[derive(Clone)]
@@ -73,7 +72,6 @@ pub(crate) enum ParsedPlacementV2 {
     Layout {
         width: ParsedDimensionV2,
         height: ParsedDimensionV2,
-        anchor: u32,
     },
     Free {
         width: ParsedI32BindingFieldV2,
@@ -82,16 +80,7 @@ pub(crate) enum ParsedPlacementV2 {
         target: ParsedAnchorTargetV2,
         target_anchor: ParsedAnchorPairV2,
         offset: ParsedPointV2,
-        anchor: u32,
     },
-}
-
-impl ParsedPlacementV2 {
-    pub(crate) const fn anchor(&self) -> u32 {
-        match self {
-            Self::Layout { anchor, .. } | Self::Free { anchor, .. } => *anchor,
-        }
-    }
 }
 
 #[derive(Clone)]

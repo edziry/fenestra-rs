@@ -44,7 +44,7 @@ impl ParserV2 {
 
     pub(super) fn parse_container(&mut self) -> Result<ParsedContainerV2, AuthoringDiagnosticV2> {
         let keyword = self.expect_keyword("container")?;
-        let anchor = self.push_anchor(AnchorKindV2::SpatialContainer, &keyword)?;
+        self.push_anchor(AnchorKindV2::SpatialContainer, &keyword)?;
         let axis = self.parse_axis()?;
         self.expect_keyword("padding")?;
         self.expect_punctuation(Punctuation::OpenParenthesis)?;
@@ -67,7 +67,6 @@ impl ParserV2 {
                 bottom,
             },
             gap,
-            anchor,
         })
     }
 
@@ -85,18 +84,14 @@ impl ParserV2 {
 
     pub(super) fn parse_placement(&mut self) -> Result<ParsedPlacementV2, AuthoringDiagnosticV2> {
         let keyword = self.expect_keyword("placement")?;
-        let anchor = self.push_anchor(AnchorKindV2::SpatialPlacement, &keyword)?;
+        self.push_anchor(AnchorKindV2::SpatialPlacement, &keyword)?;
         if self.matches_keyword("layout") {
             self.expect_keyword("layout")?;
             self.expect_keyword("width")?;
             let width = self.parse_dimension()?;
             self.expect_keyword("height")?;
             let height = self.parse_dimension()?;
-            return Ok(ParsedPlacementV2::Layout {
-                width,
-                height,
-                anchor,
-            });
+            return Ok(ParsedPlacementV2::Layout { width, height });
         }
         self.expect_keyword("free")?;
         self.expect_keyword("width")?;
@@ -129,7 +124,6 @@ impl ParserV2 {
             target,
             target_anchor,
             offset,
-            anchor,
         })
     }
 
