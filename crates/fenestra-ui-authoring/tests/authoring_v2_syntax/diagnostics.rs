@@ -226,6 +226,7 @@ fn primitive_numeric_bounds_and_special_attribution_are_exact() {
             AnchorKindV2::SpatialField,
             53,
             "-2147483649",
+            0,
         ),
         (
             "i32 high",
@@ -234,6 +235,7 @@ fn primitive_numeric_bounds_and_special_attribution_are_exact() {
             AnchorKindV2::SpatialField,
             53,
             "2147483648",
+            0,
         ),
         (
             "i64 low",
@@ -242,6 +244,7 @@ fn primitive_numeric_bounds_and_special_attribution_are_exact() {
             AnchorKindV2::SpatialField,
             240,
             "-9223372036854775809",
+            0,
         ),
         (
             "i64 high",
@@ -250,6 +253,7 @@ fn primitive_numeric_bounds_and_special_attribution_are_exact() {
             AnchorKindV2::SpatialField,
             240,
             "9223372036854775808",
+            0,
         ),
         (
             "u8 high",
@@ -258,6 +262,7 @@ fn primitive_numeric_bounds_and_special_attribution_are_exact() {
             AnchorKindV2::SpatialField,
             168,
             "256",
+            0,
         ),
         (
             "u16 high",
@@ -266,6 +271,7 @@ fn primitive_numeric_bounds_and_special_attribution_are_exact() {
             AnchorKindV2::SpatialField,
             145,
             "65536",
+            6,
         ),
         (
             "u32 high",
@@ -274,6 +280,7 @@ fn primitive_numeric_bounds_and_special_attribution_are_exact() {
             AnchorKindV2::SpatialField,
             63,
             "4294967296",
+            0,
         ),
         (
             "u64 high",
@@ -282,9 +289,10 @@ fn primitive_numeric_bounds_and_special_attribution_are_exact() {
             AnchorKindV2::InitialKey,
             46,
             "18446744073709551616",
+            0,
         ),
     ];
-    for (name, before, after, anchor_kind, ordinal, culprit) in invalid {
+    for (name, before, after, anchor_kind, ordinal, culprit, occurrence) in invalid {
         let source = replace_once(FIXTURE, before, after);
         std::panic::catch_unwind(|| {
             assert_diagnostic(
@@ -294,7 +302,7 @@ fn primitive_numeric_bounds_and_special_attribution_are_exact() {
                     anchor_kind,
                     ordinal,
                     culprit,
-                    0,
+                    occurrence,
                 ),
             );
         })
@@ -309,7 +317,7 @@ fn primitive_numeric_bounds_and_special_attribution_are_exact() {
             AnchorKindV2::SpatialTransform,
             266,
             "4",
-            0,
+            24,
         ),
     );
 

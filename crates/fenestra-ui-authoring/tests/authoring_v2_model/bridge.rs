@@ -158,6 +158,7 @@ fn fixed_range_ir_failures_bridge_the_exact_field_span_and_phase_order() {
         &two,
         IrValidationErrorKind::SpatialFixed16OutOfRange,
         &invalid,
+        &[&(MAX_FIXED + 2).to_string()],
     );
 }
 
@@ -173,6 +174,7 @@ fn the_full_negative_i64_minimum_reaches_fixed_domain_validation() {
         &source,
         IrValidationErrorKind::SpatialFixed16OutOfRange,
         literal,
+        &[],
     );
 }
 
@@ -201,7 +203,12 @@ fn assert_ir_kind(source: &str, expected: IrValidationErrorKind) {
     );
 }
 
-fn assert_spatial_field_ir_error(source: &str, expected: IrValidationErrorKind, literal: &str) {
+fn assert_spatial_field_ir_error(
+    source: &str,
+    expected: IrValidationErrorKind,
+    literal: &str,
+    later_invalid_literals: &[&str],
+) {
     let error = support::compile_fen_with(source, support::limits())
         .expect_err("the invalid fixed literal must fail raw IR validation");
     assert_eq!(
@@ -222,7 +229,10 @@ fn assert_spatial_field_ir_error(source: &str, expected: IrValidationErrorKind, 
     let end = start + u32::try_from(literal.len()).expect("fixture literal length");
     assert_eq!(physical.fen_byte_range(), Some((start, end)));
 
-    let compiled_source = support::replace_once(source, literal, "0");
+    let mut compiled_source = support::replace_once(source, literal, "0");
+    for later in later_invalid_literals {
+        compiled_source = support::replace_once(&compiled_source, later, "0");
+    }
     let compiled = support::compile_fen(&compiled_source);
     let mapped = compiled
         .source_map()
