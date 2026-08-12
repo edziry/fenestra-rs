@@ -27,10 +27,12 @@ The implementation sequence is:
 
 1. raw output values and the borrowed five-table output view;
 2. one immutable owner for raw spatial input;
-3. an opaque prepared spatial proof and lifetime-free resolved snapshot;
-4. infallible reference materialization;
-5. candidate-output validation;
-6. exact clip coverage, reverse hit selection, rasterization, and runtime
+3. an opaque prepared spatial proof produced by complete phase-10 preparation;
+4. a lifetime-free resolved snapshot produced by infallible reference
+   materialization;
+5. the one-shot reference resolver;
+6. candidate-output validation;
+7. exact clip coverage, reverse hit selection, rasterization, and runtime
    publication in their own later RED/GREEN cuts.
 
 The completed slice adds exactly 15 `prototype` exports, taking the exact
@@ -38,6 +40,10 @@ surface from 98 to 113 names: the eight raw output values below,
 `SpatialOwnedInputV2`, `PreparedSpatialV2`, `SpatialResolvedSnapshotV2`, and
 the four resolver functions. Granular RED/GREEN commits may add those names in
 the staged order above but may not add aliases, traits, or convenience seams.
+The exact staged totals are 106 after raw output values, 107 after owned input,
+109 after `PreparedSpatialV2` plus `prepare_spatial_v2`, 111 after
+`SpatialResolvedSnapshotV2` plus `materialize_reference_spatial_v2`, 112 after
+`resolve_spatial_v2`, and 113 after `validate_spatial_output_v2`.
 
 ## Raw output AABB
 
