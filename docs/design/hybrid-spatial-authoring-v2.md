@@ -10,6 +10,8 @@ Sources and diagnostics:
 [format-2 source and diagnostic contract](hybrid-spatial-authoring-source-v2.md)
 Reference fixture: [format-2 reference](hybrid-spatial-authoring-reference-v2.md)
 Semantic artifact: [format-2 semantic artifact](hybrid-spatial-authoring-semantic-v2.md)
+Runtime equivalence:
+[format-2 authoring runtime equivalence](hybrid-spatial-authoring-runtime-equivalence-v2.md)
 
 ## Boundary and compatibility
 
