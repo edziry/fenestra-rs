@@ -81,6 +81,21 @@ fn reference_key_origins_and_shared_node_origins_are_exact() {
     );
 }
 
+#[test]
+fn malformed_negative_literal_retains_the_full_signed_origin() {
+    let source = FIXTURE.replacen("padding (4, 4, 3, 3)", "padding (-00, 4, 3, 3)", 1);
+    let parsed = parse_fen_document_v2(SourceId::new(13), &source, limits())
+        .expect("literal conversion remains delayed until lowering");
+    let physical = match parsed.spatial.viewport.left.value.value {
+        Ok(_) => panic!("leading zero must remain an invalid literal"),
+        Err(physical) => physical,
+    };
+    assert_eq!(
+        physical.fen_byte_range(),
+        Some(nth_range(&source, "-00", 0))
+    );
+}
+
 fn limits() -> AuthoringLimitsV2 {
     AuthoringLimitsV2::new([
         8_192,

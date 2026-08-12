@@ -57,7 +57,7 @@ impl ParserV2 {
         &mut self,
     ) -> Result<ParsedSpellingV2<i32>, AuthoringDiagnosticV2> {
         let (negative, token, physical) = self.take_signed()?;
-        let magnitude = self.parse_u64_spelled(&token).value;
+        let magnitude = self.parse_u64_spelled(&token).value.map_err(|_| physical);
         let value = magnitude.and_then(|magnitude| {
             let signed = signed_magnitude(magnitude, negative, i32::MAX as u64, physical)?;
             i32::try_from(signed).map_err(|_| physical)
@@ -76,7 +76,7 @@ impl ParserV2 {
         &mut self,
     ) -> Result<ParsedSpellingV2<i64>, AuthoringDiagnosticV2> {
         let (negative, token, physical) = self.take_signed()?;
-        let magnitude = self.parse_u64_spelled(&token).value;
+        let magnitude = self.parse_u64_spelled(&token).value.map_err(|_| physical);
         let value = magnitude
             .and_then(|magnitude| signed_magnitude(magnitude, negative, i64::MAX as u64, physical));
         let label = value.as_ref().map_or_else(
