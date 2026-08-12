@@ -143,11 +143,17 @@ order is `[10, 30]`.
 Step nine must be exactly
 `TransactionErrorKind::Spatial(RuntimeSpatialErrorV2::Ir(_))`; the IR kind is
 `Resolve`, the resolver kind is `Transform(SingularTransform)`, the resolver
-location is `Node { index: 3 }`, the IR span is logical bytes `247..248` in
+location is `Node { index: 3 }`, the IR span is logical bytes `226..227` in
 source zero, and `operation_index()` is `None`. After failure, the committed
 snapshot shares its exact outer state allocation with the pre-attempt handle;
 generation, viewport, properties, logical identities, mapping, spatial
 snapshot pointer, hit results, and raster bytes remain unchanged.
+
+The factor binding that makes the determinant zero retains its own authored
+field span at logical bytes `247..248`. The raw resolver reports a whole-node
+singularity because the determinant depends on four affine coefficients, so
+runtime maps that `Node` location to the containing node record rather than
+attributing the failure to one contributing coefficient.
 
 ## Logical identity normalization
 
