@@ -221,14 +221,13 @@ fn runtime_spatial_owner_methods_have_exact_attributes() {
         method_attributes(&source, "spatial"),
         names(&["#[must_use]"])
     );
-    for name in [
-        "new_spatial",
-        "new_spatial_with_layout_engine",
-        "resize_spatial",
-        "spatial",
-    ] {
-        assert!(!source.contains(&format!("pub const fn {name}(")));
-    }
+    assert_nonconst_methods(
+        &source,
+        "UiRuntime",
+        &["new_spatial", "new_spatial_with_layout_engine"],
+    );
+    assert_nonconst_methods(&source, "UiTransaction", &["resize_spatial"]);
+    assert_nonconst_methods(&source, "CommittedRuntimeSnapshot", &["spatial"]);
 }
 
 fn public_methods(source: &str, type_name: &str) -> BTreeSet<String> {
