@@ -2,10 +2,14 @@
 
 //! Disposable interactive native GPU feasibility probe for Fenestra.
 
+use std::error::Error;
+use std::fmt;
+
 mod admission;
 mod artifact;
 mod cli;
 mod evidence;
+mod native;
 mod presentation;
 mod scene;
 
@@ -32,3 +36,30 @@ pub use scene::{
     RegisteredSceneErrorKindV1, RegisteredSceneObservationV1, build_registered_runtime_v1,
     inspect_registered_scene_pair_v1,
 };
+
+/// Closed failures that prevent the native probe from emitting an artifact.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum InteractiveProbeErrorKindV1 {
+    /// The native event loop could not start or complete.
+    EventLoop,
+    /// The native window could not be created.
+    Window,
+    /// The registered runtime or scheduler contract failed.
+    Runtime,
+    /// The bounded evidence artifact could not be formed.
+    Artifact,
+}
+
+impl fmt::Display for InteractiveProbeErrorKindV1 {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str("interactive GPU probe failed")
+    }
+}
+
+impl Error for InteractiveProbeErrorKindV1 {}
+
+/// Runs one native interactive GPU probe to a terminal evidence artifact.
+#[must_use = "interactive probe failures must be handled"]
+pub fn run_interactive_probe_v1() -> Result<Vec<u8>, InteractiveProbeErrorKindV1> {
+    native::run_interactive_probe_v1()
+}

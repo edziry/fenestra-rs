@@ -60,6 +60,12 @@ impl InteractiveArtifactBuilderV1 {
         self.encoded.bytes().filter(|byte| *byte == b'\n').count()
     }
 
+    /// Returns the next milestone required by the encoded event prefix.
+    #[must_use]
+    pub fn next_required(&self) -> Option<InteractiveMilestoneV1> {
+        self.evidence.next_required()
+    }
+
     /// Records one admitted adapter before any surface or event record.
     pub fn record_adapter(
         &mut self,

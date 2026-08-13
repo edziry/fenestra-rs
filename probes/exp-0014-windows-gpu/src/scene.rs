@@ -21,6 +21,16 @@ const TONE_PROPERTY: PropertyId = PropertyId::new(4);
 const MUTATED_TONE: PropertyValue = PropertyValue::Rgba8([80, 40, 24, 255]);
 const FNV_OFFSET_BASIS: u64 = 14_695_981_039_346_656_037;
 
+pub(crate) struct PreparedVelloSceneV1 {
+    pub(crate) scene: vello::Scene,
+    pub(crate) width: u32,
+    pub(crate) height: u32,
+    pub(crate) rgba_bytes: usize,
+    pub(crate) raster_digest: u64,
+    pub(crate) scene_commands: usize,
+    pub(crate) scene_fingerprint: u64,
+}
+
 /// Closed failures while preparing the registered runtime scenes.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum RegisteredSceneErrorKindV1 {
@@ -159,6 +169,23 @@ fn scene_observation(
     generation: u64,
     frame: SpatialPaintFrameV2<'_>,
 ) -> Result<RegisteredSceneObservationV1, RegisteredSceneErrorKindV1> {
+    let prepared = prepare_vello_scene_v1(frame)?;
+    Ok(RegisteredSceneObservationV1 {
+        generation,
+        width: prepared.width,
+        height: prepared.height,
+        rgba_bytes: prepared.rgba_bytes,
+        raster_digest: prepared.raster_digest,
+        scene_commands: prepared.scene_commands,
+        scene_fingerprint: prepared.scene_fingerprint,
+        used_vello_scene: true,
+        executed_gpu: false,
+    })
+}
+
+pub(crate) fn prepare_vello_scene_v1(
+    frame: SpatialPaintFrameV2<'_>,
+) -> Result<PreparedVelloSceneV1, RegisteredSceneErrorKindV1> {
     let raster = frame
         .rasterize_reference(REGISTERED_REFERENCE_RASTER_LIMITS_V2)
         .map_err(|_| RegisteredSceneErrorKindV1::Raster)?;
@@ -193,16 +220,14 @@ fn scene_observation(
         }
     }
     scene_fingerprint = fold_u32(scene_fingerprint, encoding.n_paths);
-    Ok(RegisteredSceneObservationV1 {
-        generation,
+    Ok(PreparedVelloSceneV1 {
+        scene,
         width: raster.width(),
         height: raster.height(),
         rgba_bytes: raster.bytes().len(),
         raster_digest,
         scene_commands,
         scene_fingerprint,
-        used_vello_scene: true,
-        executed_gpu: false,
     })
 }
 
