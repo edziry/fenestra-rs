@@ -8,40 +8,20 @@ use winit::window::Window;
 
 use crate::scene::prepare_vello_scene_v1;
 use crate::{
-    ArtifactAdaptReasonV1, ArtifactAdapterV1, ArtifactSurfaceV1, GpuAdapterObservationV1,
-    GpuBackendV1, GpuDeviceTypeV1, GpuPortReceiptV1, GpuPresentErrorKindV1, GpuPresentPortV1,
-    GpuSurfaceExtentV1, GpuTargetV1, SurfaceAlphaV1, SurfaceFormatV1, SurfacePresentModeV1,
-    admit_adapter_v1,
+    ArtifactAdaptReasonV1, ArtifactSurfaceV1, GpuAdapterObservationV1, GpuPortReceiptV1,
+    GpuPresentErrorKindV1, GpuPresentPortV1, GpuSurfaceExtentV1, GpuTargetV1, admit_adapter_v1,
 };
 
+mod environment;
 mod failure;
 
+use environment::{
+    GpuEnvironmentV1, bounded_adapter_identity, map_admission, map_backend, map_device_type,
+    select_alpha, select_format, select_present, target_backends,
+};
+use failure::GpuFailureStateV1;
+
 const GPU_WAIT: Duration = Duration::from_secs(10);
-
-pub(super) struct GpuEnvironmentV1 {
-    pub(super) backend: GpuBackendV1,
-    pub(super) device_type: GpuDeviceTypeV1,
-    pub(super) vendor: u32,
-    pub(super) device: u32,
-    pub(super) name: String,
-    pub(super) driver: String,
-    pub(super) driver_info: String,
-    pub(super) surface: ArtifactSurfaceV1,
-}
-
-impl GpuEnvironmentV1 {
-    pub(super) fn artifact_adapter(&self) -> ArtifactAdapterV1<'_> {
-        ArtifactAdapterV1::new(
-            self.backend,
-            self.device_type,
-            self.vendor,
-            self.device,
-            self.name.as_bytes(),
-            self.driver.as_bytes(),
-            self.driver_info.as_bytes(),
-        )
-    }
-}
 
 pub(super) struct NativeGpuV1 {
     instance: wgpu::Instance,
@@ -54,6 +34,7 @@ pub(super) struct NativeGpuV1 {
     target_view: wgpu::TextureView,
     blitter: TextureBlitter,
     renderer: Renderer,
+    failures: GpuFailureStateV1,
 }
 
 impl NativeGpuV1 {
@@ -101,7 +82,23 @@ impl NativeGpuV1 {
             ..Default::default()
         }))
         .map_err(|_| ArtifactAdaptReasonV1::DeviceRequest)?;
-        let renderer = Renderer::new(
+        let failures = GpuFailureStateV1::new();
+        device.on_uncaptured_error(Arc::new({
+            let failures = failures.clone();
+            move |error| {
+                failures.record(match error {
+                    wgpu::Error::OutOfMemory { .. } => GpuPresentErrorKindV1::OutOfMemory,
+                    wgpu::Error::Validation { .. } | wgpu::Error::Internal { .. } => {
+                        GpuPresentErrorKindV1::Renderer
+                    }
+                });
+            }
+        }));
+        device.set_device_lost_callback({
+            let failures = failures.clone();
+            move |_, _| failures.record(GpuPresentErrorKindV1::Surface)
+        });
+        let renderer_result = Renderer::new(
             &device,
             RendererOptions {
                 use_cpu: false,
@@ -109,8 +106,11 @@ impl NativeGpuV1 {
                 num_init_threads: None,
                 pipeline_cache: None,
             },
-        )
-        .map_err(|_| ArtifactAdaptReasonV1::Renderer)?;
+        );
+        if let Some(failure) = failures.take() {
+            return Err(adapt_gpu_failure(failure));
+        }
+        let renderer = renderer_result.map_err(|_| ArtifactAdaptReasonV1::Renderer)?;
         let config = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
             format,
@@ -124,6 +124,9 @@ impl NativeGpuV1 {
         surface.configure(&device, &config);
         let (target_texture, target_view) = create_target(&device, extent);
         let blitter = TextureBlitter::new(&device, format);
+        if let Some(failure) = failures.take() {
+            return Err(adapt_gpu_failure(failure));
+        }
         let environment = GpuEnvironmentV1 {
             backend,
             device_type,
@@ -146,6 +149,7 @@ impl NativeGpuV1 {
                 target_view,
                 blitter,
                 renderer,
+                failures,
             },
             environment,
         ))
@@ -208,6 +212,9 @@ impl GpuPresentPortV1 for NativeGpuV1 {
     where
         A: FnOnce() -> Result<fenestra_ui_runtime::prototype::SubmissionId, GpuPresentErrorKindV1>,
     {
+        if let Some(failure) = self.failures.take() {
+            return Err(failure);
+        }
         if self.config.width != extent.width() || self.config.height != extent.height() {
             self.resize(extent);
         }
@@ -222,20 +229,22 @@ impl GpuPresentPortV1 for NativeGpuV1 {
             .create_view(&wgpu::TextureViewDescriptor::default());
         self.window.pre_present_notify();
         let _accepted = accept_once()?;
-        self.renderer
-            .render_to_texture(
-                &self.device,
-                &self.queue,
-                &prepared.scene,
-                &self.target_view,
-                &RenderParams {
-                    base_color: Color::from_rgba8(0, 0, 0, 0),
-                    width: extent.width(),
-                    height: extent.height(),
-                    antialiasing_method: AaConfig::Area,
-                },
-            )
-            .map_err(|_| GpuPresentErrorKindV1::Renderer)?;
+        let render_result = self.renderer.render_to_texture(
+            &self.device,
+            &self.queue,
+            &prepared.scene,
+            &self.target_view,
+            &RenderParams {
+                base_color: Color::from_rgba8(0, 0, 0, 0),
+                width: extent.width(),
+                height: extent.height(),
+                antialiasing_method: AaConfig::Area,
+            },
+        );
+        if let Some(failure) = self.failures.take() {
+            return Err(failure);
+        }
+        render_result.map_err(|_| GpuPresentErrorKindV1::Renderer)?;
         let mut encoder = self
             .device
             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
@@ -254,6 +263,9 @@ impl GpuPresentPortV1 for NativeGpuV1 {
                 wgpu::PollError::Timeout => GpuPresentErrorKindV1::Timeout,
                 wgpu::PollError::WrongSubmissionIndex(_, _) => GpuPresentErrorKindV1::Surface,
             })?;
+        if let Some(failure) = self.failures.take() {
+            return Err(failure);
+        }
         Ok(GpuPortReceiptV1::new(prepared.raster_digest))
     }
 }
@@ -280,97 +292,10 @@ fn create_target(
     (texture, view)
 }
 
-const fn target_backends(target: GpuTargetV1) -> wgpu::Backends {
-    match target {
-        GpuTargetV1::WindowsDx12 => wgpu::Backends::DX12,
-        GpuTargetV1::LinuxVulkan => wgpu::Backends::VULKAN,
-    }
-}
-
-const fn map_backend(backend: wgpu::Backend) -> Option<GpuBackendV1> {
-    match backend {
-        wgpu::Backend::Dx12 => Some(GpuBackendV1::Dx12),
-        wgpu::Backend::Vulkan => Some(GpuBackendV1::Vulkan),
-        _ => None,
-    }
-}
-
-const fn map_device_type(device_type: wgpu::DeviceType) -> GpuDeviceTypeV1 {
-    match device_type {
-        wgpu::DeviceType::Other => GpuDeviceTypeV1::Other,
-        wgpu::DeviceType::IntegratedGpu => GpuDeviceTypeV1::Integrated,
-        wgpu::DeviceType::DiscreteGpu => GpuDeviceTypeV1::Discrete,
-        wgpu::DeviceType::VirtualGpu => GpuDeviceTypeV1::Virtual,
-        wgpu::DeviceType::Cpu => GpuDeviceTypeV1::Cpu,
-    }
-}
-
-fn map_admission(error: crate::GpuAdmissionErrorKindV1) -> ArtifactAdaptReasonV1 {
-    match error {
-        crate::GpuAdmissionErrorKindV1::Backend => ArtifactAdaptReasonV1::Backend,
-        crate::GpuAdmissionErrorKindV1::DeviceType => ArtifactAdaptReasonV1::DeviceType,
-        crate::GpuAdmissionErrorKindV1::Identity => ArtifactAdaptReasonV1::Identity,
-    }
-}
-
-fn select_format(
-    capabilities: &wgpu::SurfaceCapabilities,
-) -> Result<(wgpu::TextureFormat, SurfaceFormatV1), ArtifactAdaptReasonV1> {
-    for (format, artifact) in [
-        (wgpu::TextureFormat::Bgra8Unorm, SurfaceFormatV1::Bgra8Unorm),
-        (wgpu::TextureFormat::Rgba8Unorm, SurfaceFormatV1::Rgba8Unorm),
-    ] {
-        if capabilities.formats.contains(&format) {
-            return Ok((format, artifact));
-        }
-    }
-    Err(ArtifactAdaptReasonV1::SurfaceFormat)
-}
-
-fn select_present(
-    capabilities: &wgpu::SurfaceCapabilities,
-) -> Result<(wgpu::PresentMode, SurfacePresentModeV1), ArtifactAdaptReasonV1> {
-    capabilities
-        .present_modes
-        .contains(&wgpu::PresentMode::Fifo)
-        .then_some((wgpu::PresentMode::Fifo, SurfacePresentModeV1::Fifo))
-        .ok_or(ArtifactAdaptReasonV1::Surface)
-}
-
-fn select_alpha(
-    capabilities: &wgpu::SurfaceCapabilities,
-) -> Result<(wgpu::CompositeAlphaMode, SurfaceAlphaV1), ArtifactAdaptReasonV1> {
-    capabilities
-        .alpha_modes
-        .contains(&wgpu::CompositeAlphaMode::Opaque)
-        .then_some((wgpu::CompositeAlphaMode::Opaque, SurfaceAlphaV1::Opaque))
-        .ok_or(ArtifactAdaptReasonV1::Surface)
-}
-
-fn bounded_adapter_identity(value: &str) -> String {
-    const MAX_BYTES: usize = 48;
-
-    if value.len() <= MAX_BYTES {
-        return value.to_owned();
-    }
-    let mut end = MAX_BYTES;
-    while !value.is_char_boundary(end) {
-        end -= 1;
-    }
-    value[..end].to_owned()
-}
-
-#[cfg(test)]
-mod tests {
-    use super::bounded_adapter_identity;
-
-    #[test]
-    fn adapter_identity_is_bounded_without_splitting_utf8() {
-        let exact = "a".repeat(48);
-        assert_eq!(bounded_adapter_identity(&exact), exact);
-        assert_eq!(bounded_adapter_identity(&"b".repeat(49)), "b".repeat(48));
-
-        let multibyte = format!("{}\u{e9}x", "a".repeat(47));
-        assert_eq!(bounded_adapter_identity(&multibyte), "a".repeat(47));
+const fn adapt_gpu_failure(failure: GpuPresentErrorKindV1) -> ArtifactAdaptReasonV1 {
+    match failure {
+        GpuPresentErrorKindV1::OutOfMemory => ArtifactAdaptReasonV1::OutOfMemory,
+        GpuPresentErrorKindV1::Surface => ArtifactAdaptReasonV1::Surface,
+        _ => ArtifactAdaptReasonV1::Renderer,
     }
 }
