@@ -28,6 +28,7 @@ pub(super) struct NativeGpuApplicationV1 {
     scheduler: Option<UiScheduler>,
     runtime_extent: Option<GpuSurfaceExtentV1>,
     last_present_extent: Option<GpuSurfaceExtentV1>,
+    pending_resize: Option<GpuSurfaceExtentV1>,
     suspended: bool,
     redraw_armed: bool,
     next_tick: u64,
@@ -44,6 +45,7 @@ impl NativeGpuApplicationV1 {
             scheduler: None,
             runtime_extent: None,
             last_present_extent: None,
+            pending_resize: None,
             suspended: false,
             redraw_armed: false,
             next_tick: 0,
@@ -132,6 +134,15 @@ impl NativeGpuApplicationV1 {
     }
 
     fn redraw_inner(&mut self) -> Result<(), RedrawFailureV1> {
+        if self.next_required() == Some(InteractiveMilestoneV1::Resize)
+            && let Some(extent) = self.pending_resize.take()
+        {
+            if self.runtime_extent != Some(extent) {
+                return Err(RedrawFailureV1::Internal);
+            }
+            self.observe(ArtifactEventV1::Resize(extent))
+                .map_err(|_| RedrawFailureV1::Internal)?;
+        }
         let tick = self.take_tick().map_err(|_| RedrawFailureV1::Internal)?;
         let scheduler = self.scheduler.as_mut().ok_or(RedrawFailureV1::Internal)?;
         if scheduler
@@ -165,6 +176,11 @@ impl NativeGpuApplicationV1 {
             .is_some()
         {
             return Err(RedrawFailureV1::Internal);
+        }
+        if self.next_required() == Some(InteractiveMilestoneV1::Resize) {
+            self.last_present_extent = Some(extent);
+            self.update_title();
+            return Ok(());
         }
         let milestone = match self.next_required() {
             Some(
@@ -379,39 +395,4 @@ const fn scheduler_capacity() -> SchedulerCapacity {
         QueueCapacity::new(1, 40, 64),
         QueueCapacity::new(2, 80, 64),
     )
-}
-
-#[cfg(test)]
-mod tests {
-    use super::stage_required_resize;
-    use crate::{GpuSurfaceExtentV1, InteractiveMilestoneV1};
-
-    #[test]
-    fn resize_drag_stages_the_latest_extent_before_evidence() {
-        let previous = GpuSurfaceExtentV1::new(640, 420);
-        let first = GpuSurfaceExtentV1::new(700, 460);
-        let latest = GpuSurfaceExtentV1::new(760, 500);
-        let mut pending = None;
-
-        assert!(stage_required_resize(
-            &mut pending,
-            Some(InteractiveMilestoneV1::Resize),
-            Some(previous),
-            first,
-        ));
-        assert!(stage_required_resize(
-            &mut pending,
-            Some(InteractiveMilestoneV1::Resize),
-            Some(previous),
-            latest,
-        ));
-        assert_eq!(pending, Some(latest));
-        assert!(!stage_required_resize(
-            &mut pending,
-            Some(InteractiveMilestoneV1::Resize),
-            Some(previous),
-            previous,
-        ));
-        assert_eq!(pending, None);
-    }
 }

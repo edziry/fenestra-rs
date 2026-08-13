@@ -63,11 +63,13 @@ impl NativeGpuApplicationV1 {
             .as_mut()
             .ok_or(InteractiveProbeErrorKindV1::Runtime)?
             .resize(extent);
-        let required_resize = self.next_required() == Some(InteractiveMilestoneV1::Resize)
-            && self.last_present_extent != Some(extent);
-        if required_resize {
-            self.observe(ArtifactEventV1::Resize(extent))?;
-        }
+        let next_required = self.next_required();
+        let required_resize = stage_required_resize(
+            &mut self.pending_resize,
+            next_required,
+            self.last_present_extent,
+            extent,
+        );
         if self.runtime_extent != Some(extent) {
             let scheduler = self
                 .scheduler
@@ -134,5 +136,53 @@ impl NativeGpuApplicationV1 {
             return;
         }
         self.finish(event_loop, terminal);
+    }
+}
+
+fn stage_required_resize(
+    pending: &mut Option<GpuSurfaceExtentV1>,
+    next_required: Option<InteractiveMilestoneV1>,
+    last_present: Option<GpuSurfaceExtentV1>,
+    extent: GpuSurfaceExtentV1,
+) -> bool {
+    if next_required != Some(InteractiveMilestoneV1::Resize) {
+        return false;
+    }
+    *pending = (last_present != Some(extent)).then_some(extent);
+    pending.is_some()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::stage_required_resize;
+    use crate::{GpuSurfaceExtentV1, InteractiveMilestoneV1};
+
+    #[test]
+    fn resize_drag_stages_the_latest_extent_before_evidence() {
+        let previous = GpuSurfaceExtentV1::new(640, 420);
+        let first = GpuSurfaceExtentV1::new(700, 460);
+        let latest = GpuSurfaceExtentV1::new(760, 500);
+        let mut pending = None;
+
+        assert!(stage_required_resize(
+            &mut pending,
+            Some(InteractiveMilestoneV1::Resize),
+            Some(previous),
+            first,
+        ));
+        assert!(stage_required_resize(
+            &mut pending,
+            Some(InteractiveMilestoneV1::Resize),
+            Some(previous),
+            latest,
+        ));
+        assert_eq!(pending, Some(latest));
+        assert!(!stage_required_resize(
+            &mut pending,
+            Some(InteractiveMilestoneV1::Resize),
+            Some(previous),
+            previous,
+        ));
+        assert_eq!(pending, None);
     }
 }
