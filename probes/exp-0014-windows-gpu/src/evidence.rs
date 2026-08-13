@@ -104,6 +104,8 @@ impl InteractiveObservationV1 {
 pub enum InteractiveResultV1 {
     /// Every required milestone completed in order.
     Pass,
+    /// The environment could not satisfy a closed candidate requirement.
+    Adapt,
     /// The operator sequence closed before the required prefix completed.
     Stop,
 }
