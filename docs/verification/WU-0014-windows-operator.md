@@ -27,6 +27,28 @@ Install the exact toolchain without changing another default toolchain:
 rustup toolchain install 1.97.1-x86_64-pc-windows-msvc --profile minimal --component rustfmt,clippy
 ```
 
+If the source was transferred as a Git bundle, clone the exact branch first:
+
+```powershell
+git clone -b feat/windows-interactive-gpu-spine <bundle-path> fenestra-wu-0014
+Set-Location fenestra-wu-0014
+```
+
+## One-command registered run
+
+The versioned runner installs the pinned toolchain, requires a clean checkout,
+runs every pure package gate, builds both release executables, starts the
+interactive sequence, independently verifies a pass artifact, and prints its
+SHA-256 plus bounded environment facts:
+
+```powershell
+& ".\probes\exp-0014-windows-gpu\run-windows.ps1"
+```
+
+Use the remaining sections as the interaction guide and as the exact manual
+equivalent if individual gate output needs investigation. Do not run both
+paths against the same artifact name because neither path overwrites evidence.
+
 ## Source and pure gates
 
 Record the source commit and require a clean source tree before execution:
