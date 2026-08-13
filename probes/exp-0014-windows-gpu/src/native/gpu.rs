@@ -14,6 +14,8 @@ use crate::{
     admit_adapter_v1,
 };
 
+mod failure;
+
 const GPU_WAIT: Duration = Duration::from_secs(10);
 
 pub(super) struct GpuEnvironmentV1 {
