@@ -22,7 +22,7 @@ substitute for the required Windows DX12 interactive result.
 
 ## Local implementation evidence
 
-The probe implementation at commit `c60686f` provides:
+The probe implementation and final Linux gate at commit `96fc3b6` provide:
 
 - a target-scoped winit 0.30.13 window and exact DX12 or Vulkan wgpu instance;
 - non-fallback adapter admission before Vello renderer creation;
@@ -31,19 +31,24 @@ The probe implementation at commit `c60686f` provides:
   and bounded GPU completion;
 - pointer mutation, native resize, suspend, restore, redraw, and close handling;
 - a typed bounded artifact writer and independent verifier; and
-- release-only artifact admission so a debug executable cannot claim release
-  evidence.
+- release-only artifact admission plus asynchronous device-error capture so a
+  debug executable cannot claim release evidence and GPU out-of-memory cannot
+  become an uncaught or false-pass result.
 
 These Linux commands passed on Rust 1.97.1:
 
 ```text
-cargo build --release -p fenestra-ui-exp-0014-windows-gpu --locked
+cargo build --release -p fenestra-ui-exp-0014-windows-gpu --bins --locked
 cargo test -p fenestra-ui-exp-0014-windows-gpu --all-targets --locked
 cargo clippy -p fenestra-ui-exp-0014-windows-gpu --all-targets --locked -- -D warnings
 RUSTDOCFLAGS='-D warnings -D missing-docs' cargo doc -p fenestra-ui-exp-0014-windows-gpu --no-deps --locked
+cargo test --workspace --all-targets --all-features --locked
+cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+RUSTDOCFLAGS='-D warnings -D missing-docs' cargo doc --workspace --all-features --no-deps --locked
 ```
 
-All 27 retained probe tests passed. The release runner was 12 MiB on the local
+All 28 retained probe tests and the complete workspace passed. The release
+runner was 12 MiB and the standalone verifier was 1.2 MiB on the local
 Linux host. The host exposed a Wayland session and the release event loop
 remained live until the unattended manual control was cancelled. No Linux
 artifact was written and no Linux GPU pass is claimed.
@@ -61,13 +66,15 @@ frame.
 
 ## Observed friction and corrections
 
-Three corrections were made through failing regression tests before the
+Four corrections were made through failing regression tests before the
 registered run:
 
 - debug builds are rejected before forming release-labeled evidence;
-- adapter identity fields are bounded without splitting UTF-8; and
+- adapter identity fields are bounded without splitting UTF-8;
 - a burst of resize-drag events stages the latest extent so the recorded resize
-  and completed presentation cannot diverge.
+  and completed presentation cannot diverge;
+- uncaptured wgpu validation, internal, device-loss, and out-of-memory signals
+  become closed typed outcomes, with out-of-memory taking priority.
 
 The standalone verifier is also executed by an integration test. It accepts a
 complete pass artifact, rejects invalid bytes, and prints only bounded summary
