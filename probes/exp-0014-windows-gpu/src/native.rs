@@ -47,3 +47,18 @@ fn os_version() -> Vec<u8> {
     }
     bytes
 }
+
+#[cfg(test)]
+mod tests {
+    use super::admit_release_build;
+    use crate::InteractiveProbeErrorKindV1;
+
+    #[test]
+    fn only_release_builds_may_emit_release_evidence() {
+        assert_eq!(admit_release_build(false), Ok(()));
+        assert_eq!(
+            admit_release_build(true),
+            Err(InteractiveProbeErrorKindV1::BuildProfile)
+        );
+    }
+}

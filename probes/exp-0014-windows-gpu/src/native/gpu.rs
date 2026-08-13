@@ -344,3 +344,18 @@ fn select_alpha(
         .then_some((wgpu::CompositeAlphaMode::Opaque, SurfaceAlphaV1::Opaque))
         .ok_or(ArtifactAdaptReasonV1::Surface)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::bounded_adapter_identity;
+
+    #[test]
+    fn adapter_identity_is_bounded_without_splitting_utf8() {
+        let exact = "a".repeat(48);
+        assert_eq!(bounded_adapter_identity(&exact), exact);
+        assert_eq!(bounded_adapter_identity(&"b".repeat(49)), "b".repeat(48));
+
+        let multibyte = format!("{}\u{e9}x", "a".repeat(47));
+        assert_eq!(bounded_adapter_identity(&multibyte), "a".repeat(47));
+    }
+}
