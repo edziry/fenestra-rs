@@ -14,8 +14,10 @@ pub use admission::{
     admit_adapter_v1,
 };
 pub use artifact::{
-    ARTIFACT_LIMITS_V1, InteractiveArtifactErrorKindV1, InteractiveArtifactLimitsV1,
-    VerifiedInteractiveArtifactV1, verify_interactive_artifact_v1,
+    ARTIFACT_LIMITS_V1, ArtifactAdaptReasonV1, ArtifactAdapterV1, ArtifactEventV1,
+    ArtifactPresentV1, ArtifactSurfaceV1, ArtifactTerminalV1, InteractiveArtifactBuilderV1,
+    InteractiveArtifactErrorKindV1, InteractiveArtifactLimitsV1, SurfaceAlphaV1, SurfaceFormatV1,
+    SurfacePresentModeV1, VerifiedInteractiveArtifactV1, verify_interactive_artifact_v1,
 };
 pub use cli::{ProbeCliErrorKindV1, ProbeCliV1, parse_probe_cli_v1};
 pub use evidence::{

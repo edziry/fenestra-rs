@@ -1,5 +1,6 @@
 mod replay;
 mod syntax;
+mod writer;
 
 use crate::{
     GpuAdapterObservationV1, GpuBackendV1, GpuDeviceTypeV1, GpuTargetV1, InteractiveResultV1,
@@ -8,6 +9,12 @@ use crate::{
 
 use replay::{ArtifactReplay, terminal_result};
 use syntax::{exact_keys, fields, parse_target, parse_u32, require_hex};
+
+pub use writer::{
+    ArtifactAdaptReasonV1, ArtifactAdapterV1, ArtifactEventV1, ArtifactPresentV1,
+    ArtifactSurfaceV1, ArtifactTerminalV1, InteractiveArtifactBuilderV1, SurfaceAlphaV1,
+    SurfaceFormatV1, SurfacePresentModeV1,
+};
 
 /// Inclusive bounds for one interactive evidence artifact.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
