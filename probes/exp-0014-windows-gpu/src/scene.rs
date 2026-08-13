@@ -110,19 +110,7 @@ impl RegisteredSceneObservationV1 {
 #[must_use = "registered scene preparation failures must be handled"]
 pub fn inspect_registered_scene_pair_v1()
 -> Result<[RegisteredSceneObservationV1; 2], RegisteredSceneErrorKindV1> {
-    let programs = generated_hybrid_spatial_v2();
-    let schema = validate_schema(programs.0, IR_LIMITS)
-        .map_err(|_| RegisteredSceneErrorKindV1::Validation)?;
-    let construction = validate_construction(&schema, programs.1, IR_LIMITS)
-        .map_err(|_| RegisteredSceneErrorKindV1::Validation)?;
-    let style = validate_style(&construction, programs.2, STYLE_LIMITS)
-        .map_err(|_| RegisteredSceneErrorKindV1::Validation)?;
-    let spatial = validate_spatial(&style, programs.3, SPATIAL_LIMITS)
-        .map_err(|_| RegisteredSceneErrorKindV1::Validation)?;
-    let mut runtime =
-        UiRuntime::new_spatial_ir(spatial, VIEWPORT, REGISTERED_SPATIAL_LIMITS_V2, CAPACITY)
-            .map_err(|_| RegisteredSceneErrorKindV1::Runtime)?;
-
+    let mut runtime = build_registered_runtime_v1(VIEWPORT)?;
     let initial = observe_committed_scene(&runtime)?;
     let before = runtime.committed();
     let mut transaction = runtime.begin_transaction();
@@ -134,6 +122,24 @@ pub fn inspect_registered_scene_pair_v1()
         .map_err(|_| RegisteredSceneErrorKindV1::Mutation)?;
     let mutated = observe_committed_scene(&runtime)?;
     Ok([initial, mutated])
+}
+
+/// Builds the canonical format-2 `.fen` fixture at one caller-selected viewport.
+#[must_use = "registered runtime preparation failures must be handled"]
+pub fn build_registered_runtime_v1(
+    viewport: SpatialViewportV2,
+) -> Result<UiRuntime, RegisteredSceneErrorKindV1> {
+    let programs = generated_hybrid_spatial_v2();
+    let schema = validate_schema(programs.0, IR_LIMITS)
+        .map_err(|_| RegisteredSceneErrorKindV1::Validation)?;
+    let construction = validate_construction(&schema, programs.1, IR_LIMITS)
+        .map_err(|_| RegisteredSceneErrorKindV1::Validation)?;
+    let style = validate_style(&construction, programs.2, STYLE_LIMITS)
+        .map_err(|_| RegisteredSceneErrorKindV1::Validation)?;
+    let spatial = validate_spatial(&style, programs.3, SPATIAL_LIMITS)
+        .map_err(|_| RegisteredSceneErrorKindV1::Validation)?;
+    UiRuntime::new_spatial_ir(spatial, viewport, REGISTERED_SPATIAL_LIMITS_V2, CAPACITY)
+        .map_err(|_| RegisteredSceneErrorKindV1::Runtime)
 }
 
 fn observe_committed_scene(

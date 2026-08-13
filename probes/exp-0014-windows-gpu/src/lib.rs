@@ -6,6 +6,7 @@ mod admission;
 mod artifact;
 mod cli;
 mod evidence;
+mod presentation;
 mod scene;
 
 pub use admission::{
@@ -21,6 +22,11 @@ pub use evidence::{
     InteractiveEvidenceErrorKindV1, InteractiveEvidenceV1, InteractiveMilestoneV1,
     InteractiveObservationV1, InteractiveResultV1,
 };
+pub use presentation::{
+    GpuPortReceiptV1, GpuPresentErrorKindV1, GpuPresentErrorV1, GpuPresentPortV1,
+    GpuPresentationOutcomeV1, GpuPresentationReceiptV1, GpuSurfaceExtentV1, present_gpu_offer_v1,
+};
 pub use scene::{
-    RegisteredSceneErrorKindV1, RegisteredSceneObservationV1, inspect_registered_scene_pair_v1,
+    RegisteredSceneErrorKindV1, RegisteredSceneObservationV1, build_registered_runtime_v1,
+    inspect_registered_scene_pair_v1,
 };
