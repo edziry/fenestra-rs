@@ -22,7 +22,7 @@ file|runtime|path=tests/artifacts/layout-board-runtime-v1.txt|bytes=26400|lines=
 file|trybuild-nesting|path=crates/fenestra-ui-macros/tests/ui/nesting_depth.stderr|bytes=153|lines=5|max-line=43|sha256=218c18f4259f2a32754b3d673c66ab56f7db06508044cb4cb72874411fd8e24b
 file|trybuild-unknown-component|path=crates/fenestra-ui-macros/tests/ui/unknown_component.stderr|bytes=201|lines=5|max-line=62|sha256=8ba6efc1d086a98cff9775c2b51ac33e1f3280fee8fc69781623062f7a4f1b72
 file|trybuild-unsupported-token|path=crates/fenestra-ui-macros/tests/ui/unsupported_token.stderr|bytes=120|lines=5|max-line=39|sha256=550f19751c832236b78259a01b86a9268b13742acb2031733a0d59f3051c53be
-file|cargo-lock|path=Cargo.lock|bytes=72936|lines=2908|max-line=77|sha256=343c31486110d3deda1bbfc335ef71f46ae7d4b775fe4c1face03b12ec4a027b
+file|cargo-lock|path=Cargo.lock|bytes=73370|lines=2928|max-line=77|sha256=acbdbff6999b2f9dda5f0e5cfd2d85e691243bdc5f90f6b2787adce6b000724d
 dependency|proc-macro2|version=1.0.107|scope=host-normal,probe-dev|license=MIT-OR-Apache-2.0|rust=1.71|build-script=true
 dependency|quote|version=1.0.47|scope=host-normal|license=MIT-OR-Apache-2.0|rust=1.71|build-script=true
 dependency|unicode-ident|version=1.0.24|scope=host-transitive|license=(MIT-OR-Apache-2.0)-AND-Unicode-3.0|rust=1.71|build-script=false
