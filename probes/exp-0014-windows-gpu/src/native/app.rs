@@ -380,3 +380,38 @@ const fn scheduler_capacity() -> SchedulerCapacity {
         QueueCapacity::new(2, 80, 64),
     )
 }
+
+#[cfg(test)]
+mod tests {
+    use super::stage_required_resize;
+    use crate::{GpuSurfaceExtentV1, InteractiveMilestoneV1};
+
+    #[test]
+    fn resize_drag_stages_the_latest_extent_before_evidence() {
+        let previous = GpuSurfaceExtentV1::new(640, 420);
+        let first = GpuSurfaceExtentV1::new(700, 460);
+        let latest = GpuSurfaceExtentV1::new(760, 500);
+        let mut pending = None;
+
+        assert!(stage_required_resize(
+            &mut pending,
+            Some(InteractiveMilestoneV1::Resize),
+            Some(previous),
+            first,
+        ));
+        assert!(stage_required_resize(
+            &mut pending,
+            Some(InteractiveMilestoneV1::Resize),
+            Some(previous),
+            latest,
+        ));
+        assert_eq!(pending, Some(latest));
+        assert!(!stage_required_resize(
+            &mut pending,
+            Some(InteractiveMilestoneV1::Resize),
+            Some(previous),
+            previous,
+        ));
+        assert_eq!(pending, None);
+    }
+}
