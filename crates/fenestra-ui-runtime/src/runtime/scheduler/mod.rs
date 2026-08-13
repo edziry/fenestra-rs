@@ -8,7 +8,7 @@ mod types;
 
 use std::collections::VecDeque;
 
-use fenestra_ui_ir::prototype::InvalidationSet;
+use fenestra_ui_ir::prototype::{InvalidationClass, InvalidationSet};
 
 use super::transaction::{UiRuntime, UiTransaction};
 use super::view::CommittedRuntimeSnapshot;
@@ -27,6 +27,7 @@ use types::VISUAL_ENVELOPE_BYTES;
 pub use types::{
     QueueCapacity, ScheduledCommit, SchedulerAction, SchedulerCapacity, SchedulerError,
     SchedulerErrorKind, SchedulerLane, SchedulerState, SchedulerTick, VisualCancelResult,
+    VisualRequestResult,
 };
 
 /// Single-owner bounded scheduler around one logical UI runtime.
@@ -139,6 +140,38 @@ impl UiScheduler {
 
         self.coalesce_visual(self.runtime.committed(), summary.invalidation(), tick);
         Ok(summary)
+    }
+
+    /// Requests presentation of the immutable current generation.
+    ///
+    /// This is used for platform exposure or surface restoration and does not
+    /// create a runtime transaction or generation.
+    pub fn request_current_frame(
+        &mut self,
+        tick: SchedulerTick,
+    ) -> Result<VisualRequestResult, SchedulerError> {
+        self.begin_regular_turn(tick)?;
+        if self.state != SchedulerState::Running
+            || self.controls_pending()
+            || self.deferred.is_some()
+            || self.offer_is_pending()
+        {
+            return Err(SchedulerError::new(
+                SchedulerErrorKind::ControlPending,
+                None,
+            ));
+        }
+        let result = if self.visual.is_none() {
+            VisualRequestResult::Requested
+        } else {
+            VisualRequestResult::Coalesced
+        };
+        self.coalesce_visual(
+            self.runtime.committed(),
+            InvalidationSet::from_class(InvalidationClass::Surface),
+            tick,
+        );
+        Ok(result)
     }
 
     /// Advances one adapter-facing action without invoking foreign code.

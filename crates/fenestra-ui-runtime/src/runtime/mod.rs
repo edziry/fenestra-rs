@@ -42,7 +42,7 @@ pub use scheduler::{
     FrameWork, NestedCallbackScope, QueueCapacity, QueueStats, RendererEpoch, RuntimePaintFrameV2,
     ScheduledCommit, SchedulerAction, SchedulerCapacity, SchedulerError, SchedulerErrorKind,
     SchedulerInput, SchedulerInputResult, SchedulerLane, SchedulerState, SchedulerStats,
-    SchedulerTick, SubmissionId, UiScheduler, VisualCancelResult,
+    SchedulerTick, SubmissionId, UiScheduler, VisualCancelResult, VisualRequestResult,
 };
 pub use spatial::{
     RuntimeSpatialBuildViewV2, RuntimeSpatialErrorV2, RuntimeSpatialInputV2,

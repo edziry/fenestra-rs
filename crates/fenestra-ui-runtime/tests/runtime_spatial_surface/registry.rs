@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 
 use super::source::{all_source, read, source_dir};
 
-const EXPECTED_EXPORTS: [&str; 75] = [
+const EXPECTED_EXPORTS: [&str; 76] = [
     "CallbackFinish",
     "CallbackScope",
     "CapacityKind",
@@ -78,6 +78,7 @@ const EXPECTED_EXPORTS: [&str; 75] = [
     "UiScheduler",
     "UiTransaction",
     "VisualCancelResult",
+    "VisualRequestResult",
 ];
 
 const EXPECTED_STRUCTS: [&str; 53] = [
