@@ -13,6 +13,7 @@ members = [
     "probes/exp-0007-typed-authoring",
     "probes/exp-0008-hybrid-spatial",
     "probes/exp-0008-layout-conformance",
+    "probes/exp-0014-windows-gpu",
 ]
 resolver = "3"
 

@@ -490,6 +490,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "fenestra-ui-exp-0014-windows-gpu"
+version = "0.2.0"
+
+[[package]]
 name = "fenestra-ui-ir"
 version = "0.2.0"
 
