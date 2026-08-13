@@ -4,6 +4,7 @@
 
 mod admission;
 mod artifact;
+mod cli;
 mod evidence;
 mod scene;
 
@@ -15,6 +16,7 @@ pub use artifact::{
     ARTIFACT_LIMITS_V1, InteractiveArtifactErrorKindV1, InteractiveArtifactLimitsV1,
     VerifiedInteractiveArtifactV1, verify_interactive_artifact_v1,
 };
+pub use cli::{ProbeCliErrorKindV1, ProbeCliV1, parse_probe_cli_v1};
 pub use evidence::{
     InteractiveEvidenceErrorKindV1, InteractiveEvidenceV1, InteractiveMilestoneV1,
     InteractiveObservationV1, InteractiveResultV1,
