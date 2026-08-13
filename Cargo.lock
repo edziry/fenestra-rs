@@ -492,6 +492,13 @@ dependencies = [
 [[package]]
 name = "fenestra-ui-exp-0014-windows-gpu"
 version = "0.2.0"
+dependencies = [
+ "fenestra-ui-exp-0007-typed-authoring",
+ "fenestra-ui-ir",
+ "fenestra-ui-runtime",
+ "fenestra-ui-spatial",
+ "vello",
+]
 
 [[package]]
 name = "fenestra-ui-ir"
