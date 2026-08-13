@@ -9,6 +9,7 @@ use self::app::NativeGpuApplicationV1;
 use crate::{GpuTargetV1, InteractiveArtifactBuilderV1};
 
 pub(crate) fn run_interactive_probe_v1() -> Result<Vec<u8>, crate::InteractiveProbeErrorKindV1> {
+    admit_release_build(cfg!(debug_assertions))?;
     let builder = InteractiveArtifactBuilderV1::new(target(), &os_version())
         .map_err(|_| crate::InteractiveProbeErrorKindV1::Artifact)?;
     let event_loop = EventLoop::new().map_err(|_| crate::InteractiveProbeErrorKindV1::EventLoop)?;
@@ -18,6 +19,16 @@ pub(crate) fn run_interactive_probe_v1() -> Result<Vec<u8>, crate::InteractivePr
         .run_app(&mut application)
         .map_err(|_| crate::InteractiveProbeErrorKindV1::EventLoop)?;
     application.into_output()
+}
+
+const fn admit_release_build(
+    debug_assertions: bool,
+) -> Result<(), crate::InteractiveProbeErrorKindV1> {
+    if debug_assertions {
+        Err(crate::InteractiveProbeErrorKindV1::BuildProfile)
+    } else {
+        Ok(())
+    }
 }
 
 pub(super) const fn target() -> GpuTargetV1 {

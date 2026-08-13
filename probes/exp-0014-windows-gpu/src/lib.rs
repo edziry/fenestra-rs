@@ -40,6 +40,8 @@ pub use scene::{
 /// Closed failures that prevent the native probe from emitting an artifact.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum InteractiveProbeErrorKindV1 {
+    /// The executable was not built with the required release profile.
+    BuildProfile,
     /// The native event loop could not start or complete.
     EventLoop,
     /// The native window could not be created.

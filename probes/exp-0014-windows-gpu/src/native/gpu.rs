@@ -127,9 +127,9 @@ impl NativeGpuV1 {
             device_type,
             vendor: info.vendor,
             device: info.device,
-            name: info.name,
-            driver: info.driver,
-            driver_info: info.driver_info,
+            name: bounded_adapter_identity(&info.name),
+            driver: bounded_adapter_identity(&info.driver),
+            driver_info: bounded_adapter_identity(&info.driver_info),
             surface: ArtifactSurfaceV1::new(artifact_format, artifact_present, artifact_alpha),
         };
         Ok((
@@ -343,6 +343,19 @@ fn select_alpha(
         .contains(&wgpu::CompositeAlphaMode::Opaque)
         .then_some((wgpu::CompositeAlphaMode::Opaque, SurfaceAlphaV1::Opaque))
         .ok_or(ArtifactAdaptReasonV1::Surface)
+}
+
+fn bounded_adapter_identity(value: &str) -> String {
+    const MAX_BYTES: usize = 48;
+
+    if value.len() <= MAX_BYTES {
+        return value.to_owned();
+    }
+    let mut end = MAX_BYTES;
+    while !value.is_char_boundary(end) {
+        end -= 1;
+    }
+    value[..end].to_owned()
 }
 
 #[cfg(test)]
