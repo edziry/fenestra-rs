@@ -1,0 +1,22 @@
+pub fn valid_pass_artifact() -> Vec<u8> {
+    concat!(
+        "fenestra-windows-gpu|artifact=1|probe=14\n",
+        "run|target=windows-dx12|rust-target=x86_64-pc-windows-msvc|package=0.2.0|profile=release|os=windows|os-version-hex=31312e30\n",
+        "adapter|backend=dx12|device-type=integrated|vendor=4098|device=5686|name-hex=414d44|driver-hex=616d64|info-hex=33312e30\n",
+        "surface|format=bgra8unorm|present=fifo|alpha=opaque\n",
+        "event|milestone=adapter\n",
+        "event|milestone=initial-present|generation=0|frame=0|submission=0|physical=192x128|logical=192x128|raster=0123456789abcdef\n",
+        "event|milestone=pointer-move\n",
+        "event|milestone=pointer-press\n",
+        "event|milestone=mutation-present|generation=1|frame=1|submission=1|physical=192x128|logical=192x128|raster=fedcba9876543210\n",
+        "event|milestone=resize|physical=224x160|logical=224x160\n",
+        "event|milestone=resize-present|generation=2|frame=2|submission=2|physical=224x160|logical=224x160|raster=0011223344556677\n",
+        "event|milestone=suspend\n",
+        "event|milestone=restore\n",
+        "event|milestone=restore-present|generation=2|frame=3|submission=3|physical=224x160|logical=224x160|raster=0011223344556677\n",
+        "event|milestone=close\n",
+        "result|kind=pass|reason=complete\n",
+    )
+    .as_bytes()
+    .to_vec()
+}
