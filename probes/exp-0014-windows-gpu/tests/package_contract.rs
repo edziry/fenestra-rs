@@ -25,6 +25,33 @@ fn gpu_probe_is_unpublished_and_additive() {
     }
 }
 
+#[test]
+fn native_candidate_dependencies_are_exact_feature_minimal_and_target_scoped() {
+    let root = workspace_root();
+    let manifest = read(&root.join("probes/exp-0014-windows-gpu/Cargo.toml"));
+
+    assert!(manifest.contains(
+        "vello = { version = \"=0.9.0\", default-features = false, features = [\"wgpu\"] }"
+    ));
+    assert!(manifest.contains("pollster = { version = \"=0.4.0\", default-features = false }"));
+    assert!(manifest.contains("target.'cfg(target_os = \"linux\")'.dependencies"));
+    assert!(manifest.contains("features = [\"std\", \"vulkan\", \"wgsl\"]"));
+    assert!(manifest.contains("target.'cfg(target_os = \"windows\")'.dependencies"));
+    assert!(manifest.contains("features = [\"dx12\", \"std\", \"wgsl\"]"));
+    assert!(manifest.contains("winit = { version = \"=0.30.13\", default-features = false"));
+
+    for manifest_path in manifests(&root.join("crates")) {
+        let source = read(&manifest_path);
+        for candidate in ["vello", "wgpu", "winit", "pollster"] {
+            assert!(
+                !source.contains(candidate),
+                "{} must not expose candidate dependency {candidate}",
+                manifest_path.display()
+            );
+        }
+    }
+}
+
 fn manifests(directory: &Path) -> Vec<PathBuf> {
     fs::read_dir(directory)
         .expect("manifest directory should be readable")
