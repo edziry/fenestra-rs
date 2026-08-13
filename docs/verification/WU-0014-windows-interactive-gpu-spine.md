@@ -22,7 +22,7 @@ substitute for the required Windows DX12 interactive result.
 
 ## Local implementation evidence
 
-The probe implementation and final Linux gate at commit `96fc3b6` provide:
+The probe implementation and final Linux gate at commit `eda8236` provide:
 
 - a target-scoped winit 0.30.13 window and exact DX12 or Vulkan wgpu instance;
 - non-fallback adapter admission before Vello renderer creation;
@@ -30,10 +30,11 @@ The probe implementation and final Linux gate at commit `96fc3b6` provide:
   reference raster, one Vello image scene, wgpu submission, surface present,
   and bounded GPU completion;
 - pointer mutation, native resize, suspend, restore, redraw, and close handling;
-- a typed bounded artifact writer and independent verifier; and
+- a typed bounded artifact writer and independent verifier;
 - release-only artifact admission plus asynchronous device-error capture so a
   debug executable cannot claim release evidence and GPU out-of-memory cannot
-  become an uncaught or false-pass result.
+  become an uncaught or false-pass result;
+- one fail-closed PowerShell runner for the complete registered Windows gate.
 
 These Linux commands passed on Rust 1.97.1:
 
@@ -47,7 +48,7 @@ cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
 RUSTDOCFLAGS='-D warnings -D missing-docs' cargo doc --workspace --all-features --no-deps --locked
 ```
 
-All 28 retained probe tests and the complete workspace passed. The release
+All 29 retained probe tests and the complete workspace passed. The release
 runner was 12 MiB and the standalone verifier was 1.2 MiB on the local
 Linux host. The host exposed a Wayland session and the release event loop
 remained live until the unattended manual control was cancelled. No Linux
@@ -66,7 +67,7 @@ frame.
 
 ## Observed friction and corrections
 
-Four corrections were made through failing regression tests before the
+Five corrections were made through failing regression tests before the
 registered run:
 
 - debug builds are rejected before forming release-labeled evidence;
@@ -74,7 +75,9 @@ registered run:
 - a burst of resize-drag events stages the latest extent so the recorded resize
   and completed presentation cannot diverge;
 - uncaptured wgpu validation, internal, device-loss, and out-of-memory signals
-  become closed typed outcomes, with out-of-memory taking priority.
+  become closed typed outcomes, with out-of-memory taking priority; and
+- the multi-command Windows handoff is encoded as one bounded, pinned,
+  clean-tree-enforcing operator script with a source contract test.
 
 The standalone verifier is also executed by an integration test. It accepts a
 complete pass artifact, rejects invalid bytes, and prints only bounded summary
