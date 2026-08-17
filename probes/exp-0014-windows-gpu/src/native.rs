@@ -11,7 +11,7 @@ use crate::{GpuTargetV1, InteractiveArtifactBuilderV1};
 pub(crate) fn run_interactive_probe_v1() -> Result<Vec<u8>, crate::InteractiveProbeErrorKindV1> {
     admit_release_build(cfg!(debug_assertions))?;
     let builder = InteractiveArtifactBuilderV1::new(target(), &os_version())
-        .map_err(|_| crate::InteractiveProbeErrorKindV1::Artifact)?;
+        .map_err(crate::InteractiveProbeErrorKindV1::Artifact)?;
     let event_loop = EventLoop::new().map_err(|_| crate::InteractiveProbeErrorKindV1::EventLoop)?;
     event_loop.set_control_flow(ControlFlow::Wait);
     let mut application = NativeGpuApplicationV1::new(builder);

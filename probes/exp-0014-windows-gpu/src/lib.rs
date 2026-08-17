@@ -48,8 +48,10 @@ pub enum InteractiveProbeErrorKindV1 {
     Window,
     /// The registered runtime or scheduler contract failed.
     Runtime,
-    /// The bounded evidence artifact could not be formed.
-    Artifact,
+    /// The bounded evidence artifact rejected one exact writer or verifier rule.
+    Artifact(InteractiveArtifactErrorKindV1),
+    /// The native application lost its evidence builder or output state.
+    ArtifactState,
 }
 
 impl fmt::Display for InteractiveProbeErrorKindV1 {

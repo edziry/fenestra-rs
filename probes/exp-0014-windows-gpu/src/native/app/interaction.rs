@@ -131,8 +131,8 @@ impl NativeGpuApplicationV1 {
         } else {
             ArtifactTerminalV1::Stop
         };
-        if self.observe(ArtifactEventV1::Close).is_err() {
-            self.abort(event_loop, InteractiveProbeErrorKindV1::Artifact);
+        if let Err(error) = self.observe(ArtifactEventV1::Close) {
+            self.abort(event_loop, error);
             return;
         }
         self.finish(event_loop, terminal);

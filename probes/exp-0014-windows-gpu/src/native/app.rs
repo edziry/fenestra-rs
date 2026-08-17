@@ -58,7 +58,8 @@ impl NativeGpuApplicationV1 {
         if let Some(error) = self.failure {
             return Err(error);
         }
-        self.output.ok_or(InteractiveProbeErrorKindV1::Artifact)
+        self.output
+            .ok_or(InteractiveProbeErrorKindV1::ArtifactState)
     }
 
     fn initialize(
@@ -96,12 +97,12 @@ impl NativeGpuApplicationV1 {
         let builder = self
             .builder
             .as_mut()
-            .ok_or(InteractiveProbeErrorKindV1::Artifact)?;
+            .ok_or(InteractiveProbeErrorKindV1::ArtifactState)?;
         builder
             .record_adapter(environment.artifact_adapter())
             .and_then(|()| builder.record_surface(environment.surface))
             .and_then(|()| builder.observe(ArtifactEventV1::Adapter))
-            .map_err(|_| InteractiveProbeErrorKindV1::Artifact)?;
+            .map_err(InteractiveProbeErrorKindV1::Artifact)?;
         let runtime = build_registered_runtime_v1(viewport(extent))
             .map_err(|_| InteractiveProbeErrorKindV1::Runtime)?;
         let mut scheduler = UiScheduler::new(runtime, scheduler_capacity())
@@ -240,9 +241,9 @@ impl NativeGpuApplicationV1 {
     fn observe(&mut self, event: ArtifactEventV1) -> Result<(), InteractiveProbeErrorKindV1> {
         self.builder
             .as_mut()
-            .ok_or(InteractiveProbeErrorKindV1::Artifact)?
+            .ok_or(InteractiveProbeErrorKindV1::ArtifactState)?
             .observe(event)
-            .map_err(|_| InteractiveProbeErrorKindV1::Artifact)
+            .map_err(InteractiveProbeErrorKindV1::Artifact)
     }
 
     fn next_required(&self) -> Option<InteractiveMilestoneV1> {
@@ -276,12 +277,12 @@ impl NativeGpuApplicationV1 {
 
     fn finish(&mut self, event_loop: &ActiveEventLoop, terminal: ArtifactTerminalV1) {
         let Some(builder) = self.builder.take() else {
-            self.abort(event_loop, InteractiveProbeErrorKindV1::Artifact);
+            self.abort(event_loop, InteractiveProbeErrorKindV1::ArtifactState);
             return;
         };
         match builder.finish(terminal) {
             Ok(bytes) => self.output = Some(bytes),
-            Err(_) => self.failure = Some(InteractiveProbeErrorKindV1::Artifact),
+            Err(error) => self.failure = Some(InteractiveProbeErrorKindV1::Artifact(error)),
         }
         self.scheduler.take();
         self.gpu.take();
