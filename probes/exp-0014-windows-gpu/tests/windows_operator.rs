@@ -20,11 +20,14 @@ fn windows_operator_script_is_bounded_pinned_and_fail_closed() {
         "cargo +$Toolchain clippy -p $Package --all-targets --locked -- -D warnings",
         "cargo +$Toolchain doc -p $Package --no-deps --locked",
         "cargo +$Toolchain build --release -p $Package --bins --locked",
-        "Test-Path -LiteralPath $Artifact",
+        "GetUnresolvedProviderPathFromPSPath($Artifact)",
+        "Test-Path -LiteralPath $ArtifactPath",
         "fenestra-ui-exp-0014-windows-gpu.exe",
         "fenestra-wu-0014-verify.exe",
-        "Get-FileHash -Algorithm SHA256",
-        "ReadAllBytes($Artifact).Length",
+        "& $Runner $ArtifactPath",
+        "& $Verifier $ArtifactPath",
+        "Get-FileHash -Algorithm SHA256 -LiteralPath $ArtifactPath",
+        "ReadAllBytes($ArtifactPath).Length",
     ] {
         assert!(script.contains(required), "missing `{required}`");
     }
