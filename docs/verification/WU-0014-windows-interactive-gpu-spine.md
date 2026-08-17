@@ -83,6 +83,15 @@ The standalone verifier is also executed by an integration test. It accepts a
 complete pass artifact, rejects invalid bytes, and prints only bounded summary
 facts.
 
+The exact versioned PowerShell runner was additionally loaded by the
+PowerShell language parser in a read-only Linux container pinned to manifest
+digest `sha256:810c4f1e0c9d23022c3ec18c50a6205ee4b60766f1739d329b2948df1fd7d5b0`.
+The parser reported zero errors. Executing the same script in that container
+reached and returned the exact `WU-0014 requires Windows` guard before toolchain
+installation or repository mutation. These controls establish script syntax
+and fail-closed host admission only; they do not establish Windows PowerShell,
+MSVC, Win32, DX12, or GPU behavior.
+
 ## Registered execution
 
 The exact build, interaction, and independent verification commands are in the
