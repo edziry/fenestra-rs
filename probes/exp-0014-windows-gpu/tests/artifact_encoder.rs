@@ -131,9 +131,7 @@ fn empty_optional_adapter_text_is_encoded_as_unknown() {
         .expect("admitted surface");
 
     let bytes = builder
-        .finish(ArtifactTerminalV1::Adapt(
-            ArtifactAdaptReasonV1::Renderer,
-        ))
+        .finish(ArtifactTerminalV1::Adapt(ArtifactAdaptReasonV1::Renderer))
         .expect("empty optional identity fields remain valid");
     let text = std::str::from_utf8(&bytes).expect("ASCII artifact");
     assert!(text.contains("driver-hex=756e6b6e6f776e"));

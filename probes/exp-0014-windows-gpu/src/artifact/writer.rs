@@ -90,9 +90,9 @@ impl InteractiveArtifactBuilderV1 {
             device_type_name(adapter.device_type),
             adapter.vendor,
             adapter.device,
-            hexadecimal(adapter.name),
-            hexadecimal(adapter.driver),
-            hexadecimal(adapter.driver_info)
+            hexadecimal(observed_or_unknown(adapter.name)),
+            hexadecimal(observed_or_unknown(adapter.driver)),
+            hexadecimal(observed_or_unknown(adapter.driver_info))
         ))?;
         self.has_adapter = true;
         Ok(())
@@ -330,4 +330,8 @@ fn hexadecimal(bytes: &[u8]) -> String {
         encoded.push(char::from(DIGITS[usize::from(byte & 0x0f)]));
     }
     encoded
+}
+
+fn observed_or_unknown(bytes: &[u8]) -> &[u8] {
+    if bytes.is_empty() { b"unknown" } else { bytes }
 }
