@@ -25,7 +25,8 @@ if (
 ) {
     throw "WU-0014 requires Windows x86-64"
 }
-if (Test-Path -LiteralPath $Artifact) {
+$ArtifactPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Artifact)
+if (Test-Path -LiteralPath $ArtifactPath) {
     throw "artifact path already exists"
 }
 
@@ -67,20 +68,20 @@ Assert-NativeExit "cargo build"
 
 $Runner = ".\target\release\fenestra-ui-exp-0014-windows-gpu.exe"
 $Verifier = ".\target\release\fenestra-wu-0014-verify.exe"
-& $Runner $Artifact
+& $Runner $ArtifactPath
 $ProbeExit = $LASTEXITCODE
-if (-not (Test-Path -LiteralPath $Artifact)) {
+if (-not (Test-Path -LiteralPath $ArtifactPath)) {
     throw "probe exited with code $ProbeExit without an artifact"
 }
 
-& $Verifier $Artifact
+& $Verifier $ArtifactPath
 Assert-NativeExit "artifact verifier"
 if ($ProbeExit -ne 0) {
     throw "probe exited with code $ProbeExit"
 }
 
-$ArtifactHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $Artifact).Hash.ToLowerInvariant()
-$ArtifactBytes = [System.IO.File]::ReadAllBytes($Artifact).Length
+$ArtifactHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $ArtifactPath).Hash.ToLowerInvariant()
+$ArtifactBytes = [System.IO.File]::ReadAllBytes($ArtifactPath).Length
 Write-Output "artifact-sha256=$ArtifactHash"
 Write-Output "artifact-bytes=$ArtifactBytes"
 
