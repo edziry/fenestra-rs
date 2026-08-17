@@ -1,6 +1,6 @@
 # WU-0014 Windows interactive GPU spine plan
 
-Status: active
+Status: complete
 Scope: real GPU presentation and native interaction evidence
 Research baseline: `fenestra-research` commit
 `176c42139776ed9f1ef879cd135bddadaf12a9da`
