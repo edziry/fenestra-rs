@@ -33,8 +33,21 @@ if ($ExpectedCommitPrefix -notmatch "^[0-9a-f]{7,40}$") {
     throw "bundle filename has no commit prefix"
 }
 
-git bundle verify $Bundle
-Assert-NativeExit "git bundle verify"
+$VerifyRepository = Join-Path $PSScriptRoot ".fenestra-wu-0014-bundle-verify"
+if (Test-Path -LiteralPath $VerifyRepository) {
+    throw "bundle verification path already exists"
+}
+try {
+    git init --bare $VerifyRepository
+    Assert-NativeExit "git init --bare"
+    git -C $VerifyRepository bundle verify $Bundle
+    Assert-NativeExit "git bundle verify"
+} finally {
+    if (Test-Path -LiteralPath $VerifyRepository) {
+        Remove-Item -LiteralPath $VerifyRepository -Recurse -Force
+    }
+}
+
 git clone -b feat/windows-interactive-gpu-spine $Bundle $Checkout
 Assert-NativeExit "git clone"
 
