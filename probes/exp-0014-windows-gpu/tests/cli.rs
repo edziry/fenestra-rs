@@ -2,7 +2,10 @@ use std::ffi::OsString;
 use std::path::Path;
 use std::process::Command;
 
-use fenestra_ui_exp_0014_windows_gpu::{ProbeCliErrorKindV1, parse_probe_cli_v1};
+use fenestra_ui_exp_0014_windows_gpu::{
+    InteractiveArtifactErrorKindV1, InteractiveProbeErrorKindV1, ProbeCliErrorKindV1,
+    parse_probe_cli_v1,
+};
 
 #[test]
 fn release_cli_accepts_exactly_one_artifact_path() {
@@ -59,5 +62,16 @@ fn release_binary_reports_the_typed_probe_failure() {
             .expect("ASCII diagnostic")
             .trim(),
         "interactive-probe-error=BuildProfile"
+    );
+}
+
+#[test]
+fn native_probe_failure_retains_the_artifact_error_kind() {
+    assert_eq!(
+        format!(
+            "{:?}",
+            InteractiveProbeErrorKindV1::Artifact(InteractiveArtifactErrorKindV1::Protocol)
+        ),
+        "Artifact(Protocol)"
     );
 }
