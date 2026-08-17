@@ -27,6 +27,23 @@ Install the exact toolchain without changing another default toolchain:
 rustup toolchain install 1.97.1-x86_64-pc-windows-msvc --profile minimal --component rustfmt,clippy
 ```
 
+## Preferred transfer kit
+
+The prepared transfer ZIP contains exactly one verified Git bundle and the
+versioned bootstrap. Extract it into a new directory and run:
+
+```powershell
+& ".\bootstrap-windows.ps1"
+```
+
+The bootstrap requires Windows, refuses an existing checkout, verifies the Git
+bundle, clones the exact feature branch, checks that `HEAD` matches the commit
+prefix in the bundle filename, and starts the registered runner below. No
+manual source editing or remote repository is required.
+
+The bundle-only path remains available when a checkout must be created
+manually.
+
 If the source was transferred as a Git bundle, clone the exact branch first:
 
 ```powershell

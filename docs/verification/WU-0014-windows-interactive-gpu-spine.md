@@ -34,7 +34,9 @@ The probe implementation and final Linux gate at commit `eda8236` provide:
 - release-only artifact admission plus asynchronous device-error capture so a
   debug executable cannot claim release evidence and GPU out-of-memory cannot
   become an uncaught or false-pass result;
-- one fail-closed PowerShell runner for the complete registered Windows gate.
+- one fail-closed PowerShell runner for the complete registered Windows gate;
+- one transfer bootstrap that verifies and clones the exact bundle before
+  starting that runner.
 
 These Linux commands passed on Rust 1.97.1:
 
@@ -48,7 +50,7 @@ cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
 RUSTDOCFLAGS='-D warnings -D missing-docs' cargo doc --workspace --all-features --no-deps --locked
 ```
 
-All 29 retained probe tests and the complete workspace passed. The release
+All 30 retained probe tests and the complete workspace passed. The release
 runner was 12 MiB and the standalone verifier was 1.2 MiB on the local
 Linux host. The host exposed a Wayland session and the release event loop
 remained live until the unattended manual control was cancelled. No Linux
@@ -67,7 +69,7 @@ frame.
 
 ## Observed friction and corrections
 
-Five corrections were made through failing regression tests before the
+Six corrections were made through failing regression tests before the
 registered run:
 
 - debug builds are rejected before forming release-labeled evidence;
@@ -75,22 +77,25 @@ registered run:
 - a burst of resize-drag events stages the latest extent so the recorded resize
   and completed presentation cannot diverge;
 - uncaptured wgpu validation, internal, device-loss, and out-of-memory signals
-  become closed typed outcomes, with out-of-memory taking priority; and
+  become closed typed outcomes, with out-of-memory taking priority;
 - the multi-command Windows handoff is encoded as one bounded, pinned,
-  clean-tree-enforcing operator script with a source contract test.
+  clean-tree-enforcing operator script with a source contract test; and
+- transfer is encoded as a bounded bootstrap that verifies bundle integrity,
+  exact branch and commit identity, and a new checkout before delegation.
 
 The standalone verifier is also executed by an integration test. It accepts a
 complete pass artifact, rejects invalid bytes, and prints only bounded summary
 facts.
 
-The exact versioned PowerShell runner was additionally loaded by the
-PowerShell language parser in a read-only Linux container pinned to manifest
+The exact versioned PowerShell runner and transfer bootstrap were additionally
+loaded by the PowerShell language parser in a read-only Linux container pinned
+to manifest
 digest `sha256:810c4f1e0c9d23022c3ec18c50a6205ee4b60766f1739d329b2948df1fd7d5b0`.
-The parser reported zero errors. Executing the same script in that container
-reached and returned the exact `WU-0014 requires Windows` guard before toolchain
-installation or repository mutation. These controls establish script syntax
-and fail-closed host admission only; they do not establish Windows PowerShell,
-MSVC, Win32, DX12, or GPU behavior.
+The parser reported zero errors for both files. Executing each script in that
+container reached and returned its exact Windows guard before toolchain
+installation, cloning, or repository mutation. These controls establish
+script syntax and fail-closed host admission only; they do not establish
+Windows PowerShell, MSVC, Win32, DX12, or GPU behavior.
 
 ## Registered execution
 
