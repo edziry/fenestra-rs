@@ -8,6 +8,7 @@ members = [
     "crates/fenestra-ui-runtime",
     "crates/fenestra-ui-spatial",
     "crates/fenestra-ui-testkit",
+    "apps/fenestra-layout-inspector",
     "probes/exp-0001-native-spine",
     "probes/exp-0001-spine",
     "probes/exp-0007-typed-authoring",

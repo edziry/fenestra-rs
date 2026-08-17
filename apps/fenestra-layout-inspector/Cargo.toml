@@ -1,0 +1,34 @@
+[package]
+name = "fenestra-layout-inspector"
+description = "First usable Fenestra spatial layout inspector"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+repository.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+fenestra-ui-ir.workspace = true
+fenestra-ui-runtime.workspace = true
+fenestra-ui-spatial.workspace = true
+
+[build-dependencies]
+fenestra-ui-authoring.workspace = true
+fenestra-ui-ir.workspace = true
+
+[target.'cfg(target_os = "linux")'.dependencies]
+winit = { version = "=0.30.13", default-features = false, features = [
+    "rwh_06",
+    "wayland",
+    "wayland-dlopen",
+] }
+softbuffer = { version = "=0.4.8", default-features = false, features = [
+    "wayland",
+    "wayland-dlopen",
+] }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+winit = { version = "=0.30.13", default-features = false, features = ["rwh_06"] }
+softbuffer = { version = "=0.4.8", default-features = false }

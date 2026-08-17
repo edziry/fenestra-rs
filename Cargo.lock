@@ -412,6 +412,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "fenestra-layout-inspector"
+version = "0.2.0"
+dependencies = [
+ "fenestra-ui-authoring",
+ "fenestra-ui-ir",
+ "fenestra-ui-runtime",
+ "fenestra-ui-spatial",
+ "softbuffer",
+ "winit",
+]
+
+[[package]]
 name = "fenestra-ui"
 version = "0.2.0"
 
