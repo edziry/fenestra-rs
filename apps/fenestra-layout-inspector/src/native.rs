@@ -28,8 +28,17 @@ pub enum NativeInspectorError {
 
 /// Runs the interactive layout inspector until its window is closed.
 pub fn run_native() -> Result<(), NativeInspectorError> {
+    run_native_inner(false)
+}
+
+/// Runs one native presentation and exits through the event loop.
+pub fn run_native_smoke() -> Result<(), NativeInspectorError> {
+    run_native_inner(true)
+}
+
+fn run_native_inner(auto_close: bool) -> Result<(), NativeInspectorError> {
     let event_loop = EventLoop::new().map_err(|_| NativeInspectorError::EventLoop)?;
-    let mut application = NativeApplication::new()?;
+    let mut application = NativeApplication::new(auto_close)?;
     event_loop
         .run_app(&mut application)
         .map_err(|_| NativeInspectorError::EventLoop)?;
@@ -38,6 +47,8 @@ pub fn run_native() -> Result<(), NativeInspectorError> {
 
 struct NativeApplication {
     inspector: LayoutInspector,
+    auto_close: bool,
+    presented: bool,
     window: Option<Arc<Window>>,
     _context: Option<NativeContext>,
     surface: Option<NativeSurface>,
@@ -45,9 +56,11 @@ struct NativeApplication {
 }
 
 impl NativeApplication {
-    fn new() -> Result<Self, NativeInspectorError> {
+    fn new(auto_close: bool) -> Result<Self, NativeInspectorError> {
         Ok(Self {
             inspector: LayoutInspector::new().map_err(NativeInspectorError::Application)?,
+            auto_close,
+            presented: false,
             window: None,
             _context: None,
             surface: None,
@@ -133,7 +146,9 @@ impl NativeApplication {
         window.pre_present_notify();
         buffer
             .present()
-            .map_err(|_| NativeInspectorError::Presenter)
+            .map_err(|_| NativeInspectorError::Presenter)?;
+        self.presented = true;
+        Ok(())
     }
 
     fn abort(&mut self, event_loop: &ActiveEventLoop, error: NativeInspectorError) {
@@ -193,6 +208,12 @@ impl ApplicationHandler for NativeApplication {
         match result {
             Ok(()) => self.request_redraw(),
             Err(error) => self.abort(event_loop, error),
+        }
+    }
+
+    fn about_to_wait(&mut self, event_loop: &ActiveEventLoop) {
+        if self.auto_close && self.presented {
+            event_loop.exit();
         }
     }
 }
