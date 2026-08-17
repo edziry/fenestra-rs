@@ -45,7 +45,9 @@ fn windows_transfer_bootstrap_verifies_clones_and_runs_the_bundle() {
     for required in [
         "Set-StrictMode -Version Latest",
         "fenestra-wu-0014-*.bundle",
-        "git bundle verify",
+        "git init --bare $VerifyRepository",
+        "git -C $VerifyRepository bundle verify $Bundle",
+        "Remove-Item -LiteralPath $VerifyRepository -Recurse -Force",
         "git clone -b feat/windows-interactive-gpu-spine",
         "git -C $Checkout rev-parse HEAD",
         "StartsWith($ExpectedCommitPrefix",
