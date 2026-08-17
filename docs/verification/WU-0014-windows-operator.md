@@ -1,6 +1,6 @@
 # WU-0014 Windows DX12 operator protocol
 
-Status: ready for registered execution
+Status: registered pass recorded
 Required host: Windows x86-64 with a physical GPU
 Required Rust host: `x86_64-pc-windows-msvc`
 
@@ -93,8 +93,9 @@ The artifact path must not already exist. The runner refuses to overwrite it.
 
 ```powershell
 $Artifact = ".\probes\exp-0014-windows-gpu\evidence\windows-dx12-v1.txt"
-if (Test-Path $Artifact) { throw "artifact path already exists" }
-& ".\target\release\fenestra-ui-exp-0014-windows-gpu.exe" $Artifact
+$ArtifactPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Artifact)
+if (Test-Path $ArtifactPath) { throw "artifact path already exists" }
+& ".\target\release\fenestra-ui-exp-0014-windows-gpu.exe" $ArtifactPath
 ```
 
 Follow the window title one step at a time:
@@ -115,10 +116,10 @@ and returns a failing process exit. An unsupported environment writes an
 Run the standalone verifier against the bytes written by the runner:
 
 ```powershell
-& ".\target\release\fenestra-wu-0014-verify.exe" $Artifact
+& ".\target\release\fenestra-wu-0014-verify.exe" $ArtifactPath
 if ($LASTEXITCODE -ne 0) { throw "WU-0014 evidence did not pass" }
-Get-FileHash -Algorithm SHA256 $Artifact
-[System.IO.File]::ReadAllBytes($Artifact).Length
+Get-FileHash -Algorithm SHA256 $ArtifactPath
+[System.IO.File]::ReadAllBytes($ArtifactPath).Length
 ```
 
 The verifier prints only a `pass` summary containing record count, byte count,
@@ -134,3 +135,18 @@ git status --short
 ```
 
 The expected source-tree change after a pass is only the new evidence file.
+
+## Recorded result
+
+The registered run completed at source commit
+`db0e86769950be8bb7387055f6eb3986062fc469` on a physical NVIDIA GeForce RTX
+4060 using DX12. The standalone verifier reported:
+
+```text
+pass|records=16|bytes=1216|generation=4
+```
+
+The preserved artifact SHA-256 is
+`7b856a334ba17de5415758daebd69af3b3ac84966021cdf884a342506d736af5`.
+See the [registered verification record](WU-0014-windows-interactive-gpu-spine.md)
+for environment facts, interaction method, limitations, and conclusions.
