@@ -12,23 +12,40 @@ use fenestra_ui_exp_0014_windows_gpu::{
 };
 
 fn main() -> ExitCode {
-    let Ok(cli) = parse_probe_cli_v1(std::env::args_os()) else {
-        return ExitCode::FAILURE;
+    let cli = match parse_probe_cli_v1(std::env::args_os()) {
+        Ok(cli) => cli,
+        Err(error) => {
+            eprintln!("probe-cli-error={error:?}");
+            return ExitCode::FAILURE;
+        }
     };
-    let Ok(bytes) = run_interactive_probe_v1() else {
-        return ExitCode::FAILURE;
+    let bytes = match run_interactive_probe_v1() {
+        Ok(bytes) => bytes,
+        Err(error) => {
+            eprintln!("interactive-probe-error={error:?}");
+            return ExitCode::FAILURE;
+        }
     };
-    let Ok(verified) = verify_interactive_artifact_v1(&bytes) else {
-        return ExitCode::FAILURE;
+    let verified = match verify_interactive_artifact_v1(&bytes) {
+        Ok(verified) => verified,
+        Err(error) => {
+            eprintln!("artifact-verification-error={error:?}");
+            return ExitCode::FAILURE;
+        }
     };
-    let Ok(mut file) = OpenOptions::new()
+    let mut file = match OpenOptions::new()
         .write(true)
         .create_new(true)
         .open(cli.artifact_path())
-    else {
-        return ExitCode::FAILURE;
+    {
+        Ok(file) => file,
+        Err(_) => {
+            eprintln!("artifact-open-error");
+            return ExitCode::FAILURE;
+        }
     };
     if file.write_all(&bytes).and_then(|()| file.flush()).is_err() {
+        eprintln!("artifact-write-error");
         return ExitCode::FAILURE;
     }
     if verified.result() == InteractiveResultV1::Pass {
