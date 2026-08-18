@@ -15,6 +15,7 @@ fn windows_operator_is_bounded_ascii_and_uses_real_input() {
         "Set-StrictMode -Version Latest",
         "1.97.1-x86_64-pc-windows-msvc",
         "git status --porcelain",
+        "$Status.Count -ne 0",
         "cargo +$Toolchain fmt --all -- --check",
         "cargo +$Toolchain test -p $Package --all-targets --locked",
         "cargo +$Toolchain clippy -p $Package --all-targets --locked -- -D warnings",

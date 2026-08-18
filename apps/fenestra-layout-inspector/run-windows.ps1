@@ -125,7 +125,8 @@ $Toolchain = "1.97.1-x86_64-pc-windows-msvc"
 $Runner = Join-Path $Repo "target\release\fenestra-layout-inspector-native.exe"
 $Verifier = Join-Path $Repo "target\release\fenestra-layout-inspector-verify.exe"
 if (Test-Path -LiteralPath $ArtifactPath) { throw "artifact path already exists" }
-if ((git status --porcelain) -ne "") { throw "worktree is not clean" }
+$Status = @(git status --porcelain)
+if ($Status.Count -ne 0) { throw "worktree is not clean" }
 
 cargo +$Toolchain fmt --all -- --check
 cargo +$Toolchain test -p $Package --all-targets --locked -- --test-threads=1
