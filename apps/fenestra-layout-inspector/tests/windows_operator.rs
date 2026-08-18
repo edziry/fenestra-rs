@@ -36,6 +36,8 @@ fn windows_operator_is_bounded_ascii_and_uses_real_input() {
         "New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive",
         "interactive-failure=",
         "Test-Path -LiteralPath $ArtifactPath",
+        "$TaskRunningCode = 267009",
+        "interactive task timed out",
     ] {
         assert!(script.contains(required), "missing `{required}`");
     }

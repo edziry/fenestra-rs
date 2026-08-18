@@ -146,15 +146,17 @@ $Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument $Arguments
 $Principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive -RunLevel Limited
 Register-ScheduledTask -TaskName $TaskName -Action $Action -Principal $Principal -Force | Out-Null
 try {
-    $started = Get-Date
+    $started = (Get-Date).AddSeconds(-2)
+    $TaskRunningCode = 267009
     Start-ScheduledTask -TaskName $TaskName
     for ($attempt = 0; $attempt -lt 120; $attempt++) {
         $info = Get-ScheduledTaskInfo -TaskName $TaskName
         if (Test-Path -LiteralPath $ArtifactPath) { break }
-        if ($info.LastRunTime -ge $started -and $info.LastTaskResult -ne 0) { break }
+        if ($info.LastRunTime -ge $started -and $info.LastTaskResult -ne $TaskRunningCode) { break }
         Start-Sleep -Milliseconds 250
     }
     $info = Get-ScheduledTaskInfo -TaskName $TaskName
+    if ($info.LastTaskResult -eq $TaskRunningCode) { throw "interactive task timed out" }
     if ($info.LastTaskResult -ne 0) { throw "interactive task failed with code $($info.LastTaskResult)" }
 } finally {
     Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction SilentlyContinue
