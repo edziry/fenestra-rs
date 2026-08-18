@@ -122,3 +122,13 @@ fn verifier_rejects_reordered_or_unbounded_evidence() {
         Some(EvidenceMilestone::InitialPresent)
     );
 }
+
+#[test]
+fn committed_windows_artifact_is_still_independently_verified() {
+    let bytes = include_bytes!("artifacts/windows-native-v1.txt");
+    let verified = verify_artifact(bytes).expect("committed Windows artifact");
+    assert_eq!(verified.result(), EvidenceResult::Pass);
+    assert_eq!(verified.record_count(), 10);
+    assert_eq!(verified.byte_count(), 608);
+    assert_eq!(verified.final_generation(), Some(6));
+}

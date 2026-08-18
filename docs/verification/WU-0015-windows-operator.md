@@ -1,6 +1,6 @@
 # WU-0015 Windows native operator
 
-Status: implementation complete; interactive evidence pending
+Status: verified
 
 ## Scope
 
@@ -48,3 +48,16 @@ Preserve the exact artifact bytes, verifier output, source commit, Windows
 version, Rust toolchain, artifact byte count, and SHA-256 together. Do not
 claim a pass from a screenshot, process exit alone, or an artifact that the
 standalone verifier did not accept.
+
+## Recorded result
+
+The registered session used Windows 10 build `26200`, Rust
+`1.97.1-x86_64-pc-windows-msvc`, and source commit
+`95a5f35290e6b8574fe2aadcf5cfc333d38821b1`. The verifier reported:
+
+```text
+pass|records=10|bytes=608|generation=6
+```
+
+The retained artifact SHA-256 is
+`641d34244cc3e16cc9ad618d999b3ab093e87c714c2b0ea903a58ab9fd677e29`.

@@ -1,6 +1,14 @@
 # WU-0015 first usable Fenestra application verification
 
-Status: native automation implemented; Windows evidence run pending
+Status: native automation verified
+
+Registered native artifact: [windows-native-v1.txt](../../apps/fenestra-layout-inspector/tests/artifacts/windows-native-v1.txt)
+
+Source commit: `95a5f35290e6b8574fe2aadcf5cfc333d38821b1`
+
+Windows result: `pass|records=10|bytes=608|generation=6`
+
+Artifact SHA-256: `641d34244cc3e16cc9ad618d999b3ab093e87c714c2b0ea903a58ab9fd677e29`
 
 ## Current pure acceptance slice
 
@@ -22,8 +30,8 @@ reviewed as one tuple.
 
 The native protocol builds the same release package, presents the runtime paint
 frame through a native window, exercises real pointer, keyboard, and resize
-events, and records a bounded ASCII artifact. A passing native run is required
-before WU-0015 is marked complete.
+events, and records a bounded ASCII artifact. The registered native run passed
+the independent verifier.
 
 The ordered artifact milestones are:
 

@@ -1,6 +1,6 @@
 # WU-0015 first usable Fenestra application
 
-Status: implementation in progress
+Status: native application slice verified
 Branch: `feat/first-usable-application`
 
 ## Objective
