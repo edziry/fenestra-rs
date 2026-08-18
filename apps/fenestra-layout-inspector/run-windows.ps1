@@ -115,7 +115,9 @@ if ($Interactive) {
     exit 0
 }
 
-$ArtifactPath = [System.IO.Path]::GetFullPath((Get-UnresolvedProviderPathFromPSPath $Artifact))
+$ArtifactPath = [System.IO.Path]::GetFullPath(
+    $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Artifact)
+)
 $Repo = (Get-Location).Path
 $Package = "fenestra-layout-inspector"
 $Toolchain = "1.97.1-x86_64-pc-windows-msvc"
