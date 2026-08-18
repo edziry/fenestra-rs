@@ -145,7 +145,8 @@ try {
     Start-ScheduledTask -TaskName $TaskName
     for ($attempt = 0; $attempt -lt 120; $attempt++) {
         $info = Get-ScheduledTaskInfo -TaskName $TaskName
-        if ($info.LastRunTime -ge $started -and $info.State -eq "Ready") { break }
+        $task = Get-ScheduledTask -TaskName $TaskName
+        if ($info.LastRunTime -ge $started -and $task.State -eq "Ready") { break }
         Start-Sleep -Milliseconds 250
     }
     $info = Get-ScheduledTaskInfo -TaskName $TaskName

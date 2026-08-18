@@ -34,6 +34,7 @@ fn windows_operator_is_bounded_ascii_and_uses_real_input() {
         "Get-FileHash -Algorithm SHA256 -LiteralPath $ArtifactPath",
         "ReadAllBytes($ArtifactPath).Length",
         "New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive",
+        "Get-ScheduledTask -TaskName $TaskName",
     ] {
         assert!(script.contains(required), "missing `{required}`");
     }
