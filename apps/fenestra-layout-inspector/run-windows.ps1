@@ -96,21 +96,26 @@ function Wait-Window([int]$ProcessId) {
 
 if ($Interactive) {
     if ([string]::IsNullOrWhiteSpace($Runner) -or [string]::IsNullOrWhiteSpace($Artifact)) { throw "interactive paths are required" }
-    $process = Start-Process -FilePath $Runner -ArgumentList "--artifact=$Artifact" -PassThru
     try {
-        $window = Wait-Window $process.Id
-        Start-Sleep -Milliseconds 750
-        if (-not [FenestraWin32]::ClickClient($window, 4, 3)) { throw "native pointer input failed" }
-        Start-Sleep -Milliseconds 400
-        if (-not [FenestraWin32]::PressSpace()) { throw "native keyboard input failed" }
-        Start-Sleep -Milliseconds 500
-        if (-not [FenestraWin32]::Resize($window, 704, 460)) { throw "native resize failed" }
-        Start-Sleep -Milliseconds 700
-        if (-not [FenestraWin32]::Close($window)) { throw "native close failed" }
-        $process.WaitForExit()
-        if ($process.ExitCode -ne 0) { throw "native runner failed with exit code $($process.ExitCode)" }
-    } finally {
-        if (-not $process.HasExited) { Stop-Process -Id $process.Id -Force }
+        $process = Start-Process -FilePath $Runner -ArgumentList "--artifact=$Artifact" -PassThru
+        try {
+            $window = Wait-Window $process.Id
+            Start-Sleep -Milliseconds 750
+            if (-not [FenestraWin32]::ClickClient($window, 4, 3)) { throw "native pointer input failed" }
+            Start-Sleep -Milliseconds 400
+            if (-not [FenestraWin32]::PressSpace()) { throw "native keyboard input failed" }
+            Start-Sleep -Milliseconds 500
+            if (-not [FenestraWin32]::Resize($window, 704, 460)) { throw "native resize failed" }
+            Start-Sleep -Milliseconds 700
+            if (-not [FenestraWin32]::Close($window)) { throw "native close failed" }
+            $process.WaitForExit()
+            if ($process.ExitCode -ne 0) { throw "native runner failed with exit code $($process.ExitCode)" }
+        } finally {
+            if (-not $process.HasExited) { Stop-Process -Id $process.Id -Force }
+        }
+    } catch {
+        "interactive-failure=$($_.Exception.Message)" | Set-Content -LiteralPath "$Artifact.interactive.log" -Encoding ascii
+        throw
     }
     exit 0
 }
@@ -145,8 +150,8 @@ try {
     Start-ScheduledTask -TaskName $TaskName
     for ($attempt = 0; $attempt -lt 120; $attempt++) {
         $info = Get-ScheduledTaskInfo -TaskName $TaskName
-        $task = Get-ScheduledTask -TaskName $TaskName
-        if ($info.LastRunTime -ge $started -and $task.State -eq "Ready") { break }
+        if (Test-Path -LiteralPath $ArtifactPath) { break }
+        if ($info.LastRunTime -ge $started -and $info.LastTaskResult -ne 0) { break }
         Start-Sleep -Milliseconds 250
     }
     $info = Get-ScheduledTaskInfo -TaskName $TaskName
