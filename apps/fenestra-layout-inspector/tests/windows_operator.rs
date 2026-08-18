@@ -20,6 +20,8 @@ fn windows_operator_is_bounded_ascii_and_uses_real_input() {
         "cargo +$Toolchain clippy -p $Package --all-targets --locked -- -D warnings",
         "cargo +$Toolchain doc -p $Package --no-deps --locked",
         "cargo +$Toolchain build --release -p $Package --bins --locked",
+        "Join-Path $PSScriptRoot",
+        "Set-Location -LiteralPath $Repo",
         "SessionState.Path.GetUnresolvedProviderPathFromPSPath($Artifact)",
         "SendInput",
         "ClickClient",

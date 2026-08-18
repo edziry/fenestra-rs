@@ -118,7 +118,8 @@ if ($Interactive) {
 $ArtifactPath = [System.IO.Path]::GetFullPath(
     $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Artifact)
 )
-$Repo = (Get-Location).Path
+$Repo = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot "..\.."))
+Set-Location -LiteralPath $Repo
 $Package = "fenestra-layout-inspector"
 $Toolchain = "1.97.1-x86_64-pc-windows-msvc"
 $Runner = Join-Path $Repo "target\release\fenestra-layout-inspector-native.exe"
