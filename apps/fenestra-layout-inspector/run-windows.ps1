@@ -25,7 +25,6 @@ public static class FenestraWin32 {
     [DllImport("user32.dll")] private static extern bool SetCursorPos(int x, int y);
     [DllImport("user32.dll")] private static extern uint SendInput(uint count, INPUT[] inputs, int size);
     [DllImport("user32.dll")] private static extern bool SetWindowPos(IntPtr hwnd, IntPtr insertAfter, int x, int y, int width, int height, uint flags);
-    [DllImport("user32.dll")] private static extern bool PostMessage(IntPtr hwnd, uint message, IntPtr wParam, IntPtr lParam);
 
     [StructLayout(LayoutKind.Sequential)] private struct POINT { public int X; public int Y; }
     [StructLayout(LayoutKind.Sequential)] private struct RECT { public int Left; public int Top; public int Right; public int Bottom; }
@@ -70,7 +69,11 @@ public static class FenestraWin32 {
     }
 
     public static bool Close(IntPtr hwnd) {
-        return PostMessage(hwnd, 0x0010, IntPtr.Zero, IntPtr.Zero);
+        return SetForegroundWindow(hwnd)
+            && Keyboard(0x0038, 0x0008)
+            && Keyboard(0x003E, 0x0008)
+            && Keyboard(0x003E, 0x0008 | 0x0002)
+            && Keyboard(0x0038, 0x0008 | 0x0002);
     }
 
     private static bool Mouse(uint flags) {

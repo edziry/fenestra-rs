@@ -34,7 +34,7 @@ sequence:
 1. Move the real cursor to client coordinate `(4,3)` and send a left click.
 2. Send one physical `Space` key press to insert keyed tile `30`.
 3. Resize the window to `704x460`.
-4. Send a normal close request.
+4. Send a real `Alt+F4` close input.
 
 The application writes the artifact only after the close event and verifies
 the bytes before returning success. The separate release verifier then checks

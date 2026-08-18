@@ -33,7 +33,7 @@ initial-present -> pointer-move -> pointer-press -> keyed-insert
 ```
 
 The native operator uses `SendInput` for the pointer and `Space` key, then
-`SetWindowPos` and a normal window close message. The standalone verifier
+`SetWindowPos` and a real `Alt+F4` close input. The standalone verifier
 replays the artifact independently of the native event loop:
 
 ```text

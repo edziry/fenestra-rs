@@ -28,7 +28,7 @@ fn windows_operator_is_bounded_ascii_and_uses_real_input() {
         "ClickClient",
         "PressSpace",
         "SetWindowPos",
-        "PostMessage",
+        "Close(IntPtr hwnd)",
         "fenestra-layout-inspector-native.exe",
         "fenestra-layout-inspector-verify.exe",
         "Get-FileHash -Algorithm SHA256 -LiteralPath $ArtifactPath",
