@@ -8,11 +8,13 @@ members = [
     "crates/fenestra-ui-runtime",
     "crates/fenestra-ui-spatial",
     "crates/fenestra-ui-testkit",
+    "apps/fenestra-layout-inspector",
     "probes/exp-0001-native-spine",
     "probes/exp-0001-spine",
     "probes/exp-0007-typed-authoring",
     "probes/exp-0008-hybrid-spatial",
     "probes/exp-0008-layout-conformance",
+    "probes/exp-0014-windows-gpu",
 ]
 resolver = "3"
 

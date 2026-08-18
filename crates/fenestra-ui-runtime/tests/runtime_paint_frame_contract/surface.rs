@@ -3,14 +3,15 @@ use std::collections::BTreeSet;
 use super::source::{all_source, read, source_dir};
 
 #[test]
-fn runtime_paint_frame_is_the_only_additive_export_and_struct() {
+fn runtime_paint_frame_and_current_frame_request_exports_are_additive() {
     let source = all_source();
     let lib = read(&source_dir().join("lib.rs"));
     let exports = prototype_exports(&lib);
     let structs = public_structs(&source);
 
-    assert_eq!(exports.len(), 75);
+    assert_eq!(exports.len(), 76);
     assert!(exports.contains("RuntimePaintFrameV2"));
+    assert!(exports.contains("VisualRequestResult"));
     assert_eq!(structs.len(), 53);
     assert!(structs.contains("RuntimePaintFrameV2"));
     assert_eq!(

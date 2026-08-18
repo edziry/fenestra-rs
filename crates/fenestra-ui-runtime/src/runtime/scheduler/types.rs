@@ -154,6 +154,15 @@ pub enum VisualCancelResult {
     AlreadyEmpty,
 }
 
+/// Result of explicitly requesting presentation of the current generation.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum VisualRequestResult {
+    /// A new platform frame request became pending.
+    Requested,
+    /// Existing replaceable visual work now covers the request.
+    Coalesced,
+}
+
 /// Closed failure categories for the scheduler prototype.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum SchedulerErrorKind {

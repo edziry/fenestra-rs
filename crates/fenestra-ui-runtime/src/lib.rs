@@ -30,6 +30,6 @@ pub mod prototype {
         SchedulerCapacity, SchedulerError, SchedulerErrorKind, SchedulerInput,
         SchedulerInputResult, SchedulerLane, SchedulerState, SchedulerStats, SchedulerTick,
         SpatialViewportChangeViewV2, SubmissionId, TransactionError, TransactionErrorKind,
-        UiRuntime, UiScheduler, UiTransaction, VisualCancelResult,
+        UiRuntime, UiScheduler, UiTransaction, VisualCancelResult, VisualRequestResult,
     };
 }

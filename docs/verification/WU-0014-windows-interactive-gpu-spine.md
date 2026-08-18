@@ -1,0 +1,145 @@
+# WU-0014 Windows interactive GPU spine verification
+
+Status: complete
+Linux pure result: pass
+Linux Vulkan developer result: pending
+Windows cross-compile result: pass
+Windows native pure result: pass
+Windows DX12 interactive result: pass
+Branch: `feat/windows-interactive-gpu-spine`
+Research baseline: `fenestra-research` commit
+`176c42139776ed9f1ef879cd135bddadaf12a9da`
+Registered source commit:
+`db0e86769950be8bb7387055f6eb3986062fc469`
+Registered artifact:
+`probes/exp-0014-windows-gpu/evidence/windows-dx12-v1.txt`
+Registered artifact SHA-256:
+`7b856a334ba17de5415758daebd69af3b3ac84966021cdf884a342506d736af5`
+
+## Scope
+
+The versioned [WU-0014 plan](../design/windows-interactive-gpu-spine.md)
+defines the required scenario, candidate boundary, protocol, artifact, exit
+criteria, and nonclaims.
+
+No result is recorded until its commands, source commit, environment, artifact,
+and limitations are independently checkable. A local or Linux GPU run cannot
+substitute for the required Windows DX12 interactive result.
+
+## Local implementation evidence
+
+The probe implementation used by the registered run at commit `db0e867`
+provides:
+
+- a target-scoped winit 0.30.13 window and exact DX12 or Vulkan wgpu instance;
+- non-fallback adapter admission before Vello renderer creation;
+- the registered format-2 `.fen` scene through runtime scheduling, the exact
+  reference raster, one Vello image scene, wgpu submission, surface present,
+  and bounded GPU completion;
+- pointer mutation, native resize, suspend, restore, redraw, and close handling;
+- a typed bounded artifact writer and independent verifier;
+- release-only artifact admission plus asynchronous device-error capture so a
+  debug executable cannot claim release evidence and GPU out-of-memory cannot
+  become an uncaught or false-pass result;
+- one fail-closed PowerShell runner for the complete registered Windows gate;
+- one transfer bootstrap that verifies and clones the exact bundle before
+  starting that runner.
+
+These Linux commands passed on Rust 1.97.1:
+
+```text
+cargo build --release -p fenestra-ui-exp-0014-windows-gpu --bins --locked
+cargo test -p fenestra-ui-exp-0014-windows-gpu --all-targets --locked
+cargo clippy -p fenestra-ui-exp-0014-windows-gpu --all-targets --locked -- -D warnings
+RUSTDOCFLAGS='-D warnings -D missing-docs' cargo doc -p fenestra-ui-exp-0014-windows-gpu --no-deps --locked
+cargo test --workspace --all-targets --all-features --locked
+cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+RUSTDOCFLAGS='-D warnings -D missing-docs' cargo doc --workspace --all-features --no-deps --locked
+```
+
+All 33 retained probe tests and the complete workspace passed. The release
+runner was 12 MiB and the standalone verifier was 1.2 MiB on the local
+Linux host. The host exposed a Wayland session and the release event loop
+remained live until the unattended manual control was cancelled. No Linux
+artifact was written and no Linux GPU pass is claimed.
+
+The MSVC Rust standard library was then installed for the pinned toolchain and
+this source-only cross-target check passed:
+
+```text
+cargo check -p fenestra-ui-exp-0014-windows-gpu --all-targets --target x86_64-pc-windows-msvc --locked
+```
+
+This establishes Windows type checking only. It does not link with the MSVC
+toolchain, open a Win32 window, select DX12, execute GPU work, or present a
+frame.
+
+## Observed friction and corrections
+
+Eleven corrections were made through failing regression tests before the
+registered run:
+
+- debug builds are rejected before forming release-labeled evidence;
+- adapter identity fields are bounded without splitting UTF-8;
+- a burst of resize-drag events stages the latest extent so the recorded resize
+  and completed presentation cannot diverge;
+- uncaptured wgpu validation, internal, device-loss, and out-of-memory signals
+  become closed typed outcomes, with out-of-memory taking priority;
+- the multi-command Windows handoff is encoded as one bounded, pinned,
+  clean-tree-enforcing operator script with a source contract test;
+- transfer is encoded as a bounded bootstrap that verifies bundle integrity,
+  exact branch and commit identity, and a new checkout before delegation;
+- bundle verification runs inside an isolated bare repository so the bootstrap
+  also works from a freshly extracted transfer directory;
+- the native release binary prints bounded typed failure diagnostics instead
+  of returning a silent nonzero result;
+- artifact failures preserve their exact verifier subtype instead of collapsing
+  every malformed or incomplete artifact into one generic result;
+- absent Windows adapter metadata is encoded as the bounded ASCII value
+  `unknown` instead of producing an invalid empty artifact field; and
+- the Windows runner resolves the artifact path once before native execution
+  and .NET byte inspection, avoiding PowerShell and process working-directory
+  divergence.
+
+The standalone verifier is also executed by an integration test. It accepts a
+complete pass artifact, rejects invalid bytes, and prints only bounded summary
+facts.
+
+The exact versioned PowerShell runner and transfer bootstrap were additionally
+loaded by the PowerShell language parser in a read-only Linux container pinned
+to manifest
+digest `sha256:810c4f1e0c9d23022c3ec18c50a6205ee4b60766f1739d329b2948df1fd7d5b0`.
+The parser reported zero errors for both files. Executing each script in that
+container reached and returned its exact Windows guard before toolchain
+installation, cloning, or repository mutation. These controls establish
+script syntax and fail-closed host admission only; they do not establish
+Windows PowerShell, MSVC, Win32, DX12, or GPU behavior.
+
+## Registered execution
+
+The [Windows operator protocol](WU-0014-windows-operator.md) completed at
+source commit `db0e86769950be8bb7387055f6eb3986062fc469`. Its versioned runner
+returned exit code 0 after Windows formatting, tests, clippy, documentation,
+release builds, the native interaction sequence, and standalone artifact
+verification.
+
+The registered host reported Windows kernel version `10.0.26200`, build
+`26200`, 64-bit architecture, Rust and Cargo 1.97.1, and a physical NVIDIA
+GeForce RTX 4060 with driver `32.0.15.9186`. DX12 selected the discrete
+adapter. The surface used `bgra8unorm`, FIFO present mode, and opaque alpha.
+
+The artifact records initial, mutated, resized, and restored presentations;
+pointer move and primary-button input; a physical resize from 640x420 to
+784x561; suspend and restore; and normal close. The independent Windows and
+Linux verifiers both reported:
+
+```text
+pass|records=16|bytes=1216|generation=4
+```
+
+The run was initiated over SSH through temporary scheduled tasks attached to
+the already active Windows interactive session. It exercised an actual Win32
+window, native window callbacks, DX12 GPU work, and surface presentation. The
+workstation was locked, so targeted Win32 messages supplied pointer input and
+window APIs supplied resize, minimize, restore, and close. This result does not
+claim a human manual-usability observation or broad Windows support.

@@ -1,0 +1,30 @@
+[package]
+name = "fenestra-ui-exp-0014-windows-gpu"
+description = "Disposable interactive native GPU probe for Fenestra"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+repository.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+fenestra-ui-exp-0007-typed-authoring = { path = "../exp-0007-typed-authoring", version = "=0.2.0" }
+fenestra-ui-ir.workspace = true
+fenestra-ui-runtime.workspace = true
+fenestra-ui-spatial.workspace = true
+pollster = { version = "=0.4.0", default-features = false }
+vello = { version = "=0.9.0", default-features = false, features = ["wgpu"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+wgpu = { version = "=29.0.3", default-features = false, features = ["std", "vulkan", "wgsl"] }
+winit = { version = "=0.30.13", default-features = false, features = [
+    "rwh_06",
+    "wayland",
+    "wayland-dlopen",
+] }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+wgpu = { version = "=29.0.3", default-features = false, features = ["dx12", "std", "wgsl"] }
+winit = { version = "=0.30.13", default-features = false, features = ["rwh_06"] }

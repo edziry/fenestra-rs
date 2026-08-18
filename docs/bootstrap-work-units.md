@@ -254,3 +254,28 @@ Verification: [hybrid spatial verification](verification/WU-0013-hybrid-spatial.
 Exit: layout and free placement are optional peer capabilities that can contain
 one another without coupling layout allocation, visual geometry, hit shape, or
 semantic bounds. WU-0012 remains deferred and no mobile support claim is made.
+
+## WU-0014: Windows interactive GPU spine
+
+Branch: `feat/windows-interactive-gpu-spine`
+Design: [Windows interactive GPU spine plan](design/windows-interactive-gpu-spine.md)
+Verification: [Windows interactive GPU spine verification](verification/WU-0014-windows-interactive-gpu-spine.md)
+
+- Research: start from the completed WU-0013 spatial, Vello scene, scheduler,
+  and native presentation evidence; inspect the exact Vello 0.9.0, wgpu 29.0.3,
+  and winit 0.30.13 source contracts without selecting them permanently.
+- Planning: freeze the real user scenario, DX12 and Vulkan target policy,
+  pre-accept and post-accept phases, interactive milestones, typed outcomes,
+  bounded artifact, TDD order, and explicit nonclaims.
+- Implementation: add one disposable GPU probe that consumes the registered
+  `.fen` runtime paint frame, executes a Vello image scene on a non-fallback GPU,
+  presents through a native surface, mutates runtime state from native input,
+  and verifies its own evidence.
+- Verification: run all pure gates on Linux and Windows, execute the developer
+  Vulkan control, then complete the exact Windows DX12 pointer, resize,
+  minimize, restore, and close sequence in a release build.
+
+Exit: one verified Windows DX12 artifact proves real GPU submission,
+presentation, completion, and native interaction for the registered machine
+without leaking candidate types or claiming renderer selection or product
+support.

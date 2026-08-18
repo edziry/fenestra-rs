@@ -1,0 +1,16 @@
+fenestra-windows-gpu|artifact=1|probe=14
+run|target=windows-dx12|rust-target=x86_64-pc-windows-msvc|package=0.2.0|profile=release|os=windows|os-version-hex=0d0a4d6963726f736f66742057696e646f7773205b5665727369a26e2031302e302e32363230302e393136385d
+adapter|backend=dx12|device-type=discrete|vendor=4318|device=10370|name-hex=4e5649444941204765466f726365205254582034303630|driver-hex=33322e302e31352e39313836|info-hex=756e6b6e6f776e
+surface|format=bgra8unorm|present=fifo|alpha=opaque
+event|milestone=adapter
+event|milestone=initial-present|generation=2|frame=0|submission=0|physical=640x420|logical=640x420|raster=d2a8d7b8eb56df10
+event|milestone=pointer-move
+event|milestone=pointer-press
+event|milestone=mutation-present|generation=3|frame=1|submission=1|physical=640x420|logical=640x420|raster=a0d16bb05a0c7c3a
+event|milestone=resize|physical=784x561|logical=784x561
+event|milestone=resize-present|generation=4|frame=2|submission=2|physical=784x561|logical=784x561|raster=8d347ccab0b4333a
+event|milestone=suspend
+event|milestone=restore
+event|milestone=restore-present|generation=4|frame=3|submission=3|physical=784x561|logical=784x561|raster=8d347ccab0b4333a
+event|milestone=close
+result|kind=pass|reason=complete

@@ -1,9 +1,10 @@
 mod support;
 
-use fenestra_ui_ir::prototype::PropertyValue;
+use fenestra_ui_ir::prototype::{InvalidationClass, PropertyValue};
 use fenestra_ui_runtime::prototype::{
-    QueueCapacity, SchedulerAction, SchedulerCapacity, SchedulerErrorKind, SchedulerLane,
-    SchedulerTick, UiRuntime, UiScheduler,
+    QueueCapacity, SchedulerAction, SchedulerCapacity, SchedulerErrorKind, SchedulerInput,
+    SchedulerInputResult, SchedulerLane, SchedulerTick, UiRuntime, UiScheduler,
+    VisualRequestResult,
 };
 
 use support::{WIDTH, capacity, construction, layout};
@@ -99,6 +100,53 @@ fn true_noop_schedules_no_visual_work() {
     assert_eq!(visual.accounted_bytes(), 0);
     assert_eq!(visual.earliest_tick(), None);
     assert_eq!(visual.latest_tick(), None);
+}
+
+#[test]
+fn explicit_frame_request_republishes_the_current_generation_without_mutation() {
+    let mut scheduler = scheduler();
+    let before = scheduler.committed();
+
+    assert_eq!(
+        scheduler
+            .request_current_frame(SchedulerTick::new(10))
+            .expect("current generation should be requestable"),
+        VisualRequestResult::Requested
+    );
+    assert_eq!(scheduler.committed().generation(), before.generation());
+    assert!(before.shares_state_with(&scheduler.committed()));
+    assert_eq!(
+        scheduler
+            .next_action(SchedulerTick::new(10))
+            .expect("request"),
+        Some(SchedulerAction::RequestFrame)
+    );
+    assert_eq!(
+        scheduler
+            .request_current_frame(SchedulerTick::new(11))
+            .expect("duplicate request should coalesce"),
+        VisualRequestResult::Coalesced
+    );
+    assert_eq!(
+        scheduler
+            .next_action(SchedulerTick::new(11))
+            .expect("coalesced"),
+        None
+    );
+    assert_eq!(
+        scheduler
+            .process_input(SchedulerInput::FrameReady, SchedulerTick::new(12))
+            .expect("frame boundary"),
+        SchedulerInputResult::FrameReady
+    );
+    let Some(SchedulerAction::OfferFrame(work)) = scheduler
+        .next_action(SchedulerTick::new(12))
+        .expect("current frame offer")
+    else {
+        panic!("current generation should be offered");
+    };
+    assert_eq!(work.generation(), before.generation());
+    assert!(work.invalidation().contains(InvalidationClass::Surface));
 }
 
 #[test]

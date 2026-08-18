@@ -1,0 +1,10 @@
+fenestra-layout-inspector|artifact=1|wu=0015
+event|milestone=initial-present|generation=3|viewport=640x420|nodes=8|keys=10,20|hover=0|selected=0|raster-bytes=1075200
+event|milestone=pointer-move|x=4|y=3|hit=1|generation=3
+event|milestone=pointer-press|generation=4|selected=1
+event|milestone=keyed-insert|key=30|generation=5|nodes=9|keys=10,20,30
+event|milestone=mutation-present|generation=5|viewport=640x420|raster-bytes=1075200
+event|milestone=resize|viewport=688x421
+event|milestone=resize-present|generation=6|viewport=688x421|raster-bytes=1158592
+event|milestone=close
+result|kind=pass|reason=complete
