@@ -138,7 +138,7 @@ if (-not (Test-Path -LiteralPath $Runner) -or -not (Test-Path -LiteralPath $Veri
 $TaskName = "Fenestra-WU0015-Layout-Inspector"
 $Arguments = "-NoProfile -File `"$PSCommandPath`" -Interactive -Artifact `"$ArtifactPath`" -Runner `"$Runner`" -Verifier `"$Verifier`""
 $Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument $Arguments
-$Principal = New-ScheduledTaskPrincipal -UserId "$env:USERDOMAIN\$env:USERNAME" -LogonType Interactive -RunLevel Limited
+$Principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive -RunLevel Limited
 Register-ScheduledTask -TaskName $TaskName -Action $Action -Principal $Principal -Force | Out-Null
 try {
     $started = Get-Date
