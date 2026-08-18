@@ -26,9 +26,10 @@ clips, transforms, and viewport changes.
 5. Resize the viewport and observe a new committed frame.
 6. Close the application normally.
 
-The deterministic application core currently exercises steps 2 through 5. The
-Win32 presentation shell and its operator protocol are the next implementation
-slice.
+The deterministic application core exercises steps 2 through 5. The native
+presentation shell maps left click to selection, `Space` to keyed insertion,
+and window resize to a committed viewport update. The Windows operator owns
+the real-input sequence and its bounded evidence artifact.
 
 ## Application boundary
 

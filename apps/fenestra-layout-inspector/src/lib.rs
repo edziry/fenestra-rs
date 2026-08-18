@@ -23,6 +23,9 @@ use fenestra_ui_spatial::prototype::{
 /// Native window and CPU presentation shell for the application core.
 pub mod native;
 
+/// Bounded ASCII evidence contract for the native application sequence.
+pub mod evidence;
+
 const IR_LIMITS: ValidationLimits = ValidationLimits::new(1, 8, 7, 1, 6, 19, 2, 4, 8);
 const STYLE_LIMITS: StyleValidationLimits = StyleValidationLimits::new(3);
 const SPATIAL_LIMITS: SpatialValidationLimitsV2 =

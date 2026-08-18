@@ -1,6 +1,6 @@
 # WU-0015 first usable Fenestra application verification
 
-Status: implementation in progress
+Status: native automation implemented; Windows evidence run pending
 
 ## Current pure acceptance slice
 
@@ -20,10 +20,37 @@ reviewed as one tuple.
 
 ## Native acceptance slice
 
-The pending native protocol will build the same release package, present the
-runtime paint frame through a native window, exercise real pointer and resize
-events, and record a bounded ASCII artifact. A passing native run will be
-required before WU-0015 is marked complete.
+The native protocol builds the same release package, presents the runtime paint
+frame through a native window, exercises real pointer, keyboard, and resize
+events, and records a bounded ASCII artifact. A passing native run is required
+before WU-0015 is marked complete.
+
+The ordered artifact milestones are:
+
+```text
+initial-present -> pointer-move -> pointer-press -> keyed-insert
+-> mutation-present -> resize -> resize-present -> close
+```
+
+The native operator uses `SendInput` for the pointer and `Space` key, then
+`SetWindowPos` and a normal window close message. The standalone verifier
+replays the artifact independently of the native event loop:
+
+```text
+target\release\fenestra-layout-inspector-verify.exe <artifact-path>
+```
+
+The versioned Windows operator performs the pure gates, runs the native binary
+in the interactive desktop session through a scheduled task, invokes the
+verifier, and prints the artifact SHA-256 and byte count:
+
+```text
+powershell -NoProfile -File apps\fenestra-layout-inspector\run-windows.ps1 `
+  -Artifact C:\Users\sebas\fenestra-wu-0015-layout-inspector.txt
+```
+
+The artifact is not versioned until this command exits successfully and the
+verifier reports `pass`.
 
 ## Nonclaims
 

@@ -4,10 +4,12 @@ use std::sync::Arc;
 use softbuffer::{Context, Surface};
 use winit::application::ApplicationHandler;
 use winit::dpi::LogicalSize;
-use winit::event::{ElementState, MouseButton, WindowEvent};
+use winit::event::{ElementState, KeyEvent, MouseButton, WindowEvent};
 use winit::event_loop::{ActiveEventLoop, EventLoop, OwnedDisplayHandle};
+use winit::keyboard::{KeyCode, PhysicalKey};
 use winit::window::{Window, WindowId};
 
+use crate::evidence::{EvidenceError, EvidenceMilestone, LayoutInspectorEvidence};
 use crate::{InspectorAction, InspectorErrorKind, LayoutInspector};
 
 type NativeContext = Context<OwnedDisplayHandle>;
@@ -24,46 +26,63 @@ pub enum NativeInspectorError {
     Presenter,
     /// The application core rejected an interaction or frame.
     Application(InspectorErrorKind),
+    /// The bounded native evidence sequence rejected an observation.
+    Evidence(EvidenceError),
 }
 
 /// Runs the interactive layout inspector until its window is closed.
 pub fn run_native() -> Result<(), NativeInspectorError> {
-    run_native_inner(false)
+    run_native_inner(false, false).map(|_| ())
 }
 
 /// Runs one native presentation and exits through the event loop.
 pub fn run_native_smoke() -> Result<(), NativeInspectorError> {
-    run_native_inner(true)
+    run_native_inner(true, false).map(|_| ())
 }
 
-fn run_native_inner(auto_close: bool) -> Result<(), NativeInspectorError> {
+/// Runs the native inspector and returns its independently verified artifact.
+pub fn run_native_artifact() -> Result<Vec<u8>, NativeInspectorError> {
+    run_native_inner(false, true)?.ok_or(NativeInspectorError::Evidence(EvidenceError::Incomplete))
+}
+
+fn run_native_inner(
+    auto_close: bool,
+    record_evidence: bool,
+) -> Result<Option<Vec<u8>>, NativeInspectorError> {
     let event_loop = EventLoop::new().map_err(|_| NativeInspectorError::EventLoop)?;
-    let mut application = NativeApplication::new(auto_close)?;
+    let mut application = NativeApplication::new(auto_close, record_evidence)?;
     event_loop
         .run_app(&mut application)
         .map_err(|_| NativeInspectorError::EventLoop)?;
-    application.failure.map_or(Ok(()), Err)
+    if let Some(error) = application.failure {
+        return Err(error);
+    }
+    Ok(application.output)
 }
 
 struct NativeApplication {
     inspector: LayoutInspector,
     auto_close: bool,
     presented: bool,
+    evidence: Option<LayoutInspectorEvidence>,
     window: Option<Arc<Window>>,
     _context: Option<NativeContext>,
     surface: Option<NativeSurface>,
+    output: Option<Vec<u8>>,
     failure: Option<NativeInspectorError>,
 }
 
 impl NativeApplication {
-    fn new(auto_close: bool) -> Result<Self, NativeInspectorError> {
+    fn new(auto_close: bool, record_evidence: bool) -> Result<Self, NativeInspectorError> {
         Ok(Self {
             inspector: LayoutInspector::new().map_err(NativeInspectorError::Application)?,
             auto_close,
             presented: false,
+            evidence: record_evidence.then(LayoutInspectorEvidence::new),
             window: None,
             _context: None,
             surface: None,
+            output: None,
             failure: None,
         })
     }
@@ -148,7 +167,43 @@ impl NativeApplication {
             .present()
             .map_err(|_| NativeInspectorError::Presenter)?;
         self.presented = true;
+        self.record_presentation()?;
         Ok(())
+    }
+
+    fn record_presentation(&mut self) -> Result<(), NativeInspectorError> {
+        let Some(next) = self
+            .evidence
+            .as_ref()
+            .and_then(LayoutInspectorEvidence::next_required)
+        else {
+            return Ok(());
+        };
+        let frame = self
+            .inspector
+            .observe()
+            .map_err(NativeInspectorError::Application)?;
+        match next {
+            EvidenceMilestone::InitialPresent => self
+                .evidence
+                .as_mut()
+                .expect("evidence was checked above")
+                .record_initial(&frame)
+                .map_err(NativeInspectorError::Evidence),
+            EvidenceMilestone::MutationPresent => self
+                .evidence
+                .as_mut()
+                .expect("evidence was checked above")
+                .record_mutation_present(&frame)
+                .map_err(NativeInspectorError::Evidence),
+            EvidenceMilestone::ResizePresent => self
+                .evidence
+                .as_mut()
+                .expect("evidence was checked above")
+                .record_resize_present(&frame)
+                .map_err(NativeInspectorError::Evidence),
+            _ => Ok(()),
+        }
     }
 
     fn abort(&mut self, event_loop: &ActiveEventLoop, error: NativeInspectorError) {
@@ -180,29 +235,117 @@ impl ApplicationHandler for NativeApplication {
         let result = match event {
             WindowEvent::RedrawRequested => self.redraw(),
             WindowEvent::CursorMoved { position, .. } => {
-                let x = i32::try_from(position.x as i64);
-                let y = i32::try_from(position.y as i64);
-                match (x, y) {
-                    (Ok(x), Ok(y)) => self
-                        .inspector
-                        .dispatch(InspectorAction::PointerMove { x, y }),
-                    _ => Err(InspectorErrorKind::Transaction),
-                }
-                .map_err(NativeInspectorError::Application)
+                (|| -> Result<(), NativeInspectorError> {
+                    let x = i32::try_from(position.x as i64);
+                    let y = i32::try_from(position.y as i64);
+                    match (x, y) {
+                        (Ok(x), Ok(y)) => {
+                            self.inspector
+                                .dispatch(InspectorAction::PointerMove { x, y })
+                                .map_err(NativeInspectorError::Application)?;
+                            if self.evidence.as_ref().is_some_and(|evidence| {
+                                evidence.next_required() == Some(EvidenceMilestone::PointerMove)
+                            }) {
+                                let frame = self
+                                    .inspector
+                                    .observe()
+                                    .map_err(NativeInspectorError::Application)?;
+                                self.evidence
+                                    .as_mut()
+                                    .expect("evidence was checked above")
+                                    .record_pointer_move(x, y, &frame)
+                                    .map_err(NativeInspectorError::Evidence)?;
+                            }
+                            Ok(())
+                        }
+                        _ => Err(NativeInspectorError::Application(
+                            InspectorErrorKind::Transaction,
+                        )),
+                    }
+                })()
             }
             WindowEvent::MouseInput {
                 state: ElementState::Pressed,
                 button: MouseButton::Left,
                 ..
-            } => self
-                .inspector
-                .dispatch(InspectorAction::PointerPress)
-                .map_err(NativeInspectorError::Application),
-            WindowEvent::Resized(size) => self.resize_application(size.width, size.height),
-            WindowEvent::CloseRequested => {
+            } => (|| -> Result<(), NativeInspectorError> {
+                self.inspector
+                    .dispatch(InspectorAction::PointerPress)
+                    .map_err(NativeInspectorError::Application)?;
+                if self.evidence.as_ref().is_some_and(|evidence| {
+                    evidence.next_required() == Some(EvidenceMilestone::PointerPress)
+                }) {
+                    let frame = self
+                        .inspector
+                        .observe()
+                        .map_err(NativeInspectorError::Application)?;
+                    self.evidence
+                        .as_mut()
+                        .expect("evidence was checked above")
+                        .record_pointer_press(&frame)
+                        .map_err(NativeInspectorError::Evidence)?;
+                }
+                Ok(())
+            })(),
+            WindowEvent::KeyboardInput {
+                event:
+                    KeyEvent {
+                        physical_key: PhysicalKey::Code(KeyCode::Space),
+                        state: ElementState::Pressed,
+                        repeat: false,
+                        ..
+                    },
+                ..
+            } => (|| -> Result<(), NativeInspectorError> {
+                self.inspector
+                    .dispatch(InspectorAction::InsertTile { key: 30 })
+                    .map_err(NativeInspectorError::Application)?;
+                if self.evidence.as_ref().is_some_and(|evidence| {
+                    evidence.next_required() == Some(EvidenceMilestone::KeyedInsert)
+                }) {
+                    let frame = self
+                        .inspector
+                        .observe()
+                        .map_err(NativeInspectorError::Application)?;
+                    self.evidence
+                        .as_mut()
+                        .expect("evidence was checked above")
+                        .record_keyed_insert(30, &frame)
+                        .map_err(NativeInspectorError::Evidence)?;
+                }
+                Ok(())
+            })(),
+            WindowEvent::Resized(size) => (|| -> Result<(), NativeInspectorError> {
+                self.resize_application(size.width, size.height)?;
+                if self.evidence.as_ref().is_some_and(|evidence| {
+                    evidence.next_required() == Some(EvidenceMilestone::Resize)
+                }) {
+                    let frame = self
+                        .inspector
+                        .observe()
+                        .map_err(NativeInspectorError::Application)?;
+                    self.evidence
+                        .as_mut()
+                        .expect("evidence was checked above")
+                        .record_resize(&frame)
+                        .map_err(NativeInspectorError::Evidence)?;
+                }
+                Ok(())
+            })(),
+            WindowEvent::CloseRequested => (|| -> Result<(), NativeInspectorError> {
+                if let Some(evidence) = &mut self.evidence {
+                    evidence
+                        .record_close()
+                        .map_err(NativeInspectorError::Evidence)?;
+                    self.output = Some(
+                        std::mem::take(evidence)
+                            .finish()
+                            .map_err(NativeInspectorError::Evidence)?,
+                    );
+                }
                 event_loop.exit();
                 Ok(())
-            }
+            })(),
             _ => Ok(()),
         };
         match result {
