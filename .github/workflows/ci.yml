@@ -51,6 +51,12 @@ jobs:
       - name: Lint authored text consumer
         run: cargo clippy --manifest-path examples/text-app/Cargo.toml --all-targets --all-features --locked -- -D warnings
 
+      - name: Check responsive consumer formatting
+        run: cargo fmt --manifest-path examples/responsive-app/Cargo.toml -- --check
+
+      - name: Lint responsive consumer
+        run: cargo clippy --manifest-path examples/responsive-app/Cargo.toml --all-targets --all-features --locked -- -D warnings
+
       - name: Check isolated text screen formatting
         run: cargo fmt --manifest-path probes/text-candidate-screen/Cargo.toml --all -- --check
 
@@ -96,6 +102,12 @@ jobs:
 
       - name: Run authored text application headlessly
         run: cargo run --manifest-path examples/text-app/Cargo.toml --locked
+
+      - name: Test responsive public API consumer
+        run: cargo test --manifest-path examples/responsive-app/Cargo.toml --all-targets --all-features --locked
+
+      - name: Run responsive application headlessly
+        run: cargo run --manifest-path examples/responsive-app/Cargo.toml --locked
 
       - name: Test isolated text candidates and native editor contracts
         run: cargo test --manifest-path probes/text-candidate-screen/Cargo.toml --workspace --all-targets --all-features --locked
