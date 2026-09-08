@@ -7,6 +7,8 @@ use fenestra_ui::{
     TextLimits, TextMeasureRequest, TextMetrics, TextRequest, TextStyle, View,
 };
 
+#[path = "control_atomicity/accessibility.rs"]
+mod accessibility;
 #[path = "control_atomicity/semantics.rs"]
 mod semantics;
 

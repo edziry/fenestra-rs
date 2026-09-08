@@ -8,6 +8,7 @@ use crate::control::ControlData;
 use crate::model::ElementKind;
 use crate::{Bounds, Error, Limits, Raster, Size, StateStyle, Style, TextEngine};
 
+mod accessibility;
 mod construction;
 mod controls;
 mod decoration;

@@ -164,7 +164,7 @@ impl Application {
         self.commit_state(nodes, self.size)
     }
 
-    pub(super) fn control_targets(&self) -> Result<Vec<Target>, Error> {
+    pub(in crate::application) fn control_targets(&self) -> Result<Vec<Target>, Error> {
         self.nodes
             .iter()
             .enumerate()

@@ -24,6 +24,27 @@ impl Application {
         let transition = self
             .interaction
             .reduce(&input, &self.control_targets()?, hit);
+        let mut events = self.apply_control_transition(transition)?;
+        let raw = match input {
+            InputEvent::PointerMoved { x, y } => Event::PointerMoved { x, y },
+            InputEvent::PointerPressed => Event::Click { target },
+            InputEvent::PointerReleased => Event::PointerReleased { target },
+            InputEvent::PointerLeft => Event::PointerLeft,
+            InputEvent::SpacePressed => Event::SpacePressed,
+            InputEvent::KeyboardInput(input) => Event::KeyboardInput(input),
+            InputEvent::ModifiersChanged(modifiers) => Event::ModifiersChanged(modifiers),
+            InputEvent::Focused(focused) => Event::Focused(focused),
+            InputEvent::Ime(ime) => Event::Ime(ime),
+            InputEvent::CloseRequested => Event::CloseRequested,
+        };
+        events.insert(0, raw);
+        Ok(events)
+    }
+
+    pub(in crate::application) fn apply_control_transition(
+        &mut self,
+        transition: super::super::interaction::Transition,
+    ) -> Result<Vec<Event>, Error> {
         let old_focus = self.interaction.focus;
         let mut nodes = self.nodes.clone();
         let action = transition.activate.map(|index| {
@@ -60,19 +81,7 @@ impl Application {
             // changing any accepted control state or requesting a new generation.
             self.interaction = transition.next;
         }
-        let raw = match input {
-            InputEvent::PointerMoved { x, y } => Event::PointerMoved { x, y },
-            InputEvent::PointerPressed => Event::Click { target },
-            InputEvent::PointerReleased => Event::PointerReleased { target },
-            InputEvent::PointerLeft => Event::PointerLeft,
-            InputEvent::SpacePressed => Event::SpacePressed,
-            InputEvent::KeyboardInput(input) => Event::KeyboardInput(input),
-            InputEvent::ModifiersChanged(modifiers) => Event::ModifiersChanged(modifiers),
-            InputEvent::Focused(focused) => Event::Focused(focused),
-            InputEvent::Ime(ime) => Event::Ime(ime),
-            InputEvent::CloseRequested => Event::CloseRequested,
-        };
-        let mut events = vec![raw];
+        let mut events = Vec::new();
         if old_focus != self.interaction.focus {
             events.push(Event::FocusChanged {
                 target: self.focused_control().map(str::to_owned),

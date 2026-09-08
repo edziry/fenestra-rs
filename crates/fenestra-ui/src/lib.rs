@@ -5,6 +5,7 @@
 //! This unpublished API is experimental. Construction and style are expressed
 //! with named elements; internal schema and spatial identities stay private.
 
+mod accessibility;
 mod application;
 mod control;
 mod dimension;
@@ -21,6 +22,10 @@ mod state_style;
 mod style;
 mod text;
 
+pub use accessibility::{
+    AccessibilityAction, AccessibilityActionRequest, AccessibilityId, AccessibilityNode,
+    AccessibilityRole, AccessibilityTree,
+};
 pub use application::Application;
 pub use control::{ControlId, ControlRole, ControlSnapshot, ControlState};
 pub use dimension::Dimension;
