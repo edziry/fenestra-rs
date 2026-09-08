@@ -275,31 +275,34 @@ impl Cursor {
     ///
     /// The `width` parameter defines the width of the resulting rectangle.
     pub fn geometry<B: Brush>(&self, layout: &Layout<B>, width: f32) -> BoundingBox {
-        match self.visual_clusters(layout) {
-            [Some(left), Some(right)] => {
-                if left.is_end_of_line() {
-                    if left.is_soft_line_break() {
-                        let (cluster, at_end) = if left.is_rtl()
-                            && self.affinity == Affinity::Downstream
-                            || !left.is_rtl() && self.affinity == Affinity::Upstream
-                        {
-                            (left, true)
-                        } else {
-                            (right, false)
-                        };
-                        cursor_rect(&cluster, at_end, width)
-                    } else {
-                        cursor_rect(&right, false, width)
-                    }
-                } else {
-                    cursor_rect(&left, true, width)
-                }
-            }
-            [Some(left), None] if left.is_hard_line_break() => last_line_cursor_rect(layout, width),
-            [Some(left), _] => cursor_rect(&left, true, width),
-            [_, Some(right)] => cursor_rect(&right, false, width),
-            _ => last_line_cursor_rect(layout, width),
+        let [upstream, downstream] = self.logical_clusters(layout);
+        // After a hard break both affinities belong to the following line,
+        // including its empty final line. Visual neighbors alone cannot detect
+        // this in RTL text, where the newline is the leftmost cluster.
+        if upstream
+            .as_ref()
+            .is_some_and(|cluster| cluster.is_hard_line_break())
+        {
+            return downstream.map_or_else(
+                || last_line_cursor_rect(layout, width),
+                |cluster| cursor_rect(&cluster, cluster.is_rtl(), width),
+            );
         }
+        // Attach to the logical side selected by affinity. In particular, the
+        // rightmost RTL cluster may have its next visual neighbor on another
+        // line even though the cursor is at the start of the current line.
+        let attachment = match self.affinity {
+            Affinity::Upstream => upstream
+                .map(|cluster| (cluster, true))
+                .or_else(|| downstream.map(|cluster| (cluster, false))),
+            Affinity::Downstream => downstream
+                .map(|cluster| (cluster, false))
+                .or_else(|| upstream.map(|cluster| (cluster, true))),
+        };
+        attachment.map_or_else(
+            || last_line_cursor_rect(layout, width),
+            |(cluster, after)| cursor_rect(&cluster, after != cluster.is_rtl(), width),
+        )
     }
 
     /// Returns the pair of clusters that logically bound the cursor

@@ -7,6 +7,7 @@ use fenestra_ui_text::TextRenderer;
 const FONT: &[u8] = include_bytes!("../../../assets/fonts/dejavu-sans-2.37/DejaVuSans.ttf");
 
 mod geometry {
+    mod caret;
     mod navigation;
     mod selection;
 }
