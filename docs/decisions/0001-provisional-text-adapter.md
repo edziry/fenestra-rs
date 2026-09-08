@@ -33,12 +33,13 @@ records dependency licenses; it does not choose the Fenestra project license.
 
 | Package | Version / enabled features | Purpose | Declared MSRV | License |
 | --- | --- | --- | --- | --- |
-| Parley | 0.11.1 / `std` | Layout, shaping integration and line breaking | 1.88 | Apache-2.0 OR MIT |
+| Parley | 0.11.1 / `std`, `complex-scripts` | Layout, shaping integration and line breaking | 1.88 | Apache-2.0 OR MIT |
 | Fontique | 0.11.1 / `std` through Parley | Explicit owned-font metadata and matching | 1.88 | Apache-2.0 OR MIT |
 | HarfRust | 0.12.0 / `std` through Parley | OpenType shaping | 1.85 | MIT |
 | Skrifa | 0.44.0 / `std` through Parley | Font metrics and metadata | 1.85 | MIT OR Apache-2.0 |
 | read-fonts | 0.41.0 / through Fontique and Skrifa | Font parsing | 1.85 | MIT OR Apache-2.0 |
 | Swash | 0.2.6 / `std`, `scale`, `render` | Outline glyph rasterization | Not declared | Apache-2.0 OR MIT |
+| Zeno | 0.3.3 / through Swash; `std`, `eval` | Bounded outline mask scan conversion | Not declared | Apache-2.0 OR MIT |
 | Skrifa / read-fonts | 0.37.0 / 0.35.0 through Swash | Raster font parsing | 1.82 / 1.82 | MIT OR Apache-2.0 |
 
 The MSRVs above are published package metadata, not executed compiler lanes.
@@ -68,6 +69,14 @@ lists, lockfile hashes and the exact results. The subset was produced by
 following each selected package's lockfile dependency entries and preserving
 those package blocks verbatim in a temporary lockfile; no versions were
 re-resolved and no advisory was ignored.
+
+The [product audit](evidence/text-product-admission-v1.json) additionally checks
+the actual root lockfile after adding the owned text adapter: 342 packages,
+zero known vulnerabilities, zero warnings, and a successful `--deny warnings`
+exit. Its Parley feature set enables `complex-scripts`, which was disabled in
+the WU-0018 comparison. This permits dictionary-based segmentation through the
+already resolved ICU dependencies; it does not supply missing fonts or establish
+script conformance. Both audit snapshots retain their separate lockfile hashes.
 
 The warning is [RUSTSEC-2026-0192](https://rustsec.org/advisories/RUSTSEC-2026-0192.html):
 `ttf-parser` 0.25.1 is unmaintained with no patched version, reached through
@@ -102,8 +111,8 @@ The implementation must satisfy these constraints before using this admission:
    register immutable owned bytes with `Blob` and `register_fonts`. Never call
    filesystem scanning or accept a `SourceKind::Path`. Specify the default
    family from a successfully registered font. Fallback is restricted to the
-   explicitly registered application font set; unknown families and uncovered
-   source ranges require owned typed facts rather than silent host-font use.
+   explicitly registered application font set; uncovered text requires a typed
+   failure rather than silent host-font use.
 2. Set finite product limits before candidate calls: font bytes per face,
    total font bytes, font count, UTF-8 text bytes, font size, line height,
    layout width and raster pixels. Their actual values belong to the owned
@@ -126,6 +135,24 @@ The implementation must satisfy these constraints before using this admission:
    short visible viewport. Neither screen establishes worst-case timing or
    allocation bounds for arbitrary font programs.
 
+The product implementation in [fenestra-ui-text](../../crates/fenestra-ui-text/src/lib.rs)
+implements these conditions with 32 fonts, 8 MiB per font and 32 MiB total,
+checked before copying bytes. It validates sfnt directory ranges and the
+OpenType `unitsPerEm` range of 16 through 16,384 before candidate registration.
+Private family aliases preserve caller order when source fonts have equal family
+names. Missing coverage returns `TextError::MissingGlyphs` before rasterization.
+
+Complete glyph counts and measurements are checked before glyph raster work.
+Swash then decomposes each monochrome outline; Zeno inspects that exact outline
+and its subpixel offset before mask allocation. The mask must fit both the
+request's pixel budget and 4,194,304 pixels. Before scan conversion, the outline
+must contain at most 65,536 finite points with coordinate magnitude at most
+1,048,576 pixels. These checks avoid trusting a font's declared bounding box.
+The outline, mask buffer, scan-conversion scratch and scaler cache are private
+and reused. Font parsing and outline decomposition still perform candidate
+allocations before the output checks, so these bounds are not a hard heap or
+time guarantee for hostile fonts.
+
 The new [Parley registration tests](../../probes/text-candidate-screen/parley/tests/font_registration.rs)
 exercise empty and invalid bytes, 65 short prefixes of the versioned font,
 two bounded malformed TTC headers, owned source retention, single-face metadata,
@@ -136,6 +163,14 @@ retain the corresponding candidate facts and its viewport limitation. These
 are focused regressions, not fuzzing or adversarial-font hardening. They add
 no font asset; the sole valid fixture remains the licensed DejaVu Sans 2.37
 font with its versioned provenance.
+
+The [product adapter tests](../../crates/fenestra-ui-text/tests/renderer.rs) add
+ordered fallback using an in-memory reduced-coverage derivative of that same
+fixture, complete clipped measurements, premultiplied color and transparency,
+repeated contexts, malformed offsets and unsupported raster formats. A zero-em
+font was observed passing registration before the validation fix; a separately
+expanded glyph bypassed its mask budget before mask preflight was implemented.
+Both cases now return typed failures. No derivative font file is distributed.
 
 ## Unsafe, native and distribution surface
 
@@ -148,13 +183,13 @@ internals; its outline parser and scaler remain part of the trusted dependency
 surface. This is an inventory, not a complete unsafe audit. No handwritten
 unsafe is needed in the Fenestra adapter.
 
-Parley's `system`, `complex-scripts` and `accesskit` features remain disabled.
+Parley's `system` and `accesskit` features remain disabled.
 There is no Fontconfig, DirectWrite or CoreText service requirement for this
 configuration. `fontique/std` still enables memmap2 0.9.10, which declares Rust
 1.63 and MIT OR Apache-2.0, and its normal platform support dependencies.
 Do not describe the dependency graph as having no native capability. Native
-font discovery, dictionary-based complex-script breaking, accessibility and
-system-font distribution require separate capability decisions.
+font discovery, accessibility and system-font distribution require separate
+capability decisions. Enabling `complex-scripts` does not enlarge font coverage.
 
 Shipping applications must preserve the relevant dependency license and notice
 obligations and the provenance and redistribution terms of every bundled font.
@@ -174,7 +209,7 @@ behind this projection boundary.
 
 Further admission needs fuzzing or equivalent malformed-font evidence,
 worst-case resource measurements, an executed MSRV lane, broader script/font
-fixtures with provenance, multiple-font fallback tests, native platform and
+fixtures with provenance, broader multiple-font/script fallback evidence, native platform and
 scale evidence, and review of the full distributable dependency graph.
 Read-only text evidence does not admit IME geometry, selection/caret behavior,
 visual bidi navigation, editable text, rich text or accessibility semantics.
@@ -205,3 +240,4 @@ snapshot; a product lockfile audit remains required for product distribution.
 - [Swash 0.2.6 manifest](https://github.com/dfrg/swash/blob/v0.2.6/Cargo.toml)
 - [cosmic-text 0.19.0 manifest](https://docs.rs/crate/cosmic-text/0.19.0/source/Cargo.toml.orig)
 - [fontdb 0.23.0 manifest](https://docs.rs/crate/fontdb/0.23.0/source/Cargo.toml)
+- [OpenType font header](https://learn.microsoft.com/en-us/typography/opentype/spec/head)

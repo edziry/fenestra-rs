@@ -1,0 +1,45 @@
+{
+  "schema": "fenestra.text-product-admission.v1",
+  "checked_at_utc": "2026-09-08T02:05:52.115272+00:00",
+  "source_lockfile": "Cargo.lock",
+  "source_lockfile_sha256": "251b7fa38f06dc44ec50f1a73544aa719eabafad58f68186a02015ccb2a1a614",
+  "direct_features": {
+    "parley 0.11.1": [
+      "std",
+      "complex-scripts"
+    ],
+    "swash 0.2.6": [
+      "std",
+      "scale",
+      "render"
+    ]
+  },
+  "audit": {
+    "database": {
+      "advisory-count": 1242,
+      "last-commit": "8a1eb4f933fb5821add5b4e98601ebd90b8b3538",
+      "last-updated": "2026-09-07T11:19:30-07:00"
+    },
+    "lockfile": {
+      "dependency-count": 342
+    },
+    "settings": {
+      "target_arch": [],
+      "target_os": [],
+      "severity": null,
+      "ignore": [],
+      "informational_warnings": [
+        "unmaintained",
+        "unsound",
+        "notice"
+      ]
+    },
+    "vulnerabilities": {
+      "found": false,
+      "count": 0,
+      "list": []
+    },
+    "warnings": {}
+  },
+  "deny_warnings_exit_code": 0
+}

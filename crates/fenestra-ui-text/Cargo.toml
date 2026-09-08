@@ -1,0 +1,15 @@
+[package]
+name = "fenestra-ui-text"
+description = "Replaceable owned-font text adapter for the unpublished Fenestra UI facade"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+repository.workspace = true
+
+[dependencies]
+fenestra-ui.workspace = true
+parley.workspace = true
+swash.workspace = true
+
+[lints]
+workspace = true
