@@ -39,6 +39,39 @@ jobs:
       - name: Run Clippy
         run: cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
 
+      - name: Lint vendored AT-SPI state translation
+        run: cargo clippy -p accesskit_atspi_common --all-targets --locked -- -D warnings
+
+      - name: Check standalone consumer formatting
+        run: cargo fmt --manifest-path examples/typed-app/Cargo.toml -- --check
+
+      - name: Lint standalone consumer
+        run: cargo clippy --manifest-path examples/typed-app/Cargo.toml --all-targets --all-features --locked -- -D warnings
+
+      - name: Check authored text consumer formatting
+        run: cargo fmt --manifest-path examples/text-app/Cargo.toml -- --check
+
+      - name: Lint authored text consumer
+        run: cargo clippy --manifest-path examples/text-app/Cargo.toml --all-targets --all-features --locked -- -D warnings
+
+      - name: Check responsive consumer formatting
+        run: cargo fmt --manifest-path examples/responsive-app/Cargo.toml -- --check
+
+      - name: Lint responsive consumer
+        run: cargo clippy --manifest-path examples/responsive-app/Cargo.toml --all-targets --all-features --locked -- -D warnings
+
+      - name: Check keyboard controls consumer formatting
+        run: cargo fmt --manifest-path examples/controls-app/Cargo.toml -- --check
+
+      - name: Lint keyboard controls consumer
+        run: cargo clippy --manifest-path examples/controls-app/Cargo.toml --all-targets --all-features --locked -- -D warnings
+
+      - name: Check isolated text screen formatting
+        run: cargo fmt --manifest-path probes/text-candidate-screen/Cargo.toml --all -- --check
+
+      - name: Lint isolated text screen and native editor probe
+        run: cargo clippy --manifest-path probes/text-candidate-screen/Cargo.toml --workspace --all-targets --all-features --locked -- -D warnings
+
       - name: Build documentation
         run: cargo doc --workspace --all-features --no-deps --locked
         env:
@@ -66,6 +99,46 @@ jobs:
 
       - name: Build and run tests
         run: cargo test --workspace --all-targets --all-features --locked
+
+      - name: Test vendored AT-SPI disabled-state regressions
+        if: runner.os == 'Linux'
+        run: cargo test -p accesskit_atspi_common --lib --locked
+
+      - name: Test standalone public API consumer
+        run: cargo test --manifest-path examples/typed-app/Cargo.toml --all-features --locked
+
+      - name: Run standalone headless application
+        run: cargo run --manifest-path examples/typed-app/Cargo.toml --locked
+
+      - name: Test authored text public API consumer
+        run: cargo test --manifest-path examples/text-app/Cargo.toml --all-targets --all-features --locked
+
+      - name: Run authored text application headlessly
+        run: cargo run --manifest-path examples/text-app/Cargo.toml --locked
+
+      - name: Exercise public text geometry and viewports
+        run: cargo run --manifest-path examples/text-app/Cargo.toml --locked --example geometry-gallery
+
+      - name: Test responsive public API consumer
+        run: cargo test --manifest-path examples/responsive-app/Cargo.toml --all-targets --all-features --locked
+
+      - name: Run responsive application headlessly
+        run: cargo run --manifest-path examples/responsive-app/Cargo.toml --locked
+
+      - name: Test keyboard controls public API consumer
+        run: cargo test --manifest-path examples/controls-app/Cargo.toml --all-targets --all-features --locked
+
+      - name: Run keyboard controls application headlessly
+        run: cargo run --manifest-path examples/controls-app/Cargo.toml --locked
+
+      - name: Test portable accessibility probe helpers
+        run: python -m unittest discover -s examples/controls-app/tools -p "test_*.py"
+
+      - name: Test isolated text candidates and native editor contracts
+        run: cargo test --manifest-path probes/text-candidate-screen/Cargo.toml --workspace --all-targets --all-features --locked
+
+      - name: Exercise headless text editing
+        run: cargo run --manifest-path probes/text-candidate-screen/Cargo.toml -p fenestra-text-screen-cosmic --features native --bin text-pad --locked
 
       - name: Verify typed authoring contract on Windows paths
         if: runner.os == 'Windows'

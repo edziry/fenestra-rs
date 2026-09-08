@@ -60,6 +60,7 @@ fn prepared_and_snapshot_values_have_only_the_staged_public_surface() {
             "pub fn output",
             "pub fn paint_frame",
             "pub fn rasterize_reference",
+            "pub fn with_image_paints",
         ]
     );
     assert!(source.contains("pub const fn viewport(&self) -> SpatialViewportV2"));
@@ -77,6 +78,7 @@ fn prepared_and_snapshot_values_have_only_the_staged_public_surface() {
         "hit_test",
         "paint_frame",
         "rasterize_reference",
+        "with_image_paints",
     ] {
         let item = public_method(&source, "SpatialResolvedSnapshotV2", method);
         assert!(has_must_use(&source, item.start));

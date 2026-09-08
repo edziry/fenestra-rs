@@ -1,0 +1,1138 @@
+{
+  "profile": "debug",
+  "helper_exit": 0,
+  "probe_success": true,
+  "elapsed_seconds": 8.001,
+  "samples": 26,
+  "rss_min_mib": 5.664,
+  "rss_max_mib": 32.66,
+  "pss_min_mib": 3.73,
+  "pss_max_mib": 29.046,
+  "swap_max_mib": 0.0,
+  "checkpoints": [
+    {
+      "stage": "initial",
+      "generation": 0,
+      "rgba_checksum": "91dd60df59f8de21",
+      "window_focused": true,
+      "logical_focus": null
+    },
+    {
+      "stage": "focused",
+      "generation": 1,
+      "rgba_checksum": "3dbd8c516a0c0d39",
+      "window_focused": true,
+      "logical_focus": "compact"
+    },
+    {
+      "stage": "changed",
+      "generation": 5,
+      "rgba_checksum": "8f06055aecb4fbec",
+      "window_focused": true,
+      "logical_focus": "compact"
+    },
+    {
+      "stage": "applied",
+      "generation": 7,
+      "rgba_checksum": "cdef0096d5590403",
+      "window_focused": true,
+      "logical_focus": "compact"
+    }
+  ],
+  "protocol": "250ms observations from owned child PID file through helper exit; CPU delta utime+stime divided by CLK_TCK and monotonic elapsed, percent of one core; RSS/PSS/swap from smaps_rollup; no intentional idle interval",
+  "binary_bytes": 203025256,
+  "host_status_unchanged": true,
+  "presented_sample_count": 20,
+  "presented_rss_min_mib": 29.852,
+  "presented_rss_max_mib": 32.66,
+  "presented_pss_min_mib": 26.237,
+  "presented_pss_max_mib": 29.046,
+  "all_four_ppm_byte_identical_to_pre_cache_release": true,
+  "measurements": [
+    {
+      "seconds": 0.25,
+      "rss_mib": 5.664,
+      "pss_mib": 3.73,
+      "anonymous_mib": 1.09,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": null,
+      "generation": null,
+      "presentations": null,
+      "completed_checkpoints": [],
+      "host": {
+        "available_mib": 6691.082,
+        "cached_mib": 6620.484,
+        "swap_used_mib": 8168.27,
+        "pressure": "some avg10=1.33 avg60=0.69 avg300=0.20 total=30047863\nfull avg10=1.28 avg60=0.64 avg300=0.19 total=26612694",
+        "compiler_processes": [
+          {
+            "pid": 547107,
+            "name": "cargo-clippy",
+            "rss_mib": 27.062,
+            "pss_mib": 15.278
+          },
+          {
+            "pid": 547124,
+            "name": "cargo",
+            "rss_mib": 81.262,
+            "pss_mib": 69.487
+          },
+          {
+            "pid": 547222,
+            "name": "cargo",
+            "rss_mib": 67.793,
+            "pss_mib": 56.021
+          }
+        ]
+      }
+    },
+    {
+      "seconds": 0.532,
+      "rss_mib": 25.781,
+      "pss_mib": 23.485,
+      "anonymous_mib": 4.445,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 88.764,
+      "generation": null,
+      "presentations": null,
+      "completed_checkpoints": [],
+      "host": {
+        "available_mib": 6693.324,
+        "cached_mib": 6537.801,
+        "swap_used_mib": 8175.227,
+        "pressure": "some avg10=1.33 avg60=0.69 avg300=0.20 total=30054168\nfull avg10=1.28 avg60=0.64 avg300=0.19 total=26618953",
+        "compiler_processes": [
+          {
+            "pid": 547107,
+            "name": "cargo-clippy",
+            "rss_mib": 27.062,
+            "pss_mib": 15.278
+          },
+          {
+            "pid": 547124,
+            "name": "cargo",
+            "rss_mib": 81.262,
+            "pss_mib": 69.487
+          },
+          {
+            "pid": 547222,
+            "name": "cargo",
+            "rss_mib": 67.793,
+            "pss_mib": 56.021
+          }
+        ]
+      }
+    },
+    {
+      "seconds": 0.809,
+      "rss_mib": 26.023,
+      "pss_mib": 23.728,
+      "anonymous_mib": 4.688,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 101.1,
+      "generation": null,
+      "presentations": null,
+      "completed_checkpoints": [],
+      "host": {
+        "available_mib": 6667.875,
+        "cached_mib": 6540.664,
+        "swap_used_mib": 8175.141,
+        "pressure": "some avg10=1.33 avg60=0.69 avg300=0.20 total=30054168\nfull avg10=1.28 avg60=0.64 avg300=0.19 total=26618953",
+        "compiler_processes": [
+          {
+            "pid": 547107,
+            "name": "cargo-clippy",
+            "rss_mib": 27.062,
+            "pss_mib": 15.278
+          },
+          {
+            "pid": 547124,
+            "name": "cargo",
+            "rss_mib": 81.262,
+            "pss_mib": 69.487
+          },
+          {
+            "pid": 547222,
+            "name": "cargo",
+            "rss_mib": 67.793,
+            "pss_mib": 56.021
+          }
+        ]
+      }
+    },
+    {
+      "seconds": 1.084,
+      "rss_mib": 26.223,
+      "pss_mib": 23.927,
+      "anonymous_mib": 4.887,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 98.095,
+      "generation": null,
+      "presentations": null,
+      "completed_checkpoints": [],
+      "host": {
+        "available_mib": 6594.27,
+        "cached_mib": 6541.734,
+        "swap_used_mib": 8175.086,
+        "pressure": "some avg10=1.33 avg60=0.69 avg300=0.20 total=30054500\nfull avg10=1.28 avg60=0.64 avg300=0.19 total=26619228",
+        "compiler_processes": [
+          {
+            "pid": 547107,
+            "name": "cargo-clippy",
+            "rss_mib": 27.062,
+            "pss_mib": 15.247
+          },
+          {
+            "pid": 547124,
+            "name": "cargo",
+            "rss_mib": 81.262,
+            "pss_mib": 69.487
+          },
+          {
+            "pid": 547222,
+            "name": "cargo",
+            "rss_mib": 67.793,
+            "pss_mib": 56.021
+          }
+        ]
+      }
+    },
+    {
+      "seconds": 1.362,
+      "rss_mib": 26.469,
+      "pss_mib": 24.173,
+      "anonymous_mib": 5.133,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 100.74,
+      "generation": null,
+      "presentations": null,
+      "completed_checkpoints": [],
+      "host": {
+        "available_mib": 6611.0,
+        "cached_mib": 6551.133,
+        "swap_used_mib": 8174.617,
+        "pressure": "some avg10=1.08 avg60=0.67 avg300=0.20 total=30054553\nfull avg10=1.04 avg60=0.62 avg300=0.19 total=26619276",
+        "compiler_processes": [
+          {
+            "pid": 547107,
+            "name": "cargo-clippy",
+            "rss_mib": 27.25,
+            "pss_mib": 25.082
+          },
+          {
+            "pid": 547222,
+            "name": "cargo",
+            "rss_mib": 67.793,
+            "pss_mib": 65.451
+          }
+        ]
+      }
+    },
+    {
+      "seconds": 1.636,
+      "rss_mib": 26.738,
+      "pss_mib": 24.443,
+      "anonymous_mib": 5.402,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 98.716,
+      "generation": null,
+      "presentations": null,
+      "completed_checkpoints": [],
+      "host": {
+        "available_mib": 6618.836,
+        "cached_mib": 6576.938,
+        "swap_used_mib": 8174.613,
+        "pressure": "some avg10=1.08 avg60=0.67 avg300=0.20 total=30054886\nfull avg10=1.04 avg60=0.62 avg300=0.19 total=26619583",
+        "compiler_processes": [
+          {
+            "pid": 547222,
+            "name": "cargo",
+            "rss_mib": 67.793,
+            "pss_mib": 56.452
+          },
+          {
+            "pid": 548457,
+            "name": "cargo",
+            "rss_mib": 62.137,
+            "pss_mib": 50.916
+          }
+        ]
+      }
+    },
+    {
+      "seconds": 1.912,
+      "rss_mib": 29.852,
+      "pss_mib": 26.237,
+      "anonymous_mib": 5.668,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 75.948,
+      "generation": 0,
+      "presentations": 2,
+      "completed_checkpoints": [],
+      "host": {
+        "available_mib": 6696.312,
+        "cached_mib": 6439.844,
+        "swap_used_mib": 8186.488,
+        "pressure": "some avg10=1.08 avg60=0.67 avg300=0.20 total=30062390\nfull avg10=1.04 avg60=0.62 avg300=0.19 total=26626984",
+        "compiler_processes": [
+          {
+            "pid": 547222,
+            "name": "cargo",
+            "rss_mib": 67.793,
+            "pss_mib": 56.121
+          },
+          {
+            "pid": 548457,
+            "name": "cargo",
+            "rss_mib": 77.969,
+            "pss_mib": 66.293
+          },
+          {
+            "pid": 548482,
+            "name": "rustc",
+            "rss_mib": 106.328,
+            "pss_mib": 68.385
+          },
+          {
+            "pid": 548485,
+            "name": "rustdoc",
+            "rss_mib": 102.863,
+            "pss_mib": 63.294
+          }
+        ]
+      }
+    },
+    {
+      "seconds": 2.203,
+      "rss_mib": 30.035,
+      "pss_mib": 26.421,
+      "anonymous_mib": 5.852,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 58.427,
+      "generation": 0,
+      "presentations": 2,
+      "completed_checkpoints": [
+        "initial"
+      ],
+      "host": {
+        "available_mib": 6594.602,
+        "cached_mib": 6457.625,
+        "swap_used_mib": 8186.398,
+        "pressure": "some avg10=1.08 avg60=0.67 avg300=0.20 total=30063239\nfull avg10=1.04 avg60=0.62 avg300=0.19 total=26627273",
+        "compiler_processes": [
+          {
+            "pid": 547222,
+            "name": "cargo",
+            "rss_mib": 67.793,
+            "pss_mib": 56.121
+          },
+          {
+            "pid": 548457,
+            "name": "cargo",
+            "rss_mib": 77.969,
+            "pss_mib": 66.293
+          },
+          {
+            "pid": 548482,
+            "name": "rustc",
+            "rss_mib": 185.766,
+            "pss_mib": 126.496
+          },
+          {
+            "pid": 548485,
+            "name": "rustdoc",
+            "rss_mib": 241.547,
+            "pss_mib": 182.058
+          }
+        ]
+      }
+    },
+    {
+      "seconds": 2.492,
+      "rss_mib": 30.035,
+      "pss_mib": 26.421,
+      "anonymous_mib": 5.852,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 107.199,
+      "generation": 0,
+      "presentations": 2,
+      "completed_checkpoints": [
+        "initial"
+      ],
+      "host": {
+        "available_mib": 6598.223,
+        "cached_mib": 6401.762,
+        "swap_used_mib": 8191.984,
+        "pressure": "some avg10=1.08 avg60=0.67 avg300=0.20 total=30065430\nfull avg10=1.04 avg60=0.62 avg300=0.19 total=26629410",
+        "compiler_processes": [
+          {
+            "pid": 547222,
+            "name": "cargo",
+            "rss_mib": 67.793,
+            "pss_mib": 56.121
+          },
+          {
+            "pid": 548457,
+            "name": "cargo",
+            "rss_mib": 77.969,
+            "pss_mib": 66.293
+          },
+          {
+            "pid": 548482,
+            "name": "rustc",
+            "rss_mib": 223.473,
+            "pss_mib": 154.305
+          },
+          {
+            "pid": 548485,
+            "name": "rustdoc",
+            "rss_mib": 339.375,
+            "pss_mib": 270.175
+          }
+        ]
+      }
+    },
+    {
+      "seconds": 2.784,
+      "rss_mib": 30.039,
+      "pss_mib": 26.425,
+      "anonymous_mib": 5.855,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 109.729,
+      "generation": 0,
+      "presentations": 2,
+      "completed_checkpoints": [
+        "initial"
+      ],
+      "host": {
+        "available_mib": 6493.965,
+        "cached_mib": 6410.363,
+        "swap_used_mib": 8191.977,
+        "pressure": "some avg10=1.08 avg60=0.67 avg300=0.20 total=30065432\nfull avg10=1.04 avg60=0.62 avg300=0.19 total=26629412",
+        "compiler_processes": [
+          {
+            "pid": 547222,
+            "name": "cargo",
+            "rss_mib": 67.793,
+            "pss_mib": 56.121
+          },
+          {
+            "pid": 548457,
+            "name": "cargo",
+            "rss_mib": 77.977,
+            "pss_mib": 66.301
+          },
+          {
+            "pid": 548485,
+            "name": "rustdoc",
+            "rss_mib": 417.438,
+            "pss_mib": 355.909
+          },
+          {
+            "pid": 548492,
+            "name": "rustc",
+            "rss_mib": 175.914,
+            "pss_mib": 114.355
+          }
+        ]
+      }
+    },
+    {
+      "seconds": 3.074,
+      "rss_mib": 30.039,
+      "pss_mib": 26.425,
+      "anonymous_mib": 5.855,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 110.241,
+      "generation": 0,
+      "presentations": 2,
+      "completed_checkpoints": [
+        "initial"
+      ],
+      "host": {
+        "available_mib": 6375.098,
+        "cached_mib": 6416.48,
+        "swap_used_mib": 8175.121,
+        "pressure": "some avg10=1.08 avg60=0.67 avg300=0.20 total=30065644\nfull avg10=1.04 avg60=0.62 avg300=0.19 total=26629624",
+        "compiler_processes": [
+          {
+            "pid": 547222,
+            "name": "cargo",
+            "rss_mib": 67.793,
+            "pss_mib": 56.121
+          },
+          {
+            "pid": 548457,
+            "name": "cargo",
+            "rss_mib": 77.988,
+            "pss_mib": 66.312
+          },
+          {
+            "pid": 548485,
+            "name": "rustdoc",
+            "rss_mib": 486.051,
+            "pss_mib": 403.179
+          },
+          {
+            "pid": 548497,
+            "name": "rustdoc",
+            "rss_mib": 223.402,
+            "pss_mib": 140.046
+          }
+        ]
+      }
+    },
+    {
+      "seconds": 3.369,
+      "rss_mib": 30.039,
+      "pss_mib": 26.425,
+      "anonymous_mib": 5.855,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 115.45,
+      "generation": 0,
+      "presentations": 2,
+      "completed_checkpoints": [
+        "initial"
+      ],
+      "host": {
+        "available_mib": 6167.836,
+        "cached_mib": 6320.113,
+        "swap_used_mib": 8174.09,
+        "pressure": "some avg10=0.89 avg60=0.64 avg300=0.20 total=30066217\nfull avg10=0.85 avg60=0.60 avg300=0.18 total=26630198",
+        "compiler_processes": [
+          {
+            "pid": 547222,
+            "name": "cargo",
+            "rss_mib": 67.793,
+            "pss_mib": 56.121
+          },
+          {
+            "pid": 548457,
+            "name": "cargo",
+            "rss_mib": 77.988,
+            "pss_mib": 66.312
+          },
+          {
+            "pid": 548485,
+            "name": "rustdoc",
+            "rss_mib": 627.785,
+            "pss_mib": 527.265
+          },
+          {
+            "pid": 548497,
+            "name": "rustdoc",
+            "rss_mib": 334.898,
+            "pss_mib": 234.394
+          }
+        ]
+      }
+    },
+    {
+      "seconds": 3.663,
+      "rss_mib": 30.164,
+      "pss_mib": 26.55,
+      "anonymous_mib": 5.98,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 95.22,
+      "generation": 1,
+      "presentations": 3,
+      "completed_checkpoints": [
+        "initial"
+      ],
+      "host": {
+        "available_mib": 6158.906,
+        "cached_mib": 6258.547,
+        "swap_used_mib": 8176.816,
+        "pressure": "some avg10=0.89 avg60=0.64 avg300=0.20 total=30070395\nfull avg10=0.85 avg60=0.60 avg300=0.18 total=26634351",
+        "compiler_processes": [
+          {
+            "pid": 547222,
+            "name": "cargo",
+            "rss_mib": 67.793,
+            "pss_mib": 56.121
+          },
+          {
+            "pid": 548457,
+            "name": "cargo",
+            "rss_mib": 77.988,
+            "pss_mib": 66.312
+          },
+          {
+            "pid": 548485,
+            "name": "rustdoc",
+            "rss_mib": 538.594,
+            "pss_mib": 431.979
+          },
+          {
+            "pid": 548497,
+            "name": "rustdoc",
+            "rss_mib": 413.188,
+            "pss_mib": 306.503
+          }
+        ]
+      }
+    },
+    {
+      "seconds": 3.961,
+      "rss_mib": 30.164,
+      "pss_mib": 26.55,
+      "anonymous_mib": 5.98,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 36.858,
+      "generation": 1,
+      "presentations": 3,
+      "completed_checkpoints": [
+        "initial",
+        "focused"
+      ],
+      "host": {
+        "available_mib": 6330.492,
+        "cached_mib": 6210.117,
+        "swap_used_mib": 8175.445,
+        "pressure": "some avg10=0.89 avg60=0.64 avg300=0.20 total=30072493\nfull avg10=0.85 avg60=0.60 avg300=0.18 total=26636403",
+        "compiler_processes": [
+          {
+            "pid": 547222,
+            "name": "cargo",
+            "rss_mib": 67.793,
+            "pss_mib": 56.121
+          },
+          {
+            "pid": 548457,
+            "name": "cargo",
+            "rss_mib": 77.992,
+            "pss_mib": 66.316
+          },
+          {
+            "pid": 548497,
+            "name": "rustdoc",
+            "rss_mib": 524.617,
+            "pss_mib": 443.331
+          },
+          {
+            "pid": 548521,
+            "name": "rustdoc",
+            "rss_mib": 247.938,
+            "pss_mib": 165.855
+          }
+        ]
+      }
+    },
+    {
+      "seconds": 4.265,
+      "rss_mib": 30.168,
+      "pss_mib": 26.554,
+      "anonymous_mib": 5.984,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 112.034,
+      "generation": 1,
+      "presentations": 3,
+      "completed_checkpoints": [
+        "initial",
+        "focused"
+      ],
+      "host": {
+        "available_mib": 6159.363,
+        "cached_mib": 6179.621,
+        "swap_used_mib": 8174.57,
+        "pressure": "some avg10=0.89 avg60=0.64 avg300=0.20 total=30073731\nfull avg10=0.85 avg60=0.60 avg300=0.18 total=26637641",
+        "compiler_processes": [
+          {
+            "pid": 547222,
+            "name": "cargo",
+            "rss_mib": 67.793,
+            "pss_mib": 56.121
+          },
+          {
+            "pid": 548457,
+            "name": "cargo",
+            "rss_mib": 77.992,
+            "pss_mib": 66.316
+          },
+          {
+            "pid": 548497,
+            "name": "rustdoc",
+            "rss_mib": 617.207,
+            "pss_mib": 520.126
+          },
+          {
+            "pid": 548521,
+            "name": "rustdoc",
+            "rss_mib": 345.469,
+            "pss_mib": 248.061
+          }
+        ]
+      }
+    },
+    {
+      "seconds": 4.571,
+      "rss_mib": 30.168,
+      "pss_mib": 26.554,
+      "anonymous_mib": 5.984,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 107.797,
+      "generation": 1,
+      "presentations": 3,
+      "completed_checkpoints": [
+        "initial",
+        "focused"
+      ],
+      "host": {
+        "available_mib": 6176.781,
+        "cached_mib": 6085.758,
+        "swap_used_mib": 8175.887,
+        "pressure": "some avg10=0.89 avg60=0.64 avg300=0.20 total=30076817\nfull avg10=0.85 avg60=0.60 avg300=0.18 total=26640708",
+        "compiler_processes": [
+          {
+            "pid": 547222,
+            "name": "cargo",
+            "rss_mib": 67.793,
+            "pss_mib": 56.121
+          },
+          {
+            "pid": 548457,
+            "name": "cargo",
+            "rss_mib": 77.973,
+            "pss_mib": 66.297
+          },
+          {
+            "pid": 548497,
+            "name": "rustdoc",
+            "rss_mib": 182.422,
+            "pss_mib": 148.983
+          },
+          {
+            "pid": 548521,
+            "name": "rustdoc",
+            "rss_mib": 426.609,
+            "pss_mib": 392.384
+          }
+        ]
+      }
+    },
+    {
+      "seconds": 4.861,
+      "rss_mib": 30.168,
+      "pss_mib": 26.554,
+      "anonymous_mib": 5.984,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 110.407,
+      "generation": 1,
+      "presentations": 3,
+      "completed_checkpoints": [
+        "initial",
+        "focused"
+      ],
+      "host": {
+        "available_mib": 6343.336,
+        "cached_mib": 6087.254,
+        "swap_used_mib": 8175.879,
+        "pressure": "some avg10=0.89 avg60=0.64 avg300=0.20 total=30076817\nfull avg10=0.85 avg60=0.60 avg300=0.18 total=26640708",
+        "compiler_processes": [
+          {
+            "pid": 547222,
+            "name": "cargo",
+            "rss_mib": 67.793,
+            "pss_mib": 56.121
+          },
+          {
+            "pid": 548457,
+            "name": "cargo",
+            "rss_mib": 77.984,
+            "pss_mib": 66.309
+          },
+          {
+            "pid": 548521,
+            "name": "rustdoc",
+            "rss_mib": 502.703,
+            "pss_mib": 413.105
+          },
+          {
+            "pid": 548543,
+            "name": "rustdoc",
+            "rss_mib": 261.422,
+            "pss_mib": 171.797
+          }
+        ]
+      }
+    },
+    {
+      "seconds": 5.164,
+      "rss_mib": 30.168,
+      "pss_mib": 26.554,
+      "anonymous_mib": 5.984,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 115.355,
+      "generation": 1,
+      "presentations": 3,
+      "completed_checkpoints": [
+        "initial",
+        "focused"
+      ],
+      "host": {
+        "available_mib": 6207.066,
+        "cached_mib": 6087.297,
+        "swap_used_mib": 8174.586,
+        "pressure": "some avg10=0.89 avg60=0.64 avg300=0.20 total=30076834\nfull avg10=0.85 avg60=0.60 avg300=0.18 total=26640724",
+        "compiler_processes": [
+          {
+            "pid": 547222,
+            "name": "cargo",
+            "rss_mib": 67.793,
+            "pss_mib": 56.121
+          },
+          {
+            "pid": 548457,
+            "name": "cargo",
+            "rss_mib": 77.984,
+            "pss_mib": 66.309
+          },
+          {
+            "pid": 548521,
+            "name": "rustdoc",
+            "rss_mib": 626.977,
+            "pss_mib": 525.621
+          },
+          {
+            "pid": 548543,
+            "name": "rustdoc",
+            "rss_mib": 347.594,
+            "pss_mib": 246.551
+          }
+        ]
+      }
+    },
+    {
+      "seconds": 5.461,
+      "rss_mib": 32.66,
+      "pss_mib": 29.046,
+      "anonymous_mib": 8.477,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 107.927,
+      "generation": 1,
+      "presentations": 3,
+      "completed_checkpoints": [
+        "initial",
+        "focused"
+      ],
+      "host": {
+        "available_mib": 5917.898,
+        "cached_mib": 6008.754,
+        "swap_used_mib": 8176.359,
+        "pressure": "some avg10=0.72 avg60=0.62 avg300=0.20 total=30079999\nfull avg10=0.70 avg60=0.58 avg300=0.18 total=26643866",
+        "compiler_processes": [
+          {
+            "pid": 547222,
+            "name": "cargo",
+            "rss_mib": 67.793,
+            "pss_mib": 56.121
+          },
+          {
+            "pid": 548457,
+            "name": "cargo",
+            "rss_mib": 77.984,
+            "pss_mib": 66.309
+          },
+          {
+            "pid": 548521,
+            "name": "rustdoc",
+            "rss_mib": 700.602,
+            "pss_mib": 594.477
+          },
+          {
+            "pid": 548543,
+            "name": "rustdoc",
+            "rss_mib": 422.16,
+            "pss_mib": 315.91
+          }
+        ]
+      }
+    },
+    {
+      "seconds": 5.764,
+      "rss_mib": 30.246,
+      "pss_mib": 26.632,
+      "anonymous_mib": 6.062,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 29.637,
+      "generation": 5,
+      "presentations": 5,
+      "completed_checkpoints": [
+        "initial",
+        "focused"
+      ],
+      "host": {
+        "available_mib": 6349.871,
+        "cached_mib": 5901.98,
+        "swap_used_mib": 8177.566,
+        "pressure": "some avg10=0.72 avg60=0.62 avg300=0.20 total=30081113\nfull avg10=0.70 avg60=0.58 avg300=0.18 total=26644978",
+        "compiler_processes": [
+          {
+            "pid": 547222,
+            "name": "cargo",
+            "rss_mib": 67.793,
+            "pss_mib": 56.121
+          },
+          {
+            "pid": 548457,
+            "name": "cargo",
+            "rss_mib": 78.004,
+            "pss_mib": 66.328
+          },
+          {
+            "pid": 548543,
+            "name": "rustdoc",
+            "rss_mib": 530.508,
+            "pss_mib": 498.418
+          },
+          {
+            "pid": 548584,
+            "name": "rustdoc",
+            "rss_mib": 82.633,
+            "pss_mib": 46.502
+          }
+        ]
+      }
+    },
+    {
+      "seconds": 6.052,
+      "rss_mib": 30.293,
+      "pss_mib": 26.679,
+      "anonymous_mib": 6.109,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 69.523,
+      "generation": 5,
+      "presentations": 7,
+      "completed_checkpoints": [
+        "initial",
+        "focused",
+        "changed"
+      ],
+      "host": {
+        "available_mib": 6181.637,
+        "cached_mib": 5905.23,
+        "swap_used_mib": 8177.543,
+        "pressure": "some avg10=0.72 avg60=0.62 avg300=0.20 total=30081113\nfull avg10=0.70 avg60=0.58 avg300=0.18 total=26644978",
+        "compiler_processes": [
+          {
+            "pid": 547222,
+            "name": "cargo",
+            "rss_mib": 67.793,
+            "pss_mib": 56.121
+          },
+          {
+            "pid": 548457,
+            "name": "cargo",
+            "rss_mib": 78.004,
+            "pss_mib": 66.328
+          },
+          {
+            "pid": 548543,
+            "name": "rustdoc",
+            "rss_mib": 606.891,
+            "pss_mib": 513.543
+          },
+          {
+            "pid": 548584,
+            "name": "rustdoc",
+            "rss_mib": 275.574,
+            "pss_mib": 182.162
+          }
+        ]
+      }
+    },
+    {
+      "seconds": 6.352,
+      "rss_mib": 30.293,
+      "pss_mib": 26.679,
+      "anonymous_mib": 6.109,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 106.571,
+      "generation": 5,
+      "presentations": 7,
+      "completed_checkpoints": [
+        "initial",
+        "focused",
+        "changed"
+      ],
+      "host": {
+        "available_mib": 6434.848,
+        "cached_mib": 5905.199,
+        "swap_used_mib": 8177.414,
+        "pressure": "some avg10=0.72 avg60=0.62 avg300=0.20 total=30081113\nfull avg10=0.70 avg60=0.58 avg300=0.18 total=26644978",
+        "compiler_processes": [
+          {
+            "pid": 547222,
+            "name": "cargo",
+            "rss_mib": 67.793,
+            "pss_mib": 56.121
+          },
+          {
+            "pid": 548457,
+            "name": "cargo",
+            "rss_mib": 78.004,
+            "pss_mib": 66.328
+          },
+          {
+            "pid": 548584,
+            "name": "rustdoc",
+            "rss_mib": 361.941,
+            "pss_mib": 358.816
+          }
+        ]
+      }
+    },
+    {
+      "seconds": 6.633,
+      "rss_mib": 30.293,
+      "pss_mib": 26.679,
+      "anonymous_mib": 6.109,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 121.043,
+      "generation": 5,
+      "presentations": 7,
+      "completed_checkpoints": [
+        "initial",
+        "focused",
+        "changed"
+      ],
+      "host": {
+        "available_mib": 6372.539,
+        "cached_mib": 5905.348,
+        "swap_used_mib": 8177.41,
+        "pressure": "some avg10=0.72 avg60=0.62 avg300=0.20 total=30081113\nfull avg10=0.70 avg60=0.58 avg300=0.18 total=26644978",
+        "compiler_processes": [
+          {
+            "pid": 547222,
+            "name": "cargo",
+            "rss_mib": 67.793,
+            "pss_mib": 56.121
+          },
+          {
+            "pid": 548457,
+            "name": "cargo",
+            "rss_mib": 78.004,
+            "pss_mib": 66.328
+          },
+          {
+            "pid": 548584,
+            "name": "rustdoc",
+            "rss_mib": 448.895,
+            "pss_mib": 445.77
+          }
+        ]
+      }
+    },
+    {
+      "seconds": 6.916,
+      "rss_mib": 30.293,
+      "pss_mib": 26.679,
+      "anonymous_mib": 6.109,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 109.78,
+      "generation": 5,
+      "presentations": 7,
+      "completed_checkpoints": [
+        "initial",
+        "focused",
+        "changed"
+      ],
+      "host": {
+        "available_mib": 6188.207,
+        "cached_mib": 5905.887,
+        "swap_used_mib": 8176.441,
+        "pressure": "some avg10=0.72 avg60=0.62 avg300=0.20 total=30081122\nfull avg10=0.70 avg60=0.58 avg300=0.18 total=26644987",
+        "compiler_processes": [
+          {
+            "pid": 547222,
+            "name": "cargo",
+            "rss_mib": 67.793,
+            "pss_mib": 56.121
+          },
+          {
+            "pid": 548457,
+            "name": "cargo",
+            "rss_mib": 78.004,
+            "pss_mib": 66.328
+          },
+          {
+            "pid": 548584,
+            "name": "rustdoc",
+            "rss_mib": 577.145,
+            "pss_mib": 574.02
+          }
+        ]
+      }
+    },
+    {
+      "seconds": 7.201,
+      "rss_mib": 30.293,
+      "pss_mib": 26.679,
+      "anonymous_mib": 6.109,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 105.235,
+      "generation": 5,
+      "presentations": 7,
+      "completed_checkpoints": [
+        "initial",
+        "focused",
+        "changed"
+      ],
+      "host": {
+        "available_mib": 6254.199,
+        "cached_mib": 5905.598,
+        "swap_used_mib": 8176.395,
+        "pressure": "some avg10=0.72 avg60=0.62 avg300=0.20 total=30081122\nfull avg10=0.70 avg60=0.58 avg300=0.18 total=26644987",
+        "compiler_processes": [
+          {
+            "pid": 547222,
+            "name": "cargo",
+            "rss_mib": 67.793,
+            "pss_mib": 56.121
+          },
+          {
+            "pid": 548457,
+            "name": "cargo",
+            "rss_mib": 78.004,
+            "pss_mib": 66.328
+          }
+        ]
+      }
+    },
+    {
+      "seconds": 7.478,
+      "rss_mib": 30.297,
+      "pss_mib": 26.684,
+      "anonymous_mib": 6.113,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 108.333,
+      "generation": 7,
+      "presentations": 10,
+      "completed_checkpoints": [
+        "initial",
+        "focused",
+        "changed"
+      ],
+      "host": {
+        "available_mib": 6523.012,
+        "cached_mib": 5927.848,
+        "swap_used_mib": 8176.258,
+        "pressure": "some avg10=0.59 avg60=0.60 avg300=0.20 total=30081243\nfull avg10=0.57 avg60=0.56 avg300=0.18 total=26645065",
+        "compiler_processes": [
+          {
+            "pid": 547222,
+            "name": "cargo",
+            "rss_mib": 67.793,
+            "pss_mib": 56.063
+          },
+          {
+            "pid": 548603,
+            "name": "cargo",
+            "rss_mib": 74.727,
+            "pss_mib": 63.123
+          }
+        ]
+      }
+    }
+  ]
+}

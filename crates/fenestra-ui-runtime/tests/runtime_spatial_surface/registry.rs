@@ -2,11 +2,12 @@ use std::collections::BTreeSet;
 
 use super::source::{all_source, read, source_dir};
 
-const EXPECTED_EXPORTS: [&str; 76] = [
+const EXPECTED_EXPORTS: [&str; 77] = [
     "CallbackFinish",
     "CallbackScope",
     "CapacityKind",
     "CommitReceipt",
+    "CommitWithError",
     "CommittedRuntimeSnapshot",
     "CompletionWatermark",
     "ComputedStyleView",

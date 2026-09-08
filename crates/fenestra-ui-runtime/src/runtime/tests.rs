@@ -169,4 +169,6 @@ fn retained_generation_capacity_precedes_generation_exhaustion() {
     assert_eq!(error.operation_index(), None);
 }
 
+mod prepublication;
+mod preview;
 mod spatial;

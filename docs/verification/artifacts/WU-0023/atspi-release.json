@@ -1,0 +1,2017 @@
+{
+  "activation": "private session Status fixture; real host AT-SPI tree and actions",
+  "host_status_before": {
+    "IsEnabled": false,
+    "ScreenReaderEnabled": false
+  },
+  "host_status_after": {
+    "IsEnabled": false,
+    "ScreenReaderEnabled": false
+  },
+  "inspect_only": false,
+  "success": true,
+  "failure": null,
+  "checkpoints": [
+    {
+      "stage": "initial",
+      "rust": {
+        "apply_count": 0,
+        "controls": [
+          {
+            "bounds": [
+              24,
+              110,
+              592,
+              46
+            ],
+            "checked": true,
+            "disabled": false,
+            "focused": false,
+            "label": "Show notifications",
+            "name": "notifications",
+            "role": "checkbox"
+          },
+          {
+            "bounds": [
+              24,
+              166,
+              592,
+              46
+            ],
+            "checked": false,
+            "disabled": false,
+            "focused": false,
+            "label": "Use compact spacing",
+            "name": "compact",
+            "role": "checkbox"
+          },
+          {
+            "bounds": [
+              24,
+              222,
+              592,
+              46
+            ],
+            "checked": true,
+            "disabled": false,
+            "focused": false,
+            "label": "Save changes automatically",
+            "name": "autosave",
+            "role": "checkbox"
+          },
+          {
+            "bounds": [
+              24,
+              284,
+              280,
+              46
+            ],
+            "checked": null,
+            "disabled": true,
+            "focused": false,
+            "label": "Apply preferences",
+            "name": "apply",
+            "role": "button"
+          },
+          {
+            "bounds": [
+              316,
+              284,
+              280,
+              46
+            ],
+            "checked": null,
+            "disabled": true,
+            "focused": false,
+            "label": "Reset defaults",
+            "name": "reset",
+            "role": "button"
+          },
+          {
+            "bounds": [
+              24,
+              384,
+              592,
+              40
+            ],
+            "checked": null,
+            "disabled": false,
+            "focused": false,
+            "label": "Finish accessibility verification",
+            "name": "finish",
+            "role": "button"
+          }
+        ],
+        "finished": false,
+        "frame": "frame-0002.ppm",
+        "generation": 0,
+        "logical_focus": null,
+        "pid": 549453,
+        "presentations": 2,
+        "readout": "Preferences are up to date.",
+        "rgba_checksum": "91dd60df59f8de21",
+        "viewport": [
+          640,
+          520
+        ],
+        "window_focused": true
+      },
+      "atspi": [
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/root",
+          "name": "a11y-probe",
+          "accessible_id": "",
+          "role_id": 75,
+          "role": "application",
+          "states": {
+            "checked": false,
+            "enabled": false,
+            "focusable": false,
+            "focused": false,
+            "pressed": false,
+            "sensitive": false,
+            "showing": false,
+            "visible": false,
+            "checkable": false
+          },
+          "children": [
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/0"
+            ]
+          ],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Application"
+          ],
+          "bounds": null,
+          "actions": []
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/0",
+          "name": "Fenestra accessibility verification",
+          "accessible_id": "",
+          "role_id": 23,
+          "role": "frame",
+          "states": {
+            "checked": false,
+            "enabled": true,
+            "focusable": true,
+            "focused": true,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": false
+          },
+          "children": [
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/36893488147419103232"
+            ],
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/55340232221128654848"
+            ],
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/92233720368547758080"
+            ],
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/166020696663385964544"
+            ],
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/239807672958224171008"
+            ],
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/332041393326771929088"
+            ],
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/368934881474191032320"
+            ],
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/405828369621610135552"
+            ],
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/424275113695319687168"
+            ]
+          ],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            0,
+            0,
+            640,
+            520
+          ],
+          "actions": []
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/36893488147419103232",
+          "name": "Workspace preferences",
+          "accessible_id": "title",
+          "role_id": 29,
+          "role": "label",
+          "states": {
+            "checked": false,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": false
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            24,
+            24,
+            592,
+            34
+          ],
+          "actions": []
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/55340232221128654848",
+          "name": "Tab to move. Space toggles an option. Enter or Space activates a button.",
+          "accessible_id": "instructions",
+          "role_id": 29,
+          "role": "label",
+          "states": {
+            "checked": false,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": false
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            24,
+            74,
+            592,
+            20
+          ],
+          "actions": []
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/92233720368547758080",
+          "name": "Show notifications",
+          "accessible_id": "notifications",
+          "role_id": 7,
+          "role": "check box",
+          "states": {
+            "checked": true,
+            "enabled": true,
+            "focusable": true,
+            "focused": false,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": true
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Action",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            24,
+            110,
+            592,
+            46
+          ],
+          "actions": [
+            "click"
+          ]
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/166020696663385964544",
+          "name": "Use compact spacing",
+          "accessible_id": "compact",
+          "role_id": 7,
+          "role": "check box",
+          "states": {
+            "checked": false,
+            "enabled": true,
+            "focusable": true,
+            "focused": false,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": true
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Action",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            24,
+            166,
+            592,
+            46
+          ],
+          "actions": [
+            "click"
+          ]
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/239807672958224171008",
+          "name": "Save changes automatically",
+          "accessible_id": "autosave",
+          "role_id": 7,
+          "role": "check box",
+          "states": {
+            "checked": true,
+            "enabled": true,
+            "focusable": true,
+            "focused": false,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": true
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Action",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            24,
+            222,
+            592,
+            46
+          ],
+          "actions": [
+            "click"
+          ]
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/332041393326771929088",
+          "name": "Apply preferences",
+          "accessible_id": "apply",
+          "role_id": 43,
+          "role": "push button",
+          "states": {
+            "checked": false,
+            "enabled": false,
+            "focusable": false,
+            "focused": false,
+            "pressed": false,
+            "sensitive": false,
+            "showing": true,
+            "visible": true,
+            "checkable": false
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            24,
+            284,
+            280,
+            46
+          ],
+          "actions": []
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/368934881474191032320",
+          "name": "Reset defaults",
+          "accessible_id": "reset",
+          "role_id": 43,
+          "role": "push button",
+          "states": {
+            "checked": false,
+            "enabled": false,
+            "focusable": false,
+            "focused": false,
+            "pressed": false,
+            "sensitive": false,
+            "showing": true,
+            "visible": true,
+            "checkable": false
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            316,
+            284,
+            280,
+            46
+          ],
+          "actions": []
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/405828369621610135552",
+          "name": "Preferences are up to date.",
+          "accessible_id": "readout",
+          "role_id": 29,
+          "role": "label",
+          "states": {
+            "checked": false,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": false
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            24,
+            346,
+            592,
+            22
+          ],
+          "actions": []
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/424275113695319687168",
+          "name": "Finish accessibility verification",
+          "accessible_id": "finish",
+          "role_id": 43,
+          "role": "push button",
+          "states": {
+            "checked": false,
+            "enabled": true,
+            "focusable": true,
+            "focused": false,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": false
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Action",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            24,
+            384,
+            592,
+            40
+          ],
+          "actions": [
+            "click"
+          ]
+        }
+      ],
+      "ppm_sha256": "d39d7daf541ffc7a6dfcdd2211f8b09df7fc5569db0fd9b7680817d06eed0c50"
+    },
+    {
+      "stage": "focused",
+      "rust": {
+        "apply_count": 0,
+        "controls": [
+          {
+            "bounds": [
+              24,
+              110,
+              592,
+              46
+            ],
+            "checked": true,
+            "disabled": false,
+            "focused": false,
+            "label": "Show notifications",
+            "name": "notifications",
+            "role": "checkbox"
+          },
+          {
+            "bounds": [
+              24,
+              166,
+              592,
+              46
+            ],
+            "checked": false,
+            "disabled": false,
+            "focused": true,
+            "label": "Use compact spacing",
+            "name": "compact",
+            "role": "checkbox"
+          },
+          {
+            "bounds": [
+              24,
+              222,
+              592,
+              46
+            ],
+            "checked": true,
+            "disabled": false,
+            "focused": false,
+            "label": "Save changes automatically",
+            "name": "autosave",
+            "role": "checkbox"
+          },
+          {
+            "bounds": [
+              24,
+              284,
+              280,
+              46
+            ],
+            "checked": null,
+            "disabled": true,
+            "focused": false,
+            "label": "Apply preferences",
+            "name": "apply",
+            "role": "button"
+          },
+          {
+            "bounds": [
+              316,
+              284,
+              280,
+              46
+            ],
+            "checked": null,
+            "disabled": true,
+            "focused": false,
+            "label": "Reset defaults",
+            "name": "reset",
+            "role": "button"
+          },
+          {
+            "bounds": [
+              24,
+              384,
+              592,
+              40
+            ],
+            "checked": null,
+            "disabled": false,
+            "focused": false,
+            "label": "Finish accessibility verification",
+            "name": "finish",
+            "role": "button"
+          }
+        ],
+        "finished": false,
+        "frame": "frame-0011.ppm",
+        "generation": 1,
+        "logical_focus": "compact",
+        "pid": 549453,
+        "presentations": 11,
+        "readout": "Preferences are up to date.",
+        "rgba_checksum": "3dbd8c516a0c0d39",
+        "viewport": [
+          640,
+          520
+        ],
+        "window_focused": true
+      },
+      "atspi": [
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/root",
+          "name": "a11y-probe",
+          "accessible_id": "",
+          "role_id": 75,
+          "role": "application",
+          "states": {
+            "checked": false,
+            "enabled": false,
+            "focusable": false,
+            "focused": false,
+            "pressed": false,
+            "sensitive": false,
+            "showing": false,
+            "visible": false,
+            "checkable": false
+          },
+          "children": [
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/0"
+            ]
+          ],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Application"
+          ],
+          "bounds": null,
+          "actions": []
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/0",
+          "name": "Fenestra accessibility verification",
+          "accessible_id": "",
+          "role_id": 23,
+          "role": "frame",
+          "states": {
+            "checked": false,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": false
+          },
+          "children": [
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/36893488147419103232"
+            ],
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/55340232221128654848"
+            ],
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/92233720368547758080"
+            ],
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/166020696663385964544"
+            ],
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/239807672958224171008"
+            ],
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/332041393326771929088"
+            ],
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/368934881474191032320"
+            ],
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/405828369621610135552"
+            ],
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/424275113695319687168"
+            ]
+          ],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            0,
+            0,
+            640,
+            520
+          ],
+          "actions": []
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/36893488147419103232",
+          "name": "Workspace preferences",
+          "accessible_id": "title",
+          "role_id": 29,
+          "role": "label",
+          "states": {
+            "checked": false,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": false
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            24,
+            24,
+            592,
+            34
+          ],
+          "actions": []
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/55340232221128654848",
+          "name": "Tab to move. Space toggles an option. Enter or Space activates a button.",
+          "accessible_id": "instructions",
+          "role_id": 29,
+          "role": "label",
+          "states": {
+            "checked": false,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": false
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            24,
+            74,
+            592,
+            20
+          ],
+          "actions": []
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/92233720368547758080",
+          "name": "Show notifications",
+          "accessible_id": "notifications",
+          "role_id": 7,
+          "role": "check box",
+          "states": {
+            "checked": true,
+            "enabled": true,
+            "focusable": true,
+            "focused": false,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": true
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Action",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            24,
+            110,
+            592,
+            46
+          ],
+          "actions": [
+            "click"
+          ]
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/166020696663385964544",
+          "name": "Use compact spacing",
+          "accessible_id": "compact",
+          "role_id": 7,
+          "role": "check box",
+          "states": {
+            "checked": false,
+            "enabled": true,
+            "focusable": true,
+            "focused": true,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": true
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Action",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            24,
+            166,
+            592,
+            46
+          ],
+          "actions": [
+            "click"
+          ]
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/239807672958224171008",
+          "name": "Save changes automatically",
+          "accessible_id": "autosave",
+          "role_id": 7,
+          "role": "check box",
+          "states": {
+            "checked": true,
+            "enabled": true,
+            "focusable": true,
+            "focused": false,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": true
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Action",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            24,
+            222,
+            592,
+            46
+          ],
+          "actions": [
+            "click"
+          ]
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/332041393326771929088",
+          "name": "Apply preferences",
+          "accessible_id": "apply",
+          "role_id": 43,
+          "role": "push button",
+          "states": {
+            "checked": false,
+            "enabled": false,
+            "focusable": false,
+            "focused": false,
+            "pressed": false,
+            "sensitive": false,
+            "showing": true,
+            "visible": true,
+            "checkable": false
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            24,
+            284,
+            280,
+            46
+          ],
+          "actions": []
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/368934881474191032320",
+          "name": "Reset defaults",
+          "accessible_id": "reset",
+          "role_id": 43,
+          "role": "push button",
+          "states": {
+            "checked": false,
+            "enabled": false,
+            "focusable": false,
+            "focused": false,
+            "pressed": false,
+            "sensitive": false,
+            "showing": true,
+            "visible": true,
+            "checkable": false
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            316,
+            284,
+            280,
+            46
+          ],
+          "actions": []
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/405828369621610135552",
+          "name": "Preferences are up to date.",
+          "accessible_id": "readout",
+          "role_id": 29,
+          "role": "label",
+          "states": {
+            "checked": false,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": false
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            24,
+            346,
+            592,
+            22
+          ],
+          "actions": []
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/424275113695319687168",
+          "name": "Finish accessibility verification",
+          "accessible_id": "finish",
+          "role_id": 43,
+          "role": "push button",
+          "states": {
+            "checked": false,
+            "enabled": true,
+            "focusable": true,
+            "focused": false,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": false
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Action",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            24,
+            384,
+            592,
+            40
+          ],
+          "actions": [
+            "click"
+          ]
+        }
+      ],
+      "ppm_sha256": "49d1bf796bb0e4ab50b4d8bb71e96bc2773fba5094b98b167356635e859c4887"
+    },
+    {
+      "stage": "changed",
+      "rust": {
+        "apply_count": 0,
+        "controls": [
+          {
+            "bounds": [
+              24,
+              110,
+              592,
+              46
+            ],
+            "checked": true,
+            "disabled": false,
+            "focused": false,
+            "label": "Show notifications",
+            "name": "notifications",
+            "role": "checkbox"
+          },
+          {
+            "bounds": [
+              24,
+              166,
+              592,
+              46
+            ],
+            "checked": true,
+            "disabled": false,
+            "focused": true,
+            "label": "Use compact spacing",
+            "name": "compact",
+            "role": "checkbox"
+          },
+          {
+            "bounds": [
+              24,
+              222,
+              592,
+              46
+            ],
+            "checked": true,
+            "disabled": false,
+            "focused": false,
+            "label": "Save changes automatically",
+            "name": "autosave",
+            "role": "checkbox"
+          },
+          {
+            "bounds": [
+              24,
+              284,
+              280,
+              46
+            ],
+            "checked": null,
+            "disabled": false,
+            "focused": false,
+            "label": "Apply preferences",
+            "name": "apply",
+            "role": "button"
+          },
+          {
+            "bounds": [
+              316,
+              284,
+              280,
+              46
+            ],
+            "checked": null,
+            "disabled": false,
+            "focused": false,
+            "label": "Reset defaults",
+            "name": "reset",
+            "role": "button"
+          },
+          {
+            "bounds": [
+              24,
+              384,
+              592,
+              40
+            ],
+            "checked": null,
+            "disabled": false,
+            "focused": false,
+            "label": "Finish accessibility verification",
+            "name": "finish",
+            "role": "button"
+          }
+        ],
+        "finished": false,
+        "frame": "frame-0014.ppm",
+        "generation": 5,
+        "logical_focus": "compact",
+        "pid": 549453,
+        "presentations": 14,
+        "readout": "Changes pending. Apply when ready.",
+        "rgba_checksum": "8f06055aecb4fbec",
+        "viewport": [
+          640,
+          520
+        ],
+        "window_focused": true
+      },
+      "atspi": [
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/root",
+          "name": "a11y-probe",
+          "accessible_id": "",
+          "role_id": 75,
+          "role": "application",
+          "states": {
+            "checked": false,
+            "enabled": false,
+            "focusable": false,
+            "focused": false,
+            "pressed": false,
+            "sensitive": false,
+            "showing": false,
+            "visible": false,
+            "checkable": false
+          },
+          "children": [
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/0"
+            ]
+          ],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Application"
+          ],
+          "bounds": null,
+          "actions": []
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/0",
+          "name": "Fenestra accessibility verification",
+          "accessible_id": "",
+          "role_id": 23,
+          "role": "frame",
+          "states": {
+            "checked": false,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": false
+          },
+          "children": [
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/36893488147419103232"
+            ],
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/55340232221128654848"
+            ],
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/92233720368547758080"
+            ],
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/166020696663385964544"
+            ],
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/239807672958224171008"
+            ],
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/332041393326771929088"
+            ],
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/368934881474191032320"
+            ],
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/405828369621610135552"
+            ],
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/424275113695319687168"
+            ]
+          ],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            0,
+            0,
+            640,
+            520
+          ],
+          "actions": []
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/36893488147419103232",
+          "name": "Workspace preferences",
+          "accessible_id": "title",
+          "role_id": 29,
+          "role": "label",
+          "states": {
+            "checked": false,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": false
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            24,
+            24,
+            592,
+            34
+          ],
+          "actions": []
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/55340232221128654848",
+          "name": "Tab to move. Space toggles an option. Enter or Space activates a button.",
+          "accessible_id": "instructions",
+          "role_id": 29,
+          "role": "label",
+          "states": {
+            "checked": false,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": false
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            24,
+            74,
+            592,
+            20
+          ],
+          "actions": []
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/92233720368547758080",
+          "name": "Show notifications",
+          "accessible_id": "notifications",
+          "role_id": 7,
+          "role": "check box",
+          "states": {
+            "checked": true,
+            "enabled": true,
+            "focusable": true,
+            "focused": false,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": true
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Action",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            24,
+            110,
+            592,
+            46
+          ],
+          "actions": [
+            "click"
+          ]
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/166020696663385964544",
+          "name": "Use compact spacing",
+          "accessible_id": "compact",
+          "role_id": 7,
+          "role": "check box",
+          "states": {
+            "checked": true,
+            "enabled": true,
+            "focusable": true,
+            "focused": true,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": true
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Action",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            24,
+            166,
+            592,
+            46
+          ],
+          "actions": [
+            "click"
+          ]
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/239807672958224171008",
+          "name": "Save changes automatically",
+          "accessible_id": "autosave",
+          "role_id": 7,
+          "role": "check box",
+          "states": {
+            "checked": true,
+            "enabled": true,
+            "focusable": true,
+            "focused": false,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": true
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Action",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            24,
+            222,
+            592,
+            46
+          ],
+          "actions": [
+            "click"
+          ]
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/332041393326771929088",
+          "name": "Apply preferences",
+          "accessible_id": "apply",
+          "role_id": 43,
+          "role": "push button",
+          "states": {
+            "checked": false,
+            "enabled": true,
+            "focusable": true,
+            "focused": false,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": false
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Action",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            24,
+            284,
+            280,
+            46
+          ],
+          "actions": [
+            "click"
+          ]
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/368934881474191032320",
+          "name": "Reset defaults",
+          "accessible_id": "reset",
+          "role_id": 43,
+          "role": "push button",
+          "states": {
+            "checked": false,
+            "enabled": true,
+            "focusable": true,
+            "focused": false,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": false
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Action",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            316,
+            284,
+            280,
+            46
+          ],
+          "actions": [
+            "click"
+          ]
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/405828369621610135552",
+          "name": "Changes pending. Apply when ready.",
+          "accessible_id": "readout",
+          "role_id": 29,
+          "role": "label",
+          "states": {
+            "checked": false,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": false
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            24,
+            346,
+            592,
+            22
+          ],
+          "actions": []
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/424275113695319687168",
+          "name": "Finish accessibility verification",
+          "accessible_id": "finish",
+          "role_id": 43,
+          "role": "push button",
+          "states": {
+            "checked": false,
+            "enabled": true,
+            "focusable": true,
+            "focused": false,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": false
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Action",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            24,
+            384,
+            592,
+            40
+          ],
+          "actions": [
+            "click"
+          ]
+        }
+      ],
+      "ppm_sha256": "88f5103231b011b1ed514784ee6dde13c466ca9cd8cdcf225a0a6fc845b73ee9"
+    },
+    {
+      "stage": "applied",
+      "rust": {
+        "apply_count": 1,
+        "controls": [
+          {
+            "bounds": [
+              24,
+              110,
+              592,
+              46
+            ],
+            "checked": true,
+            "disabled": false,
+            "focused": false,
+            "label": "Show notifications",
+            "name": "notifications",
+            "role": "checkbox"
+          },
+          {
+            "bounds": [
+              24,
+              166,
+              592,
+              46
+            ],
+            "checked": true,
+            "disabled": false,
+            "focused": true,
+            "label": "Use compact spacing",
+            "name": "compact",
+            "role": "checkbox"
+          },
+          {
+            "bounds": [
+              24,
+              222,
+              592,
+              46
+            ],
+            "checked": true,
+            "disabled": false,
+            "focused": false,
+            "label": "Save changes automatically",
+            "name": "autosave",
+            "role": "checkbox"
+          },
+          {
+            "bounds": [
+              24,
+              284,
+              280,
+              46
+            ],
+            "checked": null,
+            "disabled": true,
+            "focused": false,
+            "label": "Apply preferences",
+            "name": "apply",
+            "role": "button"
+          },
+          {
+            "bounds": [
+              316,
+              284,
+              280,
+              46
+            ],
+            "checked": null,
+            "disabled": false,
+            "focused": false,
+            "label": "Reset defaults",
+            "name": "reset",
+            "role": "button"
+          },
+          {
+            "bounds": [
+              24,
+              384,
+              592,
+              40
+            ],
+            "checked": null,
+            "disabled": false,
+            "focused": false,
+            "label": "Finish accessibility verification",
+            "name": "finish",
+            "role": "button"
+          }
+        ],
+        "finished": false,
+        "frame": "frame-0015.ppm",
+        "generation": 7,
+        "logical_focus": "compact",
+        "pid": 549453,
+        "presentations": 15,
+        "readout": "Preferences applied (1).",
+        "rgba_checksum": "cdef0096d5590403",
+        "viewport": [
+          640,
+          520
+        ],
+        "window_focused": true
+      },
+      "atspi": [
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/root",
+          "name": "a11y-probe",
+          "accessible_id": "",
+          "role_id": 75,
+          "role": "application",
+          "states": {
+            "checked": false,
+            "enabled": false,
+            "focusable": false,
+            "focused": false,
+            "pressed": false,
+            "sensitive": false,
+            "showing": false,
+            "visible": false,
+            "checkable": false
+          },
+          "children": [
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/0"
+            ]
+          ],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Application"
+          ],
+          "bounds": null,
+          "actions": []
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/0",
+          "name": "Fenestra accessibility verification",
+          "accessible_id": "",
+          "role_id": 23,
+          "role": "frame",
+          "states": {
+            "checked": false,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": false
+          },
+          "children": [
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/36893488147419103232"
+            ],
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/55340232221128654848"
+            ],
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/92233720368547758080"
+            ],
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/166020696663385964544"
+            ],
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/239807672958224171008"
+            ],
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/332041393326771929088"
+            ],
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/368934881474191032320"
+            ],
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/405828369621610135552"
+            ],
+            [
+              ":1.37",
+              "/org/a11y/atspi/accessible/0/424275113695319687168"
+            ]
+          ],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            0,
+            0,
+            640,
+            520
+          ],
+          "actions": []
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/36893488147419103232",
+          "name": "Workspace preferences",
+          "accessible_id": "title",
+          "role_id": 29,
+          "role": "label",
+          "states": {
+            "checked": false,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": false
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            24,
+            24,
+            592,
+            34
+          ],
+          "actions": []
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/55340232221128654848",
+          "name": "Tab to move. Space toggles an option. Enter or Space activates a button.",
+          "accessible_id": "instructions",
+          "role_id": 29,
+          "role": "label",
+          "states": {
+            "checked": false,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": false
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            24,
+            74,
+            592,
+            20
+          ],
+          "actions": []
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/92233720368547758080",
+          "name": "Show notifications",
+          "accessible_id": "notifications",
+          "role_id": 7,
+          "role": "check box",
+          "states": {
+            "checked": true,
+            "enabled": true,
+            "focusable": true,
+            "focused": false,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": true
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Action",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            24,
+            110,
+            592,
+            46
+          ],
+          "actions": [
+            "click"
+          ]
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/166020696663385964544",
+          "name": "Use compact spacing",
+          "accessible_id": "compact",
+          "role_id": 7,
+          "role": "check box",
+          "states": {
+            "checked": true,
+            "enabled": true,
+            "focusable": true,
+            "focused": true,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": true
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Action",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            24,
+            166,
+            592,
+            46
+          ],
+          "actions": [
+            "click"
+          ]
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/239807672958224171008",
+          "name": "Save changes automatically",
+          "accessible_id": "autosave",
+          "role_id": 7,
+          "role": "check box",
+          "states": {
+            "checked": true,
+            "enabled": true,
+            "focusable": true,
+            "focused": false,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": true
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Action",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            24,
+            222,
+            592,
+            46
+          ],
+          "actions": [
+            "click"
+          ]
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/332041393326771929088",
+          "name": "Apply preferences",
+          "accessible_id": "apply",
+          "role_id": 43,
+          "role": "push button",
+          "states": {
+            "checked": false,
+            "enabled": false,
+            "focusable": false,
+            "focused": false,
+            "pressed": false,
+            "sensitive": false,
+            "showing": true,
+            "visible": true,
+            "checkable": false
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            24,
+            284,
+            280,
+            46
+          ],
+          "actions": []
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/368934881474191032320",
+          "name": "Reset defaults",
+          "accessible_id": "reset",
+          "role_id": 43,
+          "role": "push button",
+          "states": {
+            "checked": false,
+            "enabled": true,
+            "focusable": true,
+            "focused": false,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": false
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Action",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            316,
+            284,
+            280,
+            46
+          ],
+          "actions": [
+            "click"
+          ]
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/405828369621610135552",
+          "name": "Preferences applied (1).",
+          "accessible_id": "readout",
+          "role_id": 29,
+          "role": "label",
+          "states": {
+            "checked": false,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": false
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            24,
+            346,
+            592,
+            22
+          ],
+          "actions": []
+        },
+        {
+          "bus": ":1.37",
+          "path": "/org/a11y/atspi/accessible/0/424275113695319687168",
+          "name": "Finish accessibility verification",
+          "accessible_id": "finish",
+          "role_id": 43,
+          "role": "push button",
+          "states": {
+            "checked": false,
+            "enabled": true,
+            "focusable": true,
+            "focused": false,
+            "pressed": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true,
+            "checkable": false
+          },
+          "children": [],
+          "interfaces": [
+            "org.a11y.atspi.Accessible",
+            "org.a11y.atspi.Action",
+            "org.a11y.atspi.Component"
+          ],
+          "bounds": [
+            24,
+            384,
+            592,
+            40
+          ],
+          "actions": [
+            "click"
+          ]
+        }
+      ],
+      "ppm_sha256": "b6c942d5306478540d6a50e01c2847064cd93967fd039417573316180e4e7616"
+    }
+  ]
+}

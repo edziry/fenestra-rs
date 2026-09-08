@@ -9,6 +9,7 @@ use crate::output_item::{
 };
 use crate::output_view::SpatialOutputV2;
 
+mod attachments;
 #[cfg(test)]
 mod facts;
 mod hit;
@@ -17,6 +18,7 @@ mod presentation;
 mod raster;
 mod validate;
 
+pub use attachments::{SpatialImageAttachmentErrorV2, SpatialImagePaintAttachmentV2};
 pub use hit::SpatialHitResultV2;
 pub use presentation::SpatialPaintFrameV2;
 

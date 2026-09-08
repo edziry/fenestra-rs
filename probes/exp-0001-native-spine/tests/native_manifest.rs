@@ -35,7 +35,6 @@ fn native_candidates_are_exact_target_scoped_and_replaceable() {
     assert!(!workspace.contains("winit = "));
     assert!(!workspace.contains("softbuffer = "));
     for relative in [
-        "crates/fenestra-ui/Cargo.toml",
         "crates/fenestra-ui-ir/Cargo.toml",
         "crates/fenestra-ui-runtime/Cargo.toml",
         "crates/fenestra-ui-testkit/Cargo.toml",
@@ -45,6 +44,26 @@ fn native_candidates_are_exact_target_scoped_and_replaceable() {
         assert!(!other.contains("winit = "), "{relative}");
         assert!(!other.contains("softbuffer = "), "{relative}");
     }
+    // The application facade hosts the extracted CPU shell only when opted in.
+    let facade = read(&root.join("crates/fenestra-ui/Cargo.toml"));
+    assert!(facade.contains("default = []"));
+    assert!(facade.contains(
+        "native = [\"dep:winit\", \"dep:softbuffer\", \"dep:accesskit\", \"dep:accesskit_winit\"]"
+    ));
+    assert!(!facade.contains("x11"));
+    for line in facade.lines().filter(|line| {
+        [
+            "winit = ",
+            "softbuffer = ",
+            "accesskit = ",
+            "accesskit_winit = ",
+        ]
+        .iter()
+        .any(|prefix| line.starts_with(prefix))
+    }) {
+        assert!(line.contains("optional = true"));
+        assert!(line.contains("default-features = false"));
+    }
 }
 
 #[test]
@@ -52,6 +71,8 @@ fn lockfile_records_the_exact_native_candidates() {
     let lock = read(&workspace_root().join("Cargo.lock"));
     assert!(package_block(&lock, "winit", "0.30.13").is_some());
     assert!(package_block(&lock, "softbuffer", "0.4.8").is_some());
+    assert!(package_block(&lock, "accesskit", "0.25.0").is_some());
+    assert!(package_block(&lock, "accesskit_winit", "0.34.0").is_some());
 }
 
 fn package_block<'a>(lock: &'a str, name: &str, version: &str) -> Option<&'a str> {

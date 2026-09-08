@@ -13,8 +13,15 @@ pub(crate) fn parse_ui_document_v2(
     stream: TokenStream,
     limits: AuthoringLimitsV2,
 ) -> Result<ParsedDocumentV2, AuthoringDiagnosticV2> {
-    let (tokens, eof) = UiTokenAdapterV2::new(limits).adapt(stream)?;
+    let (tokens, eof) = adapt_ui_tokens_v2(stream, limits)?;
     parse_document_v2(AuthoringFrontendV2::UiMacro, eof, tokens, limits)
+}
+
+pub(crate) fn adapt_ui_tokens_v2(
+    stream: TokenStream,
+    limits: AuthoringLimitsV2,
+) -> Result<(Vec<AbstractToken<PhysicalOriginV2>>, PhysicalOriginV2), AuthoringDiagnosticV2> {
+    UiTokenAdapterV2::new(limits).adapt(stream)
 }
 
 struct UiTokenAdapterV2 {

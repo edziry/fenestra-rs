@@ -14,6 +14,10 @@ pub struct SpatialImageV2 {
 }
 
 impl SpatialImageV2 {
+    pub(crate) fn set_key(&mut self, key: SpatialImageKeyV2) {
+        self.key = key;
+    }
+
     /// Creates an unvalidated image record and takes ownership of its exact bytes.
     #[must_use]
     pub fn new(

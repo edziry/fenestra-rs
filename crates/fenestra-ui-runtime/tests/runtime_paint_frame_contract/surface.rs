@@ -9,7 +9,8 @@ fn runtime_paint_frame_and_current_frame_request_exports_are_additive() {
     let exports = prototype_exports(&lib);
     let structs = public_structs(&source);
 
-    assert_eq!(exports.len(), 76);
+    assert_eq!(exports.len(), 77);
+    assert!(exports.contains("CommitWithError"));
     assert!(exports.contains("RuntimePaintFrameV2"));
     assert!(exports.contains("VisualRequestResult"));
     assert_eq!(structs.len(), 53);

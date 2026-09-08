@@ -129,9 +129,13 @@ same redaction and auto-trait policy as their V1 equivalents.
 Format 2 reuses the format-1 lexical contract unchanged. Input is UTF-8 and
 the grammar itself is ASCII. Identifiers, unsigned decimal tokens, signed
 decimal composition, whitespace, punctuation, group adaptation, opaque macro
-spans, and rejection of strings, floats, comments, suffixes, raw identifiers,
+spans, and rejection of strings, floats, suffixes, raw identifiers,
 base prefixes, and numeric underscores remain exactly as specified by the
 format-1 reference.
+
+The `.fen` lexer rejects comment syntax. Rust strips ordinary line and block
+comments before the `ui!` adapter receives tokens, so those comments may
+separate macro tokens. They do not enter the shared abstract-token grammar.
 
 No encoded image literal or file path is added. Image bytes are an explicit
 bounded list of decimal bytes.

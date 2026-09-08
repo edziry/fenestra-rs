@@ -1,0 +1,6 @@
+case=0 text_bytes=20 selection=3..6 lines=1 highlights=1 caret=(54.680,0.000,55.680,32.000) extent=(203.684,32.000) offset=0,0
+case=1 text_bytes=14 selection=2..8 lines=1 highlights=2 caret=(60.656,0.000,61.656,32.000) extent=(136.652,32.000) offset=0,0
+case=2 text_bytes=15 selection=15..15 lines=3 highlights=0 caret=(0.000,64.000,1.000,96.000) extent=(88.324,96.000) offset=0,0
+case=3 text_bytes=59 selection=24..35 lines=1 highlights=1 caret=(405.773,0.000,406.773,32.000) extent=(669.422,32.000) offset=180,0
+ime_area=78,148,2,32
+viewport=900x540 rgba_bytes=1944000 checksum=957477744035acf4 native_presented=true

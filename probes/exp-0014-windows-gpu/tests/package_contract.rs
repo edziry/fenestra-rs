@@ -42,11 +42,31 @@ fn native_candidate_dependencies_are_exact_feature_minimal_and_target_scoped() {
 
     for manifest_path in manifests(&root.join("crates")) {
         let source = read(&manifest_path);
-        for candidate in ["vello", "wgpu", "winit", "pollster"] {
+        for candidate in ["vello", "wgpu", "pollster"] {
             assert!(
                 !source.contains(candidate),
                 "{} must not expose candidate dependency {candidate}",
                 manifest_path.display()
+            );
+        }
+        if manifest_path == root.join("crates/fenestra-ui/Cargo.toml") {
+            // The CPU window shell and its accessibility adapters are optional.
+            // The core and GPU experiment boundary stays independent.
+            assert!(source.contains("default = []"));
+            assert!(source.contains(
+                "native = [\"dep:winit\", \"dep:softbuffer\", \"dep:accesskit\", \"dep:accesskit_winit\"]"
+            ));
+            for line in source.lines().filter(|line| line.starts_with("winit = ")) {
+                assert!(line.contains("optional = true"));
+                assert!(line.contains("version = \"=0.30.13\""));
+                assert!(line.contains("default-features = false"));
+            }
+            assert!(source.contains("target.'cfg(target_os = \"linux\")'.dependencies"));
+            assert!(source.contains("target.'cfg(target_os = \"windows\")'.dependencies"));
+        } else {
+            assert!(
+                !source.contains("winit"),
+                "core must remain window-system independent"
             );
         }
     }

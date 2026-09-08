@@ -25,15 +25,18 @@ const METHODS: [&str; 14] = [
 ];
 
 #[test]
-fn paint_frame_is_the_only_additive_export_and_struct() {
+fn paint_frame_and_image_attachments_have_the_expected_additive_surface() {
     let source = all_source();
     let lib = fs::read_to_string(source_dir().join("lib.rs")).expect("read spatial lib");
     let observed_exports = prototype_exports(&lib);
     let observed_structs = public_structs(&source);
 
-    assert_eq!(observed_exports.len(), 122);
+    assert_eq!(observed_exports.len(), 124);
+    assert!(observed_exports.contains("SpatialImageAttachmentErrorV2"));
+    assert!(observed_exports.contains("SpatialImagePaintAttachmentV2"));
     assert!(observed_exports.contains("SpatialPaintFrameV2"));
-    assert_eq!(observed_structs.len(), 52);
+    assert_eq!(observed_structs.len(), 53);
+    assert!(observed_structs.contains("SpatialImagePaintAttachmentV2"));
     assert!(observed_structs.contains("SpatialPaintFrameV2"));
     assert_struct_fields_private(&source, "SpatialPaintFrameV2");
     assert!(!struct_field_types(&source, "SpatialPaintFrameV2").is_empty());
@@ -56,6 +59,7 @@ fn paint_frame_and_snapshot_surfaces_are_exact_and_must_use() {
             "hit_test",
             "rasterize_reference",
             "paint_frame",
+            "with_image_paints",
         ])
     );
     assert!(public_constants(&source, "SpatialResolvedSnapshotV2").is_empty());
@@ -125,6 +129,7 @@ fn public_structs(source: &str) -> BTreeSet<&str> {
                 .split(['<', '(', '{'])
                 .next()
                 .expect("struct name")
+                .trim()
         })
         .collect()
 }

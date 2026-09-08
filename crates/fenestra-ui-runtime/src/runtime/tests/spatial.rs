@@ -28,6 +28,8 @@ const VIEWPORT: SpatialViewportV2 = SpatialViewportV2::new(80, 60);
 const NAMESPACE: SchemaNamespace = SchemaNamespace::new(99);
 const REVISION: SchemaRevision = SchemaRevision::new(1);
 
+mod preview;
+
 #[derive(Default)]
 struct ProgramState {
     calls: AtomicUsize,
@@ -178,6 +180,48 @@ fn spatial_rebuild_decision_is_independent_of_aggregate_invalidation() {
 #[test]
 fn spatial_rebuild_precedes_generation_exhaustion_and_drops_candidate_source() {
     assert_late_publication_failure(4, TransactionErrorKind::GenerationExhausted);
+}
+
+#[test]
+fn preparation_receives_completed_spatial_geometry_and_rejection_drops_it() {
+    let (mut runtime, program, engine) = runtime(4);
+    let before = runtime.committed();
+    let mut transaction = runtime.begin_transaction();
+    let resized = SpatialViewportV2::new(100, 90);
+    transaction.resize_spatial(resized).unwrap();
+    let result = runtime.commit_with(transaction, |candidate| {
+        let spatial = candidate.spatial().unwrap();
+        assert_eq!(candidate.generation().get(), 1);
+        assert_eq!(spatial.snapshot().viewport(), resized);
+        assert_eq!(spatial.snapshot().output().geometry().len(), 2);
+        assert_eq!(engine.load(Ordering::SeqCst), 2);
+        Err::<(), _>("rejected image attachment")
+    });
+
+    assert!(matches!(
+        result,
+        Err(crate::runtime::CommitWithError::Preparation(
+            "rejected image attachment"
+        ))
+    ));
+    assert!(before.shares_state_with(&runtime.committed()));
+    let sources = program.sources.lock().unwrap();
+    assert!(sources[0].upgrade().is_some());
+    assert!(sources[1].upgrade().is_none());
+}
+
+#[test]
+fn successful_sidecar_retains_the_same_spatial_snapshot_as_publication() {
+    let (mut runtime, _, _) = runtime(4);
+    let transaction = changed_transaction(&runtime, 10);
+    let (_, candidate) = runtime
+        .commit_with(transaction, |candidate| Ok::<_, ()>(candidate.clone()))
+        .unwrap();
+    let committed = runtime.committed();
+    assert!(std::ptr::eq(
+        candidate.spatial().unwrap().snapshot(),
+        committed.spatial().unwrap().snapshot()
+    ));
 }
 
 #[test]

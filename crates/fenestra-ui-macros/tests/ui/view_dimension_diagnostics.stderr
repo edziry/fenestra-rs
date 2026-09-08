@@ -1,0 +1,17 @@
+error: expected a positive integer from 1 through 65535
+ --> tests/ui/view_dimension_diagnostics.rs:8:29
+  |
+8 |                 width: fill(0);
+  |                             ^
+
+error: minimum width exceeds maximum width
+  --> tests/ui/view_dimension_diagnostics.rs:17:17
+   |
+17 |                 min_width: 80;
+   |                 ^^^^^^^^^
+
+error: expected a positive integer from 1 through 65535
+  --> tests/ui/view_dimension_diagnostics.rs:25:30
+   |
+25 |                 height: fill(65536);
+   |                              ^^^^^

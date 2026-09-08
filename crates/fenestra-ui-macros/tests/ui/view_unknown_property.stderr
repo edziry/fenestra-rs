@@ -1,0 +1,5 @@
+error: unknown property; expected width, height, padding, gap, background, or input
+ --> tests/ui/view_unknown_property.rs:8:17
+  |
+8 |                 widht: 12;
+  |                 ^^^^^

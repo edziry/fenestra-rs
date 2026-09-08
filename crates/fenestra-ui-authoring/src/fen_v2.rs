@@ -34,7 +34,7 @@ pub(crate) fn parse_fen_document_v2(
     )
 }
 
-fn lex_fen_v2(
+pub(crate) fn lex_fen_v2(
     source: SourceId,
     text: &str,
     limits: AuthoringLimitsV2,

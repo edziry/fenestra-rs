@@ -2,7 +2,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 const CURRENT_PRE_ALPHA_VERSION: &str = "0.2.0";
-const MEMBER_MANIFESTS: [&str; 12] = [
+const MEMBER_MANIFESTS: [&str; 13] = [
     "crates/fenestra-ui/Cargo.toml",
     "crates/fenestra-ui-authoring/Cargo.toml",
     "crates/fenestra-ui-ir/Cargo.toml",
@@ -11,6 +11,7 @@ const MEMBER_MANIFESTS: [&str; 12] = [
     "crates/fenestra-ui-runtime/Cargo.toml",
     "crates/fenestra-ui-spatial/Cargo.toml",
     "crates/fenestra-ui-testkit/Cargo.toml",
+    "crates/fenestra-ui-text/Cargo.toml",
     "probes/exp-0001-native-spine/Cargo.toml",
     "probes/exp-0001-spine/Cargo.toml",
     "probes/exp-0007-typed-authoring/Cargo.toml",
@@ -26,9 +27,9 @@ fn workspace_uses_one_explicit_pre_alpha_semver_line() {
     assert!(workspace_manifest.contains("version = \"0.2.0\""));
     assert_eq!(
         workspace_manifest.matches("version = \"=0.2.0\"").count(),
-        8
+        9
     );
-    assert_eq!(workspace_dependency_count(&workspace_manifest), 8);
+    assert_eq!(workspace_family_dependency_count(&workspace_manifest), 9);
 
     for relative in MEMBER_MANIFESTS {
         let manifest = read(&root.join(relative));
@@ -61,7 +62,7 @@ fn read(path: &Path) -> String {
         .unwrap_or_else(|error| panic!("failed to read {}: {error}", path.display()))
 }
 
-fn workspace_dependency_count(manifest: &str) -> usize {
+fn workspace_family_dependency_count(manifest: &str) -> usize {
     manifest
         .split_once("[workspace.dependencies]")
         .expect("workspace dependencies should exist")
@@ -70,6 +71,6 @@ fn workspace_dependency_count(manifest: &str) -> usize {
         .next()
         .expect("workspace dependency section should terminate")
         .lines()
-        .filter(|line| line.contains(" = "))
+        .filter(|line| line.starts_with("fenestra-ui") && line.contains(" = "))
         .count()
 }

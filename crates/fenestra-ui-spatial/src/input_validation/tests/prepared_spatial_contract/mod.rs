@@ -22,6 +22,8 @@ mod raster_authority_clips;
 mod raster_geometry;
 mod raster_limits;
 mod raster_ownership;
+mod raster_pixel_constant;
+mod raster_pixel_constant_fallback;
 mod raster_resources;
 mod raster_sampling;
 mod raster_support;

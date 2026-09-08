@@ -34,6 +34,7 @@ fn ui_runtime_has_exact_ten_method_additive_surface() {
         names(&[
             "begin_transaction",
             "commit",
+            "commit_with",
             "committed",
             "new",
             "new_headless",
@@ -42,6 +43,7 @@ fn ui_runtime_has_exact_ten_method_additive_surface() {
             "new_spatial_ir",
             "new_spatial_ir_with_layout_engine",
             "new_spatial_with_layout_engine",
+            "preview",
         ])
     );
 }

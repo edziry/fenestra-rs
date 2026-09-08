@@ -279,3 +279,123 @@ Exit: one verified Windows DX12 artifact proves real GPU submission,
 presentation, completion, and native interaction for the registered machine
 without leaking candidate types or claiming renderer selection or product
 support.
+
+## WU-0015: First usable application
+
+Branch: `feat/first-usable-application`
+Design: [first usable application](design/first-usable-application.md)
+Verification: [first usable application verification](verification/WU-0015-first-usable-application.md)
+
+- Research: dogfood the frozen WU-0013 format-2 spatial fixture through one
+  application boundary without claiming a final renderer or authoring API.
+- Planning: freeze the inspector user task, native input sequence, evidence
+  schema, limits, and nonclaims.
+- Implementation: add a deterministic layout inspector core, native CPU shell,
+  keyed insertion, selection, resize, and independently verified Windows
+  evidence.
+- Verification: pass the pure workspace gates and complete the bounded native
+  pointer, keyboard, resize, and close sequence.
+
+Exit: one first usable native application slice is reproducible and integrated
+without turning the frozen fixture into a public application contract.
+
+## WU-0016: Inspector and authoring loop
+
+Branch: `feat/inspector-authoring-loop`
+Design: [inspector and authoring loop](design/inspector-authoring-loop.md)
+Verification: [inspector and authoring loop verification](verification/WU-0016-inspector-authoring-loop.md)
+
+- Research: identify the existing `.fen`/`ui!` parity boundary and the
+  application facts needed for visible diagnostics.
+- Planning: keep authoring compilation at build time, accept configurable raw
+  programs explicitly, and preserve unknown source metadata for external
+  programs.
+- Implementation: compare the `.fen` and `ui!` raw programs in the inspector
+  build, add `LayoutInspector::from_programs`, and expose bounded authoring and
+  selection diagnostics.
+- Verification: prove configurable initialization, frontend parity, selected
+  property diagnostics, deterministic smoke output, and unchanged WU-0015
+  evidence tests.
+
+Exit: the inspector has a reusable compiled-content seam and the application
+dogfoods both typed authoring frontends without selecting a final authoring
+syntax or public API.
+
+## WU-0017: Typed application API and component authoring
+
+Branch: `feat/typed-application-api`
+Design: [typed application API](design/typed-application-api.md)
+Verification: [typed application API verification](verification/WU-0017-typed-application-api.md)
+
+- Research: reuse the typed runtime, spatial bindings and CPU native shell;
+  identify numeric schema bookkeeping and fixture capacities as application
+  adoption barriers.
+- Planning: define named row/column/rectangle elements, typed styles, atomic
+  named updates, explicit capacities and an additive compiled format 3.
+- Implementation: expose the public facade, compile `.fen` and `ui!` to its
+  constructors, extract optional shared native hosting and add a standalone
+  application consumer.
+- Verification: prove public source parity, pixels, hits, coherent mutation,
+  wider/deeper trees, limits, diagnostics, preserved earlier fixtures, native
+  Wayland presentation and Windows cross-compilation.
+
+Exit: an application can author, build, mutate and present named views through
+the public API without internal IDs or a runtime compiler dependency. General
+controls, text, flexible layout, authored component reuse and the remaining
+product gates stay open.
+
+## WU-0018: Text and input foundation
+
+Branch: `feat/text-input-foundation`
+Design: [text and input foundation](design/text-input-foundation.md)
+Verification: [text and input verification](verification/WU-0018-text-input-foundation.md)
+
+- Research: compare current text candidates with one versioned font and corpus;
+  keep font/layout library types outside the facade.
+- Planning: define owned bounded editing, native events and committed geometry,
+  and distinguish the native probe from a general text-view implementation.
+- Implementation: add grapheme-safe text editing, keyboard/focus/IME event
+  bridging, public element bounds, candidate screen and interactive text pad.
+- Verification: test editing and selection, candidate source geometry, raster
+  clipping, event sequences, preserved workspace fixtures and available native
+  presentation; record platform and font coverage limits.
+
+Exit: an isolated native editor exercises the owned public foundations while
+text-view integration, visual bidi navigation, production caching, font
+fallback, clipboard, undo, accessibility and IME qualification remain open.
+
+## WU-0019: Authored text views
+
+Branch: `feat/authored-text-views`
+Design: [authored text views](design/authored-text-views.md)
+Verification: [authored text verification](verification/WU-0019-authored-text-views.md)
+Decision: [provisional text adapter](decisions/0001-provisional-text-adapter.md)
+
+- Research: compare candidate registration, script support and dependency
+  admission; select a replaceable explicit-font Parley adapter for this slice.
+- Planning: define owned text requests, complete metrics, logical resource
+  bounds, fixed-size authored leaves and publication before/after invariants.
+- Implementation: add `.fen`/`ui!` text strings, atomic public text updates,
+  validated spatial image attachments, a standalone consumer and an exact
+  constant-sample raster optimization.
+- Verification: preserve frozen syntax/runtime/graphics evidence; test rejected
+  fonts and glyph expansion, multilingual fallback, coherent updates, painter
+  order, cache behavior and exact optimized pixels; run available native smoke
+  and export its accepted frame for visual review.
+
+Exit: real authored text is measured, rendered, updated and presented through
+the public API with explicit fonts. Intrinsic layout, normal text controls,
+arbitrary font hardening, clipboard, accessibility, qualified IME, production
+caching and the remaining platform/release gates stay open.
+
+## WU-0020: Responsive layout
+
+Branch: `feat/responsive-layout`
+Design: [responsive sizing and measurement](design/responsive-layout.md)
+Verification: [responsive layout verification](verification/WU-0020-responsive-layout.md)
+
+Exit: typed auto/fill/min/max sizing, intrinsic text measurement and atomic
+resize are exercised through both authoring frontends and a native consumer.
+General alignment, controls, scrolling and the remaining product gates stay open.
+
+Subsequent increments are recorded in the [application work units](application-work-units.md).

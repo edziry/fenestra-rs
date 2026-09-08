@@ -1,0 +1,69 @@
+{
+  "schema": "fenestra-text-geometry-gallery-v1",
+  "viewport": {
+    "width": 900,
+    "height": 540
+  },
+  "source": "examples/text-app/examples/geometry-gallery.rs",
+  "font": "assets/fonts/dejavu-sans-2.37/DejaVuSans.ttf",
+  "platform": "Linux x86_64 / Fedora 43 / Wayland",
+  "toolchain": "Rust 1.97.1",
+  "all_four_ppms_identical": true,
+  "runs": [
+    {
+      "profile": "headless-debug",
+      "report": "headless-debug.txt",
+      "exit_code": 0,
+      "ppm_bytes": 1458015,
+      "ppm_sha256": "9c1f2136e90d7daf6fc944b18e0ae6659f71b81d07fd67cb05678b8bea3cbff9",
+      "rgba_bytes": 1944000,
+      "rgba_checksum": "957477744035acf4",
+      "native_presented": false
+    },
+    {
+      "profile": "headless-release",
+      "report": "headless-release.txt",
+      "exit_code": 0,
+      "ppm_bytes": 1458015,
+      "ppm_sha256": "9c1f2136e90d7daf6fc944b18e0ae6659f71b81d07fd67cb05678b8bea3cbff9",
+      "rgba_bytes": 1944000,
+      "rgba_checksum": "957477744035acf4",
+      "native_presented": false
+    },
+    {
+      "profile": "native-debug",
+      "report": "native-debug.txt",
+      "exit_code": 0,
+      "ppm_bytes": 1458015,
+      "ppm_sha256": "9c1f2136e90d7daf6fc944b18e0ae6659f71b81d07fd67cb05678b8bea3cbff9",
+      "rgba_bytes": 1944000,
+      "rgba_checksum": "957477744035acf4",
+      "native_presented": true
+    },
+    {
+      "profile": "native-release",
+      "report": "native-release.txt",
+      "exit_code": 0,
+      "ppm_bytes": 1458015,
+      "ppm_sha256": "9c1f2136e90d7daf6fc944b18e0ae6659f71b81d07fd67cb05678b8bea3cbff9",
+      "rgba_bytes": 1944000,
+      "rgba_checksum": "957477744035acf4",
+      "native_presented": true
+    }
+  ],
+  "png": {
+    "file": "geometry-gallery.png",
+    "sha256": "cd6497119b2ef8f30501130b5459c6ec036f6810f8f1b9abaa5df18059b860fa",
+    "content": "Lossless RGB export after successful native release presentation, not a desktop screenshot"
+  },
+  "ime": {
+    "requested_physical_area": [
+      78,
+      148,
+      2,
+      32
+    ],
+    "actual_candidate_ui_placement_qualified": false,
+    "native_composition_session_qualified": false
+  }
+}

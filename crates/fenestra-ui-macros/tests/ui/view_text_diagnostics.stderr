@@ -1,0 +1,17 @@
+error: expected a positive integer from 1 through 512
+ --> tests/ui/view_text_diagnostics.rs:9:28
+  |
+9 |                 font_size: 513;
+  |                            ^^^
+
+error: expected a nonnegative integer from 0 through 2147483647
+  --> tests/ui/view_text_diagnostics.rs:18:24
+   |
+18 |                 width: "12";
+   |                        ^^^^
+
+error: text element requires content
+  --> tests/ui/view_text_diagnostics.rs:26:13
+   |
+26 |             }
+   |             ^

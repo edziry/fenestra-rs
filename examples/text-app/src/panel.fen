@@ -1,0 +1,44 @@
+format 3;
+view text_demo {
+  column root {
+    width: 640;
+    height: 360;
+    padding: 24;
+    gap: 12;
+    background: rgba8(18, 24, 36, 255);
+    text title {
+      content: "Authored text, real pixels";
+      width: 592;
+      height: 40;
+      font_size: 28;
+      line_height: 36;
+      color: rgba8(235, 241, 246, 255);
+    }
+    text instructions {
+      content: "Type to append; Backspace removes one grapheme.\nEnter adds a line. IME commits are accepted once.";
+      width: 592;
+      height: 48;
+      font_size: 16;
+      line_height: 24;
+      color: rgba8(174, 190, 210, 255);
+    }
+    text content {
+      content: "Hello, caf\u{e9}!\nGreek: \u{03b1}\u{03b2}\u{03b3}  Hebrew: \u{05e9}\u{05dc}\u{05d5}\u{05dd}\nArabic: \u{0627}\u{0644}\u{0639}\u{0631}\u{0628}\u{064a}\u{0629}  Combining: e\u{301}";
+      width: 592;
+      height: 112;
+      font_size: 20;
+      line_height: 28;
+      color: rgba8(235, 241, 246, 255);
+      background: rgba8(30, 40, 56, 255);
+      input: accept;
+    }
+    text status {
+      content: "Edits append at the end. Fixed boxes wrap and clip.\nNo system fonts, visible caret, or selection control.";
+      width: 592;
+      height: 44;
+      font_size: 14;
+      line_height: 20;
+      color: rgba8(118, 196, 176, 255);
+    }
+  }
+}

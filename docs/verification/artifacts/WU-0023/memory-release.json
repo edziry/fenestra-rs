@@ -1,0 +1,154 @@
+{
+  "profile": "release",
+  "helper_exit": 0,
+  "probe_success": true,
+  "elapsed_seconds": 1.849,
+  "samples": 5,
+  "rss_min_mib": 17.953,
+  "rss_max_mib": 20.0,
+  "pss_min_mib": 14.212,
+  "pss_max_mib": 16.259,
+  "swap_max_mib": 0.0,
+  "checkpoints": [
+    {
+      "stage": "initial",
+      "generation": 0,
+      "rgba_checksum": "91dd60df59f8de21",
+      "window_focused": true,
+      "logical_focus": null
+    },
+    {
+      "stage": "focused",
+      "generation": 1,
+      "rgba_checksum": "3dbd8c516a0c0d39",
+      "window_focused": true,
+      "logical_focus": "compact"
+    },
+    {
+      "stage": "changed",
+      "generation": 5,
+      "rgba_checksum": "8f06055aecb4fbec",
+      "window_focused": true,
+      "logical_focus": "compact"
+    },
+    {
+      "stage": "applied",
+      "generation": 7,
+      "rgba_checksum": "cdef0096d5590403",
+      "window_focused": true,
+      "logical_focus": "compact"
+    }
+  ],
+  "protocol": "250ms observations from owned child PID file through helper exit; CPU delta utime+stime divided by CLK_TCK and monotonic elapsed, percent of one core; RSS/PSS/swap from smaps_rollup; no intentional idle interval",
+  "binary_bytes": 17021400,
+  "host_status_unchanged": true,
+  "presented_sample_count": 5,
+  "presented_rss_min_mib": 17.953,
+  "presented_rss_max_mib": 20.0,
+  "presented_pss_min_mib": 14.212,
+  "presented_pss_max_mib": 16.259,
+  "all_four_ppm_byte_identical_to_pre_cache_release": true,
+  "measurements": [
+    {
+      "seconds": 0.25,
+      "rss_mib": 20.0,
+      "pss_mib": 16.259,
+      "anonymous_mib": 7.102,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": null,
+      "generation": 0,
+      "presentations": 1,
+      "completed_checkpoints": [],
+      "host": {
+        "available_mib": 6708.328,
+        "cached_mib": 5964.633,
+        "swap_used_mib": 8069.484,
+        "pressure": "some avg10=0.11 avg60=0.46 avg300=0.19 total=30135160\nfull avg10=0.11 avg60=0.43 avg300=0.17 total=26698111",
+        "compiler_processes": []
+      }
+    },
+    {
+      "seconds": 0.526,
+      "rss_mib": 17.953,
+      "pss_mib": 14.212,
+      "anonymous_mib": 4.992,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 32.635,
+      "generation": 1,
+      "presentations": 9,
+      "completed_checkpoints": [
+        "initial"
+      ],
+      "host": {
+        "available_mib": 6684.582,
+        "cached_mib": 5997.934,
+        "swap_used_mib": 8069.469,
+        "pressure": "some avg10=0.11 avg60=0.46 avg300=0.19 total=30135186\nfull avg10=0.11 avg60=0.43 avg300=0.17 total=26698130",
+        "compiler_processes": []
+      }
+    },
+    {
+      "seconds": 0.794,
+      "rss_mib": 17.953,
+      "pss_mib": 14.212,
+      "anonymous_mib": 4.992,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 7.465,
+      "generation": 1,
+      "presentations": 13,
+      "completed_checkpoints": [
+        "initial"
+      ],
+      "host": {
+        "available_mib": 6633.738,
+        "cached_mib": 6001.848,
+        "swap_used_mib": 8069.418,
+        "pressure": "some avg10=0.09 avg60=0.44 avg300=0.19 total=30135187\nfull avg10=0.09 avg60=0.41 avg300=0.17 total=26698131",
+        "compiler_processes": []
+      }
+    },
+    {
+      "seconds": 1.062,
+      "rss_mib": 18.043,
+      "pss_mib": 14.302,
+      "anonymous_mib": 5.082,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 22.355,
+      "generation": 5,
+      "presentations": 14,
+      "completed_checkpoints": [
+        "initial",
+        "focused"
+      ],
+      "host": {
+        "available_mib": 6637.719,
+        "cached_mib": 6009.109,
+        "swap_used_mib": 8069.27,
+        "pressure": "some avg10=0.09 avg60=0.44 avg300=0.19 total=30135201\nfull avg10=0.09 avg60=0.41 avg300=0.17 total=26698145",
+        "compiler_processes": []
+      }
+    },
+    {
+      "seconds": 1.33,
+      "rss_mib": 18.043,
+      "pss_mib": 14.302,
+      "anonymous_mib": 5.082,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 22.398,
+      "generation": 7,
+      "presentations": 15,
+      "completed_checkpoints": [
+        "initial",
+        "focused",
+        "changed"
+      ],
+      "host": {
+        "available_mib": 6638.68,
+        "cached_mib": 6012.906,
+        "swap_used_mib": 8068.969,
+        "pressure": "some avg10=0.09 avg60=0.44 avg300=0.19 total=30135201\nfull avg10=0.09 avg60=0.41 avg300=0.17 total=26698145",
+        "compiler_processes": []
+      }
+    }
+  ]
+}

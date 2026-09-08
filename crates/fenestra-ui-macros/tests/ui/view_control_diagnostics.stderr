@@ -1,0 +1,47 @@
+error: control label must be nonempty
+ --> tests/ui/view_control_diagnostics.rs:8:24
+  |
+8 |                 label: " \t\n";
+  |                        ^^^^^^^
+
+error: expected true or false
+  --> tests/ui/view_control_diagnostics.rs:17:26
+   |
+17 |                 checked: 1;
+   |                          ^
+
+error: nested controls are not supported
+  --> tests/ui/view_control_diagnostics.rs:28:21
+   |
+28 |                     checkbox inner {
+   |                     ^^^^^^^^
+
+error: input accept is not supported inside a control
+  --> tests/ui/view_control_diagnostics.rs:41:21
+   |
+41 |                     input: accept;
+   |                     ^^^^^
+
+error: focus_color requires a control element
+  --> tests/ui/view_control_diagnostics.rs:53:21
+   |
+53 |                     focus_color: rgba8(1,2,3,4);
+   |                     ^^^^^^^^^^^
+
+error: checked_color requires a text element inside a checkbox control
+  --> tests/ui/view_control_diagnostics.rs:65:21
+   |
+65 |                     checked_color: rgba8(1,2,3,4);
+   |                     ^^^^^^^^^^^^^
+
+error: disabled_color requires a text element inside a control
+  --> tests/ui/view_control_diagnostics.rs:75:17
+   |
+75 |                 disabled_color: rgba8(1,2,3,4);
+   |                 ^^^^^^^^^^^^^^
+
+error: state style property requires a control or its descendant
+  --> tests/ui/view_control_diagnostics.rs:86:17
+   |
+86 |                 hover_background: rgba8(1,2,3,4);
+   |                 ^^^^^^^^^^^^^^^^

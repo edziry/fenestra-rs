@@ -1,0 +1,7 @@
+{
+  "source": "examples/controls-app/examples/raster-cost.rs",
+  "source_sha256": "ff5eaf5df6b1656ee06946ab0914d1262bdef5f03271662da62f6e20d2d08aed",
+  "link_method": "rustc --edition=2024 with existing controls-app and serde_json rlibs from pre-cache standalone debug/release targets; release opt-level3 and debug-assertions=no; all application/rendering code in existing rlibs",
+  "before_core": "WU22 final pre-cache built libraries",
+  "timings": "Observational wall-clock Instant around Application.raster only; fractional microseconds preserve sub-microsecond observations; checksums,byte comparisons,mutation,retention,JSON excluded; no thresholds"
+}

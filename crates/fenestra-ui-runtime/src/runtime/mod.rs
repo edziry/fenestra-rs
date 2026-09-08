@@ -50,7 +50,7 @@ pub use spatial::{
     RuntimeSpatialViewV2,
 };
 pub use state::RuntimeGeneration;
-pub use transaction::{CommitReceipt, UiRuntime, UiTransaction};
+pub use transaction::{CommitReceipt, CommitWithError, UiRuntime, UiTransaction};
 pub use view::{CommittedRuntimeSnapshot, KeyedMemberIter};
 
 #[cfg(test)]

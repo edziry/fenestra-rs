@@ -33,17 +33,19 @@ pub fn expand_ui(
     v1_limits: AuthoringLimitsV1,
     v2_limits: AuthoringLimitsV2,
 ) -> TokenStream {
-    if has_exact_v2_header(&input) {
+    if has_exact_header(&input, "3") {
+        crate::view::expand(input)
+    } else if has_exact_header(&input, "2") {
         expand_ui_v2(input, v2_limits)
     } else {
         expand_ui_v1(input, v1_limits)
     }
 }
 
-fn has_exact_v2_header(input: &TokenStream) -> bool {
+fn has_exact_header(input: &TokenStream, version: &str) -> bool {
     let mut trees = input.clone().into_iter();
     matches!(trees.next(), Some(TokenTree::Ident(value)) if value == "format")
-        && matches!(trees.next(), Some(TokenTree::Literal(value)) if value.to_string() == "2")
+        && matches!(trees.next(), Some(TokenTree::Literal(value)) if value.to_string() == version)
         && matches!(trees.next(), Some(TokenTree::Punct(value)) if value.as_char() == ';' && value.spacing() == Spacing::Alone)
 }
 
