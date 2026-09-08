@@ -17,7 +17,7 @@ members = [
     "probes/exp-0008-layout-conformance",
     "probes/exp-0014-windows-gpu",
 ]
-exclude = ["third-party/accesskit-atspi-common"]
+exclude = ["third-party/accesskit-atspi-common", "third-party/parley"]
 resolver = "3"
 
 [workspace.package]
@@ -36,7 +36,7 @@ fenestra-ui-runtime = { path = "crates/fenestra-ui-runtime", version = "=0.2.0" 
 fenestra-ui-spatial = { path = "crates/fenestra-ui-spatial", version = "=0.2.0" }
 fenestra-ui-testkit = { path = "crates/fenestra-ui-testkit", version = "=0.2.0" }
 fenestra-ui-text = { path = "crates/fenestra-ui-text", version = "=0.2.0" }
-parley = { version = "=0.11.1", default-features = false, features = ["std", "complex-scripts"] }
+parley = { path = "third-party/parley", version = "=0.11.1", default-features = false, features = ["std", "complex-scripts"] }
 swash = { version = "=0.2.6", default-features = false, features = ["std", "scale", "render"] }
 
 [workspace.lints.rust]
