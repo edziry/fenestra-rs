@@ -48,3 +48,22 @@ status fixture leaves global accessibility and screen-reader settings
 unchanged. Windows is cross-compiled; real UIA interaction and screen-reader
 usability remain open, along with editable controls, clipboard, scrolling,
 general component bindings and broader platform qualification.
+
+## WU-0023: Committed raster reuse
+
+Branch: `perf/committed-raster-cache`
+Verification: [committed raster reuse](verification/WU-0023-committed-raster-cache.md)
+
+- Measure the preferences application's per-process memory and unchanged-frame
+  rendering cost before attributing desktop resource use to the native window.
+- Retain one successful owned raster for the accepted generation, with lazy
+  rendering, bounded pixel storage and no retained runtime snapshot history.
+- Preserve no-op and rejected-update behavior, invalidate after successful
+  publication, and retry failed rendering without returning stale pixels.
+- Exercise public mutation and snapshot contracts and repeat native AT-SPI
+  actions against the cached rendering path.
+
+Exit: repeated reads of one accepted frame avoid reference sampling, while
+changed frames and failed updates preserve their existing correctness
+contracts. Whole-process memory budgets, incremental rendering and larger
+accessibility-tree performance remain separate gates.

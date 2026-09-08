@@ -75,8 +75,8 @@ remains available as separate labels.
 On Linux Wayland or Windows, opt into the native feature:
 
 ```sh
-cargo run --manifest-path examples/controls-app/Cargo.toml --locked --features native -- --native
-cargo run --manifest-path examples/controls-app/Cargo.toml --locked --features native -- --native-smoke
+cargo run --manifest-path examples/controls-app/Cargo.toml --release --locked --features native -- --native
+cargo run --manifest-path examples/controls-app/Cargo.toml --release --locked --features native -- --native-smoke
 cargo test --manifest-path examples/controls-app/Cargo.toml --locked --all-targets --all-features
 ```
 
@@ -84,6 +84,24 @@ Use Tab to move among enabled controls, Space to toggle a checkbox, and Enter
 or Space to activate a button. Pointer activation requires a matching release
 over the control. Smoke mode exits after a successful presentation without
 injecting input.
+
+Use the release profile for interactive runs. The reference rasterizer's first
+frame and changed frames do substantially more work in debug builds. Repeated
+reads reuse one successfully rendered frame until the accepted generation
+changes. The cache retains one additional RGBA image; it does not retain a
+history of frames or establish a whole-process memory budget.
+
+The [raster-cost example](examples/raster-cost.rs) measures five reads of the
+same generation, then a visual change and a repeated read. It checks exact
+pixels and old-frame ownership outside the timed calls, with no timing limits:
+
+```sh
+cargo run --manifest-path examples/controls-app/Cargo.toml --locked --example raster-cost
+cargo run --manifest-path examples/controls-app/Cargo.toml --release --locked --example raster-cost
+```
+
+See [WU-0023](../../docs/verification/WU-0023-committed-raster-cache.md) for the
+observed resource use, before/after timings and verification scope.
 
 The [native accessibility contract](../../docs/design/native-accessibility.md)
 routes focus and activation requests to these same committed controls without

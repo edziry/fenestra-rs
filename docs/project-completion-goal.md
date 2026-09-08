@@ -142,6 +142,12 @@ scrolling, native IME, real Windows UIA and screen-reader usability remain open.
 - [ ] Measure startup, idle work, input latency, text and scene scaling;
   establish budgets before asserting performance or incremental benefits.
 
+[WU-0023](verification/WU-0023-committed-raster-cache.md) addresses repeated
+reference rasterization of an unchanged committed frame and records bounded
+native memory observations. One cached raster has an explicit pixel-storage
+bound. General latency, scene scaling and whole-process memory budgets remain
+open; this bounded optimization does not close the performance gate.
+
 ### 5. Release readiness
 
 - [ ] Record the project owner's license and distribution decisions, an MSRV

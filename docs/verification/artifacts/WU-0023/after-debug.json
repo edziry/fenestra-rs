@@ -1,0 +1,80 @@
+{
+  "debug_assertions": true,
+  "mutation": "set_checked(compact, true)",
+  "old_frame_unchanged": true,
+  "samples": [
+    {
+      "generation": 0,
+      "height": 520,
+      "iteration": 0,
+      "phase": "cold",
+      "raster_microseconds": 1119945.1570000001,
+      "rgba_bytes": 1331200,
+      "rgba_checksum": "9de7fa0cecfbc58e",
+      "width": 640
+    },
+    {
+      "generation": 0,
+      "height": 520,
+      "iteration": 1,
+      "phase": "warm",
+      "raster_microseconds": 1116.0,
+      "rgba_bytes": 1331200,
+      "rgba_checksum": "9de7fa0cecfbc58e",
+      "width": 640
+    },
+    {
+      "generation": 0,
+      "height": 520,
+      "iteration": 2,
+      "phase": "warm",
+      "raster_microseconds": 110.818,
+      "rgba_bytes": 1331200,
+      "rgba_checksum": "9de7fa0cecfbc58e",
+      "width": 640
+    },
+    {
+      "generation": 0,
+      "height": 520,
+      "iteration": 3,
+      "phase": "warm",
+      "raster_microseconds": 97.132,
+      "rgba_bytes": 1331200,
+      "rgba_checksum": "9de7fa0cecfbc58e",
+      "width": 640
+    },
+    {
+      "generation": 0,
+      "height": 520,
+      "iteration": 4,
+      "phase": "warm",
+      "raster_microseconds": 107.822,
+      "rgba_bytes": 1331200,
+      "rgba_checksum": "9de7fa0cecfbc58e",
+      "width": 640
+    },
+    {
+      "generation": 1,
+      "height": 520,
+      "iteration": 5,
+      "phase": "after_visual_change",
+      "raster_microseconds": 1170154.0159999998,
+      "rgba_bytes": 1331200,
+      "rgba_checksum": "34ac8e97cb4a004e",
+      "width": 640
+    },
+    {
+      "generation": 1,
+      "height": 520,
+      "iteration": 6,
+      "phase": "warm_after_visual_change",
+      "raster_microseconds": 61.245,
+      "rgba_bytes": 1331200,
+      "rgba_checksum": "34ac8e97cb4a004e",
+      "width": 640
+    }
+  ],
+  "schema": "fenestra-raster-cost-v1",
+  "unchanged_calls": 5,
+  "warm_repeats": 4
+}

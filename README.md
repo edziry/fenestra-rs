@@ -81,6 +81,12 @@ unchanged. This verifies the activated bridge, not a screen-reader experience.
 See the [native accessibility design](docs/design/native-accessibility.md) and
 [WU-0022 evidence](docs/verification/WU-0022-native-accessibility.md).
 
+Repeated raster reads now reuse one image for the accepted generation. The
+[resource and timing evidence](docs/verification/WU-0023-committed-raster-cache.md)
+records the observed CPU improvement, retained pixel-storage bound and native
+checks. Changed frames still use the reference renderer; use release builds
+for interactive examples.
+
 The [responsive application](examples/responsive-app/README.md) combines a
 fixed sidebar with flexible content, text that sizes to its lines, and weighted
 cards. Window resizing automatically recalculates their geometry and wrapping:
