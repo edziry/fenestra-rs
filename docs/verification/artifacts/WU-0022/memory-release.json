@@ -1,0 +1,212 @@
+{
+  "profile": "release",
+  "helper_exit": 0,
+  "probe_success": true,
+  "elapsed_seconds": 2.137,
+  "samples": 6,
+  "rss_min_mib": 16.59,
+  "rss_max_mib": 19.965,
+  "pss_min_mib": 12.849,
+  "pss_max_mib": 16.224,
+  "swap_max_mib": 0.0,
+  "checkpoints": [
+    {
+      "stage": "initial",
+      "generation": 0,
+      "rgba_checksum": "91dd60df59f8de21",
+      "window_focused": true,
+      "logical_focus": null
+    },
+    {
+      "stage": "focused",
+      "generation": 1,
+      "rgba_checksum": "3dbd8c516a0c0d39",
+      "window_focused": true,
+      "logical_focus": "compact"
+    },
+    {
+      "stage": "changed",
+      "generation": 5,
+      "rgba_checksum": "8f06055aecb4fbec",
+      "window_focused": true,
+      "logical_focus": "compact"
+    },
+    {
+      "stage": "applied",
+      "generation": 7,
+      "rgba_checksum": "cdef0096d5590403",
+      "window_focused": true,
+      "logical_focus": "compact"
+    }
+  ],
+  "protocol": "250ms observations from owned child PID file through helper exit; CPU delta utime+stime divided by CLK_TCK and monotonic elapsed, percent of one core; RSS/PSS/swap from smaps_rollup; no intentional idle interval",
+  "binary_bytes": 17019464,
+  "host_status_unchanged": true,
+  "samples_observed": [
+    {
+      "seconds": 0.501,
+      "rss_mib": 19.965,
+      "pss_mib": 16.224,
+      "anonymous_mib": 7.102,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": null,
+      "generation": 0,
+      "presentations": 1,
+      "completed_checkpoints": [],
+      "host": {
+        "available_mib": 6908.492,
+        "cached_mib": 3258.266,
+        "swap_used_mib": 7993.496,
+        "pressure": "some avg10=0.00 avg60=0.19 avg300=0.21 total=28891207\nfull avg10=0.00 avg60=0.17 avg300=0.20 total=25506820",
+        "compiler_processes": [
+          {
+            "pid": 528262,
+            "name": "cargo",
+            "rss_mib": 86.848,
+            "pss_mib": 84.502
+          }
+        ]
+      }
+    },
+    {
+      "seconds": 0.778,
+      "rss_mib": 16.59,
+      "pss_mib": 12.849,
+      "anonymous_mib": 3.727,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 43.175,
+      "generation": 1,
+      "presentations": 3,
+      "completed_checkpoints": [
+        "initial"
+      ],
+      "host": {
+        "available_mib": 6900.055,
+        "cached_mib": 3285.82,
+        "swap_used_mib": 7993.453,
+        "pressure": "some avg10=0.00 avg60=0.19 avg300=0.21 total=28891207\nfull avg10=0.00 avg60=0.17 avg300=0.20 total=25506821",
+        "compiler_processes": [
+          {
+            "pid": 528262,
+            "name": "cargo",
+            "rss_mib": 86.848,
+            "pss_mib": 84.502
+          }
+        ]
+      }
+    },
+    {
+      "seconds": 1.051,
+      "rss_mib": 16.59,
+      "pss_mib": 12.849,
+      "anonymous_mib": 3.727,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 3.673,
+      "generation": 1,
+      "presentations": 3,
+      "completed_checkpoints": [
+        "initial"
+      ],
+      "host": {
+        "available_mib": 6900.059,
+        "cached_mib": 3285.926,
+        "swap_used_mib": 7993.445,
+        "pressure": "some avg10=0.00 avg60=0.19 avg300=0.21 total=28891207\nfull avg10=0.00 avg60=0.17 avg300=0.20 total=25506821",
+        "compiler_processes": [
+          {
+            "pid": 528262,
+            "name": "cargo",
+            "rss_mib": 86.848,
+            "pss_mib": 84.502
+          }
+        ]
+      }
+    },
+    {
+      "seconds": 1.322,
+      "rss_mib": 16.676,
+      "pss_mib": 12.935,
+      "anonymous_mib": 3.812,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 40.542,
+      "generation": 5,
+      "presentations": 4,
+      "completed_checkpoints": [
+        "initial",
+        "focused"
+      ],
+      "host": {
+        "available_mib": 6895.672,
+        "cached_mib": 3287.762,
+        "swap_used_mib": 7993.309,
+        "pressure": "some avg10=0.00 avg60=0.19 avg300=0.21 total=28891207\nfull avg10=0.00 avg60=0.17 avg300=0.20 total=25506821",
+        "compiler_processes": [
+          {
+            "pid": 528262,
+            "name": "cargo",
+            "rss_mib": 86.848,
+            "pss_mib": 84.502
+          }
+        ]
+      }
+    },
+    {
+      "seconds": 1.592,
+      "rss_mib": 19.09,
+      "pss_mib": 15.349,
+      "anonymous_mib": 6.227,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 37.08,
+      "generation": 5,
+      "presentations": 4,
+      "completed_checkpoints": [
+        "initial",
+        "focused",
+        "changed"
+      ],
+      "host": {
+        "available_mib": 6895.441,
+        "cached_mib": 3288.746,
+        "swap_used_mib": 7993.297,
+        "pressure": "some avg10=0.00 avg60=0.19 avg300=0.21 total=28891207\nfull avg10=0.00 avg60=0.17 avg300=0.20 total=25506821",
+        "compiler_processes": [
+          {
+            "pid": 528262,
+            "name": "cargo",
+            "rss_mib": 86.848,
+            "pss_mib": 84.502
+          }
+        ]
+      }
+    },
+    {
+      "seconds": 1.866,
+      "rss_mib": 16.676,
+      "pss_mib": 12.935,
+      "anonymous_mib": 3.812,
+      "swap_mib": 0.0,
+      "cpu_percent_interval": 7.285,
+      "generation": 7,
+      "presentations": 5,
+      "completed_checkpoints": [
+        "initial",
+        "focused",
+        "changed"
+      ],
+      "host": {
+        "available_mib": 6893.699,
+        "cached_mib": 3289.762,
+        "swap_used_mib": 7993.289,
+        "pressure": "some avg10=0.00 avg60=0.18 avg300=0.21 total=28891207\nfull avg10=0.00 avg60=0.16 avg300=0.20 total=25506821",
+        "compiler_processes": [
+          {
+            "pid": 528262,
+            "name": "cargo",
+            "rss_mib": 86.848,
+            "pss_mib": 84.502
+          }
+        ]
+      }
+    }
+  ]
+}
