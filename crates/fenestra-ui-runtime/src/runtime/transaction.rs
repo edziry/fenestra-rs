@@ -1,3 +1,4 @@
+use std::convert::Infallible;
 use std::fmt;
 use std::sync::{Arc, Weak};
 
@@ -9,18 +10,21 @@ use fenestra_ui_spatial::prototype::SpatialViewportV2;
 use crate::logical_tree::NodeId;
 
 use super::capacity::RuntimeCapacity;
+use super::commit_control::CommitControl;
 #[cfg(test)]
 pub(super) use super::commit_control::CommitTestHook;
-use super::commit_control::{CommitCheckpoint, CommitControl};
 use super::error::{CapacityKind, TransactionError, TransactionErrorKind};
 use super::fragment::FragmentId;
-use super::headless::{HeadlessProjectionErrorKind, HeadlessRuntimeConfig, HeadlessSurface};
+use super::headless::{HeadlessRuntimeConfig, HeadlessSurface};
 use super::mutation::{MutationIter, MutationRecord};
 use super::spatial::SpatialRuntimeConfig;
 use super::state::{RuntimeGeneration, RuntimeState};
 use super::view::CommittedRuntimeSnapshot;
 
+mod commit;
 mod construct;
+
+pub use commit::CommitWithError;
 
 pub(super) enum Operation {
     SetProperty {
@@ -194,108 +198,27 @@ impl UiRuntime {
         &mut self,
         transaction: UiTransaction,
     ) -> Result<CommitReceipt, TransactionError> {
-        self.commit_inner(transaction, CommitControl::NONE)
+        self.commit_inner(transaction, CommitControl::NONE, |_| {
+            Ok::<(), Infallible>(())
+        })
+        .map(|(receipt, ())| receipt)
+        .map_err(CommitWithError::into_runtime)
     }
 
-    fn commit_inner(
+    /// Prepares an owned sidecar from the exact candidate before publication.
+    ///
+    /// The callback runs once after runtime validation and publication guards.
+    /// A no-op transaction supplies the current snapshot without advancing its
+    /// generation. Otherwise the supplied snapshot has the next generation and
+    /// its completed projections, but becomes committed only when this returns
+    /// successfully. Rejection or unwind preserves the previous runtime state.
+    /// Callbacks must keep external changes provisional until success.
+    pub fn commit_with<T, E>(
         &mut self,
         transaction: UiTransaction,
-        control: CommitControl,
-    ) -> Result<CommitReceipt, TransactionError> {
-        if let Some(error) = transaction.poison {
-            return Err(error);
-        }
-        if !Arc::ptr_eq(&self.state, &transaction.base) {
-            return Err(TransactionError::new(TransactionErrorKind::StaleBase, None));
-        }
-
-        let mut draft = transaction.base.fork_for_transaction();
-        control.panic_if(CommitCheckpoint::Draft);
-        let mut applied = self.apply_operations(&mut draft, transaction.operations)?;
-        control.panic_if(CommitCheckpoint::Apply);
-        control.before_validation(&mut draft);
-        draft
-            .validate(&self.construction, self.capacity)
-            .map_err(|()| TransactionError::new(TransactionErrorKind::InvariantViolation, None))?;
-        control.panic_if(CommitCheckpoint::Validation);
-        applied.records.retain(MutationRecord::is_effective);
-        let invalidation = applied
-            .records
-            .iter()
-            .fold(InvalidationSet::NONE, |set, record| {
-                set.union(record.invalidation())
-            });
-        #[cfg(test)]
-        let invalidation = control.override_invalidation(invalidation);
-        if applied.records.is_empty() {
-            return Ok(CommitReceipt {
-                generation: self.state.generation,
-                records: applied.records,
-                invalidation,
-                _retired_generation: None,
-            });
-        }
-
-        if let Some(headless) = &self.headless {
-            let surface = applied.candidate_surface().ok_or_else(|| {
-                TransactionError::new(TransactionErrorKind::InvariantViolation, None)
-            })?;
-            draft
-                .rebuild_headless_projection(headless, surface)
-                .map_err(|failure| {
-                    let operation_index = match failure.kind() {
-                        HeadlessProjectionErrorKind::InvalidSurface => {
-                            applied.surface_operation_index()
-                        }
-                        _ => failure
-                            .cause()
-                            .and_then(|(node, property)| applied.operation_index(node, property)),
-                    };
-                    TransactionError::new(
-                        TransactionErrorKind::Headless(failure.kind()),
-                        operation_index,
-                    )
-                })?;
-        }
-
-        if let Some(spatial) = &self.spatial {
-            let viewport = applied.candidate_spatial_viewport().ok_or_else(|| {
-                TransactionError::new(TransactionErrorKind::InvariantViolation, None)
-            })?;
-            draft.spatial = Some(spatial.build(&draft, viewport).map_err(|error| {
-                TransactionError::new(TransactionErrorKind::Spatial(error), None)
-            })?);
-        }
-
-        self.retired.retain(|state| state.strong_count() != 0);
-        let retained = self.retired.len().checked_add(1).ok_or_else(|| {
-            TransactionError::new(
-                TransactionErrorKind::CapacityExceeded(CapacityKind::RetainedGenerations),
-                None,
-            )
-        })?;
-        if retained > self.capacity.retained_generations() {
-            return Err(TransactionError::new(
-                TransactionErrorKind::CapacityExceeded(CapacityKind::RetainedGenerations),
-                None,
-            ));
-        }
-        let generation = self.state.generation.next().ok_or_else(|| {
-            TransactionError::new(TransactionErrorKind::GenerationExhausted, None)
-        })?;
-        draft.generation = generation;
-        let prepared = Arc::new(draft);
-        self.retired.reserve(1);
-        control.panic_if(CommitCheckpoint::Preparation);
-
-        let previous = std::mem::replace(&mut self.state, prepared);
-        self.retired.push(Arc::downgrade(&previous));
-        Ok(CommitReceipt {
-            generation,
-            records: applied.records,
-            invalidation,
-            _retired_generation: Some(previous),
-        })
+        prepare: impl FnOnce(&CommittedRuntimeSnapshot) -> Result<T, E>,
+    ) -> Result<(CommitReceipt, T), CommitWithError<E>> {
+        self.commit_inner(transaction, CommitControl::NONE, prepare)
     }
 
     #[cfg(test)]
@@ -304,7 +227,9 @@ impl UiRuntime {
         transaction: UiTransaction,
         hook: CommitTestHook,
     ) -> Result<CommitReceipt, TransactionError> {
-        self.commit_inner(transaction, hook.control())
+        self.commit_inner(transaction, hook.control(), |_| Ok::<(), Infallible>(()))
+            .map(|(receipt, ())| receipt)
+            .map_err(CommitWithError::into_runtime)
     }
 
     #[cfg(test)]

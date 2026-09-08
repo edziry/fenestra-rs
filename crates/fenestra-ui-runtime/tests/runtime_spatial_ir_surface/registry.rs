@@ -2,11 +2,12 @@ use std::collections::BTreeSet;
 
 use super::source::{all_source, read, source_dir};
 
-const EXPORTS: [&str; 76] = [
+const EXPORTS: [&str; 77] = [
     "CallbackFinish",
     "CallbackScope",
     "CapacityKind",
     "CommitReceipt",
+    "CommitWithError",
     "CommittedRuntimeSnapshot",
     "CompletionWatermark",
     "ComputedStyleView",
@@ -138,7 +139,7 @@ const STRUCTS: [&str; 53] = [
 ];
 
 #[test]
-fn runtime_ir_adapter_has_exact_76_name_prototype_registry() {
+fn runtime_ir_adapter_has_exact_prototype_registry_with_prepublication() {
     let source = read(&source_dir().join("lib.rs"));
     let all_source = all_source();
     for forbidden in ["include!", "#[macro_export]"] {

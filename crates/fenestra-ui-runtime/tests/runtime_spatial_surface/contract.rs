@@ -53,6 +53,7 @@ fn runtime_spatial_cut_preserves_current_owner_method_sets() {
         names(&[
             "begin_transaction",
             "commit",
+            "commit_with",
             "committed",
             "new",
             "new_headless",

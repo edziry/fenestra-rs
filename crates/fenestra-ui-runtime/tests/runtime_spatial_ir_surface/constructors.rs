@@ -34,6 +34,7 @@ fn ui_runtime_has_exact_ten_method_additive_surface() {
         names(&[
             "begin_transaction",
             "commit",
+            "commit_with",
             "committed",
             "new",
             "new_headless",
