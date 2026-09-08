@@ -142,5 +142,10 @@ fn lower(view: &View, limits: Limits) -> Result<Lowered, Error> {
             Size::new(width as u32, height as u32)
         })
         .collect::<Vec<_>>();
-    lower_prepared(&flat, &sizes, limits)
+    let styles = flat
+        .nodes
+        .iter()
+        .map(|node| node.element.style)
+        .collect::<Vec<_>>();
+    lower_prepared(&flat, &sizes, &styles, limits)
 }

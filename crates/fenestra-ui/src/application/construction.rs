@@ -1,6 +1,10 @@
 use fenestra_ui_runtime::prototype::UiRuntime;
 
-use super::{Application, NamedNode, TextState, layout, text, validate_size, viewport};
+use super::{
+    Application, NamedNode, TextState, controls, interaction::Interaction, layout, text,
+    validate_size, viewport,
+};
+use crate::control::ControlData;
 use crate::{Error, Limits, Size, TextEngine, View, lower};
 
 impl Application {
@@ -60,8 +64,9 @@ impl Application {
                 children: &node.children,
             })
             .collect::<Vec<_>>();
+        let styles = controls::initial_styles(&flat, &mut texts);
         let sizes = layout::resolve(&descriptions, &mut texts, &mut text_engine, size, limits)?;
-        let lowered = lower::lower_prepared(&flat, &sizes, limits)?;
+        let lowered = lower::lower_prepared(&flat, &sizes, &styles, limits)?;
         let runtime = UiRuntime::new_spatial_ir(
             lowered.program,
             viewport(size),
@@ -94,20 +99,38 @@ impl Application {
                 id,
                 kind: element.kind,
                 style: element.style,
+                effective_style: styles[index],
+                state_style: element.state_style,
+                control_owner: flat_node.control_owner,
+                control: element.kind.control_role().map(|role| ControlData {
+                    role,
+                    label: std::sync::Arc::from(element.label.as_deref().expect("validated label")),
+                    disabled: element.disabled.unwrap_or(false),
+                    checked: element.checked.unwrap_or(false),
+                }),
                 resolved,
                 children: flat_node.children.clone(),
                 text,
             };
+            layout::finish_measurement(&mut node, &mut text_engine, limits)?;
             text::prepare_node(&mut node, &mut text_engine, limits.text())?;
             nodes.push(node);
         }
-        let text_frame = text::prepare_frame(&committed, &nodes, lowered.spatial_limits, limits)?;
+        let interaction = Interaction::default();
+        let text_frame = text::prepare_frame(
+            &committed,
+            &nodes,
+            &interaction,
+            lowered.spatial_limits,
+            limits,
+        )?;
         Ok(Self {
             runtime,
             nodes,
             size,
             limits,
             revision: 0,
+            interaction,
             spatial_limits: lowered.spatial_limits,
             text_engine,
             text_frame,

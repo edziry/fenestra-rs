@@ -1,10 +1,7 @@
 use std::sync::Arc;
 
-use fenestra_ui_ir::prototype::PropertyValue;
-use fenestra_ui_runtime::prototype::CommitWithError;
-
-use super::{Application, NamedNode, TextState, layout, text, validate_size, viewport};
-use crate::{Color, Error, Size, Style, TextMetrics, TextStyle, lower};
+use super::{Application, TextState, validate_size};
+use crate::{Color, Error, Size, Style, TextMetrics, TextStyle};
 
 impl Application {
     /// Returns the exact committed UTF-8 content of a text element.
@@ -35,17 +32,20 @@ impl Application {
         }
         // Bound the whole view before copying the new text or invoking an engine.
         crate::text::validate_budget(
-            self.nodes.iter().enumerate().filter_map(|(slot, node)| {
-                node.text.as_ref().map(|text| {
-                    (
+            self.nodes.iter().enumerate().flat_map(|(slot, node)| {
+                [
+                    node.text.as_ref().map(|text| {
                         if slot == index {
                             content
                         } else {
-                            &text.content
-                        },
-                        Size::new(0, 0),
-                    )
-                })
+                            text.content.as_ref()
+                        }
+                    }),
+                    node.control.as_ref().map(|control| control.label.as_ref()),
+                ]
+                .into_iter()
+                .flatten()
+                .map(|text| (text, Size::new(0, 0)))
             }),
             self.limits.text(),
         )?;
@@ -82,6 +82,12 @@ impl Application {
         let index = self.node_index(name)?;
         let node = &self.nodes[index];
         style.validate(name, node.kind)?;
+        if node.control_owner.is_some() && style.input {
+            return Err(Error::InvalidElement {
+                node: name.into(),
+                reason: "control input is derived; descendants cannot enable independent input",
+            });
+        }
         if node.style == style {
             return Ok(());
         }
@@ -117,51 +123,5 @@ impl Application {
                 node: name.into(),
                 reason: "operation requires a text element",
             })
-    }
-
-    fn commit_state(&mut self, mut nodes: Vec<NamedNode>, size: Size) -> Result<(), Error> {
-        layout::prepare_nodes(&mut nodes, &mut self.text_engine, size, self.limits)?;
-        let mut transaction = self.runtime.begin_transaction();
-        for (old, new) in self.nodes.iter().zip(&nodes) {
-            for ((_, before), (property, after)) in old
-                .style
-                .values(old.resolved)
-                .into_iter()
-                .zip(new.style.values(new.resolved))
-            {
-                if before != after {
-                    transaction
-                        .set_property(new.id, property, after)
-                        .map_err(|error| Error::Runtime(format!("{:?}", error.kind())))?;
-                }
-            }
-        }
-        let revision = self.revision.wrapping_add(1);
-        transaction
-            .set_property(
-                nodes[0].id,
-                lower::VIEW_REVISION,
-                PropertyValue::ScalarI32(revision),
-            )
-            .map_err(|error| Error::Runtime(format!("{:?}", error.kind())))?;
-        if size != self.size {
-            transaction
-                .resize_spatial(viewport(size))
-                .map_err(|error| Error::Runtime(format!("{:?}", error.kind())))?;
-        }
-        let (_, frame) = self
-            .runtime
-            .commit_with(transaction, |committed| {
-                text::prepare_frame(committed, &nodes, self.spatial_limits, self.limits)
-            })
-            .map_err(|error| match error {
-                CommitWithError::Runtime(error) => Error::Runtime(format!("{:?}", error.kind())),
-                CommitWithError::Preparation(error) => error,
-            })?;
-        self.nodes = nodes;
-        self.revision = revision;
-        self.size = size;
-        self.text_frame = frame;
-        Ok(())
     }
 }

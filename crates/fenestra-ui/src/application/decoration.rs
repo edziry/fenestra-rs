@@ -9,6 +9,7 @@ pub(super) fn focus_paints(
     owner: SpatialNodeKeyV2,
     size: Size,
     color: Option<Color>,
+    offset: (i64, i64),
 ) -> Vec<SpatialImagePaintAttachmentV2> {
     let (width, height) = (size.width(), size.height());
     if width == 0 || height == 0 {
@@ -17,20 +18,29 @@ pub(super) fn focus_paints(
     let mut paints = Vec::with_capacity(8);
     let bounds = [0, 0, width, height];
     if let Some(color) = color {
-        border(&mut paints, owner, bounds, 2, color);
+        border(&mut paints, owner, offset, bounds, 2, color);
     } else if width < 3 || height < 3 {
         border(
             &mut paints,
             owner,
+            offset,
             bounds,
             1,
             Color::rgba8(255, 255, 255, 255),
         );
     } else {
-        border(&mut paints, owner, bounds, 1, Color::rgba8(0, 0, 0, 255));
         border(
             &mut paints,
             owner,
+            offset,
+            bounds,
+            1,
+            Color::rgba8(0, 0, 0, 255),
+        );
+        border(
+            &mut paints,
+            owner,
+            offset,
             [1, 1, width - 2, height - 2],
             1,
             Color::rgba8(255, 255, 255, 255),
@@ -42,6 +52,7 @@ pub(super) fn focus_paints(
 fn border(
     paints: &mut Vec<SpatialImagePaintAttachmentV2>,
     owner: SpatialNodeKeyV2,
+    offset: (i64, i64),
     [x, y, width, height]: [u32; 4],
     thickness: u32,
     color: Color,
@@ -71,7 +82,12 @@ fn border(
         paints.push(SpatialImagePaintAttachmentV2::new(
             owner,
             SpatialImageV2::new(SpatialImageKeyV2::new(0), 1, 1, 4, Box::new(rgba)),
-            SpatialImageDestinationRectV2::new(scalar(x), scalar(y), scalar(width), scalar(height)),
+            SpatialImageDestinationRectV2::new(
+                SpatialScalarV2::new((i64::from(x) + offset.0) * 65_536),
+                SpatialScalarV2::new((i64::from(y) + offset.1) * 65_536),
+                scalar(width),
+                scalar(height),
+            ),
             None,
         ));
     }
@@ -109,7 +125,7 @@ mod tests {
         let spatial = committed.spatial().unwrap();
         let owner = spatial.spatial_key(app.nodes[0].id).unwrap();
         let before = spatial.snapshot();
-        let additions = focus_paints(owner, size, color);
+        let additions = focus_paints(owner, size, color, (0, 0));
         assert!(additions.len() <= 8);
         let limits = SpatialLimitsV2::new(SpatialLimitKindV2::ALL.map(|kind| match kind {
             SpatialLimitKindV2::Images | SpatialLimitKindV2::ImagePixelsTotal => 8,
@@ -221,7 +237,7 @@ mod tests {
     fn empty_focus_areas_add_no_image_resources() {
         for size in [Size::new(0, 8), Size::new(8, 0), Size::new(0, 0)] {
             for color in [None, Some(Color::rgba8(100, 50, 20, 128))] {
-                assert!(focus_paints(SpatialNodeKeyV2::new(0), size, color).is_empty());
+                assert!(focus_paints(SpatialNodeKeyV2::new(0), size, color, (0, 0)).is_empty());
             }
         }
     }

@@ -16,6 +16,7 @@ const COMPONENT: ComponentTypeId = ComponentTypeId::new(0);
 pub(super) fn build(
     flat: &FlatView<'_>,
     sizes: &[Size],
+    styles: &[Style],
     property_slots: usize,
 ) -> Result<ValidatedStyleProgram, Error> {
     let n = flat.nodes.len();
@@ -50,9 +51,7 @@ pub(super) fn build(
         .iter()
         .enumerate()
         .map(|(index, node)| {
-            let properties = node
-                .element
-                .style
+            let properties = styles[index]
                 .values(sizes[index])
                 .into_iter()
                 .chain([(VIEW_REVISION, PropertyValue::ScalarI32(0))])

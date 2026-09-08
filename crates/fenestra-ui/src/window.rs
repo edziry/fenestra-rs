@@ -11,11 +11,7 @@ impl Application {
         options: WindowOptions,
         handler: impl FnMut(&mut Application, Event) -> Result<(), Error>,
     ) -> Result<Self, NativeError<Error>> {
-        let mut content = ApplicationWindow {
-            app: self,
-            handler,
-            pointer: None,
-        };
+        let mut content = ApplicationWindow { app: self, handler };
         native::run(&mut content, options)?;
         Ok(content.app)
     }
@@ -24,15 +20,6 @@ impl Application {
 struct ApplicationWindow<F> {
     app: Application,
     handler: F,
-    pointer: Option<(i32, i32)>,
-}
-
-impl<F> ApplicationWindow<F> {
-    fn pointer_target(&self) -> Option<String> {
-        self.pointer
-            .and_then(|(x, y)| self.app.hit_test(x, y))
-            .map(str::to_owned)
-    }
 }
 
 impl<F> WindowContent for ApplicationWindow<F>
@@ -48,34 +35,10 @@ where
     }
 
     fn event(&mut self, event: WindowEvent) -> Result<(), Error> {
-        let event = match event {
-            WindowEvent::PointerMoved { x, y } => {
-                self.pointer = Some((x, y));
-                Event::PointerMoved { x, y }
-            }
-            WindowEvent::PointerPressed => Event::Click {
-                target: self.pointer_target(),
-            },
-            WindowEvent::PointerReleased => Event::PointerReleased {
-                target: self.pointer_target(),
-            },
-            WindowEvent::PointerLeft => {
-                self.pointer = None;
-                Event::PointerLeft
-            }
-            WindowEvent::SpacePressed => Event::SpacePressed,
-            WindowEvent::KeyboardInput(input) => Event::KeyboardInput(input),
-            WindowEvent::ModifiersChanged(modifiers) => Event::ModifiersChanged(modifiers),
-            WindowEvent::Focused(focused) => {
-                if !focused {
-                    self.pointer = None;
-                }
-                Event::Focused(focused)
-            }
-            WindowEvent::Ime(ime) => Event::Ime(ime),
-            WindowEvent::CloseRequested => Event::CloseRequested,
-        };
-        (self.handler)(&mut self.app, event)
+        for event in self.app.dispatch_input(event)? {
+            (self.handler)(&mut self.app, event)?;
+        }
+        Ok(())
     }
 
     fn frame(&self) -> Result<Raster, Error> {

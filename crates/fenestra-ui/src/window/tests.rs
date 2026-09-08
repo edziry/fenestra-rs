@@ -7,7 +7,6 @@ fn release_hits_current_geometry_and_preserves_legacy_click_on_press() {
     let mut received = Vec::new();
     let mut content = ApplicationWindow {
         app: pointer_application(),
-        pointer: None,
         handler: |_: &mut Application, event| {
             received.push(event);
             Ok(())
@@ -46,7 +45,6 @@ fn leaving_or_losing_focus_clears_pointer_before_release_and_next_press() {
         let mut received = Vec::new();
         let mut content = ApplicationWindow {
             app: pointer_application(),
-            pointer: None,
             handler: |_: &mut Application, event| {
                 received.push(event);
                 Ok(())
@@ -95,7 +93,6 @@ fn owned_keyboard_focus_and_ime_events_reach_the_application_handler() {
     let mut received = Vec::new();
     let mut content = ApplicationWindow {
         app,
-        pointer: None,
         handler: |_: &mut Application, event| {
             received.push(event);
             Ok(())
@@ -153,7 +150,6 @@ fn focus_loss_discards_the_cached_click_target() {
     let mut targets = Vec::new();
     let mut content = ApplicationWindow {
         app: Application::new(view, Size::new(80, 80)).unwrap(),
-        pointer: None,
         handler: |_: &mut Application, event| {
             if let Event::Click { target } = event {
                 targets.push(target);
@@ -183,7 +179,6 @@ fn native_clicks_resolve_against_current_layout_and_mutate_named_content() {
     let app = Application::new(view, Size::new(80, 80)).unwrap();
     let mut content = ApplicationWindow {
         app,
-        pointer: None,
         handler: |app: &mut Application, event| {
             if let Event::Click { target: Some(name) } = event {
                 app.set_background(&name, Color::rgba8(255, 0, 0, 255))?;

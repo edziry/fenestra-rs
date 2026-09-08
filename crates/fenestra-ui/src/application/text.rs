@@ -7,7 +7,7 @@ use fenestra_ui_spatial::prototype::{
     SpatialScalarV2,
 };
 
-use super::NamedNode;
+use super::{NamedNode, controls, decoration, interaction::Interaction};
 use crate::{
     Error, Limits, TextEngine, TextError, TextLayout, TextLimits, TextMetrics, TextRequest,
     TextStyle,
@@ -17,6 +17,7 @@ use crate::{
 pub(super) struct TextState {
     pub(super) content: Arc<str>,
     pub(super) style: TextStyle,
+    pub(super) effective_style: TextStyle,
     pub(super) layout: Option<Arc<TextLayout>>,
     pub(super) natural: Option<TextMetrics>,
     pub(super) wrapped: Option<(u32, TextMetrics)>,
@@ -27,6 +28,7 @@ impl TextState {
         Self {
             content: Arc::from(content),
             style,
+            effective_style: style,
             layout: None,
             natural: None,
             wrapped: None,
@@ -59,7 +61,7 @@ pub(super) fn prepare_node(
     {
         return check_measurement(text, layout);
     }
-    let request = TextRequest::new(&text.content, text.style, size, limits)?;
+    let request = TextRequest::new(&text.content, text.effective_style, size, limits)?;
     let layout = engine.layout(request)?;
     layout.validate_request(request)?;
     check_measurement(text, &layout)?;
@@ -80,6 +82,7 @@ fn check_measurement(text: &TextState, layout: &TextLayout) -> Result<(), Error>
 pub(super) fn prepare_frame(
     committed: &CommittedRuntimeSnapshot,
     nodes: &[NamedNode],
+    interaction: &Interaction,
     spatial_limits: SpatialLimitsV2,
     limits: Limits,
 ) -> Result<Option<SpatialResolvedSnapshotV2>, Error> {
@@ -88,6 +91,9 @@ pub(super) fn prepare_frame(
         .ok_or_else(|| Error::InvalidProgram("missing spatial frame".into()))?;
     let mut additions = Vec::new();
     for node in nodes {
+        let owner = spatial
+            .spatial_key(node.id)
+            .ok_or_else(|| Error::InvalidProgram("missing image owner".into()))?;
         let Some(layout) = node.text.as_ref().and_then(|text| text.layout.as_ref()) else {
             continue;
         };
@@ -102,9 +108,6 @@ pub(super) fn prepare_frame(
             raster.bytes().to_vec().into_boxed_slice(),
         );
         let scalar = |value: u32| SpatialScalarV2::new(i64::from(value) * 65_536);
-        let owner = spatial
-            .spatial_key(node.id)
-            .ok_or_else(|| Error::InvalidProgram("missing text owner".into()))?;
         additions.push(SpatialImagePaintAttachmentV2::new(
             owner,
             image,
@@ -115,6 +118,28 @@ pub(super) fn prepare_frame(
                 scalar(size.height()),
             ),
             None,
+        ));
+    }
+    for (index, node) in nodes.iter().enumerate() {
+        if node.control.is_none() || !controls::state(nodes, index, interaction).focused() {
+            continue;
+        }
+        // Place the ring after the control's complete subtree, before later
+        // siblings. A child background must not hide its owner's focus indicator.
+        let mut last = index;
+        while let Some(&child) = nodes[last].children.last() {
+            last = child;
+        }
+        let owner = spatial
+            .spatial_key(nodes[last].id)
+            .ok_or_else(|| Error::InvalidProgram("missing focus painter".into()))?;
+        let bounds = super::bounds_for(committed, node.id)?;
+        let anchor = super::bounds_for(committed, nodes[last].id)?;
+        additions.extend(decoration::focus_paints(
+            owner,
+            node.resolved,
+            node.state_style.focus_color,
+            (bounds.x() - anchor.x(), bounds.y() - anchor.y()),
         ));
     }
     if additions.is_empty() {
@@ -128,9 +153,9 @@ pub(super) fn prepare_frame(
         SpatialLimitKindV2::Images => additions.len(),
         SpatialLimitKindV2::PaintItems => paint_count,
         SpatialLimitKindV2::ImageEdge | SpatialLimitKindV2::ImagePixelsTotal => {
-            limits.text().max_pixels()
+            limits.text().max_pixels().saturating_add(8)
         }
-        SpatialLimitKindV2::PaintItemsPerNode => 2,
+        SpatialLimitKindV2::PaintItemsPerNode => 10,
         _ => spatial_limits.limit(kind),
     });
     spatial

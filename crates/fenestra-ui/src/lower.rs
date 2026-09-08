@@ -12,6 +12,7 @@ use crate::model::ElementKind;
 use crate::{Element, Error, Limits, Size, View};
 
 mod construction;
+pub(crate) mod control;
 mod spatial;
 
 pub(crate) const WIDTH: PropertyId = PropertyId::new(0);
@@ -38,6 +39,7 @@ pub(crate) struct FlatElement<'a> {
     pub(crate) element: &'a Element,
     pub(crate) parent: Option<usize>,
     pub(crate) children: Vec<usize>,
+    pub(crate) control_owner: Option<usize>,
 }
 
 pub(crate) struct FlatView<'a> {
@@ -51,10 +53,10 @@ pub(crate) fn prepare(view: &View, limits: Limits) -> Result<FlatView<'_>, Error
     let flat = flatten(&view.root, limits)?;
     // Check bytes before copying content or asking a text engine to measure it.
     crate::text::validate_budget(
-        flat.nodes.iter().filter_map(|node| {
-            node.element
-                .text
-                .as_deref()
+        flat.nodes.iter().flat_map(|node| {
+            [node.element.text.as_deref(), node.element.label.as_deref()]
+                .into_iter()
+                .flatten()
                 .map(|text| (text, Size::new(0, 0)))
         }),
         limits.text(),
@@ -65,9 +67,10 @@ pub(crate) fn prepare(view: &View, limits: Limits) -> Result<FlatView<'_>, Error
 pub(crate) fn lower_prepared(
     flat: &FlatView<'_>,
     sizes: &[Size],
+    styles: &[crate::Style],
     limits: Limits,
 ) -> Result<Lowered, Error> {
-    if sizes.len() != flat.nodes.len() {
+    if sizes.len() != flat.nodes.len() || styles.len() != flat.nodes.len() {
         return Err(Error::InvalidProgram(
             "resolved size count differs from authored nodes".into(),
         ));
@@ -85,7 +88,7 @@ pub(crate) fn lower_prepared(
     let spatial_depth = flat.depth.checked_add(1).ok_or(Error::CapacityOverflow)?;
     u32::try_from(spatial_nodes).map_err(|_| Error::CapacityOverflow)?;
 
-    let style = construction::build(flat, sizes, property_slots)?;
+    let style = construction::build(flat, sizes, styles, property_slots)?;
     let nodes = flat
         .nodes
         .iter()
@@ -182,6 +185,14 @@ fn flatten(root: &Element, limits: Limits) -> Result<FlatView<'_>, Error> {
             });
         }
         element.style.validate(&element.name, element.kind)?;
+        let inherited = parent.and_then(|parent| result.nodes[parent].control_owner);
+        let role = inherited.and_then(|owner| result.nodes[owner].element.kind.control_role());
+        control::validate(element, role)?;
+        let control_owner = if element.kind.control_role().is_some() {
+            Some(result.nodes.len())
+        } else {
+            inherited
+        };
         if matches!(element.kind, ElementKind::Rect | ElementKind::Text)
             && !element.children.is_empty()
         {
@@ -209,6 +220,7 @@ fn flatten(root: &Element, limits: Limits) -> Result<FlatView<'_>, Error> {
             element,
             parent,
             children: Vec::new(),
+            control_owner,
         });
         if !element.children.is_empty() {
             let child_depth = depth.checked_add(1).ok_or(Error::CapacityOverflow)?;

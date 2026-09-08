@@ -46,7 +46,8 @@ impl Axis {
     pub(super) const fn is_main(self, kind: ElementKind) -> bool {
         matches!(
             (self, kind),
-            (Self::Width, ElementKind::Row) | (Self::Height, ElementKind::Column)
+            (Self::Width, ElementKind::Row | ElementKind::Checkbox)
+                | (Self::Height, ElementKind::Column | ElementKind::Button)
         )
     }
 

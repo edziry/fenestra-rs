@@ -6,6 +6,7 @@
 //! with named elements; internal schema and spatial identities stay private.
 
 mod application;
+mod control;
 mod dimension;
 mod editing;
 mod error;
@@ -16,10 +17,12 @@ mod layout;
 mod limits;
 mod lower;
 mod model;
+mod state_style;
 mod style;
 mod text;
 
 pub use application::Application;
+pub use control::{ControlId, ControlRole, ControlSnapshot, ControlState};
 pub use dimension::Dimension;
 pub use editing::{EditingError, Selection, TextBuffer};
 pub use error::Error;
@@ -28,6 +31,7 @@ pub use frame::{Bounds, Raster, Size};
 pub use input::{ImeEvent, InputEvent, Key, KeyState, KeyboardInput, Modifiers};
 pub use limits::Limits;
 pub use model::{Element, View};
+pub use state_style::StateStyle;
 pub use style::{Color, Style};
 pub use text::{
     TextEngine, TextError, TextLayout, TextLimits, TextMeasureRequest, TextMetrics, TextRequest,

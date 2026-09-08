@@ -1,4 +1,4 @@
-use crate::{Style, TextStyle};
+use crate::{Color, ControlRole, Dimension, StateStyle, Style, TextStyle};
 
 /// A named, static tree of native UI elements.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -30,7 +30,7 @@ impl View {
     }
 }
 
-/// A rectangle, text leaf, or ordered row or column of child elements.
+/// A rectangle, text leaf, ordered container, button, or checkbox.
 ///
 /// Names use ASCII letters, digits, and underscores, cannot begin with a digit,
 /// and must be unique across the view. Child order determines layout and paint
@@ -44,6 +44,10 @@ pub struct Element {
     pub(crate) children: Vec<Element>,
     pub(crate) text: Option<String>,
     pub(crate) text_style: Option<TextStyle>,
+    pub(crate) label: Option<String>,
+    pub(crate) disabled: Option<bool>,
+    pub(crate) checked: Option<bool>,
+    pub(crate) state_style: StateStyle,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -52,9 +56,75 @@ pub(crate) enum ElementKind {
     Column,
     Rect,
     Text,
+    Button,
+    Checkbox,
+}
+
+impl ElementKind {
+    pub(crate) const fn control_role(self) -> Option<ControlRole> {
+        match self {
+            Self::Button => Some(ControlRole::Button),
+            Self::Checkbox => Some(ControlRole::Checkbox),
+            _ => None,
+        }
+    }
 }
 
 impl Element {
+    /// Creates a focusable command container with an explicit semantic label.
+    ///
+    /// Visible content is authored with children. A button lays out its children
+    /// as a column and rejects nested controls or input-enabled descendants.
+    #[must_use]
+    pub fn button(name: impl Into<String>, label: impl Into<String>) -> Self {
+        let mut element = Self::new(name, ElementKind::Button);
+        element.label = Some(label.into());
+        element.style = Style::new()
+            .width_mode(Dimension::Auto)
+            .height_mode(Dimension::Auto)
+            .padding(12)
+            .gap(8)
+            .background(Color::rgba8(48, 128, 192, 255));
+        element
+    }
+
+    /// Creates a two-state control whose visible children form a row.
+    ///
+    /// Use state styles on children to show its checked value. The label is
+    /// semantic metadata; no hidden label or indicator nodes are inserted.
+    #[must_use]
+    pub fn checkbox(name: impl Into<String>, label: impl Into<String>) -> Self {
+        let mut element = Self::new(name, ElementKind::Checkbox);
+        element.label = Some(label.into());
+        element.style = Style::new()
+            .width_mode(Dimension::Auto)
+            .height_mode(Dimension::Auto)
+            .padding(8)
+            .gap(8);
+        element
+    }
+
+    /// Sets initial disabled state on a button or checkbox.
+    #[must_use]
+    pub const fn disabled(mut self, disabled: bool) -> Self {
+        self.disabled = Some(disabled);
+        self
+    }
+
+    /// Sets the initial checkbox value; other element kinds reject this setter.
+    #[must_use]
+    pub const fn checked(mut self, checked: bool) -> Self {
+        self.checked = Some(checked);
+        self
+    }
+
+    /// Selects paint variations from the closest enclosing control's state.
+    #[must_use]
+    pub const fn state_style(mut self, style: StateStyle) -> Self {
+        self.state_style = style;
+        self
+    }
+
     /// Creates a container that places children from left to right.
     #[must_use]
     pub fn row(name: impl Into<String>) -> Self {
@@ -116,6 +186,10 @@ impl Element {
             children: Vec::new(),
             text: None,
             text_style: None,
+            label: None,
+            disabled: None,
+            checked: None,
+            state_style: StateStyle::new(),
         }
     }
 }

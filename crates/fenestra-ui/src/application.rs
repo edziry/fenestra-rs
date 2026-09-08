@@ -1,15 +1,20 @@
-use fenestra_ui_runtime::prototype::{NodeId, UiRuntime};
+use fenestra_ui_runtime::prototype::{CommittedRuntimeSnapshot, NodeId, UiRuntime};
 use fenestra_ui_spatial::prototype::{
     ReferenceRasterLimitsV2, SpatialLimitsV2, SpatialPointV2, SpatialResolvedSnapshotV2,
     SpatialScalarV2, SpatialViewportV2,
 };
 
+use crate::control::ControlData;
 use crate::model::ElementKind;
-use crate::{Bounds, Error, Limits, Raster, Size, Style, TextEngine};
+use crate::{Bounds, Error, Limits, Raster, Size, StateStyle, Style, TextEngine};
 
 mod construction;
+mod controls;
+mod decoration;
+mod interaction;
 mod layout;
 mod mutation;
+mod publication;
 mod text;
 
 use text::TextState;
@@ -20,6 +25,10 @@ struct NamedNode {
     id: NodeId,
     kind: ElementKind,
     style: Style,
+    effective_style: Style,
+    state_style: StateStyle,
+    control: Option<ControlData>,
+    control_owner: Option<usize>,
     resolved: Size,
     children: Vec<usize>,
     text: Option<TextState>,
@@ -32,6 +41,7 @@ pub struct Application {
     size: Size,
     limits: Limits,
     revision: i32,
+    interaction: interaction::Interaction,
     spatial_limits: SpatialLimitsV2,
     text_engine: Option<Box<dyn TextEngine>>,
     text_frame: Option<SpatialResolvedSnapshotV2>,
@@ -72,47 +82,13 @@ impl Application {
     /// their layout origin, and children can extend beyond their containers.
     pub fn bounds(&self, name: &str) -> Result<Bounds, Error> {
         let node = &self.nodes[self.node_index(name)?];
-        let committed = self.runtime.committed();
-        let spatial = committed
-            .spatial()
-            .ok_or_else(|| Error::InvalidProgram("missing spatial frame".into()))?;
-        let key = spatial
-            .spatial_key(node.id)
-            .ok_or_else(|| Error::InvalidProgram("missing element geometry".into()))?;
-        let geometry = spatial
-            .snapshot()
-            .output()
-            .geometry()
-            .iter()
-            .find(|geometry| geometry.key() == key)
-            .ok_or_else(|| Error::InvalidProgram("missing element geometry".into()))?;
-        // Public views currently lower to integer dimensions and identity
-        // transforms. Read world translation, including all ancestor placement.
-        let transform = geometry.world_from_local();
-        Ok(Bounds {
-            x: transform.tx().raw() / 65_536,
-            y: transform.ty().raw() / 65_536,
-            width: u32::try_from(geometry.base_width().raw() / 65_536)
-                .map_err(|_| Error::CapacityOverflow)?,
-            height: u32::try_from(geometry.base_height().raw() / 65_536)
-                .map_err(|_| Error::CapacityOverflow)?,
-        })
+        bounds_for(&self.runtime.committed(), node.id)
     }
 
     /// Returns the topmost input-enabled element at physical pixel coordinates.
     #[must_use]
     pub fn hit_test(&self, x: i32, y: i32) -> Option<&str> {
-        if x < 0 || y < 0 || x as u32 >= self.size.width() || y as u32 >= self.size.height() {
-            return None;
-        }
-        let committed = self.runtime.committed();
-        let spatial = committed.spatial()?;
-        let point = SpatialPointV2::new(
-            SpatialScalarV2::new(i64::from(x) * 65_536),
-            SpatialScalarV2::new(i64::from(y) * 65_536),
-        );
-        let hit = spatial.snapshot().hit_test(point)?;
-        let id = spatial.logical_node(hit.owner())?;
+        let id = hit_node(&self.runtime.committed(), self.size, x, y)?;
         self.nodes
             .iter()
             .find(|node| node.id == id)
@@ -142,6 +118,46 @@ impl Application {
             .position(|node| node.name == name)
             .ok_or_else(|| Error::UnknownNode { name: name.into() })
     }
+}
+
+fn hit_node(committed: &CommittedRuntimeSnapshot, size: Size, x: i32, y: i32) -> Option<NodeId> {
+    if x < 0 || y < 0 || x as u32 >= size.width() || y as u32 >= size.height() {
+        return None;
+    }
+    let spatial = committed.spatial()?;
+    let point = SpatialPointV2::new(
+        SpatialScalarV2::new(i64::from(x) * 65_536),
+        SpatialScalarV2::new(i64::from(y) * 65_536),
+    );
+    let hit = spatial.snapshot().hit_test(point)?;
+    spatial.logical_node(hit.owner())
+}
+
+fn bounds_for(committed: &CommittedRuntimeSnapshot, id: NodeId) -> Result<Bounds, Error> {
+    let spatial = committed
+        .spatial()
+        .ok_or_else(|| Error::InvalidProgram("missing spatial frame".into()))?;
+    let key = spatial
+        .spatial_key(id)
+        .ok_or_else(|| Error::InvalidProgram("missing element geometry".into()))?;
+    let geometry = spatial
+        .snapshot()
+        .output()
+        .geometry()
+        .iter()
+        .find(|geometry| geometry.key() == key)
+        .ok_or_else(|| Error::InvalidProgram("missing element geometry".into()))?;
+    // Public views use integer dimensions and identity transforms. World
+    // translation includes the placement of every ancestor.
+    let transform = geometry.world_from_local();
+    Ok(Bounds {
+        x: transform.tx().raw() / 65_536,
+        y: transform.ty().raw() / 65_536,
+        width: u32::try_from(geometry.base_width().raw() / 65_536)
+            .map_err(|_| Error::CapacityOverflow)?,
+        height: u32::try_from(geometry.base_height().raw() / 65_536)
+            .map_err(|_| Error::CapacityOverflow)?,
+    })
 }
 
 fn validate_size(size: Size, limits: Limits) -> Result<(), Error> {

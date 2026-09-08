@@ -1,4 +1,4 @@
-use super::{NamedNode, TextState, text};
+use super::{NamedNode, TextState};
 use crate::layout::{self, LayoutNode};
 use crate::{Error, Limits, Size, TextEngine, TextError, TextMeasureRequest, TextMetrics};
 
@@ -46,7 +46,7 @@ fn measure(
     Ok(metrics)
 }
 
-pub(super) fn prepare_nodes(
+pub(super) fn resolve_nodes(
     nodes: &mut [NamedNode],
     engine: &mut Option<Box<dyn TextEngine>>,
     size: Size,
@@ -78,7 +78,23 @@ pub(super) fn prepare_nodes(
     for ((node, text), size) in nodes.iter_mut().zip(texts).zip(sizes) {
         node.text = text;
         node.resolved = size;
-        text::prepare_node(node, engine, limits.text())?;
+        finish_measurement(node, engine, limits)?;
+    }
+    Ok(())
+}
+
+pub(super) fn finish_measurement(
+    node: &mut NamedNode,
+    engine: &mut Option<Box<dyn TextEngine>>,
+    limits: Limits,
+) -> Result<(), Error> {
+    let size = node.resolved;
+    if let Some(text) = &mut node.text {
+        // Intrinsic width may have been measured without wrapping. Obtain
+        // matching authored-color metrics for the final raster width too.
+        if text.natural.is_some() && size.width() > 0 && size.height() > 0 {
+            measure(text, engine, Some(size.width()), limits)?;
+        }
     }
     Ok(())
 }

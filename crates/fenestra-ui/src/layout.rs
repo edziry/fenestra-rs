@@ -116,7 +116,10 @@ impl<F: FnMut(usize, Option<u32>) -> Result<TextMetrics, Error>> Solver<'_, '_, 
             Dimension::Auto | Dimension::Fill(_) => match node.kind {
                 ElementKind::Text => u64::from(self.text_extent(index, axis)?),
                 ElementKind::Rect => 0,
-                ElementKind::Row | ElementKind::Column => self.container_extent(index, axis)?,
+                ElementKind::Row
+                | ElementKind::Column
+                | ElementKind::Button
+                | ElementKind::Checkbox => self.container_extent(index, axis)?,
             },
         };
         let extent = bounds.clamp(natural);
