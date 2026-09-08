@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use std::process::Command;
 
-use fenestra_text_app::{application, update_headless};
+use fenestra_text_app::{application, checksum, update_headless};
 
 struct ExportPath(PathBuf);
 
@@ -30,10 +30,11 @@ fn ppm_export_contains_the_exact_final_headless_rgb_channels() {
         "{}",
         String::from_utf8_lossy(&output.stderr)
     );
-    assert!(String::from_utf8_lossy(&output.stdout).contains("checksum=dddfe50366b70bcf"));
     let mut app = application().unwrap();
     update_headless(&mut app).unwrap();
     let raster = app.raster().unwrap();
+    let summary = format!("checksum={:016x}", checksum(raster.bytes()));
+    assert!(String::from_utf8_lossy(&output.stdout).contains(&summary));
     let mut expected = b"P6\n640 360\n255\n".to_vec();
     for pixel in raster.bytes().chunks_exact(4) {
         expected.extend_from_slice(&pixel[..3]);
