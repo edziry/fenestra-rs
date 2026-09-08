@@ -244,3 +244,37 @@ fn missing_source_reports_a_read_error() {
     assert_eq!(output.status.code(), Some(1));
     assert!(String::from_utf8_lossy(&output.stderr).contains("cannot read source"));
 }
+
+#[test]
+fn format_three_checks_and_emits_public_facade_constructors() {
+    let source =
+        SourceFile::new(b"/* an application */ format 3; view hello { rect panel { width: 20; } }");
+    let checked = check(&source.0);
+    assert!(
+        checked.status.success(),
+        "{}",
+        String::from_utf8_lossy(&checked.stderr)
+    );
+    assert!(String::from_utf8_lossy(&checked.stdout).contains("ok|format=3|"));
+    let emitted = Command::new(env!("CARGO_BIN_EXE_fenestra-check"))
+        .arg("--emit-rust")
+        .arg(&source.0)
+        .output()
+        .unwrap();
+    assert!(emitted.status.success());
+    let generated = String::from_utf8(emitted.stdout).unwrap();
+    assert!(generated.contains("fenestra_ui :: View"), "{generated}");
+    assert!(!generated.contains("prototype"));
+}
+
+#[test]
+fn format_three_syntax_failures_keep_the_correct_source_language() {
+    let source =
+        SourceFile::new(b"// panel\r\nformat 3;\r\nview hello { rect panel { width: nope; } }");
+    let output = check(&source.0);
+    assert_eq!(output.status.code(), Some(1));
+    let error = String::from_utf8(output.stderr).unwrap();
+    assert!(error.contains(":3:"), "{error}");
+    assert!(!error.contains("unsupported-authoring-format"), "{error}");
+    assert!(!error.contains("unsupported-token"), "{error}");
+}
