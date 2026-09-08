@@ -9,12 +9,25 @@ Run these commands from the workspace root:
 
 ```sh
 cargo run -p fenestra-ui-authoring --bin fenestra-check --locked -- examples/hello-panel.fen
+cargo run -p fenestra-layout-inspector --example hello-panel --locked
 cargo test -p fenestra-ui-authoring --test examples --locked
 ```
 
 The checker validates the source and reports compiler diagnostics. The test
 also checks the Rust token frontend, all four lowered programs, and canonical
-Rust generation. These commands exercise authoring without opening a window.
+Rust generation. The executable selects the first card, inserts a third and
+resizes the viewport. It reports generation `3`, nodes `4`, keys
+`[10, 20, 30]`, and viewport `224x160`, without opening a window.
+
+To interact with the same content on Windows or a Linux Wayland desktop:
+
+```sh
+cargo run -p fenestra-layout-inspector --example hello-panel --locked -- --native
+```
+
+Click a blue card to select it, press Space to add cards, and resize or close
+the window. Use `--native-smoke` for one presentation followed by automatic
+exit. The current inspector is bounded; it is not an unlimited canvas.
 
 ## Reading the example
 
@@ -50,7 +63,10 @@ The `.fen` file is compiler input. A host build script can call
 the application. The `.ui` file is an expression that can be included where
 `fenestra_ui_macros::ui` is in scope. Both return the raw program quadruple.
 The [layout inspector build script](../apps/fenestra-layout-inspector/build.rs)
-demonstrates the build-time flow with its registered conformance scene.
+compiles this example and its registered conformance scene, checking `.fen`
+and `ui!` parity for each. The [application example](../apps/fenestra-layout-inspector/examples/hello-panel.rs)
+includes the generated program and passes the resulting inspector to the
+same native presenter used by the default scene.
 
 The example uses tone property ID `4` and keyed region ID `0`, matching the
 inspector's selection and insertion conventions. Its cards accept hit tests;

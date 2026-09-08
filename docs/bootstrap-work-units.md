@@ -279,3 +279,44 @@ Exit: one verified Windows DX12 artifact proves real GPU submission,
 presentation, completion, and native interaction for the registered machine
 without leaking candidate types or claiming renderer selection or product
 support.
+
+## WU-0015: First usable application
+
+Branch: `feat/first-usable-application`
+Design: [first usable application](design/first-usable-application.md)
+Verification: [first usable application verification](verification/WU-0015-first-usable-application.md)
+
+- Research: dogfood the frozen WU-0013 format-2 spatial fixture through one
+  application boundary without claiming a final renderer or authoring API.
+- Planning: freeze the inspector user task, native input sequence, evidence
+  schema, limits, and nonclaims.
+- Implementation: add a deterministic layout inspector core, native CPU shell,
+  keyed insertion, selection, resize, and independently verified Windows
+  evidence.
+- Verification: pass the pure workspace gates and complete the bounded native
+  pointer, keyboard, resize, and close sequence.
+
+Exit: one first usable native application slice is reproducible and integrated
+without turning the frozen fixture into a public application contract.
+
+## WU-0016: Inspector and authoring loop
+
+Branch: `feat/inspector-authoring-loop`
+Design: [inspector and authoring loop](design/inspector-authoring-loop.md)
+Verification: [inspector and authoring loop verification](verification/WU-0016-inspector-authoring-loop.md)
+
+- Research: identify the existing `.fen`/`ui!` parity boundary and the
+  application facts needed for visible diagnostics.
+- Planning: keep authoring compilation at build time, accept configurable raw
+  programs explicitly, and preserve unknown source metadata for external
+  programs.
+- Implementation: compare the `.fen` and `ui!` raw programs in the inspector
+  build, add `LayoutInspector::from_programs`, and expose bounded authoring and
+  selection diagnostics.
+- Verification: prove configurable initialization, frontend parity, selected
+  property diagnostics, deterministic smoke output, and unchanged WU-0015
+  evidence tests.
+
+Exit: the inspector has a reusable compiled-content seam and the application
+dogfoods both typed authoring frontends without selecting a final authoring
+syntax or public API.

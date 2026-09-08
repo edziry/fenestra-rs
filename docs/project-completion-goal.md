@@ -1,0 +1,118 @@
+# Fenestra completion goal
+
+Status: active; product completion is not yet achieved
+Baseline: `a32025e14ceb9fdc88c385732437cf2b8d4ac344`, workspace `0.2.0`
+Audit date: 2026-09-07
+
+## Intended outcome
+
+Deliver the native Rust UI framework described in the [README](../README.md):
+practical typed component and styling authoring, application-owned state,
+native execution on Windows and Linux, and the advanced window and graphics
+capabilities promised there. Keep browser, WebView, JavaScript, media capture,
+encoding, and transport outside the framework core.
+
+The governing scope and research remain those of the
+[initial implementation plan](initial-implementation-plan.md). Its boundaries
+are sufficient for the development-loop repairs below. New language, platform,
+text, and release decisions require their own versioned design and evidence.
+
+## Audited state
+
+| Area | Evidence available | Remaining gap |
+| --- | --- | --- |
+| Kernel | Typed IR, identity, transactions, scheduler, replay and reconstruction oracles | Product-facing application lifecycle and API |
+| Authoring | Equivalent format-1/2 `.fen` and `ui!`, canonical Rust and source maps | Component syntax, bindings, events, imports and practical diagnostics |
+| Layout and graphics | Bounded layout, free placement, transforms, clips, paths, images and reference raster | General application scale, production renderer and measured incremental work |
+| Application | WU-0015 inspector and registered Windows artifact | Content beyond fixtures, node/property UX, focus and robust repeated input |
+| Native platform | Windows DX12 probe; Windows CPU inspector; Linux Wayland shell | Current Linux execution evidence, X11 path and qualified capability matrix |
+| Public package | Workspace packages and pinned toolchain | `fenestra-ui` facade is empty; no release license, MSRV or packaging commitment |
+| Normal UI | Spatial hit and semantic records | Text shaping, keyboard, IME, native accessibility, controls and scrolling |
+
+The audited baseline passed 2,155 tests across 174 test suites with no ignored
+tests using `cargo test --workspace --all-targets --all-features --locked`.
+That is a regression baseline, not proof of complete product behavior.
+
+Relevant versioned records:
+
+- [Windows GPU spine](verification/WU-0014-windows-interactive-gpu-spine.md)
+- [First usable application](verification/WU-0015-first-usable-application.md)
+- [Inspector and authoring loop](design/inspector-authoring-loop.md)
+- [Format-2 source contract](design/hybrid-spatial-authoring-source-v2.md)
+
+## Ordered acceptance gates
+
+### 1. Reproducible development and execution loop
+
+- [x] Document one working path from clone to validation, headless run and
+  native window, including the exact toolchain and platform prerequisites.
+- [x] Supply a small `.fen`/`ui!` example with equivalent programs, observable
+  pixels, pointer selection, repeated keyed insertion and resize tests.
+- [x] Expose compiler diagnostics with a source path, line, byte column,
+  diagnostic category and underlying typed validation reason.
+- [x] Keep idle native windows idle, accept repeated supported input, and
+  avoid presentation at zero size.
+- [x] Preserve the registered native evidence while executing the current
+  native shell on the available host.
+- [x] Pass formatting, tests, Clippy, documentation, manifest and dependency
+  checks; record exact native evidence limits.
+
+This gate passed under [WU-0016](verification/WU-0016-inspector-authoring-loop.md):
+2,175 tests, strict quality checks, Windows cross-compilation and local Wayland
+native presentation. Its result does not close the later gates or the
+completion goal.
+
+### 2. Practical authoring and application API
+
+- [ ] Design and ratify ergonomic component/property/style syntax using the
+  example and inspector as the user scenario; remove author-facing numeric
+  schema bookkeeping from the normal application path.
+- [ ] Define roles for `.fen` and `ui!`, Rust state/event bindings, component
+  composition, source maps and build integration.
+- [ ] Define resource budgets that permit real applications. Format 2 currently
+  fixes depth 4 and 8 initial instances independently of caller limits; the
+  reference compiler also permits only 8,192 source bytes.
+- [ ] Implement and test the new syntax/version without silently changing the
+  frozen experiment fixtures or their diagnostic contracts.
+- [ ] Provide an application-facing facade and compile examples as consumers
+  of it, without importing internal `prototype` APIs.
+- [ ] Add inspector node navigation, property display/editing and visible
+  diagnostics; keep authored input, compiled state and UI feedback traceable.
+
+### 3. Normal application interfaces
+
+- [ ] Specify, implement and verify text measurement, shaping, rendering and
+  font fallback with multilingual examples.
+- [ ] Add focus, keyboard navigation, editable text, selection, clipboard and
+  IME composition on each qualified platform.
+- [ ] Connect accessibility semantics to platform adapters and verify usable
+  accessible controls, scrolling and layout under resize and scale changes.
+- [ ] Build a complete small application using those controls and bindings,
+  and turn observed usability failures into regression tests.
+
+### 4. Platform and graphics promises
+
+- [ ] Record requested, detected and effective Windows, Wayland and X11
+  capabilities, with explicit unsupported rows and tested environments.
+- [ ] Resolve Linux native/GPU evidence and the renderer replacement boundary;
+  test lifecycle, resize, suspend/resume, device loss and multiple windows.
+- [ ] Verify transparency, overlays, notifications and safe framework-owned
+  surface export under the relevant platform authority and lifetime rules.
+- [ ] Measure startup, idle work, input latency, text and scene scaling;
+  establish budgets before asserting performance or incremental benefits.
+
+### 5. Release readiness
+
+- [ ] Record the project owner's license and distribution decisions, an MSRV
+  backed by CI, compatibility/versioning rules and the supported platform set.
+- [ ] Build reproducible installable artifacts, public API documentation,
+  tutorials and examples from a clean checkout.
+- [ ] Run release gates and publish only after explicit release authorization.
+
+## Completion rule
+
+Every mandatory gate needs implemented behavior, executable tests or native
+evidence, documentation and recorded limitations. A plan, a passing fixture,
+or a platform cross-build alone does not satisfy a product gate. Keep this
+goal active while required behavior is missing; record independently completed
+increments in their verification documents.
