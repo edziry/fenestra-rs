@@ -1,28 +1,28 @@
 use fenestra_text_app::{application, checksum, update_headless};
 use fenestra_ui::Application;
 
+mod arguments;
+mod export;
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let arguments = std::env::args().skip(1).collect::<Vec<_>>();
-    if arguments.as_slice() == ["--help"] {
+    let arguments = arguments::Arguments::parse(std::env::args_os().skip(1))?;
+    if arguments.help {
         println!("Run without arguments for deterministic text editing and raster output.");
         println!("With the native feature, use --native or --native-smoke.");
+        println!("--ppm PATH exports the final raster's RGB channels as a PPM image.");
         return Ok(());
     }
     let mut app = application()?;
-    match arguments.as_slice() {
-        [] => update_headless(&mut app)?,
-        [option] if option == "--native" => app = run_native(app, false)?,
-        [option] if option == "--native-smoke" => app = run_native(app, true)?,
-        _ => {
-            return Err(std::io::Error::new(
-                std::io::ErrorKind::InvalidInput,
-                "expected no arguments, --native, --native-smoke, or --help",
-            )
-            .into());
-        }
+    if let Some(smoke) = arguments.native {
+        app = run_native(app, smoke)?;
+    } else {
+        update_headless(&mut app)?;
     }
     let metrics = app.text_metrics("content")?;
     let raster = app.raster()?;
+    if let Some(path) = arguments.ppm {
+        export::write_ppm(&path, &raster)?;
+    }
     println!(
         "generation={} nodes={} text_bytes={} lines={} glyphs={} missing={} rgba_bytes={} checksum={:016x}",
         app.generation(),

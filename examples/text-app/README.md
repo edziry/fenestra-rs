@@ -19,6 +19,19 @@ cargo run --manifest-path examples/text-app/Cargo.toml --locked
 cargo test --manifest-path examples/text-app/Cargo.toml --locked
 ```
 
+Add `--ppm PATH` to export the final frame explicitly:
+
+```sh
+cargo run --manifest-path examples/text-app/Cargo.toml --locked -- --ppm /tmp/text-headless.ppm
+cargo run --manifest-path examples/text-app/Cargo.toml --locked --features native -- --native-smoke --ppm /tmp/text-presented.ppm
+```
+
+This exports the RGB channels of the application's final premultiplied RGBA8
+raster as binary PPM. Transparent pixels appear over black. With smoke mode,
+export happens after a successful native presentation. It is a frame export,
+not a desktop screenshot, and contains no window decorations or compositor
+effects. Exporting leaves the printed RGBA8 checksum unchanged.
+
 The default run opens no window. It appends a line with `TextBuffer`, calls
 `Application::set_text`, changes font size, line height, and foreground color
 with `set_text_style`, and reports committed generation, text bytes, line and
