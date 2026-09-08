@@ -4,6 +4,9 @@ Status: active; product completion is not yet achieved
 Baseline: `a32025e14ceb9fdc88c385732437cf2b8d4ac344`, workspace `0.2.0`
 Audit date: 2026-09-08
 
+Latest checkpoint: [application handoff, 2026-09-08](handoffs/2026-09-08-application-checkpoint.md).
+Product work stops at this requested handoff; the goal remains incomplete.
+
 ## Intended outcome
 
 Deliver the native Rust UI framework described in the [README](../README.md):
@@ -116,6 +119,10 @@ state, button/checkbox activation and agreement with presented frames. A private
 activation-status fixture selected the real desktop accessibility bus while
 global accessibility and screen-reader settings remained unchanged. The local
 AT-SPI disabled-button correction retains its provenance and regressions.
+WU-0024 adds [source-indexed editing geometry](design/text-editing-geometry.md),
+grapheme-safe queries, selection fragments, clipped text viewports and an owned
+native IME caret-context hook. Its public gallery exercises these prerequisites;
+an integrated authored field and real text accessibility remain open.
 Broad font qualification, general alignment, editing controls, clipboard,
 scrolling, native IME, real Windows UIA and screen-reader usability remain open.
 

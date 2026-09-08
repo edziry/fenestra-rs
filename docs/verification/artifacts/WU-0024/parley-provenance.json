@@ -1,0 +1,29 @@
+{
+  "package": "parley",
+  "version": "0.11.1",
+  "archive_sha256": "22d2ff88bd3f7d68d1d9b09c7e6209f9a8e8c05088295140a2bcf2e9b17038c5",
+  "unchanged_upstream_files": 44,
+  "changed_upstream_files": [
+    {
+      "path": "src/bidi.rs",
+      "archive_sha256": "4247f526dab62e89207908b4287653f0e42f53d331934afced480fbb2e36cc91",
+      "local_sha256": "4f7a775e9bc8326a4e319003a3a2c4004c430c69cfa42f2d09f320aa5885b563"
+    },
+    {
+      "path": "src/editing/cursor.rs",
+      "archive_sha256": "cd7237d6c75c495f6aa0941e3ecf9182dc62d33b6f0d4599a6a117765265e156",
+      "local_sha256": "6d455214027e434c868d0e16227e18ab2879044e839432592820135c84959832"
+    },
+    {
+      "path": "src/layout/line_break.rs",
+      "archive_sha256": "a41f56117bb55a0294e9a96d4ad651e7ebaead38b337c96cabc3443efdd697e4",
+      "local_sha256": "bc204cf017091c9a35c77bb1f558b674e91b2a9d77a1ed8317e40c15a3ec513c"
+    }
+  ],
+  "omitted_upstream_files": [
+    "Cargo.lock"
+  ],
+  "added_local_files": [
+    "FENESTRA-PATCH.md"
+  ]
+}

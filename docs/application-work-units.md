@@ -67,3 +67,22 @@ Exit: repeated reads of one accepted frame avoid reference sampling, while
 changed frames and failed updates preserve their existing correctness
 contracts. Whole-process memory budgets, incremental rendering and larger
 accessibility-tree performance remain separate gates.
+
+## WU-0024: Text editing geometry and native IME context
+
+Branch: `feat/text-editing-geometry`
+Design: [editing geometry and native context](design/text-editing-geometry.md)
+Verification: [text editing geometry](verification/WU-0024-text-editing-geometry.md)
+
+- Define owned source positions, affinity, directed selections, bounded hit and
+  navigation queries, carets, highlight fragments and full text extents.
+- Derive geometry and clipped viewport pixels from the same explicit-font
+  shaping pipeline; preserve original CRLF offsets and grapheme boundaries.
+- Add a checked native editor identity and physical caret-area hook with
+  focus/drawable gating, transition caching and legacy static compatibility.
+- Exercise the public API through a standalone gallery, structural adversarial
+  tests, real adapter regressions and native presentation.
+
+Exit: these operations establish prerequisites for an integrated editable
+control. Authored text fields, atomic value/selection/composition publication,
+text accessibility, clipboard and platform IME qualification remain open.

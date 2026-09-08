@@ -1,0 +1,62 @@
+[
+  {
+    "path": "Cargo.lock",
+    "before_sha256": "f8b7c317837fac559abc955693d4d630f0130420047942ba4de99b30fb8463c2",
+    "after_sha256": "e458aa3ccf658009aa95a976b7afef08e5572b0931ef8bcafb409c97419eef5d",
+    "package_count": 398,
+    "removed_parley_registry_fields": [
+      "source",
+      "checksum"
+    ],
+    "package_versions_and_dependency_edges_unchanged": true
+  },
+  {
+    "path": "examples/typed-app/Cargo.lock",
+    "before_sha256": "4f30bfff1debe222fe9a072d9f12ab830f8d9c4a2082268f662b9f6d2659c378",
+    "after_sha256": "4f30bfff1debe222fe9a072d9f12ab830f8d9c4a2082268f662b9f6d2659c378",
+    "package_count": 253,
+    "removed_parley_registry_fields": [],
+    "package_versions_and_dependency_edges_unchanged": true
+  },
+  {
+    "path": "examples/text-app/Cargo.lock",
+    "before_sha256": "48e976308b6552ec866336c1e620db3c332e6a39cddbb2dbd5a6b4fe6b0ba027",
+    "after_sha256": "916f34e5936950e6ba982e94ab2d063985b995d39b6a83313595cc60a64fed9d",
+    "package_count": 296,
+    "removed_parley_registry_fields": [
+      "source",
+      "checksum"
+    ],
+    "package_versions_and_dependency_edges_unchanged": true
+  },
+  {
+    "path": "examples/responsive-app/Cargo.lock",
+    "before_sha256": "6fcd86651c2fd482a68397bc218ebf31b24577d869ec570b5633ffb1fb021cf6",
+    "after_sha256": "038c860b43260564e6fe746192cbc5d6cded3dec4276e777d3922103b3b8c55b",
+    "package_count": 296,
+    "removed_parley_registry_fields": [
+      "source",
+      "checksum"
+    ],
+    "package_versions_and_dependency_edges_unchanged": true
+  },
+  {
+    "path": "examples/controls-app/Cargo.lock",
+    "before_sha256": "260c3ee5b0713974faab069f653c105815d7df3f84bba5d4063633d84e643043",
+    "after_sha256": "10ff9a53077f890658c55197a0d900f6c7e8985618e38b927ddd3e10fae7443e",
+    "package_count": 299,
+    "removed_parley_registry_fields": [
+      "source",
+      "checksum"
+    ],
+    "package_versions_and_dependency_edges_unchanged": true
+  },
+  {
+    "path": "probes/text-candidate-screen/Cargo.lock",
+    "before_sha256": "4feeff0f72c4ea1961b1dc4f640af1f6e8cdf9311991e948756f2ce8b5bacc31",
+    "after_sha256": "4feeff0f72c4ea1961b1dc4f640af1f6e8cdf9311991e948756f2ce8b5bacc31",
+    "package_count": 317,
+    "removed_parley_registry_fields": [],
+    "package_versions_and_dependency_edges_unchanged": true
+  }
+]
