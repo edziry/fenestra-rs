@@ -1,5 +1,7 @@
 use crate::native::{self, NativeError, WindowContent, WindowEvent, WindowOptions};
-use crate::{Application, Error, Event, Raster, Size};
+use crate::{
+    AccessibilityActionRequest, AccessibilityTree, Application, Error, Event, Raster, Size,
+};
 
 impl Application {
     /// Runs this application in a native window and returns its final state.
@@ -43,6 +45,17 @@ where
 
     fn frame(&self) -> Result<Raster, Error> {
         self.app.raster()
+    }
+
+    fn accessibility(&self) -> Result<Option<AccessibilityTree>, Error> {
+        self.app.accessibility_tree().map(Some)
+    }
+
+    fn accessibility_action(&mut self, request: AccessibilityActionRequest) -> Result<(), Error> {
+        for event in self.app.dispatch_accessibility_action(request)? {
+            (self.handler)(&mut self.app, event)?;
+        }
+        Ok(())
     }
 }
 

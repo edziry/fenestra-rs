@@ -3,6 +3,66 @@ use crate::{Color, Element, Style, View};
 use crate::{ImeEvent, Key, KeyState, KeyboardInput, Modifiers};
 
 #[test]
+fn native_accessibility_actions_share_committed_control_events_with_the_handler() {
+    use crate::{AccessibilityAction, AccessibilityActionRequest, AccessibilityId};
+    let app = Application::new(
+        View::new(
+            "accessible",
+            Element::checkbox("choice", "Choice").style(Style::new().width(20).height(20)),
+        ),
+        Size::new(80, 80),
+    )
+    .unwrap();
+    let mut received = Vec::new();
+    let mut content = ApplicationWindow {
+        app,
+        handler: |app: &mut Application, event: Event| {
+            if let Event::CheckedChanged { checked, .. } = &event {
+                assert_eq!(
+                    app.control_snapshot("choice")?.state().checked(),
+                    Some(*checked)
+                );
+                app.set_control_label("choice", "Accepted choice")?;
+            }
+            received.push(event);
+            Ok(())
+        },
+    };
+    let request = |action| AccessibilityActionRequest {
+        target: AccessibilityId::new(1),
+        action,
+    };
+    assert_eq!(
+        content.accessibility().unwrap().unwrap().nodes()[1].label(),
+        "Choice"
+    );
+    content
+        .accessibility_action(request(AccessibilityAction::Focus))
+        .unwrap();
+    content
+        .accessibility_action(request(AccessibilityAction::Activate))
+        .unwrap();
+    let tree = content.accessibility().unwrap().unwrap();
+    assert_eq!(tree.nodes()[1].label(), "Accepted choice");
+    assert_eq!(
+        tree.nodes()[1].control_state().unwrap().checked(),
+        Some(true)
+    );
+    assert_eq!(
+        received,
+        [
+            Event::FocusChanged {
+                target: Some("choice".into())
+            },
+            Event::CheckedChanged {
+                target: "choice".into(),
+                checked: true
+            }
+        ]
+    );
+}
+
+#[test]
 fn release_hits_current_geometry_and_preserves_legacy_click_on_press() {
     let mut received = Vec::new();
     let mut content = ApplicationWindow {
