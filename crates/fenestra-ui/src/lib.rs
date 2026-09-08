@@ -1,5 +1,34 @@
 #![forbid(unsafe_code)]
 
-//! Unpublished facade for the experimental Fenestra UI workspace.
+//! Typed native application views backed by the Fenestra runtime.
 //!
-//! This crate intentionally exposes no framework API during bootstrap.
+//! This unpublished API is experimental. Construction and style are expressed
+//! with named elements; internal schema and spatial identities stay private.
+
+mod application;
+mod error;
+mod frame;
+mod limits;
+mod lower;
+mod model;
+mod style;
+
+pub use application::Application;
+pub use error::Error;
+pub use frame::{Raster, Size};
+pub use limits::Limits;
+pub use model::{Element, View};
+pub use style::{Color, Style};
+
+/// Compiles an authored view into the public application constructors.
+pub use fenestra_ui_macros::ui;
+
+/// Optional native window hosting for application content.
+#[cfg(all(feature = "native", any(target_os = "linux", target_os = "windows")))]
+pub mod native;
+
+#[cfg(all(feature = "native", any(target_os = "linux", target_os = "windows")))]
+mod window;
+
+#[cfg(all(feature = "native", any(target_os = "linux", target_os = "windows")))]
+pub use window::Event;

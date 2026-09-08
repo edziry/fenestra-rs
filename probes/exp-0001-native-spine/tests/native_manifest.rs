@@ -35,7 +35,6 @@ fn native_candidates_are_exact_target_scoped_and_replaceable() {
     assert!(!workspace.contains("winit = "));
     assert!(!workspace.contains("softbuffer = "));
     for relative in [
-        "crates/fenestra-ui/Cargo.toml",
         "crates/fenestra-ui-ir/Cargo.toml",
         "crates/fenestra-ui-runtime/Cargo.toml",
         "crates/fenestra-ui-testkit/Cargo.toml",
@@ -44,6 +43,17 @@ fn native_candidates_are_exact_target_scoped_and_replaceable() {
         let other = read(&root.join(relative));
         assert!(!other.contains("winit = "), "{relative}");
         assert!(!other.contains("softbuffer = "), "{relative}");
+    }
+    // The application facade hosts the extracted CPU shell only when opted in.
+    let facade = read(&root.join("crates/fenestra-ui/Cargo.toml"));
+    assert!(facade.contains("default = []"));
+    assert!(facade.contains("native = [\"dep:winit\", \"dep:softbuffer\"]"));
+    for line in facade
+        .lines()
+        .filter(|line| line.starts_with("winit = ") || line.starts_with("softbuffer = "))
+    {
+        assert!(line.contains("optional = true"));
+        assert!(line.contains("default-features = false"));
     }
 }
 

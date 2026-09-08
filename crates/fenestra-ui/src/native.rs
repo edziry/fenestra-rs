@@ -1,6 +1,6 @@
 //! Optional native Windows and Linux Wayland window presentation.
 //!
-//! Enable the `native` feature to run a [`WindowContent`] implementation. Input,
+//! Enable `native` to run a [`WindowContent`](crate::native::WindowContent) implementation. Input,
 //! resize callbacks, and raster sizes use physical window pixels consistently.
 
 use std::error::Error;
