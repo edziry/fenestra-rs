@@ -1,0 +1,23 @@
+[package]
+name = "fenestra-typed-app"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[workspace]
+
+[features]
+default = []
+native = ["fenestra-ui/native"]
+
+[dependencies]
+fenestra-ui = { path = "../../crates/fenestra-ui" }
+
+[build-dependencies]
+fenestra-ui-authoring = { path = "../../crates/fenestra-ui-authoring" }
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = "warn"
