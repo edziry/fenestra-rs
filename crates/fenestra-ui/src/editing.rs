@@ -21,11 +21,12 @@ pub struct TextBuffer {
 }
 
 impl TextBuffer {
-    /// Owns the supplied text and places the caret at its end.
+    /// Copies the supplied text and places the caret at its end.
     ///
-    /// Rejects text whose UTF-8 byte length exceeds `max_bytes`.
-    pub fn new(text: impl Into<String>, max_bytes: usize) -> Result<Self, EditingError> {
-        let text = text.into();
+    /// Checks the UTF-8 byte length against `max_bytes` before allocating the
+    /// owned copy. Rejected text is not copied.
+    pub fn new(text: impl AsRef<str>, max_bytes: usize) -> Result<Self, EditingError> {
+        let text = text.as_ref();
         if text.len() > max_bytes {
             return Err(EditingError::LimitExceeded {
                 limit: max_bytes,
@@ -34,7 +35,7 @@ impl TextBuffer {
         }
         Ok(Self {
             selection: Selection::caret(text.len()),
-            text,
+            text: text.to_owned(),
             max_bytes,
         })
     }

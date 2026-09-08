@@ -38,6 +38,51 @@ fn construction_enforces_an_inclusive_utf8_byte_limit() {
 }
 
 #[test]
+fn construction_accepts_borrowed_sources_without_an_owned_conversion() {
+    struct BorrowedText<'a>(&'a str);
+
+    impl AsRef<str> for BorrowedText<'_> {
+        fn as_ref(&self) -> &str {
+            self.0
+        }
+    }
+
+    assert_eq!(
+        TextBuffer::new(BorrowedText(ACCENT), 2),
+        Err(EditingError::LimitExceeded {
+            limit: 2,
+            actual: 3,
+        })
+    );
+    let buffer = TextBuffer::new(BorrowedText(ACCENT), 3).unwrap();
+    assert_eq!(buffer.text(), ACCENT);
+}
+
+#[test]
+fn empty_insertions_preserve_carets_at_nonempty_grapheme_boundaries() {
+    let text = format!("{ACCENT}{FAMILY}\r\nx");
+    let mut buffer = TextBuffer::new(&text, text.len()).unwrap();
+    for offset in [0, 3, 3 + FAMILY.len(), 5 + FAMILY.len(), text.len()] {
+        buffer.set_selection(Selection::caret(offset)).unwrap();
+        let initial = buffer.clone();
+        buffer.replace_selection("").unwrap();
+        assert_eq!(buffer, initial);
+    }
+}
+
+#[test]
+fn directed_crlf_selections_replace_the_same_complete_cluster() {
+    for selection in [Selection::new(1, 3), Selection::new(3, 1)] {
+        let mut buffer = TextBuffer::new("a\r\nb", 4).unwrap();
+        buffer.set_selection(selection).unwrap();
+        assert_eq!(buffer.selected_text(), "\r\n");
+        buffer.replace_selection("\n").unwrap();
+        assert_eq!(buffer.text(), "a\nb");
+        assert_eq!(buffer.selection(), Selection::caret(2));
+    }
+}
+
+#[test]
 fn invalid_selection_rejects_utf8_and_grapheme_interiors_atomically() {
     let mut buffer = TextBuffer::new(format!("{ACCENT}{FAMILY}\r\nZ"), 64).unwrap();
     buffer.select_all();
