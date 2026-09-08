@@ -18,8 +18,10 @@ windows. Format 3 compiles nested `.fen` and `ui!` views into that public API.
 The facade also provides authored text views, bounded Unicode editing and owned
 keyboard, focus and IME events. An explicit-font adapter and a standalone text
 application exercise multilingual shaping, rendering and atomic text updates.
-Qualified IME, accessible controls, flexible layout and release
-packaging remain unfinished. See the [completion goal](docs/project-completion-goal.md) for
+Rows and columns support intrinsic sizing, weighted fill, minimum/maximum
+bounds and text wrapping under resize. Qualified IME, accessible controls,
+general layout alignment and release packaging remain unfinished.
+See the [completion goal](docs/project-completion-goal.md) for
 acceptance gates and the [work units](docs/bootstrap-work-units.md) for evidence.
 
 ## Run the examples
@@ -46,8 +48,23 @@ cargo run --manifest-path examples/typed-app/Cargo.toml --locked --features nati
 
 Click either card to toggle its highlight. Its handler keeps ordinary Rust
 state and updates elements by name. The [typed example guide](examples/typed-app/README.md)
-explains the syntax, build helper, API and current fixed-size layout behavior.
+explains the syntax, build helper, API and that example's fixed-size layout.
 Native window dependencies are optional; headless applications need no desktop.
+
+The [responsive application](examples/responsive-app/README.md) combines a
+fixed sidebar with flexible content, text that sizes to its lines, and weighted
+cards. Window resizing automatically recalculates their geometry and wrapping:
+
+```sh
+cargo run -p fenestra-ui-authoring --bin fenestra-check --locked -- examples/responsive-app/src/workspace.fen
+cargo run --manifest-path examples/responsive-app/Cargo.toml --locked
+cargo run --manifest-path examples/responsive-app/Cargo.toml --release --locked --features native -- --native
+```
+
+Use `width: auto`, `width: fill`, or `width: fill(2)` in either frontend, with
+optional `min_width` and `max_width`; height has the same policies. The
+[layout design](docs/design/responsive-layout.md) defines sizing, measurement
+and overflow behavior. The example needs no application resize calculations.
 
 The earlier format-2 example remains available as a conformance reference:
 
@@ -127,7 +144,8 @@ for the current editing and composition boundaries.
 `fenestra-check` reports errors as `file:line:byte-column`, followed by the
 diagnostic and exact byte range. It detects format 2 or 3 and applies each
 format's bounds. Format 3 supports ordinary comments, named elements and text
-content in cooked or raw Rust string literals;
+content in cooked or raw Rust string literals, fixed/auto/fill dimensions and
+numeric minimum/maximum bounds;
 format 2 retains its original typed IR and diagnostic contracts. The checker
 does not execute a source file.
 

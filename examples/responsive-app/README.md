@@ -82,6 +82,12 @@ raster; transparency appears over black. Native smoke export happens after
 successful presentation. This is an application frame export, not a desktop
 screenshot, and includes no window decorations or compositor effects.
 
+The recorded [Wayland frame](evidence/wayland-frame.png),
+[narrow headless frame](evidence/narrow-frame.png), and
+[updated headless frame](evidence/updated-frame.png) show the resulting
+layouts. See [WU-0020 verification](../../docs/verification/WU-0020-responsive-layout.md)
+for checksums, executed checks and native evidence limits.
+
 Export all three headless checkpoints to compare wrapping and card placement:
 
 ```sh

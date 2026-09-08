@@ -1,8 +1,12 @@
 # Authoring examples
 
 Start with the [standalone typed application](typed-app/README.md) for the
-public API and format-3 named component syntax. The format-2 example below
-remains a reference for the earlier experimental IR authoring contract.
+public API and format-3 named component syntax. Continue with the
+[text application](text-app/README.md) for multilingual rendering and basic
+editing, or the [responsive application](responsive-app/README.md) for
+intrinsic text sizing, weighted fill and layout under window resize.
+The format-2 example below remains a reference for the earlier experimental
+IR authoring contract.
 
 `hello-panel.fen` describes a dark panel containing two blue cards. Its matching
 `hello-panel.ui` contains the same program inside `ui! { ... }`. Both use the

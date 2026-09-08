@@ -67,7 +67,10 @@ completion goal.
 [WU-0017](design/typed-application-api.md) adds a public facade, named nested
 views, format 3, host-only compilation, Rust event handlers and shared native
 hosting. [WU-0019](design/authored-text-views.md) extends this vocabulary with
-fixed-size text leaves and Rust string literals. This is an implemented
+fixed-size text leaves and Rust string literals.
+[WU-0020](design/responsive-layout.md) adds typed auto/fill dimensions and
+minimum/maximum bounds to both frontends, with intrinsic text measurement.
+This is an implemented
 foundation; general reusable authored components, imports, bound expressions
 and the inspector's property UX remain open.
 
@@ -95,8 +98,10 @@ probe. Its isolated same-font Parley/cosmic-text screen informs the next text
 view contract. [WU-0019](design/authored-text-views.md) now integrates authored
 text, complete shaped measurements, ordered explicit font fallback and atomic
 content/style updates through a replaceable Parley adapter. Its standalone
-consumer has real Wayland presentation evidence. Intrinsic sizing, broad font
-qualification, normal editing controls, native IME and accessibility remain open.
+consumer has real Wayland presentation evidence. WU-0020 now resolves intrinsic
+and weighted dimensions before wrapping text and publishing sibling geometry,
+with a standalone responsive consumer. Broad font qualification, general
+alignment, normal editing controls, native IME and accessibility remain open.
 
 - [ ] Specify, implement and verify text measurement, shaping, rendering and
   font fallback with multilingual examples.

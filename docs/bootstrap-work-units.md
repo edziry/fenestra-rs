@@ -387,3 +387,13 @@ Exit: real authored text is measured, rendered, updated and presented through
 the public API with explicit fonts. Intrinsic layout, normal text controls,
 arbitrary font hardening, clipboard, accessibility, qualified IME, production
 caching and the remaining platform/release gates stay open.
+
+## WU-0020: Responsive layout
+
+Branch: `feat/responsive-layout`
+Design: [responsive sizing and measurement](design/responsive-layout.md)
+Verification: [responsive layout verification](verification/WU-0020-responsive-layout.md)
+
+Exit: typed auto/fill/min/max sizing, intrinsic text measurement and atomic
+resize are exercised through both authoring frontends and a native consumer.
+General alignment, controls, scrolling and the remaining product gates stay open.
