@@ -39,6 +39,9 @@ jobs:
       - name: Run Clippy
         run: cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
 
+      - name: Lint vendored AT-SPI state translation
+        run: cargo clippy -p accesskit_atspi_common --all-targets --locked -- -D warnings
+
       - name: Check standalone consumer formatting
         run: cargo fmt --manifest-path examples/typed-app/Cargo.toml -- --check
 
@@ -97,6 +100,10 @@ jobs:
       - name: Build and run tests
         run: cargo test --workspace --all-targets --all-features --locked
 
+      - name: Test vendored AT-SPI disabled-state regressions
+        if: runner.os == 'Linux'
+        run: cargo test -p accesskit_atspi_common --lib --locked
+
       - name: Test standalone public API consumer
         run: cargo test --manifest-path examples/typed-app/Cargo.toml --all-features --locked
 
@@ -120,6 +127,9 @@ jobs:
 
       - name: Run keyboard controls application headlessly
         run: cargo run --manifest-path examples/controls-app/Cargo.toml --locked
+
+      - name: Test portable accessibility probe helpers
+        run: python -m unittest discover -s examples/controls-app/tools -p "test_*.py"
 
       - name: Test isolated text candidates and native editor contracts
         run: cargo test --manifest-path probes/text-candidate-screen/Cargo.toml --workspace --all-targets --all-features --locked

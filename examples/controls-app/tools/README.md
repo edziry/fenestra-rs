@@ -9,6 +9,13 @@ The helper requires a running Linux Wayland session, its existing AT-SPI bus,
 `dbus-run-session`, Python 3, `dbus-python`, PyGObject and GLib. It does not use
 `pyatspi`, synthesize keyboard or pointer events, or change desktop preferences.
 
+The Rust `a11y-probe` example ignores physical keyboard, pointer and IME input
+so only accessibility actions mutate its preference checkpoints. It still
+processes real window `Focused` and `CloseRequested` events, and resize callbacks
+remain active. It does not manufacture operating-system focus. This input
+isolation belongs to the verification example; the regular controls application
+continues to handle its normal device input.
+
 From the repository root:
 
 ```sh
@@ -19,6 +26,10 @@ python3 examples/controls-app/tools/atspi_probe.py --output "$OUT" -- \
   examples/controls-app/target/debug/examples/a11y-probe "$OUT"
 python3 -m unittest discover -s examples/controls-app/tools -p 'test_*.py'
 ```
+
+The helper unit tests use only Python's standard library. CI runs them on Linux
+and Windows without a desktop session, D-Bus modules or native window launch.
+The live probe command above requires the Linux desktop dependencies.
 
 Use a new output directory for each run. `report.json` records the result,
 activation conditions and four checkpoints: initial, focused, changed and
@@ -36,6 +47,11 @@ must be followed by a matching committed Rust snapshot and presented pixels.
 The standalone Readout label must also match its current Rust text after edits.
 Activation must retain the logical focus target even if the compositor moves
 window focus elsewhere. Active focused-state parity remains a separate check.
+Wayland does not guarantee activation of a background window. The focused
+checkpoint requires both Rust and AT-SPI to report active focus and times out
+if that condition is not reached; it never replaces system focus with the
+retained logical target. Later checkpoints still compare active focus exactly
+while checking logical retention separately.
 The PPM checksum reconstructs opaque alpha; this is valid for this example's
 opaque full-window background. PPM files are raster exports, not screenshots.
 
