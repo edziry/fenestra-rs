@@ -255,3 +255,22 @@ fn focus_modifiers_and_ime_changes_request_a_frame() {
         assert!(requests_redraw(&event));
     }
 }
+
+#[test]
+fn late_unfocused_preedit_does_not_suppress_text_after_focus_returns() {
+    let mut state = InputState::default();
+    state
+        .application_events(&PlatformEvent::Focused(false))
+        .unwrap();
+    assert_eq!(
+        state.application_events(&PlatformEvent::Ime(Ime::Preedit("late".into(), None))),
+        Ok(vec![WindowEvent::Ime(ImeEvent::Preedit {
+            text: "late".into(),
+            cursor: None
+        })])
+    );
+    state
+        .application_events(&PlatformEvent::Focused(true))
+        .unwrap();
+    assert_eq!(keyboard(&press(&mut state, "a")).text.as_deref(), Some("a"));
+}

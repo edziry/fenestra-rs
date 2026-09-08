@@ -139,7 +139,7 @@ impl InputState {
                 ImeEvent::Disabled
             }
             Ime::Preedit(text, cursor) => {
-                self.composing = !text.is_empty();
+                self.composing = self.focused && !text.is_empty();
                 ImeEvent::Preedit {
                     text: text.clone(),
                     cursor: *cursor,
