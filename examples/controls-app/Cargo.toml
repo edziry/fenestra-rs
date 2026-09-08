@@ -17,8 +17,18 @@ fenestra-ui-text = { path = "../../crates/fenestra-ui-text" }
 [build-dependencies]
 fenestra-ui-authoring = { path = "../../crates/fenestra-ui-authoring" }
 
+[dev-dependencies]
+serde_json = "=1.0.151"
+
+[[example]]
+name = "a11y-probe"
+required-features = ["native"]
+
 [lints.rust]
 unsafe_code = "forbid"
 
 [lints.clippy]
 all = "warn"
+
+[patch.crates-io]
+accesskit_atspi_common = { path = "../../third-party/accesskit-atspi-common" }

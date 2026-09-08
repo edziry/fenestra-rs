@@ -12,3 +12,6 @@ unsafe_code = "forbid"
 
 [workspace.lints.clippy]
 all = "warn"
+
+[patch.crates-io]
+accesskit_atspi_common = { path = "../../third-party/accesskit-atspi-common" }
