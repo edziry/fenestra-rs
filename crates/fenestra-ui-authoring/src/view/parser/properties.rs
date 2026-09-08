@@ -4,7 +4,11 @@ use crate::token::Punctuation;
 use super::{Diagnostic, Dimension, Element, Kind, Parser};
 
 impl Parser {
-    pub(super) fn property(&mut self, element: &mut Element) -> Result<(), Diagnostic> {
+    pub(super) fn property(
+        &mut self,
+        element: &mut Element,
+        scope: Option<Kind>,
+    ) -> Result<(), Diagnostic> {
         let token = self.take()?;
         let property = token.label();
         let bit = match property {
@@ -22,6 +26,16 @@ impl Parser {
             "max_width" => 2048,
             "min_height" => 4096,
             "max_height" => 8192,
+            "label" => 1 << 14,
+            "disabled" => 1 << 15,
+            "checked" => 1 << 16,
+            "hover_background" => 1 << 17,
+            "pressed_background" => 1 << 18,
+            "checked_background" => 1 << 19,
+            "disabled_background" => 1 << 20,
+            "checked_color" => 1 << 21,
+            "disabled_color" => 1 << 22,
+            "focus_color" => 1 << 23,
             _ => {
                 return Err(Diagnostic::new(
                     "unknown property; expected width, height, padding, gap, background, or input",
@@ -32,6 +46,7 @@ impl Parser {
         if element.properties.seen & bit != 0 {
             return Err(Diagnostic::new("duplicate property", token.physical));
         }
+        self.control_property(element, property, scope, token.physical)?;
         if matches!(element.kind, Kind::Rect | Kind::Text) && matches!(property, "padding" | "gap")
         {
             return Err(Diagnostic::new(
@@ -64,7 +79,23 @@ impl Parser {
             "font_size" => props.font_size = Some(self.positive(512)?),
             "line_height" => props.line_height = Some(self.positive(2048)?),
             "color" => props.color = Some(self.color()?),
+            "label" => props.label = Some(self.label()?),
+            "disabled" => props.disabled = Some(self.boolean()?),
+            "checked" => props.checked = Some(self.boolean()?),
+            "hover_background" => props.state_style.hover_background = Some(self.color()?),
+            "pressed_background" => props.state_style.pressed_background = Some(self.color()?),
+            "checked_background" => props.state_style.checked_background = Some(self.color()?),
+            "disabled_background" => props.state_style.disabled_background = Some(self.color()?),
+            "checked_color" => props.state_style.checked_color = Some(self.color()?),
+            "disabled_color" => props.state_style.disabled_color = Some(self.color()?),
+            "focus_color" => props.state_style.focus_color = Some(self.color()?),
             _ => unreachable!("property name was validated"),
+        }
+        if property == "input" && props.input == Some(true) && scope.is_some() {
+            return Err(Diagnostic::new(
+                "input accept is not supported inside a control",
+                token.physical,
+            ));
         }
         for (axis, minimum, maximum) in [
             ("width", props.min_width, props.max_width),
@@ -115,6 +146,18 @@ impl Parser {
                 token.physical,
             )),
         }
+    }
+
+    fn label(&mut self) -> Result<Box<str>, Diagnostic> {
+        let physical = self
+            .tokens
+            .get(self.next)
+            .map_or(self.eof, |token| token.physical);
+        let label = self.content()?;
+        if label.trim().is_empty() {
+            return Err(Diagnostic::new("control label must be nonempty", physical));
+        }
+        Ok(label)
     }
 
     fn positive(&mut self, maximum: u32) -> Result<u32, Diagnostic> {

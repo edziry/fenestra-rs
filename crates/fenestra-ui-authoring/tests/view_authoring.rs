@@ -30,8 +30,8 @@ fn nested_view_emits_the_public_facade_with_identical_frontends() {
 fn failures_report_the_authored_token_and_an_actionable_message() {
     for (source, token, message) in [
         (
-            "format 3; view hello { button label {} }",
-            "button",
+            "format 3; view hello { widget label {} }",
+            "widget",
             "unknown element",
         ),
         (

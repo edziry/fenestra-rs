@@ -76,7 +76,15 @@ impl Output<'_> {
             }
             self.push(")")?;
         } else {
+            if let Some(label) = &props.label {
+                self.push(&format!(",{}", Literal::string(label)))?;
+            }
             self.push(")")?;
+        }
+        for (name, value) in [("disabled", props.disabled), ("checked", props.checked)] {
+            if let Some(value) = value {
+                self.push(&format!(".{name}({value})"))?;
+            }
         }
         self.push(".style(::fenestra_ui::Style::new()")?;
         for (name, value) in [("width", props.width), ("height", props.height)] {
@@ -104,7 +112,20 @@ impl Output<'_> {
         if let Some(value) = props.input {
             self.push(&format!(".input({value})"))?;
         }
-        self.push(")")
+        self.push(")")?;
+        let state = props.state_style.values();
+        if state.iter().any(|(_, value)| value.is_some()) {
+            self.push(".state_style(::fenestra_ui::StateStyle::new()")?;
+            for (name, value) in state {
+                if let Some([red, green, blue, alpha]) = value {
+                    self.push(&format!(
+                        ".{name}(::fenestra_ui::Color::rgba8({red}u8,{green}u8,{blue}u8,{alpha}u8))"
+                    ))?;
+                }
+            }
+            self.push(")")?;
+        }
+        Ok(())
     }
 
     fn dimension(&mut self, name: &str, dimension: Dimension) -> Result<(), Diagnostic> {

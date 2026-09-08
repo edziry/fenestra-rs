@@ -1,3 +1,4 @@
+mod controls;
 mod properties;
 mod support;
 
@@ -28,6 +29,8 @@ pub(super) enum Kind {
     Column,
     Rect,
     Text,
+    Button,
+    Checkbox,
 }
 
 impl Kind {
@@ -37,7 +40,13 @@ impl Kind {
             Self::Column => "column",
             Self::Rect => "rect",
             Self::Text => "text",
+            Self::Button => "button",
+            Self::Checkbox => "checkbox",
         }
+    }
+
+    pub(super) const fn is_control(self) -> bool {
+        matches!(self, Self::Button | Self::Checkbox)
     }
 }
 
@@ -57,7 +66,36 @@ pub(super) struct Properties {
     pub(super) font_size: Option<u32>,
     pub(super) line_height: Option<u32>,
     pub(super) color: Option<[u8; 4]>,
-    seen: u16,
+    pub(super) label: Option<Box<str>>,
+    pub(super) disabled: Option<bool>,
+    pub(super) checked: Option<bool>,
+    pub(super) state_style: StateProperties,
+    seen: u32,
+}
+
+#[derive(Default)]
+pub(super) struct StateProperties {
+    pub(super) hover_background: Option<[u8; 4]>,
+    pub(super) pressed_background: Option<[u8; 4]>,
+    pub(super) checked_background: Option<[u8; 4]>,
+    pub(super) disabled_background: Option<[u8; 4]>,
+    pub(super) checked_color: Option<[u8; 4]>,
+    pub(super) disabled_color: Option<[u8; 4]>,
+    pub(super) focus_color: Option<[u8; 4]>,
+}
+
+impl StateProperties {
+    pub(super) fn values(&self) -> [(&'static str, Option<[u8; 4]>); 7] {
+        [
+            ("hover_background", self.hover_background),
+            ("pressed_background", self.pressed_background),
+            ("checked_background", self.checked_background),
+            ("disabled_background", self.disabled_background),
+            ("checked_color", self.checked_color),
+            ("disabled_color", self.disabled_color),
+            ("focus_color", self.focus_color),
+        ]
+    }
 }
 
 #[derive(Clone, Copy)]
@@ -104,14 +142,21 @@ impl Parser {
         self.keyword("view")?;
         let (name, _) = self.name()?;
         self.punctuation(Punctuation::OpenBrace)?;
-        let mut elements = vec![self.element(0)?];
-        let mut pending = vec![0];
-        while let Some(&current) = pending.last() {
+        let root = self.element(0, None)?;
+        let scope = root.kind.is_control().then_some(root.kind);
+        let mut elements = vec![root];
+        let mut pending = vec![(0, scope)];
+        while let Some(&(current, scope)) = pending.last() {
             if self.matches(Punctuation::CloseBrace) {
                 if elements[current].kind == Kind::Text
                     && elements[current].properties.content.is_none()
                 {
                     return Err(self.error("text element requires content"));
+                }
+                if elements[current].kind.is_control()
+                    && elements[current].properties.label.is_none()
+                {
+                    return Err(self.error("control element requires label"));
                 }
                 self.take()?;
                 pending.pop();
@@ -123,12 +168,13 @@ impl Parser {
                     )));
                 }
                 let index = elements.len();
-                let child = self.element(index)?;
+                let child = self.element(index, scope)?;
+                let scope = child.kind.is_control().then_some(child.kind).or(scope);
                 elements.push(child);
                 elements[current].children.push(index);
-                pending.push(index);
+                pending.push((index, scope));
             } else {
-                self.property(&mut elements[current])?;
+                self.property(&mut elements[current], scope)?;
             }
         }
         self.punctuation(Punctuation::CloseBrace)?;
@@ -142,7 +188,7 @@ impl Parser {
         })
     }
 
-    fn element(&mut self, count: usize) -> Result<Element, Diagnostic> {
+    fn element(&mut self, count: usize, scope: Option<Kind>) -> Result<Element, Diagnostic> {
         if count >= self.limits.elements {
             return Err(self.error("authoring limit exceeded: elements"));
         }
@@ -152,13 +198,21 @@ impl Parser {
             "column" => Kind::Column,
             "rect" => Kind::Rect,
             "text" => Kind::Text,
+            "button" => Kind::Button,
+            "checkbox" => Kind::Checkbox,
             _ => {
                 return Err(Diagnostic::new(
-                    "unknown element; expected row, column, rect, or text",
+                    "unknown element; expected row, column, rect, text, button, or checkbox",
                     token.physical,
                 ));
             }
         };
+        if kind.is_control() && scope.is_some() {
+            return Err(Diagnostic::new(
+                "nested controls are not supported",
+                token.physical,
+            ));
+        }
         let (name, physical) = self.name()?;
         if !self.names.insert(name.clone()) {
             return Err(Diagnostic::new("duplicate element name", physical));
@@ -192,6 +246,16 @@ impl Parser {
                 | "max_width"
                 | "min_height"
                 | "max_height"
+                | "label"
+                | "disabled"
+                | "checked"
+                | "hover_background"
+                | "pressed_background"
+                | "checked_background"
+                | "disabled_background"
+                | "checked_color"
+                | "disabled_color"
+                | "focus_color"
         ) {
             return false;
         }
