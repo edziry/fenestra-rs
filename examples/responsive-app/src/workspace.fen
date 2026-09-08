@@ -1,0 +1,157 @@
+format 3;
+view responsive_workspace {
+  column root {
+    width: fill;
+    height: fill;
+    min_width: 48;
+    min_height: 48;
+    padding: 24;
+    gap: 18;
+    background: rgba8(18, 24, 36, 255);
+    column header {
+      width: fill;
+      height: auto;
+      gap: 6;
+      text title {
+        content: "Responsive workspace";
+        width: fill;
+        height: auto;
+        font_size: 28;
+        line_height: 36;
+        color: rgba8(235, 241, 246, 255);
+      }
+      text subtitle {
+        content: "Resize the window. Text wraps, columns share space, and actions follow the content.";
+        width: fill;
+        height: auto;
+        font_size: 14;
+        line_height: 20;
+        color: rgba8(174, 190, 210, 255);
+      }
+    }
+    row body {
+      width: fill;
+      height: fill;
+      gap: 20;
+      column sidebar {
+        width: 170;
+        min_width: 140;
+        max_width: 190;
+        height: fill;
+        padding: 16;
+        gap: 14;
+        background: rgba8(30, 40, 56, 255);
+        text navigation_title {
+          content: "WORKSPACE";
+          width: fill;
+          height: auto;
+          font_size: 14;
+          line_height: 22;
+          color: rgba8(118, 196, 176, 255);
+        }
+        text navigation {
+          content: "Overview\nDocuments\nActivity";
+          width: fill;
+          height: auto;
+          font_size: 14;
+          line_height: 26;
+          color: rgba8(235, 241, 246, 255);
+        }
+        rect sidebar_space {
+          width: fill;
+          height: fill;
+        }
+        text sidebar_note {
+          content: "Fixed sidebar\n170 viewport pixels";
+          width: fill;
+          height: auto;
+          font_size: 12;
+          line_height: 18;
+          color: rgba8(174, 190, 210, 255);
+        }
+      }
+      column main {
+        width: fill;
+        height: fill;
+        gap: 16;
+        text section_title {
+          content: "Project notes";
+          width: fill;
+          height: auto;
+          font_size: 22;
+          line_height: 30;
+          color: rgba8(235, 241, 246, 255);
+        }
+        text paragraph {
+          content: "Resize this workspace to see the paragraph wrap and the actions move together. A fixed sidebar shares the row with a flexible reading column. Text chooses its height from the available width.";
+          width: fill;
+          height: auto;
+          font_size: 16;
+          line_height: 24;
+          color: rgba8(174, 190, 210, 255);
+        }
+        row actions {
+          width: fill;
+          height: 88;
+          gap: 12;
+          column highlight {
+            width: fill;
+            min_width: 90;
+            max_width: 200;
+            height: fill;
+            padding: 12;
+            gap: 4;
+            background: rgba8(48, 128, 192, 255);
+            input: accept;
+            text highlight_label {
+              content: "Highlight";
+              width: fill;
+              height: auto;
+              font_size: 16;
+              line_height: 24;
+            }
+            text highlight_hint {
+              content: "Toggle tint";
+              width: fill;
+              height: auto;
+              font_size: 12;
+              line_height: 18;
+            }
+          }
+          column revise {
+            width: fill(2);
+            min_width: 120;
+            max_width: 400;
+            height: fill;
+            padding: 12;
+            gap: 4;
+            background: rgba8(44, 84, 120, 255);
+            input: accept;
+            text revise_label {
+              content: "Change notes";
+              width: fill;
+              height: auto;
+              font_size: 16;
+              line_height: 24;
+            }
+            text revise_hint {
+              content: "Edit authored text";
+              width: fill;
+              height: auto;
+              font_size: 12;
+              line_height: 18;
+            }
+          }
+        }
+        text readout {
+          content: "Ready. Click a card.";
+          width: fill;
+          height: auto;
+          font_size: 14;
+          line_height: 20;
+          color: rgba8(118, 196, 176, 255);
+        }
+      }
+    }
+  }
+}
