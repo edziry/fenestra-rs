@@ -81,6 +81,7 @@ impl WindowContent for Content {
 fn legacy_content_can_omit_accessibility_callbacks() {
     let mut content = Content::default();
     assert!(!content.should_close());
+    assert_eq!(content.ime_context().unwrap(), None);
     assert_eq!(content.accessibility().unwrap(), None);
     content
         .accessibility_action(crate::AccessibilityActionRequest {

@@ -10,6 +10,7 @@ use winit::event_loop::{ActiveEventLoop, EventLoopProxy, OwnedDisplayHandle};
 use winit::window::{Window, WindowId};
 
 use super::accessibility::{Accessibility, action_kind, action_request};
+use super::ime::{ImeBridge, WindowImeSink};
 use super::input::{InputState, requests_redraw};
 use super::presentation::copy_pixels;
 use super::{NativeError, WindowContent, WindowOptions};
@@ -36,6 +37,8 @@ pub(super) struct NativeApplication<'a, C: WindowContent> {
     _context: Option<NativeContext>,
     surface: Option<NativeSurface>,
     input: InputState,
+    ime: ImeBridge,
+    window_focused: bool,
     pub(super) failure: Option<NativeError<C::Error>>,
 }
 
@@ -43,6 +46,7 @@ impl<'a, C: WindowContent> NativeApplication<'a, C> {
     pub(super) fn new(content: &'a mut C, options: WindowOptions) -> Self {
         Self {
             content,
+            ime: ImeBridge::new(options.ime_allowed),
             options,
             presented: false,
             drawable: false,
@@ -53,6 +57,7 @@ impl<'a, C: WindowContent> NativeApplication<'a, C> {
             _context: None,
             surface: None,
             input: InputState::default(),
+            window_focused: true,
             failure: None,
         }
     }
@@ -75,7 +80,6 @@ impl<'a, C: WindowContent> NativeApplication<'a, C> {
                 )
                 .map_err(|_| NativeError::Window)?,
         );
-        window.set_ime_allowed(self.options.ime_allowed);
         let physical = window.inner_size();
         self.resize_content(physical.width, physical.height)?;
         let tree = self
@@ -101,7 +105,9 @@ impl<'a, C: WindowContent> NativeApplication<'a, C> {
         }
         self._context = Some(context);
         self.surface = Some(surface);
+        let focused = window.has_focus();
         self.window = Some(window);
+        self.refresh_ime(Some(focused), false)?;
         if let Some(window) = &self.window {
             window.set_visible(true);
         }
@@ -136,7 +142,7 @@ impl<'a, C: WindowContent> NativeApplication<'a, C> {
 
     fn redraw(&mut self) -> Result<(), NativeError<C::Error>> {
         if !self.drawable {
-            return Ok(());
+            return self.refresh_window_state(None, false);
         }
         let raster = self.content.frame().map_err(NativeError::Application)?;
         if Some(raster.size()) != self.size {
@@ -153,8 +159,13 @@ impl<'a, C: WindowContent> NativeApplication<'a, C> {
         let window = self.window.as_ref().ok_or(NativeError::Window)?;
         window.pre_present_notify();
         buffer.present().map_err(|_| NativeError::Presenter)?;
+        self.presentation_completed()
+    }
+
+    pub(super) fn presentation_completed(&mut self) -> Result<(), NativeError<C::Error>> {
         self.presented = true;
-        self.content.presented().map_err(NativeError::Application)
+        self.content.presented().map_err(NativeError::Application)?;
+        self.refresh_window_state(None, false)
     }
 
     pub(super) fn process_event(
@@ -163,8 +174,16 @@ impl<'a, C: WindowContent> NativeApplication<'a, C> {
     ) -> Result<EventOutcome, NativeError<C::Error>> {
         let redraw = requests_redraw(&event);
         let close = matches!(event, PlatformEvent::CloseRequested);
+        let focused = match &event {
+            PlatformEvent::Focused(focused) => Some(*focused),
+            _ => None,
+        };
+        let scale_changed = matches!(event, PlatformEvent::ScaleFactorChanged { .. });
         match event {
-            PlatformEvent::RedrawRequested => self.redraw()?,
+            PlatformEvent::RedrawRequested => {
+                self.redraw()?;
+                return Ok(EventOutcome { redraw, close });
+            }
             PlatformEvent::Resized(size) => self.resize_content(size.width, size.height)?,
             _ => {
                 let events = self
@@ -178,8 +197,41 @@ impl<'a, C: WindowContent> NativeApplication<'a, C> {
                 }
             }
         }
-        self.refresh_accessibility(false)?;
+        self.refresh_window_state(focused, scale_changed)?;
         Ok(EventOutcome { redraw, close })
+    }
+
+    fn refresh_window_state(
+        &mut self,
+        focused: Option<bool>,
+        force_area: bool,
+    ) -> Result<(), NativeError<C::Error>> {
+        self.refresh_accessibility(false)?;
+        self.refresh_ime(focused, force_area)
+    }
+
+    fn refresh_ime(
+        &mut self,
+        focused: Option<bool>,
+        force_area: bool,
+    ) -> Result<(), NativeError<C::Error>> {
+        let focused = focused.unwrap_or(self.window_focused);
+        let desired = self.content.ime_context();
+        if let Some(window) = &self.window {
+            self.ime
+                .refresh(
+                    desired,
+                    self.drawable,
+                    focused,
+                    force_area,
+                    &mut WindowImeSink(window),
+                )
+                .map_err(NativeError::Application)?;
+        } else {
+            desired.map_err(NativeError::Application)?;
+        }
+        self.window_focused = focused;
+        Ok(())
     }
 
     fn refresh_accessibility(&mut self, force: bool) -> Result<(), NativeError<C::Error>> {
@@ -234,7 +286,7 @@ impl<'a, C: WindowContent> NativeApplication<'a, C> {
                 {
                     window.focus_window();
                 }
-                self.refresh_accessibility(false)?;
+                self.refresh_window_state(None, false)?;
                 return Ok(true);
             }
         }

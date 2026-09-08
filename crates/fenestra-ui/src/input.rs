@@ -133,10 +133,11 @@ pub struct KeyboardInput {
 
 /// Owned input method notifications; platform availability varies.
 ///
-/// The optional native host requires opting in with `WindowOptions::ime_allowed`.
+/// Native IME opt-in comes from `WindowContent::ime_context`, or the static
+/// `WindowOptions::ime_allowed` policy when that callback returns `None`.
 /// Preedit is provisional and must not be inserted as committed text. These
-/// notifications do not provide candidate-window positioning or qualify a
-/// platform's IME behavior.
+/// notifications carry incoming composition; the context callback separately
+/// supplies candidate-area hints. Neither qualifies a platform's IME behavior.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum ImeEvent {
     /// The input method became available.

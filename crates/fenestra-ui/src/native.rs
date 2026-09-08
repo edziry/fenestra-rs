@@ -13,6 +13,9 @@ use crate::{AccessibilityActionRequest, AccessibilityTree, Raster, Size};
 mod accessibility;
 #[cfg(test)]
 mod action_tests;
+mod ime;
+#[cfg(test)]
+mod ime_host_tests;
 mod input;
 mod presentation;
 mod shell;
@@ -20,6 +23,7 @@ mod shell;
 mod tests;
 
 pub use crate::{ImeEvent, InputEvent as WindowEvent, Key, KeyState, KeyboardInput, Modifiers};
+pub use ime::{ImeContext, ImeContextError};
 
 /// Application callbacks required by the native raster window.
 pub trait WindowContent {
@@ -38,6 +42,17 @@ pub trait WindowContent {
     /// Observes a frame only after native presentation succeeds.
     fn presented(&mut self) -> Result<(), Self::Error> {
         Ok(())
+    }
+
+    /// Returns desired IME ownership and caret geometry from accepted state.
+    ///
+    /// `None` preserves the static [`WindowOptions::ime_allowed`] policy.
+    /// An explicit context controls IME dynamically; active contexts suspend
+    /// while unfocused or minimized and resume when the window is usable.
+    /// Geometry is in physical window pixels. This does not qualify a platform's
+    /// composition behavior or provide surrounding-text integration.
+    fn ime_context(&self) -> Result<Option<ImeContext>, Self::Error> {
+        Ok(None)
     }
 
     /// Returns owned semantics from the currently accepted application state.
@@ -104,8 +119,9 @@ impl WindowOptions {
 
     /// Allows native IME notifications for this window. Disabled by default.
     ///
-    /// This is a window-wide opt-in, not a focused text control lifecycle.
-    /// Candidate-window positioning and platform qualification are deferred.
+    /// This static policy applies when [`WindowContent::ime_context`] returns
+    /// `None`. An explicit context overrides it with focused editor ownership
+    /// and candidate-area positioning. Platform IME qualification is separate.
     #[must_use]
     pub const fn ime_allowed(mut self, allowed: bool) -> Self {
         self.ime_allowed = allowed;
