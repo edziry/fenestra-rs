@@ -30,6 +30,15 @@ struct Probe {
 impl Probe {
     fn events(&mut self, events: Vec<Event>) -> Result<(), ProbeError> {
         for event in events {
+            if matches!(
+                event,
+                Event::Focused(_)
+                    | Event::FocusChanged { .. }
+                    | Event::CheckedChanged { .. }
+                    | Event::Activated { .. }
+            ) {
+                eprintln!("accepted {event:?}");
+            }
             if matches!(&event, Event::Activated { target } if target == "finish") {
                 self.finish = true;
             }
@@ -59,6 +68,8 @@ impl Probe {
             "frame": frame, "controls": controls, "finished": self.finish,
             "viewport": [raster.size().width(), raster.size().height()],
             "readout": self.app.text("readout")?,
+            "logical_focus": self.app.focused_control(),
+            "window_focused": self.app.accessibility_tree()?.window_focused(),
         });
         let temporary = self.output.join("state.pending.json");
         std::fs::write(&temporary, serde_json::to_vec_pretty(&record)?)?;
@@ -79,6 +90,11 @@ impl WindowContent for Probe {
     }
 
     fn event(&mut self, input: WindowEvent) -> io::Result<()> {
+        // This probe measures the AT-SPI/UIA action path. Physical device input
+        // must not add unrelated mutations to its deterministic checkpoints.
+        if !matches!(input, WindowEvent::Focused(_) | WindowEvent::CloseRequested) {
+            return Ok(());
+        }
         let events = self.app.dispatch_input(input).map_err(io::Error::other)?;
         self.events(events).map_err(io::Error::other)
     }
@@ -95,6 +111,7 @@ impl WindowContent for Probe {
     }
 
     fn accessibility_action(&mut self, request: AccessibilityActionRequest) -> io::Result<()> {
+        eprintln!("accessibility request {request:?}");
         let events = self
             .app
             .dispatch_accessibility_action(request)
