@@ -94,7 +94,7 @@ fn rejected_color() -> Error {
 }
 
 #[test]
-fn rejected_checkbox_release_retains_the_arm_and_discards_candidate_text_caches() {
+fn rejected_checkbox_release_retains_the_arm_and_authored_measurements_for_retry() {
     let state = Rc::new(EngineState::default());
     let mut app = application(&state, StateStyle::new().checked_color(CHECKED), 128);
     app.focus(Some("choice")).unwrap();
@@ -119,7 +119,7 @@ fn rejected_checkbox_release_retains_the_arm_and_discards_candidate_text_caches(
         assert_eq!(app.text_metrics("label").unwrap(), measured);
         assert_eq!(app.raster().unwrap(), frame);
         assert_eq!(state.layouts.get(), accepted_calls.1 + attempt);
-        assert!(state.measures.get() >= accepted_calls.0 + attempt);
+        assert_eq!(state.measures.get(), accepted_calls.0);
     }
     let failed_calls = state.calls();
     state.reject.set(None);
@@ -147,7 +147,7 @@ fn rejected_checkbox_release_retains_the_arm_and_discards_candidate_text_caches(
     assert_ne!(app.raster().unwrap(), frame);
     assert_eq!(app.text_style("label").unwrap().color_value(), BASE);
     assert_eq!(state.layouts.get(), failed_calls.1 + 1);
-    assert!(state.measures.get() > failed_calls.0);
+    assert_eq!(state.measures.get(), accepted_calls.0);
 }
 
 #[test]
@@ -167,6 +167,7 @@ fn rejected_disabling_preserves_focused_pressed_checked_state_until_successful_r
     let bounds = app.bounds("label").unwrap();
     let frame = app.raster().unwrap();
     let generation = app.generation();
+    let accepted_calls = state.calls();
     state.reject.set(Some(DISABLED));
     assert_eq!(app.set_disabled("choice", true), Err(rejected_color()));
     assert_eq!(app.control_snapshot("choice").unwrap(), before);
@@ -174,6 +175,8 @@ fn rejected_disabling_preserves_focused_pressed_checked_state_until_successful_r
     assert_eq!(app.generation(), generation);
     assert_eq!(app.bounds("label").unwrap(), bounds);
     assert_eq!(app.raster().unwrap(), frame);
+    assert_eq!(state.measures.get(), accepted_calls.0);
+    assert_eq!(state.layouts.get(), accepted_calls.1 + 1);
     state.reject.set(None);
     app.set_disabled("choice", true).unwrap();
     let after = app.control_snapshot("choice").unwrap();
@@ -186,6 +189,8 @@ fn rejected_disabling_preserves_focused_pressed_checked_state_until_successful_r
     assert_eq!(app.bounds("label").unwrap(), bounds);
     assert_eq!(app.generation(), generation + 1);
     assert_ne!(app.raster().unwrap(), frame);
+    assert_eq!(state.measures.get(), accepted_calls.0);
+    assert_eq!(state.layouts.get(), accepted_calls.1 + 2);
     assert!(before.state().focused() && before.state().pressed());
     assert!(!before.state().disabled());
     assert!(
