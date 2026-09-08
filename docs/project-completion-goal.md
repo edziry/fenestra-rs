@@ -2,7 +2,7 @@
 
 Status: active; product completion is not yet achieved
 Baseline: `a32025e14ceb9fdc88c385732437cf2b8d4ac344`, workspace `0.2.0`
-Audit date: 2026-09-07
+Audit date: 2026-09-08
 
 ## Intended outcome
 
@@ -72,7 +72,8 @@ fixed-size text leaves and Rust string literals.
 minimum/maximum bounds to both frontends, with intrinsic text measurement.
 WU-0021 adds [authored controls](design/keyboard-controls.md), explicit state
 colors and semantic action events through the same public facade.
-This is an implemented
+WU-0022 adds [owned accessibility trees and native action dispatch](design/native-accessibility.md)
+without changing the authored control vocabulary. This is an implemented
 foundation; general reusable authored components, imports, bound expressions
 and the inspector's property UX remain open.
 
@@ -107,16 +108,26 @@ checkboxes, Tab navigation, visible focus, release-based pointer activation,
 explicit state colors and owned semantic snapshots. A preferences consumer
 exercises these behaviors with Rust state and has native Wayland presentation
 evidence. Its [verification](verification/WU-0021-keyboard-controls.md) records
-the scope: snapshots are not a native accessibility adapter. Broad font
-qualification, general alignment, editing controls, clipboard, scrolling,
-native IME and accessibility remain open.
+the original snapshot-only scope. WU-0022 now connects owned trees and semantic
+actions to a replaceable native adapter. Its
+[verification](verification/WU-0022-native-accessibility.md) records four actual
+Linux AT-SPI stages covering labels, roles, bounds, focus, checked and disabled
+state, button/checkbox activation and agreement with presented frames. A private
+activation-status fixture selected the real desktop accessibility bus while
+global accessibility and screen-reader settings remained unchanged. The local
+AT-SPI disabled-button correction retains its provenance and regressions.
+Broad font qualification, general alignment, editing controls, clipboard,
+scrolling, native IME, real Windows UIA and screen-reader usability remain open.
 
 - [ ] Specify, implement and verify text measurement, shaping, rendering and
   font fallback with multilingual examples.
 - [ ] Add focus, keyboard navigation, editable text, selection, clipboard and
   IME composition on each qualified platform.
-- [ ] Connect accessibility semantics to platform adapters and verify usable
-  accessible controls, scrolling and layout under resize and scale changes.
+- [x] Connect bounded button, checkbox and standalone-label semantics to the
+  native bridge and verify real Linux AT-SPI queries and actions against
+  accepted application state and presented frames.
+- [ ] Verify platform accessibility and screen-reader usability, including real
+  Windows UIA, accessible scrolling and layout under resize and scale changes.
 - [ ] Build a complete small application using those controls and bindings,
   and turn observed usability failures into regression tests.
 

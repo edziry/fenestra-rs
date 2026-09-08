@@ -65,7 +65,10 @@ The application does not compute dimensions in resize callbacks. It supplies
 the versioned [DejaVu Sans font](../../assets/fonts/dejavu-sans-2.37/README.md)
 explicitly, without system font discovery. Public semantic snapshots expose
 stable application-local IDs, labels, roles, bounds, and accepted control
-state. The example does not provide a native accessibility bridge.
+state. With `native`, the framework projects these snapshots through its
+OS accessibility adapter. Composed control children are represented by their
+owner's explicit label; standalone text, including the changing readout,
+remains available as separate labels.
 
 ## Native window and frame export
 
@@ -81,6 +84,23 @@ Use Tab to move among enabled controls, Space to toggle a checkbox, and Enter
 or Space to activate a button. Pointer activation requires a matching release
 over the control. Smoke mode exits after a successful presentation without
 injecting input.
+
+The [native accessibility contract](../../docs/design/native-accessibility.md)
+routes focus and activation requests to these same committed controls without
+simulating keyboard or pointer input. Disabled and offscreen controls advertise
+no actions, and stale requests are checked against current eligibility. A
+[versioned AT-SPI correction](../../third-party/accesskit-atspi-common/FENESTRA-PATCH.md)
+keeps disabled buttons from being reported as enabled or sensitive.
+
+[WU-0022](../../docs/verification/WU-0022-native-accessibility.md) records an
+actual Linux AT-SPI consumer run covering initial, focused, changed and applied
+states. The consumer checked control labels, roles, bounds and state, the
+standalone readout, and corresponding presented frames. Focus and activation
+requests crossed the real desktop accessibility bus. Only the probe's
+activation-status service used a private fixture; desktop `IsEnabled` and
+`ScreenReaderEnabled` remained false before and after. This is evidence for
+the activated native bridge, not a screen-reader usability test. Windows has
+cross-compilation evidence; real UIA queries and interaction remain open.
 
 Export the final frame, or several inspectable control states:
 

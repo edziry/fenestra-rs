@@ -21,7 +21,9 @@ application exercise multilingual shaping, rendering and atomic text updates.
 Rows and columns support intrinsic sizing, weighted fill, minimum/maximum
 bounds and text wrapping under resize. Authored buttons and checkboxes provide
 keyboard focus, activation, pointer cancellation and explicit state colors.
-Qualified IME, native accessibility, general layout alignment and release
+Native windows now project controls and standalone labels to OS accessibility
+adapters, with Linux AT-SPI query and action evidence. Real Windows UIA,
+screen-reader usability, qualified IME, general layout alignment and release
 packaging remain unfinished.
 See the [completion goal](docs/project-completion-goal.md) for
 acceptance gates and the [work units](docs/bootstrap-work-units.md) for evidence.
@@ -68,6 +70,16 @@ Each control supplies an explicit semantic label and visible authored children.
 Handlers receive `CheckedChanged` and `Activated` after the framework accepts
 the new state. The [control design](docs/design/keyboard-controls.md) documents
 the input, styling and publication contracts.
+
+The native feature also exposes semantic labels, roles, physical bounds,
+focus and checked/disabled state through a private accessibility adapter.
+An actual Linux AT-SPI consumer verified four stages from initial state through
+focus, checkbox activation and Apply, against committed snapshots and presented
+frames. The test used a private activation-status fixture and the real desktop
+accessibility bus; global accessibility and screen-reader preferences stayed
+unchanged. This verifies the activated bridge, not a screen-reader experience.
+See the [native accessibility design](docs/design/native-accessibility.md) and
+[WU-0022 evidence](docs/verification/WU-0022-native-accessibility.md).
 
 The [responsive application](examples/responsive-app/README.md) combines a
 fixed sidebar with flexible content, text that sizes to its lines, and weighted

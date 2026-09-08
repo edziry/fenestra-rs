@@ -199,12 +199,21 @@ check roles, labels, bounds, actions and semantic withdrawal; the
 [host action tests](../../crates/fenestra-ui/src/native/action_tests.rs)
 check callback routing, current eligibility, errors and application closure.
 
-The real Linux consumer probe is separate from these tests: it must discover
-the application's provider on the actual accessibility bus and query or
-invoke its exposed controls. A private activation-status fixture may enable
-only the probe process while preserving desktop preferences; it must not
-provide fake semantic nodes or fake action results. This design record does
-not claim that pending native probe has passed.
+The [WU-0022 native evidence](../verification/WU-0022-native-accessibility.md)
+records a successful real Linux consumer run with four checkpoints: initial,
+focused, changed and applied. The consumer discovered the application's
+provider on the desktop accessibility bus, queried control roles, labels,
+bounds and states, and invoked focus and activation. It compared those
+observations and the changing standalone readout with accepted Rust snapshots
+and frames exported after successful native presentation. Disabled-button
+enabled/sensitive flags were checked before and after activation changed
+availability. A semantic Finish action closed the probe normally.
+
+Only the probe process's activation-status service was a private fixture;
+the provider, queries and actions used the real desktop AT-SPI bus. Global
+`IsEnabled` and `ScreenReaderEnabled` remained false before and after the run.
+This demonstrates the activated native bridge, not automatic activation while
+desktop accessibility is disabled or a screen-reader user experience.
 
 Portable builds and headless tests do not establish real Windows UIA behavior
 or screen-reader usability. Further roles, editable text, selection, caret
