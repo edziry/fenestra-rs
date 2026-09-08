@@ -9,7 +9,9 @@ mod application;
 mod dimension;
 mod editing;
 mod error;
+mod event;
 mod frame;
+mod input;
 mod layout;
 mod limits;
 mod lower;
@@ -21,7 +23,9 @@ pub use application::Application;
 pub use dimension::Dimension;
 pub use editing::{EditingError, Selection, TextBuffer};
 pub use error::Error;
+pub use event::Event;
 pub use frame::{Bounds, Raster, Size};
+pub use input::{ImeEvent, InputEvent, Key, KeyState, KeyboardInput, Modifiers};
 pub use limits::Limits;
 pub use model::{Element, View};
 pub use style::{Color, Style};
@@ -39,6 +43,3 @@ pub mod native;
 
 #[cfg(all(feature = "native", any(target_os = "linux", target_os = "windows")))]
 mod window;
-
-#[cfg(all(feature = "native", any(target_os = "linux", target_os = "windows")))]
-pub use window::Event;
