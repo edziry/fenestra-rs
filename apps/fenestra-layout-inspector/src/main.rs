@@ -18,8 +18,9 @@ fn main() -> ExitCode {
             height: 160,
         })?;
         let final_frame = inspector.observe()?;
+        let diagnostics = inspector.diagnostics()?;
         println!(
-            "fenestra-layout-inspector|initial-generation={}|final-generation={}|nodes={}|keys={:?}|viewport={}x{}|selected={}",
+            "fenestra-layout-inspector|initial-generation={}|final-generation={}|nodes={}|keys={:?}|viewport={}x{}|selected={}|fen-bytes={:?}|ui-bytes={:?}|generated-bytes={:?}|frontends-equivalent={}|selected-tone={:?}",
             initial.generation(),
             final_frame.generation(),
             final_frame.node_count(),
@@ -27,6 +28,11 @@ fn main() -> ExitCode {
             final_frame.viewport().width(),
             final_frame.viewport().height(),
             final_frame.has_selection(),
+            diagnostics.fen_source_bytes(),
+            diagnostics.ui_source_bytes(),
+            diagnostics.generated_rust_bytes(),
+            diagnostics.frontends_equivalent(),
+            diagnostics.selected_tone(),
         );
         Ok::<(), fenestra_layout_inspector::InspectorErrorKind>(())
     })();

@@ -417,6 +417,7 @@ version = "0.2.0"
 dependencies = [
  "fenestra-ui-authoring",
  "fenestra-ui-ir",
+ "fenestra-ui-macros",
  "fenestra-ui-runtime",
  "fenestra-ui-spatial",
  "softbuffer",

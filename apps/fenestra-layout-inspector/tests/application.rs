@@ -1,6 +1,6 @@
 use fenestra_layout_inspector::{
-    AUTHORED_FEN_V2, DEFAULT_VIEWPORT, GENERATED_AUTHORING_RUST_V2, InspectorAction,
-    LayoutInspector,
+    AUTHORED_FEN_V2, AUTHORED_UI_V2, DEFAULT_VIEWPORT, GENERATED_AUTHORING_RUST_V2,
+    InspectorAction, LayoutInspector,
 };
 
 #[test]
@@ -89,4 +89,49 @@ fn pointer_press_without_a_hit_is_a_noop() {
         .expect("the unchanged frame should be observable");
     assert_eq!(frame.generation(), 0);
     assert!(!frame.has_selection());
+}
+
+#[test]
+fn configurable_programs_expose_authoring_and_selection_diagnostics() {
+    let configurable = LayoutInspector::from_programs(LayoutInspector::default_programs())
+        .expect("the default compiled programs should remain configurable");
+    assert_eq!(
+        configurable
+            .observe()
+            .expect("the configurable frame should be observable")
+            .node_count(),
+        8
+    );
+    let configurable_diagnostics = configurable
+        .diagnostics()
+        .expect("configurable diagnostics should be observable");
+    assert_eq!(configurable_diagnostics.fen_source_bytes(), None);
+    assert!(!configurable_diagnostics.frontends_equivalent());
+
+    let mut inspector = LayoutInspector::new().expect("the default app should initialize");
+    let initial = inspector
+        .diagnostics()
+        .expect("the initial diagnostics should be observable");
+
+    assert_eq!(initial.fen_source_bytes(), Some(AUTHORED_FEN_V2.len()));
+    assert_eq!(initial.ui_source_bytes(), Some(AUTHORED_UI_V2.len()));
+    assert_eq!(
+        initial.generated_rust_bytes(),
+        Some(GENERATED_AUTHORING_RUST_V2.len())
+    );
+    assert!(initial.frontends_equivalent());
+    assert_eq!(initial.selected_tone(), None);
+
+    inspector
+        .dispatch(InspectorAction::PointerMove { x: 4, y: 3 })
+        .expect("pointer movement should be accepted");
+    inspector
+        .dispatch(InspectorAction::PointerPress)
+        .expect("pointer press should commit selection");
+
+    let selected = inspector
+        .diagnostics()
+        .expect("selection diagnostics should be observable");
+    assert!(selected.selected_node().is_some());
+    assert_eq!(selected.selected_tone(), Some([255, 192, 32, 255]));
 }

@@ -3,13 +3,13 @@
 //! First usable application slice for the Fenestra workspace.
 //!
 //! The application owns interaction state while the authored structure and
-//! spatial behavior remain in the format-2 `.fen` fixture. Native presentation
-//! is intentionally a later shell around this deterministic application core.
+//! spatial behavior remain in compiled format-2 `.fen` programs. The native
+//! module presents frames from this deterministic application core.
 
 use fenestra_ui_ir::prototype::{
-    PropertyId, PropertyValue, SpatialValidationLimitsV2, StructuralRegionId,
-    StyleValidationLimits, ValidationLimits, validate_construction, validate_schema,
-    validate_spatial, validate_style,
+    ConstructionProgram, PropertyId, PropertyValue, SchemaManifest, SpatialProgramV2,
+    SpatialValidationLimitsV2, StructuralRegionId, StyleProgram, StyleValidationLimits,
+    ValidationLimits, validate_construction, validate_schema, validate_spatial, validate_style,
 };
 use fenestra_ui_runtime::prototype::{
     CommittedRuntimeSnapshot, FragmentId, NodeId, RuntimeCapacity, UiRuntime,
@@ -26,6 +26,10 @@ pub mod native;
 /// Bounded ASCII evidence contract for the native application sequence.
 pub mod evidence;
 
+mod frame;
+
+pub use frame::{InspectorFrame, InspectorRaster};
+
 const IR_LIMITS: ValidationLimits = ValidationLimits::new(1, 8, 7, 1, 6, 19, 2, 4, 8);
 const STYLE_LIMITS: StyleValidationLimits = StyleValidationLimits::new(3);
 const SPATIAL_LIMITS: SpatialValidationLimitsV2 =
@@ -40,9 +44,38 @@ const FIXED_ONE: i64 = 65_536;
 pub const AUTHORED_FEN_V2: &[u8] =
     include_bytes!("../../../probes/exp-0007-typed-authoring/fixtures/hybrid-spatial-v2.fen");
 
+/// Exact equivalent `ui!` source checked against [`AUTHORED_FEN_V2`] at build time.
+pub const AUTHORED_UI_V2: &[u8] =
+    include_bytes!("../../../probes/exp-0007-typed-authoring/fixtures/hybrid-spatial-v2.ui");
+
 /// Canonical Rust generated from [`AUTHORED_FEN_V2`].
 pub const GENERATED_AUTHORING_RUST_V2: &str =
     include_str!(concat!(env!("OUT_DIR"), "/layout_inspector_fen_v2.rs"));
+
+/// Reports that the build-time `.fen` and `ui!` programs were compared.
+pub const AUTHORING_FRONTENDS_EQUIVALENT_V2: bool = true;
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+struct InspectorAuthoringMetadata {
+    fen_source_bytes: Option<usize>,
+    ui_source_bytes: Option<usize>,
+    generated_rust_bytes: Option<usize>,
+    frontends_equivalent: bool,
+}
+
+const DEFAULT_AUTHORING_METADATA: InspectorAuthoringMetadata = InspectorAuthoringMetadata {
+    fen_source_bytes: Some(AUTHORED_FEN_V2.len()),
+    ui_source_bytes: Some(AUTHORED_UI_V2.len()),
+    generated_rust_bytes: Some(GENERATED_AUTHORING_RUST_V2.len()),
+    frontends_equivalent: AUTHORING_FRONTENDS_EQUIVALENT_V2,
+};
+
+const UNKNOWN_AUTHORING_METADATA: InspectorAuthoringMetadata = InspectorAuthoringMetadata {
+    fen_source_bytes: None,
+    ui_source_bytes: None,
+    generated_rust_bytes: None,
+    frontends_equivalent: false,
+};
 
 /// Default logical viewport used by the deterministic application core.
 pub const DEFAULT_VIEWPORT: SpatialViewportV2 = SpatialViewportV2::new(192, 128);
@@ -88,114 +121,71 @@ pub enum InspectorAction {
     },
 }
 
-/// Deterministic observation of one application frame.
+/// Visible application and authoring facts for the latest committed state.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct InspectorFrame {
-    generation: u64,
-    viewport: SpatialViewportV2,
-    node_count: usize,
-    keyed_keys: Box<[u64]>,
-    image_count: usize,
-    paint_count: usize,
-    hit_count: usize,
-    semantic_count: usize,
-    raster_bytes: usize,
-    has_hover: bool,
-    has_selection: bool,
+pub struct InspectorDiagnostics {
+    frame: InspectorFrame,
+    authoring: InspectorAuthoringMetadata,
+    selected_node: Option<NodeId>,
+    selected_tone: Option<[u8; 4]>,
 }
 
-/// Bounded RGBA8 reference pixels for native presentation.
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct InspectorRaster {
-    viewport: SpatialViewportV2,
-    bytes: Box<[u8]>,
-}
-
-impl InspectorRaster {
-    /// Returns the logical viewport represented by these pixels.
+impl InspectorDiagnostics {
+    /// Returns the latest deterministic application frame.
     #[must_use]
-    pub const fn viewport(&self) -> SpatialViewportV2 {
-        self.viewport
+    pub const fn frame(&self) -> &InspectorFrame {
+        &self.frame
     }
 
-    /// Returns premultiplied RGBA8 pixels in row-major order.
+    /// Returns the byte length of the `.fen` source, when known.
     #[must_use]
-    pub fn bytes(&self) -> &[u8] {
-        &self.bytes
-    }
-}
-
-impl InspectorFrame {
-    /// Returns the committed runtime generation.
-    #[must_use]
-    pub const fn generation(&self) -> u64 {
-        self.generation
+    pub const fn fen_source_bytes(&self) -> Option<usize> {
+        self.authoring.fen_source_bytes
     }
 
-    /// Returns the logical viewport used by this frame.
+    /// Returns the byte length of the equivalent `ui!` source, when known.
     #[must_use]
-    pub const fn viewport(&self) -> SpatialViewportV2 {
-        self.viewport
+    pub const fn ui_source_bytes(&self) -> Option<usize> {
+        self.authoring.ui_source_bytes
     }
 
-    /// Returns the number of live logical nodes.
+    /// Returns the byte length of canonical Rust generated from `.fen`, when known.
     #[must_use]
-    pub const fn node_count(&self) -> usize {
-        self.node_count
+    pub const fn generated_rust_bytes(&self) -> Option<usize> {
+        self.authoring.generated_rust_bytes
     }
 
-    /// Returns keyed tile keys in committed order.
+    /// Reports whether the build compared the `.fen` and `ui!` raw programs.
     #[must_use]
-    pub fn keyed_keys(&self) -> &[u64] {
-        &self.keyed_keys
+    pub const fn frontends_equivalent(&self) -> bool {
+        self.authoring.frontends_equivalent
     }
 
-    /// Returns the number of authored image resources.
+    /// Returns the selected logical node, if any.
     #[must_use]
-    pub const fn image_count(&self) -> usize {
-        self.image_count
+    pub const fn selected_node(&self) -> Option<NodeId> {
+        self.selected_node
     }
 
-    /// Returns the number of resolved paint items.
+    /// Returns the selected node's current tone property, if it is an RGBA8 value.
     #[must_use]
-    pub const fn paint_count(&self) -> usize {
-        self.paint_count
-    }
-
-    /// Returns the number of resolved hit items.
-    #[must_use]
-    pub const fn hit_count(&self) -> usize {
-        self.hit_count
-    }
-
-    /// Returns the number of resolved semantic items.
-    #[must_use]
-    pub const fn semantic_count(&self) -> usize {
-        self.semantic_count
-    }
-
-    /// Returns the size of the reference raster in bytes.
-    #[must_use]
-    pub const fn raster_bytes(&self) -> usize {
-        self.raster_bytes
-    }
-
-    /// Reports whether a pointer hit is currently hovered.
-    #[must_use]
-    pub const fn has_hover(&self) -> bool {
-        self.has_hover
-    }
-
-    /// Reports whether a node is selected.
-    #[must_use]
-    pub const fn has_selection(&self) -> bool {
-        self.has_selection
+    pub const fn selected_tone(&self) -> Option<[u8; 4]> {
+        self.selected_tone
     }
 }
+
+/// Raw programs accepted by the configurable inspector boundary.
+pub type InspectorPrograms = (
+    SchemaManifest,
+    ConstructionProgram,
+    StyleProgram,
+    SpatialProgramV2,
+);
 
 /// Single-owner deterministic application state.
 pub struct LayoutInspector {
     runtime: UiRuntime,
+    authoring: InspectorAuthoringMetadata,
     hovered: Option<NodeId>,
     selected: Option<NodeId>,
 }
@@ -203,14 +193,32 @@ pub struct LayoutInspector {
 impl LayoutInspector {
     /// Builds the application from the generated format-2 `.fen` program.
     pub fn new() -> Result<Self, InspectorErrorKind> {
-        let programs = generated_programs();
-        let schema =
-            validate_schema(programs.0, IR_LIMITS).map_err(|_| InspectorErrorKind::Validation)?;
-        let construction = validate_construction(&schema, programs.1, IR_LIMITS)
+        Self::from_programs_with_metadata(Self::default_programs(), DEFAULT_AUTHORING_METADATA)
+    }
+
+    /// Returns the default compiled application programs.
+    #[must_use]
+    pub fn default_programs() -> InspectorPrograms {
+        include!(concat!(env!("OUT_DIR"), "/layout_inspector_fen_v2.rs"))
+    }
+
+    /// Builds the application from any validated-source-compatible raw programs.
+    pub fn from_programs(programs: InspectorPrograms) -> Result<Self, InspectorErrorKind> {
+        Self::from_programs_with_metadata(programs, UNKNOWN_AUTHORING_METADATA)
+    }
+
+    fn from_programs_with_metadata(
+        programs: InspectorPrograms,
+        authoring: InspectorAuthoringMetadata,
+    ) -> Result<Self, InspectorErrorKind> {
+        let (schema_program, construction_program, style_program, spatial_program) = programs;
+        let schema = validate_schema(schema_program, IR_LIMITS)
             .map_err(|_| InspectorErrorKind::Validation)?;
-        let style = validate_style(&construction, programs.2, STYLE_LIMITS)
+        let construction = validate_construction(&schema, construction_program, IR_LIMITS)
             .map_err(|_| InspectorErrorKind::Validation)?;
-        let spatial = validate_spatial(&style, programs.3, SPATIAL_LIMITS)
+        let style = validate_style(&construction, style_program, STYLE_LIMITS)
+            .map_err(|_| InspectorErrorKind::Validation)?;
+        let spatial = validate_spatial(&style, spatial_program, SPATIAL_LIMITS)
             .map_err(|_| InspectorErrorKind::Validation)?;
         let runtime = UiRuntime::new_spatial_ir(
             spatial,
@@ -221,8 +229,27 @@ impl LayoutInspector {
         .map_err(|_| InspectorErrorKind::Runtime)?;
         Ok(Self {
             runtime,
+            authoring,
             hovered: None,
             selected: None,
+        })
+    }
+
+    /// Returns visible application and authoring facts for the latest frame.
+    pub fn diagnostics(&self) -> Result<InspectorDiagnostics, InspectorErrorKind> {
+        let frame = self.observe()?;
+        let selected_tone = self.selected.and_then(|node| {
+            let committed = self.runtime.committed();
+            match committed.property(node, TONE_PROPERTY) {
+                Some(PropertyValue::Rgba8(value)) => Some(*value),
+                _ => None,
+            }
+        });
+        Ok(InspectorDiagnostics {
+            frame,
+            authoring: self.authoring,
+            selected_node: self.selected,
+            selected_tone,
         })
     }
 
@@ -340,15 +367,6 @@ impl LayoutInspector {
             .map_err(|_| InspectorErrorKind::Transaction)?;
         Ok(())
     }
-}
-
-fn generated_programs() -> (
-    fenestra_ui_ir::prototype::SchemaManifest,
-    fenestra_ui_ir::prototype::ConstructionProgram,
-    fenestra_ui_ir::prototype::StyleProgram,
-    fenestra_ui_ir::prototype::SpatialProgramV2,
-) {
-    include!(concat!(env!("OUT_DIR"), "/layout_inspector_fen_v2.rs"))
 }
 
 fn keyed_keys(committed: &CommittedRuntimeSnapshot) -> Option<Box<[u64]>> {

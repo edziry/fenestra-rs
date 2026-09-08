@@ -17,6 +17,7 @@ fenestra-ui-spatial.workspace = true
 [build-dependencies]
 fenestra-ui-authoring.workspace = true
 fenestra-ui-ir.workspace = true
+fenestra-ui-macros.workspace = true
 
 [target.'cfg(target_os = "linux")'.dependencies]
 winit = { version = "=0.30.13", default-features = false, features = [
