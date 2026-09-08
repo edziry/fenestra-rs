@@ -57,6 +57,12 @@ jobs:
       - name: Lint responsive consumer
         run: cargo clippy --manifest-path examples/responsive-app/Cargo.toml --all-targets --all-features --locked -- -D warnings
 
+      - name: Check keyboard controls consumer formatting
+        run: cargo fmt --manifest-path examples/controls-app/Cargo.toml -- --check
+
+      - name: Lint keyboard controls consumer
+        run: cargo clippy --manifest-path examples/controls-app/Cargo.toml --all-targets --all-features --locked -- -D warnings
+
       - name: Check isolated text screen formatting
         run: cargo fmt --manifest-path probes/text-candidate-screen/Cargo.toml --all -- --check
 
@@ -108,6 +114,12 @@ jobs:
 
       - name: Run responsive application headlessly
         run: cargo run --manifest-path examples/responsive-app/Cargo.toml --locked
+
+      - name: Test keyboard controls public API consumer
+        run: cargo test --manifest-path examples/controls-app/Cargo.toml --all-targets --all-features --locked
+
+      - name: Run keyboard controls application headlessly
+        run: cargo run --manifest-path examples/controls-app/Cargo.toml --locked
 
       - name: Test isolated text candidates and native editor contracts
         run: cargo test --manifest-path probes/text-candidate-screen/Cargo.toml --workspace --all-targets --all-features --locked
