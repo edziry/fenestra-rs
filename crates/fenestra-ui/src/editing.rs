@@ -165,17 +165,7 @@ impl TextBuffer {
     }
 
     fn validate_offset(&self, offset: usize) -> Result<(), EditingError> {
-        if offset > self.text.len() {
-            return Err(EditingError::OffsetOutOfBounds {
-                offset,
-                len: self.text.len(),
-            });
-        }
-        if offset != self.text.len() && !self.text.grapheme_indices(true).any(|(i, _)| i == offset)
-        {
-            return Err(EditingError::InvalidGraphemeBoundary { offset });
-        }
-        Ok(())
+        validate_offset(&self.text, offset)
     }
 
     fn previous_boundary(&self, offset: usize) -> usize {
@@ -216,4 +206,26 @@ impl TextBuffer {
             .unwrap_or(self.text.len());
         self.selection = Selection::caret(caret);
     }
+}
+
+pub(crate) fn validate_offset(text: &str, offset: usize) -> Result<(), EditingError> {
+    if offset == text.len() {
+        return Ok(());
+    }
+    if offset > text.len() {
+        return Err(EditingError::OffsetOutOfBounds {
+            offset,
+            len: text.len(),
+        });
+    }
+    if !grapheme_boundaries(text).any(|boundary| boundary == offset) {
+        return Err(EditingError::InvalidGraphemeBoundary { offset });
+    }
+    Ok(())
+}
+
+pub(crate) fn grapheme_boundaries(text: &str) -> impl Iterator<Item = usize> + '_ {
+    text.grapheme_indices(true)
+        .map(|(offset, _)| offset)
+        .chain(std::iter::once(text.len()))
 }

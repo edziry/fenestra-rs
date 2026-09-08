@@ -7,6 +7,19 @@ pub enum TextError {
     EngineUnavailable,
     /// The supplied adapter does not implement intrinsic measurement.
     MeasurementUnavailable,
+    /// The supplied adapter does not implement editing geometry.
+    GeometryUnavailable,
+    /// The supplied adapter cannot render the explicit wrap width or offset.
+    ViewportUnavailable,
+    /// Geometry contains invalid coordinates, rectangles or query results.
+    InvalidGeometry,
+    /// A source position is not an in-bounds extended grapheme boundary.
+    InvalidTextPosition {
+        /// Rejected original UTF-8 byte offset.
+        byte: usize,
+    },
+    /// A text viewport offset exceeds signed pixel coordinates.
+    InvalidViewportOffset,
     /// A measurement width exceeds the signed pixel coordinate domain.
     InvalidMeasurementWidth {
         /// Rejected wrap width.
@@ -52,6 +65,11 @@ impl fmt::Display for TextError {
             Self::MeasurementUnavailable => {
                 f.write_str("text engine cannot measure intrinsic text")
             }
+            Self::GeometryUnavailable => f.write_str("text engine cannot query editing geometry"),
+            Self::ViewportUnavailable => f.write_str("text engine cannot render this viewport"),
+            Self::InvalidGeometry => f.write_str("invalid text geometry"),
+            Self::InvalidTextPosition { byte } => write!(f, "invalid text position: {byte}"),
+            Self::InvalidViewportOffset => f.write_str("invalid text viewport offset"),
             Self::InvalidMeasurementWidth { width } => {
                 write!(f, "invalid text measurement width: {width}")
             }

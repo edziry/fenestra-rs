@@ -39,8 +39,9 @@ pub use model::{Element, View};
 pub use state_style::StateStyle;
 pub use style::{Color, Style};
 pub use text::{
-    TextEngine, TextError, TextLayout, TextLimits, TextMeasureRequest, TextMetrics, TextRequest,
-    TextStyle,
+    TextAffinity, TextEngine, TextError, TextGeometry, TextGeometryQuery, TextGeometryRequest,
+    TextHighlight, TextLayout, TextLimits, TextMeasureRequest, TextMetrics, TextPoint,
+    TextPosition, TextRect, TextRequest, TextSelection, TextStyle, TextViewportRequest,
 };
 
 /// Compiles an authored view into the public application constructors.

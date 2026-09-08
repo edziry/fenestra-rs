@@ -1,18 +1,28 @@
 //! Owned text requests, output and resource bounds, independent of candidates.
 
+mod coordinates;
 mod error;
+mod geometry_output;
+mod geometry_request;
 mod limits;
 mod measurement;
 mod output;
+mod position;
 mod style;
+mod viewport;
 
 use crate::{Error, Size};
 
+pub use coordinates::{TextHighlight, TextPoint, TextRect};
 pub use error::TextError;
+pub use geometry_output::TextGeometry;
+pub use geometry_request::{TextGeometryQuery, TextGeometryRequest};
 pub use limits::TextLimits;
 pub use measurement::TextMeasureRequest;
 pub use output::{TextLayout, TextMetrics};
+pub use position::{TextAffinity, TextPosition, TextSelection};
 pub use style::TextStyle;
+pub use viewport::TextViewportRequest;
 
 /// An application-owned shaping and raster adapter with private caches.
 ///
@@ -21,6 +31,31 @@ pub use style::TextStyle;
 /// application state is committed only after output validation and spatial
 /// preparation succeed.
 pub trait TextEngine {
+    /// Queries owned caret and selection geometry without allocating a raster.
+    ///
+    /// Implementations must validate their result with
+    /// [`TextGeometry::validate_request`] before returning it.
+    fn geometry(&mut self, _request: TextGeometryRequest<'_>) -> Result<TextGeometry, TextError> {
+        Err(TextError::GeometryUnavailable)
+    }
+
+    /// Renders a scrolled text viewport with an independent shaping width.
+    ///
+    /// Legacy adapters are used only when the request exactly matches their
+    /// existing wrap-to-raster-width and zero-offset behavior.
+    fn layout_viewport(
+        &mut self,
+        request: TextViewportRequest<'_>,
+    ) -> Result<TextLayout, TextError> {
+        if request.offset_x() != 0
+            || request.offset_y() != 0
+            || request.wrap_width() != Some(request.request().size().width())
+        {
+            return Err(TextError::ViewportUnavailable);
+        }
+        self.layout(request.request())
+    }
+
     /// Measures complete text without allocating a raster.
     ///
     /// The default preserves adapters that support only explicitly sized text.
