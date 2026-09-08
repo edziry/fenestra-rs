@@ -12,6 +12,10 @@ use winit::window::{Window, WindowId};
 use crate::evidence::{EvidenceError, EvidenceMilestone, LayoutInspectorEvidence};
 use crate::{InspectorAction, InspectorErrorKind, LayoutInspector};
 
+mod input;
+#[cfg(test)]
+mod tests;
+
 type NativeContext = Context<OwnedDisplayHandle>;
 type NativeSurface = Surface<OwnedDisplayHandle, Arc<Window>>;
 
@@ -32,25 +36,44 @@ pub enum NativeInspectorError {
 
 /// Runs the interactive layout inspector until its window is closed.
 pub fn run_native() -> Result<(), NativeInspectorError> {
-    run_native_inner(false, false).map(|_| ())
+    run_native_inner(false, false, None).map(|_| ())
+}
+
+/// Runs the supplied inspector until its native window is closed.
+pub fn run_native_with_inspector(inspector: LayoutInspector) -> Result<(), NativeInspectorError> {
+    run_native_inner(false, false, Some(inspector)).map(|_| ())
 }
 
 /// Runs one native presentation and exits through the event loop.
 pub fn run_native_smoke() -> Result<(), NativeInspectorError> {
-    run_native_inner(true, false).map(|_| ())
+    run_native_inner(true, false, None).map(|_| ())
+}
+
+/// Presents the supplied inspector once and exits through the native event loop.
+pub fn run_native_smoke_with_inspector(
+    inspector: LayoutInspector,
+) -> Result<(), NativeInspectorError> {
+    run_native_inner(true, false, Some(inspector)).map(|_| ())
 }
 
 /// Runs the native inspector and returns its independently verified artifact.
 pub fn run_native_artifact() -> Result<Vec<u8>, NativeInspectorError> {
-    run_native_inner(false, true)?.ok_or(NativeInspectorError::Evidence(EvidenceError::Incomplete))
+    run_native_inner(false, true, None)?
+        .ok_or(NativeInspectorError::Evidence(EvidenceError::Incomplete))
 }
 
 fn run_native_inner(
     auto_close: bool,
     record_evidence: bool,
+    inspector: Option<LayoutInspector>,
 ) -> Result<Option<Vec<u8>>, NativeInspectorError> {
     let event_loop = EventLoop::new().map_err(|_| NativeInspectorError::EventLoop)?;
-    let mut application = NativeApplication::new(auto_close, record_evidence)?;
+    let mut application = match inspector {
+        Some(inspector) => {
+            NativeApplication::from_inspector(inspector, auto_close, record_evidence)
+        }
+        None => NativeApplication::new(auto_close, record_evidence)?,
+    };
     event_loop
         .run_app(&mut application)
         .map_err(|_| NativeInspectorError::EventLoop)?;
@@ -64,6 +87,7 @@ struct NativeApplication {
     inspector: LayoutInspector,
     auto_close: bool,
     presented: bool,
+    drawable: bool,
     evidence: Option<LayoutInspectorEvidence>,
     window: Option<Arc<Window>>,
     _context: Option<NativeContext>,
@@ -74,17 +98,23 @@ struct NativeApplication {
 
 impl NativeApplication {
     fn new(auto_close: bool, record_evidence: bool) -> Result<Self, NativeInspectorError> {
-        Ok(Self {
-            inspector: LayoutInspector::new().map_err(NativeInspectorError::Application)?,
+        let inspector = LayoutInspector::new().map_err(NativeInspectorError::Application)?;
+        Ok(Self::from_inspector(inspector, auto_close, record_evidence))
+    }
+
+    fn from_inspector(inspector: LayoutInspector, auto_close: bool, record_evidence: bool) -> Self {
+        Self {
+            inspector,
             auto_close,
             presented: false,
+            drawable: false,
             evidence: record_evidence.then(LayoutInspectorEvidence::new),
             window: None,
             _context: None,
             surface: None,
             output: None,
             failure: None,
-        })
+        }
     }
 
     fn initialize(&mut self, event_loop: &ActiveEventLoop) -> Result<(), NativeInspectorError> {
@@ -115,23 +145,17 @@ impl NativeApplication {
     }
 
     fn request_redraw(&self) {
-        if let Some(window) = &self.window {
+        if let Some(window) = &self.window
+            && self.drawable
+        {
             window.request_redraw();
         }
     }
 
-    fn resize_application(&mut self, width: u32, height: u32) -> Result<(), NativeInspectorError> {
-        if width == 0 || height == 0 {
+    fn redraw(&mut self) -> Result<(), NativeInspectorError> {
+        if !self.drawable {
             return Ok(());
         }
-        let width = i32::try_from(width).map_err(|_| NativeInspectorError::Presenter)?;
-        let height = i32::try_from(height).map_err(|_| NativeInspectorError::Presenter)?;
-        self.inspector
-            .dispatch(InspectorAction::Resize { width, height })
-            .map_err(NativeInspectorError::Application)
-    }
-
-    fn redraw(&mut self) -> Result<(), NativeInspectorError> {
         let raster = self
             .inspector
             .reference_raster()
@@ -232,6 +256,7 @@ impl ApplicationHandler for NativeApplication {
         {
             return;
         }
+        let request_redraw = input::requests_redraw(&event);
         let result = match event {
             WindowEvent::RedrawRequested => self.redraw(),
             WindowEvent::CursorMoved { position, .. } => {
@@ -296,42 +321,8 @@ impl ApplicationHandler for NativeApplication {
                         ..
                     },
                 ..
-            } => (|| -> Result<(), NativeInspectorError> {
-                self.inspector
-                    .dispatch(InspectorAction::InsertTile { key: 30 })
-                    .map_err(NativeInspectorError::Application)?;
-                if self.evidence.as_ref().is_some_and(|evidence| {
-                    evidence.next_required() == Some(EvidenceMilestone::KeyedInsert)
-                }) {
-                    let frame = self
-                        .inspector
-                        .observe()
-                        .map_err(NativeInspectorError::Application)?;
-                    self.evidence
-                        .as_mut()
-                        .expect("evidence was checked above")
-                        .record_keyed_insert(30, &frame)
-                        .map_err(NativeInspectorError::Evidence)?;
-                }
-                Ok(())
-            })(),
-            WindowEvent::Resized(size) => (|| -> Result<(), NativeInspectorError> {
-                self.resize_application(size.width, size.height)?;
-                if self.evidence.as_ref().is_some_and(|evidence| {
-                    evidence.next_required() == Some(EvidenceMilestone::Resize)
-                }) {
-                    let frame = self
-                        .inspector
-                        .observe()
-                        .map_err(NativeInspectorError::Application)?;
-                    self.evidence
-                        .as_mut()
-                        .expect("evidence was checked above")
-                        .record_resize(&frame)
-                        .map_err(NativeInspectorError::Evidence)?;
-                }
-                Ok(())
-            })(),
+            } => self.insert_tile(),
+            WindowEvent::Resized(size) => self.resize_window(size.width, size.height),
             WindowEvent::CloseRequested => (|| -> Result<(), NativeInspectorError> {
                 if let Some(evidence) = &mut self.evidence {
                     evidence
@@ -349,7 +340,8 @@ impl ApplicationHandler for NativeApplication {
             _ => Ok(()),
         };
         match result {
-            Ok(()) => self.request_redraw(),
+            Ok(()) if request_redraw => self.request_redraw(),
+            Ok(()) => (),
             Err(error) => self.abort(event_loop, error),
         }
     }
