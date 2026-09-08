@@ -44,6 +44,9 @@ mod version_v2;
 mod vocabulary;
 mod vocabulary_v2;
 
+/// Public format-3 view authoring compiler and Cargo build integration.
+pub mod view;
+
 /// Reserved unstable surface for the typed authoring experiment.
 #[doc(hidden)]
 pub mod prototype {

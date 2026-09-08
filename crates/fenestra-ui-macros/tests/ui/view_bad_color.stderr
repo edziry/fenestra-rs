@@ -1,0 +1,5 @@
+error: expected an rgba8 channel from 0 through 255
+ --> tests/ui/view_bad_color.rs:8:38
+  |
+8 |                 background: rgba8(0, 256, 0, 255);
+  |                                      ^^^

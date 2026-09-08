@@ -66,14 +66,18 @@ const V2_EXPORTS: [&str; 29] = [
     "expand_ui_v2",
 ];
 
-const PUBLIC_STRUCTS: [&str; 23] = [
+const PUBLIC_STRUCTS: [&str; 27] = [
     "AuthoringDiagnosticV1",
     "AuthoringDiagnosticV2",
     "AuthoringFormatVersion",
     "AuthoringLimitsV1",
     "AuthoringLimitsV2",
+    "BuildError",
     "CompiledAuthoringV1",
     "CompiledAuthoringV2",
+    "CompiledView",
+    "Diagnostic",
+    "Limits",
     "FenSourceV1",
     "FenSourceV2",
     "GeneratedRustV1",
@@ -102,7 +106,15 @@ fn prototype_registry_is_exactly_29_v1_then_29_additive_names() {
     let marker = "pub mod prototype {";
     assert!(source.contains("#[doc(hidden)]\npub mod prototype {"));
     let offset = source.find(marker).expect("prototype module");
-    assert!(!source[..offset].lines().any(is_public_line));
+    assert_eq!(
+        source[..offset]
+            .lines()
+            .filter(|line| is_public_line(line))
+            .map(str::trim)
+            .collect::<Vec<_>>(),
+        ["pub mod view;"],
+        "the public format-3 module is additive to the frozen prototype"
+    );
     let prototype = &source[offset + marker.len()..source.len() - 2];
     for forbidden in [" as ", "::*", "pub type ", "pub trait ", "pub mod "] {
         assert!(!prototype.contains(forbidden), "unexpected {forbidden}");
