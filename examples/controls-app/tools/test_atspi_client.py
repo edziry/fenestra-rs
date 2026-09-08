@@ -3,7 +3,7 @@ from types import SimpleNamespace
 
 from atspi_client import (
     ACTION, COMPONENT, Client, decode_states, inspect_tree, ppm_checksum,
-    verify_controls, verify_label,
+    verify_controls, verify_label, verify_retained_focus,
 )
 
 
@@ -134,6 +134,14 @@ class ProbeTests(unittest.TestCase):
         verify_label([node], "readout", "Changes pending.")
         with self.assertRaisesRegex(ValueError, "readout: label"):
             verify_label([node], "readout", "Preferences applied (1).")
+
+    def test_retained_logical_focus_survives_native_window_focus_loss(self):
+        state = {"logical_focus": "compact", "window_focused": False,
+                 "controls": [{"name": "compact", "focused": False}]}
+        verify_retained_focus(state, "compact")
+        state["logical_focus"] = "apply"
+        with self.assertRaisesRegex(ValueError, "moved logical focus"):
+            verify_retained_focus(state, "compact")
 
     def test_ppm_checksum_reconstructs_opaque_rgba_and_rejects_truncation(self):
         # FNV-1a of RGBA [0, 0, 0, 255].

@@ -13,7 +13,9 @@ import time
 
 from dbus import DBusException
 
-from atspi_client import Client, host_bus, ppm_checksum, verify_controls, verify_label
+from atspi_client import (
+    Client, host_bus, ppm_checksum, verify_controls, verify_label, verify_retained_focus,
+)
 
 
 def eventually(description, operation, timeout=15):
@@ -114,8 +116,7 @@ class Probe:
             state["apply_count"] == 1 and control(state, "apply")["disabled"])
         if len({state["rgba_checksum"] for state in (initial, focused, changed, applied)}) != 4:
             raise ValueError("focus, check and apply must each change presented pixels")
-        if not control(applied, "compact")["focused"]:
-            raise ValueError("AT-SPI activation unexpectedly moved logical focus")
+        verify_retained_focus(applied, "compact")
         self.action(nodes, "finish", "click")
 
 

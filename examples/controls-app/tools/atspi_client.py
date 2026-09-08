@@ -73,6 +73,11 @@ def verify_label(nodes, name, text):
         raise ValueError(f"{name}: label does not match current Rust text {text!r}")
 
 
+def verify_retained_focus(state, name):
+    if state["logical_focus"] != name:
+        raise ValueError("AT-SPI activation unexpectedly moved logical focus")
+
+
 def ppm_checksum(data):
     magic, dimensions, maximum, pixels = data.split(b"\n", 3)
     if magic != b"P6" or maximum != b"255":

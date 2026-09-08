@@ -34,6 +34,8 @@ and omission of composed control children. It then focuses Compact, toggles it,
 activates Apply, and activates Finish to close the example normally. Each action
 must be followed by a matching committed Rust snapshot and presented pixels.
 The standalone Readout label must also match its current Rust text after edits.
+Activation must retain the logical focus target even if the compositor moves
+window focus elsewhere. Active focused-state parity remains a separate check.
 The PPM checksum reconstructs opaque alpha; this is valid for this example's
 opaque full-window background. PPM files are raster exports, not screenshots.
 
