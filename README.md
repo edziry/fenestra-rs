@@ -19,8 +19,10 @@ The facade also provides authored text views, bounded Unicode editing and owned
 keyboard, focus and IME events. An explicit-font adapter and a standalone text
 application exercise multilingual shaping, rendering and atomic text updates.
 Rows and columns support intrinsic sizing, weighted fill, minimum/maximum
-bounds and text wrapping under resize. Qualified IME, accessible controls,
-general layout alignment and release packaging remain unfinished.
+bounds and text wrapping under resize. Authored buttons and checkboxes provide
+keyboard focus, activation, pointer cancellation and explicit state colors.
+Qualified IME, native accessibility, general layout alignment and release
+packaging remain unfinished.
 See the [completion goal](docs/project-completion-goal.md) for
 acceptance gates and the [work units](docs/bootstrap-work-units.md) for evidence.
 
@@ -50,6 +52,22 @@ Click either card to toggle its highlight. Its handler keeps ordinary Rust
 state and updates elements by name. The [typed example guide](examples/typed-app/README.md)
 explains the syntax, build helper, API and that example's fixed-size layout.
 Native window dependencies are optional; headless applications need no desktop.
+
+The [preferences application](examples/controls-app/README.md) demonstrates
+checkboxes, Apply and Reset buttons, visible focus and ordinary Rust state:
+
+```sh
+cargo run -p fenestra-ui-authoring --bin fenestra-check --locked -- examples/controls-app/src/preferences.fen
+cargo run --manifest-path examples/controls-app/Cargo.toml --locked
+cargo run --manifest-path examples/controls-app/Cargo.toml --release --locked --features native -- --native
+```
+
+Use Tab or Shift+Tab to move focus, Space to toggle a checkbox, and Enter or
+Space to activate a button. Pointer activation completes on a matching release.
+Each control supplies an explicit semantic label and visible authored children.
+Handlers receive `CheckedChanged` and `Activated` after the framework accepts
+the new state. The [control design](docs/design/keyboard-controls.md) documents
+the input, styling and publication contracts.
 
 The [responsive application](examples/responsive-app/README.md) combines a
 fixed sidebar with flexible content, text that sizes to its lines, and weighted
@@ -144,8 +162,8 @@ for the current editing and composition boundaries.
 `fenestra-check` reports errors as `file:line:byte-column`, followed by the
 diagnostic and exact byte range. It detects format 2 or 3 and applies each
 format's bounds. Format 3 supports ordinary comments, named elements and text
-content in cooked or raw Rust string literals, fixed/auto/fill dimensions and
-numeric minimum/maximum bounds;
+content in cooked or raw Rust string literals, fixed/auto/fill dimensions,
+numeric minimum/maximum bounds, buttons, checkboxes and explicit state colors;
 format 2 retains its original typed IR and diagnostic contracts. The checker
 does not execute a source file.
 

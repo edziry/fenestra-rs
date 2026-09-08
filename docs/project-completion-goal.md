@@ -70,6 +70,8 @@ hosting. [WU-0019](design/authored-text-views.md) extends this vocabulary with
 fixed-size text leaves and Rust string literals.
 [WU-0020](design/responsive-layout.md) adds typed auto/fill dimensions and
 minimum/maximum bounds to both frontends, with intrinsic text measurement.
+WU-0021 adds [authored controls](design/keyboard-controls.md), explicit state
+colors and semantic action events through the same public facade.
 This is an implemented
 foundation; general reusable authored components, imports, bound expressions
 and the inspector's property UX remain open.
@@ -100,8 +102,14 @@ text, complete shaped measurements, ordered explicit font fallback and atomic
 content/style updates through a replaceable Parley adapter. Its standalone
 consumer has real Wayland presentation evidence. WU-0020 now resolves intrinsic
 and weighted dimensions before wrapping text and publishing sibling geometry,
-with a standalone responsive consumer. Broad font qualification, general
-alignment, normal editing controls, native IME and accessibility remain open.
+with a standalone responsive consumer. WU-0021 now provides buttons and
+checkboxes, Tab navigation, visible focus, release-based pointer activation,
+explicit state colors and owned semantic snapshots. A preferences consumer
+exercises these behaviors with Rust state and has native Wayland presentation
+evidence. Its [verification](verification/WU-0021-keyboard-controls.md) records
+the scope: snapshots are not a native accessibility adapter. Broad font
+qualification, general alignment, editing controls, clipboard, scrolling,
+native IME and accessibility remain open.
 
 - [ ] Specify, implement and verify text measurement, shaping, rendering and
   font fallback with multilingual examples.

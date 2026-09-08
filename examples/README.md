@@ -5,6 +5,8 @@ public API and format-3 named component syntax. Continue with the
 [text application](text-app/README.md) for multilingual rendering and basic
 editing, or the [responsive application](responsive-app/README.md) for
 intrinsic text sizing, weighted fill and layout under window resize.
+The [preferences application](controls-app/README.md) adds keyboard navigation,
+checkboxes, buttons and state styling with ordinary Rust event handlers.
 The format-2 example below remains a reference for the earlier experimental
 IR authoring contract.
 

@@ -397,3 +397,5 @@ Verification: [responsive layout verification](verification/WU-0020-responsive-l
 Exit: typed auto/fill/min/max sizing, intrinsic text measurement and atomic
 resize are exercised through both authoring frontends and a native consumer.
 General alignment, controls, scrolling and the remaining product gates stay open.
+
+Subsequent increments are recorded in the [application work units](application-work-units.md).
