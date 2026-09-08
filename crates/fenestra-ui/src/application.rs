@@ -101,6 +101,9 @@ impl Application {
     }
 
     /// Renders the committed frame into owned, bounded premultiplied RGBA8 pixels.
+    ///
+    /// Reuses a successful render until the next accepted publication. Each
+    /// returned raster owns its pixels; failed renders can be retried.
     pub fn raster(&self) -> Result<Raster, Error> {
         self.raster_cache
             .get_or_render(self.generation(), || self.raster_uncached())
