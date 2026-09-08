@@ -1,13 +1,13 @@
 use fenestra_ui::{
-    Raster, TextEngine, TextError, TextLayout, TextLimits, TextMeasureRequest, TextMetrics,
-    TextRequest, TextStyle,
+    Raster, TextEngine, TextError, TextGeometry, TextGeometryRequest, TextLayout, TextLimits,
+    TextMeasureRequest, TextMetrics, TextRequest, TextStyle, TextViewportRequest,
 };
 use parley::{
     Alignment, AlignmentOptions, Layout, LayoutContext, LineHeight, PositionedLayoutItem,
     StyleProperty,
 };
 
-use crate::{FontError, fonts::Fonts, raster};
+use crate::{FontError, fonts::Fonts, geometry, raster, source::Source};
 
 /// A persistent private layout/raster context over an explicit ordered font set.
 pub struct TextRenderer {
@@ -54,20 +54,41 @@ impl TextRenderer {
 }
 
 impl TextEngine for TextRenderer {
+    fn geometry(&mut self, request: TextGeometryRequest<'_>) -> Result<TextGeometry, TextError> {
+        let measure = request.measurement();
+        let source = Source::new(measure.text());
+        let layout = self.shape(source.text(), measure.style(), measure.width());
+        let metrics = preflight(&layout, measure.limits())?;
+        metrics.validate_measurement(measure)?;
+        geometry::query(&layout, &source, request, metrics)
+    }
+
     fn measure(&mut self, request: TextMeasureRequest<'_>) -> Result<TextMetrics, TextError> {
-        let layout = self.shape(request.text(), request.style(), request.width());
+        let source = Source::new(request.text());
+        let layout = self.shape(source.text(), request.style(), request.width());
         let metrics = preflight(&layout, request.limits())?;
         metrics.validate_measurement(request)?;
         Ok(metrics)
     }
 
     fn layout(&mut self, request: TextRequest<'_>) -> Result<TextLayout, TextError> {
-        let layout = self.shape(
-            request.text(),
-            request.style(),
+        self.layout_viewport(TextViewportRequest::new(
+            request,
             Some(request.size().width()),
-        );
+            0,
+            0,
+        )?)
+    }
+
+    fn layout_viewport(
+        &mut self,
+        viewport: TextViewportRequest<'_>,
+    ) -> Result<TextLayout, TextError> {
+        let request = viewport.request();
+        let source = Source::new(request.text());
+        let layout = self.shape(source.text(), request.style(), viewport.wrap_width());
         let metrics = preflight(&layout, request.limits())?;
+        metrics.validate_measurement(viewport.measurement()?)?;
         let size = request.size();
         let length = (size.width() as usize)
             .checked_mul(size.height() as usize)
@@ -81,7 +102,7 @@ impl TextEngine for TextRenderer {
         if request.style().color_value().to_rgba8()[3] != 0 {
             raster::paint(
                 &layout,
-                request,
+                viewport,
                 &self.fonts.raster_keys,
                 &mut self.raster_context,
                 &mut pixels,

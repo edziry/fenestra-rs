@@ -6,6 +6,11 @@ use fenestra_ui_text::TextRenderer;
 
 const FONT: &[u8] = include_bytes!("../../../assets/fonts/dejavu-sans-2.37/DejaVuSans.ttf");
 
+mod geometry {
+    mod navigation;
+    mod selection;
+}
+
 fn request(text: &str, width: Option<u32>, byte: usize) -> TextGeometryRequest<'_> {
     TextGeometryRequest::new(
         TextMeasureRequest::new(
@@ -19,6 +24,15 @@ fn request(text: &str, width: Option<u32>, byte: usize) -> TextGeometryRequest<'
         TextGeometryQuery::Current,
     )
     .unwrap()
+}
+
+fn query<'a>(
+    text: &'a str,
+    width: Option<u32>,
+    selection: TextSelection,
+    operation: TextGeometryQuery,
+) -> TextGeometryRequest<'a> {
+    TextGeometryRequest::new(request(text, width, 0).measurement(), selection, operation).unwrap()
 }
 
 #[test]
@@ -47,7 +61,10 @@ fn combining_grapheme_hits_and_visual_steps_never_enter_its_interior() {
         TextGeometryQuery::Right { extend: false },
     )
     .unwrap();
-    assert_eq!(renderer.geometry(right).unwrap().selection().focus().byte(), 3);
+    assert_eq!(
+        renderer.geometry(right).unwrap().selection().focus().byte(),
+        3
+    );
 }
 
 #[test]
@@ -65,7 +82,9 @@ fn crlf_is_one_hard_break_and_geometry_keeps_original_utf8_offsets() {
     assert_eq!(end.selection().focus().byte(), text.len());
     assert_eq!(
         start.metrics(),
-        renderer.measure(request(text, None, 0).measurement()).unwrap()
+        renderer
+            .measure(request(text, None, 0).measurement())
+            .unwrap()
     );
 }
 

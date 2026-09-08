@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use fenestra_ui::{TextError, TextRequest};
+use fenestra_ui::{TextError, TextRequest, TextViewportRequest};
 use parley::{Layout, PositionedLayoutItem};
 use swash::{
     CacheKey, FontRef,
@@ -22,7 +22,7 @@ pub(crate) struct Context {
 
 pub(crate) fn paint(
     layout: &Layout<()>,
-    request: TextRequest<'_>,
+    viewport: TextViewportRequest<'_>,
     keys: &HashMap<u64, (u32, CacheKey)>,
     context: &mut Context,
     pixels: &mut [u8],
@@ -58,8 +58,11 @@ pub(crate) fn paint(
                 if scaler.scale_outline_into(glyph.id as u16, outline) {
                     draw_outline(
                         outline,
-                        (glyph.x, glyph.y),
-                        request,
+                        (
+                            f64::from(glyph.x) - f64::from(viewport.offset_x()),
+                            f64::from(glyph.y) - f64::from(viewport.offset_y()),
+                        ),
+                        viewport.request(),
                         scratch,
                         mask_pixels,
                         pixels,
@@ -73,7 +76,7 @@ pub(crate) fn paint(
 
 fn draw_outline(
     outline: &Outline,
-    position: (f32, f32),
+    position: (f64, f64),
     request: TextRequest<'_>,
     scratch: &mut Scratch,
     mask_pixels: &mut Vec<u8>,
@@ -143,14 +146,14 @@ fn draw_outline(
     Ok(())
 }
 
-fn origin((x, y): (f32, f32)) -> (i64, i64, Vector) {
+fn origin((x, y): (f64, f64)) -> (i64, i64, Vector) {
     let base_x = x.floor();
     let base_y = y.floor();
     // Outlines use upward Y; the owned raster and baseline use downward Y.
     (
         base_x as i64,
         base_y as i64,
-        Vector::new(x - base_x, -(y - base_y)),
+        Vector::new((x - base_x) as f32, -(y - base_y) as f32),
     )
 }
 
@@ -189,8 +192,8 @@ mod tests {
             let (base_x, base_y, offset) = origin((x, y));
             assert!((0.0..1.0).contains(&offset.x));
             assert!(offset.y > -1.0 && offset.y <= 0.0);
-            assert_eq!(base_x as f32 + offset.x, x);
-            assert_eq!(base_y as f32 - offset.y, y);
+            assert_eq!(base_x as f64 + f64::from(offset.x), x);
+            assert_eq!(base_y as f64 - f64::from(offset.y), y);
         }
     }
 }

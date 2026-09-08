@@ -9,8 +9,10 @@
 
 mod error;
 mod fonts;
+mod geometry;
 mod raster;
 mod renderer;
+mod source;
 
 pub use error::FontError;
 pub use renderer::TextRenderer;
