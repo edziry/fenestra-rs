@@ -166,3 +166,40 @@ fn nested_intrinsic_requests_are_memoized_once_per_text_and_axis() {
     assert_eq!(sizes, vec![Size::new(8, 10); 64]);
     assert_eq!(calls, [(63, None), (63, Some(8))]);
 }
+
+#[test]
+fn explicit_maximum_clamps_intrinsic_aggregates_before_final_fill_allocation() {
+    for kind in [Row, Column] {
+        let (mut parent, child, expected) = if kind == Row {
+            (style(Auto, Px(1)), style(Fill(1), Px(1)), Size::new(50, 1))
+        } else {
+            (style(Px(1), Auto), style(Px(1), Fill(1)), Size::new(1, 50))
+        };
+        parent.max_width = 100;
+        parent.max_height = 100;
+        let nodes = [
+            node("root", kind, parent, &[1, 2]),
+            node("first", Text, child, &[]),
+            node("second", Text, child, &[]),
+        ];
+        let mut calls = Vec::new();
+        let sizes = resolve(&nodes, Size::new(1, 1), |index, width| {
+            calls.push((index, width));
+            Ok(if kind == Row {
+                metrics(1_500_000_000.0, 1.0)
+            } else {
+                metrics(1.0, 1_500_000_000.0)
+            })
+        })
+        .unwrap();
+        let root = if kind == Row {
+            Size::new(100, 1)
+        } else {
+            Size::new(1, 100)
+        };
+        assert_eq!(sizes[0], root);
+        assert_eq!(sizes[1..], [expected; 2]);
+        let width = if kind == Row { None } else { Some(1) };
+        assert_eq!(calls, [(1, width), (2, width)]);
+    }
+}

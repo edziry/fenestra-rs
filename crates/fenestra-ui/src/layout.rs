@@ -4,7 +4,7 @@ use crate::{Dimension, Error, Size, Style, TextMetrics};
 mod axis;
 mod fill;
 
-use axis::{Axis, checked_extent};
+use axis::Axis;
 use fill::Fill;
 
 /// Borrowed, validated nodes in authored preorder with direct child indices.
@@ -56,7 +56,7 @@ impl<F: FnMut(usize, Option<u32>) -> Result<TextMetrics, Error>> Solver<'_, '_, 
     fn resolve_axis(&mut self, axis: Axis, available: u32) -> Result<(), Error> {
         let root = &self.nodes[0];
         let extent = if matches!(axis.dimension(root.style), Dimension::Fill(_)) {
-            axis.bounds(root)?.clamp(available)
+            axis.bounds(root)?.clamp(u64::from(available))
         } else {
             self.intrinsic(0, axis)?
         };
@@ -88,7 +88,7 @@ impl<F: FnMut(usize, Option<u32>) -> Result<TextMetrics, Error>> Solver<'_, '_, 
                     });
                     continue;
                 }
-                Dimension::Fill(_) => axis.bounds(child)?.clamp(inner as u32),
+                Dimension::Fill(_) => axis.bounds(child)?.clamp(inner),
                 _ => self.intrinsic(index, axis)?,
             };
             self.resolved[axis.index()][index] = extent;
@@ -112,9 +112,9 @@ impl<F: FnMut(usize, Option<u32>) -> Result<TextMetrics, Error>> Solver<'_, '_, 
         let node = &self.nodes[index];
         let bounds = axis.bounds(node)?;
         let natural = match axis.dimension(node.style) {
-            Dimension::Px(value) => value as u32,
+            Dimension::Px(value) => value as u64,
             Dimension::Auto | Dimension::Fill(_) => match node.kind {
-                ElementKind::Text => self.text_extent(index, axis)?,
+                ElementKind::Text => u64::from(self.text_extent(index, axis)?),
                 ElementKind::Rect => 0,
                 ElementKind::Row | ElementKind::Column => self.container_extent(index, axis)?,
             },
@@ -139,7 +139,7 @@ impl<F: FnMut(usize, Option<u32>) -> Result<TextMetrics, Error>> Solver<'_, '_, 
         Ok(axis.extent(measured))
     }
 
-    fn container_extent(&mut self, index: usize, axis: Axis) -> Result<u32, Error> {
+    fn container_extent(&mut self, index: usize, axis: Axis) -> Result<u64, Error> {
         let node = &self.nodes[index];
         let children = node.children;
         let main = axis.is_main(node.kind);
@@ -155,11 +155,7 @@ impl<F: FnMut(usize, Option<u32>) -> Result<TextMetrics, Error>> Solver<'_, '_, 
                 content.max(extent)
             };
         }
-        checked_extent(
-            content
-                .checked_add(padding)
-                .ok_or(Error::CapacityOverflow)?,
-        )
+        content.checked_add(padding).ok_or(Error::CapacityOverflow)
     }
 }
 

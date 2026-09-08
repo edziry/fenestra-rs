@@ -155,15 +155,19 @@ fn auto_and_fill_reject_maxima_that_cannot_contain_padding() {
 }
 
 #[test]
-fn intrinsic_sum_overflow_is_typed_and_cannot_wrap() {
+fn default_maximum_clamps_wide_intrinsic_sums_without_resizing_fixed_children() {
     let nodes = [
         node("root", Row, style(Auto, Px(1)).gap(1), &[1, 2]),
         node("large", Rect, style(Px(i32::MAX), Px(1)), &[]),
         node("small", Rect, style(Px(1), Px(1)), &[]),
     ];
     assert_eq!(
-        resolve(&nodes, Size::new(1, 1), no_measure),
-        Err(Error::CapacityOverflow)
+        resolve(&nodes, Size::new(1, 1), no_measure).unwrap(),
+        [
+            Size::new(i32::MAX as u32, 1),
+            Size::new(i32::MAX as u32, 1),
+            Size::new(1, 1)
+        ]
     );
 }
 

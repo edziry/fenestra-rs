@@ -14,8 +14,10 @@ pub(super) struct Bounds {
 }
 
 impl Bounds {
-    pub(super) fn clamp(&self, value: u32) -> u32 {
-        value.clamp(self.minimum, self.maximum)
+    pub(super) fn clamp(&self, value: u64) -> u32 {
+        // A container's natural sum can exceed signed coordinates even when
+        // its authored maximum produces a small, representable final extent.
+        value.clamp(u64::from(self.minimum), u64::from(self.maximum)) as u32
     }
 }
 
@@ -81,12 +83,4 @@ pub(super) fn gaps(node: &LayoutNode<'_>) -> Result<u64, Error> {
     count
         .checked_mul(node.style.gap as u64)
         .ok_or(Error::CapacityOverflow)
-}
-
-pub(super) fn checked_extent(value: u64) -> Result<u32, Error> {
-    if value > i32::MAX as u64 {
-        Err(Error::CapacityOverflow)
-    } else {
-        Ok(value as u32)
-    }
 }
