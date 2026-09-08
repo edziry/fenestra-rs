@@ -8,6 +8,7 @@ use crate::model::ElementKind;
 use crate::{Bounds, Error, Limits, Raster, Size, Style, TextEngine};
 
 mod construction;
+mod layout;
 mod mutation;
 mod text;
 
@@ -19,6 +20,8 @@ struct NamedNode {
     id: NodeId,
     kind: ElementKind,
     style: Style,
+    resolved: Size,
+    children: Vec<usize>,
     text: Option<TextState>,
 }
 
@@ -28,6 +31,7 @@ pub struct Application {
     nodes: Vec<NamedNode>,
     size: Size,
     limits: Limits,
+    revision: i32,
     spatial_limits: SpatialLimitsV2,
     text_engine: Option<Box<dyn TextEngine>>,
     text_frame: Option<SpatialResolvedSnapshotV2>,

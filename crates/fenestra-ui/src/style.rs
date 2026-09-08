@@ -1,8 +1,8 @@
 use fenestra_ui_ir::prototype::{InputPolicy, PropertyId, PropertyValue};
 
-use crate::Error;
 use crate::lower::{BACKGROUND, GAP, HEIGHT, INPUT, PADDING, WIDTH};
 use crate::model::ElementKind;
+use crate::{Dimension, Error, Size};
 
 /// An RGBA color with eight bits per channel and straight alpha.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -22,14 +22,19 @@ impl Color {
     }
 }
 
-/// Fixed viewport dimensions, container spacing, background, and input policy.
+/// Dimension policies, container spacing, background, and input policy.
 ///
-/// Dimensions and spacing must be nonnegative. Children may extend outside a
-/// container's dimensions; the viewport clips rendered output and input.
+/// Pixel preferences, limits, and spacing must be nonnegative. Minimum and
+/// maximum limits apply to every dimension policy. Children may extend outside
+/// a container's dimensions; the viewport clips rendered output and input.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Style {
-    pub(crate) width: i32,
-    pub(crate) height: i32,
+    pub(crate) width: Dimension,
+    pub(crate) height: Dimension,
+    pub(crate) min_width: i32,
+    pub(crate) max_width: i32,
+    pub(crate) min_height: i32,
+    pub(crate) max_height: i32,
     pub(crate) padding: i32,
     pub(crate) gap: i32,
     pub(crate) background: Color,
@@ -41,8 +46,12 @@ impl Style {
     #[must_use]
     pub const fn new() -> Self {
         Self {
-            width: 64,
-            height: 64,
+            width: Dimension::Px(64),
+            height: Dimension::Px(64),
+            min_width: 0,
+            max_width: i32::MAX,
+            min_height: 0,
+            max_height: i32::MAX,
             padding: 0,
             gap: 0,
             background: Color::rgba8(0, 0, 0, 0),
@@ -50,17 +59,59 @@ impl Style {
         }
     }
 
-    /// Sets the fixed width in viewport pixels.
+    /// Sets a pixel width preference, clamped by the minimum and maximum width.
     #[must_use]
     pub const fn width(mut self, width: i32) -> Self {
-        self.width = width;
+        self.width = Dimension::Px(width);
         self
     }
 
-    /// Sets the fixed height in viewport pixels.
+    /// Sets a pixel height preference, clamped by the minimum and maximum height.
     #[must_use]
     pub const fn height(mut self, height: i32) -> Self {
-        self.height = height;
+        self.height = Dimension::Px(height);
+        self
+    }
+
+    /// Sets the horizontal dimension policy.
+    #[must_use]
+    pub const fn width_mode(mut self, mode: Dimension) -> Self {
+        self.width = mode;
+        self
+    }
+
+    /// Sets the vertical dimension policy.
+    #[must_use]
+    pub const fn height_mode(mut self, mode: Dimension) -> Self {
+        self.height = mode;
+        self
+    }
+
+    /// Sets the inclusive nonnegative minimum width.
+    #[must_use]
+    pub const fn min_width(mut self, value: i32) -> Self {
+        self.min_width = value;
+        self
+    }
+
+    /// Sets the inclusive maximum width, which must not be below the minimum.
+    #[must_use]
+    pub const fn max_width(mut self, value: i32) -> Self {
+        self.max_width = value;
+        self
+    }
+
+    /// Sets the inclusive nonnegative minimum height.
+    #[must_use]
+    pub const fn min_height(mut self, value: i32) -> Self {
+        self.min_height = value;
+        self
+    }
+
+    /// Sets the inclusive maximum height, which must not be below the minimum.
+    #[must_use]
+    pub const fn max_height(mut self, value: i32) -> Self {
+        self.max_height = value;
         self
     }
 
@@ -93,11 +144,31 @@ impl Style {
     }
 
     pub(crate) fn validate(self, node: &str, kind: ElementKind) -> Result<(), Error> {
+        for (property, dimension) in [("width", self.width), ("height", self.height)] {
+            match dimension {
+                Dimension::Px(value) if value < 0 => {
+                    return Err(Error::InvalidStyle {
+                        node: node.into(),
+                        property,
+                        value,
+                    });
+                }
+                Dimension::Fill(weight) if !(1..=65_535).contains(&weight) => {
+                    return Err(Error::InvalidElement {
+                        node: node.into(),
+                        reason: "fill weights must be between 1 and 65535",
+                    });
+                }
+                _ => {}
+            }
+        }
         for (property, value) in [
-            ("width", self.width),
-            ("height", self.height),
             ("padding", self.padding),
             ("gap", self.gap),
+            ("min_width", self.min_width),
+            ("max_width", self.max_width),
+            ("min_height", self.min_height),
+            ("max_height", self.max_height),
         ] {
             if value < 0 {
                 return Err(Error::InvalidStyle {
@@ -106,6 +177,12 @@ impl Style {
                     value,
                 });
             }
+        }
+        if self.min_width > self.max_width || self.min_height > self.max_height {
+            return Err(Error::InvalidElement {
+                node: node.into(),
+                reason: "dimension minimum must not exceed its maximum",
+            });
         }
         if matches!(kind, ElementKind::Rect | ElementKind::Text)
             && (self.padding != 0 || self.gap != 0)
@@ -118,15 +195,15 @@ impl Style {
         Ok(())
     }
 
-    pub(crate) fn values(self) -> [(PropertyId, PropertyValue); 6] {
+    pub(crate) fn values(self, size: Size) -> [(PropertyId, PropertyValue); 6] {
         let input = if self.input {
             InputPolicy::Accept
         } else {
             InputPolicy::Ignore
         };
         [
-            (WIDTH, PropertyValue::ScalarI32(self.width)),
-            (HEIGHT, PropertyValue::ScalarI32(self.height)),
+            (WIDTH, PropertyValue::ScalarI32(size.width() as i32)),
+            (HEIGHT, PropertyValue::ScalarI32(size.height() as i32)),
             (PADDING, PropertyValue::ScalarI32(self.padding)),
             (GAP, PropertyValue::ScalarI32(self.gap)),
             (BACKGROUND, PropertyValue::Rgba8(self.background.0)),

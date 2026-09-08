@@ -9,7 +9,7 @@ use fenestra_ui_runtime::prototype::RuntimeCapacity;
 use fenestra_ui_spatial::prototype::SpatialLimitsV2;
 
 use crate::model::ElementKind;
-use crate::{Element, Error, Limits, View};
+use crate::{Element, Error, Limits, Size, View};
 
 mod construction;
 mod spatial;
@@ -20,9 +20,9 @@ pub(crate) const PADDING: PropertyId = PropertyId::new(2);
 pub(crate) const GAP: PropertyId = PropertyId::new(3);
 pub(crate) const BACKGROUND: PropertyId = PropertyId::new(4);
 pub(crate) const INPUT: PropertyId = PropertyId::new(5);
-// This ordinary paint property publishes text and typography changes through
-// the existing runtime generation without adding font data to the frozen IR.
-pub(crate) const TEXT_REVISION: PropertyId = PropertyId::new(6);
+// Publishes authored policy/content changes even when resolved pixels agree.
+// Font and dimension policy data stay outside the frozen IR.
+pub(crate) const VIEW_REVISION: PropertyId = PropertyId::new(6);
 const NAMESPACE: SchemaNamespace = SchemaNamespace::new(1);
 const REVISION: SchemaRevision = SchemaRevision::new(1);
 const SPAN: SourceSpan = SourceSpan::Synthetic;
@@ -34,28 +34,49 @@ pub(crate) struct Lowered {
     pub(crate) capacity: RuntimeCapacity,
 }
 
-struct FlatElement<'a> {
-    element: &'a Element,
-    parent: Option<usize>,
-    children: Vec<u32>,
+pub(crate) struct FlatElement<'a> {
+    pub(crate) element: &'a Element,
+    pub(crate) parent: Option<usize>,
+    pub(crate) children: Vec<usize>,
 }
 
-struct FlatView<'a> {
-    nodes: Vec<FlatElement<'a>>,
+pub(crate) struct FlatView<'a> {
+    pub(crate) nodes: Vec<FlatElement<'a>>,
     depth: usize,
     children_per_node: usize,
 }
 
-pub(crate) fn lower(view: &View, limits: Limits) -> Result<Lowered, Error> {
+pub(crate) fn prepare(view: &View, limits: Limits) -> Result<FlatView<'_>, Error> {
     validate_name(&view.name)?;
     let flat = flatten(&view.root, limits)?;
+    // Check bytes before copying content or asking a text engine to measure it.
     crate::text::validate_budget(
         flat.nodes.iter().filter_map(|node| {
             node.element
                 .text
                 .as_deref()
-                .map(|text| (text, node.element.style))
+                .map(|text| (text, Size::new(0, 0)))
         }),
+        limits.text(),
+    )?;
+    Ok(flat)
+}
+
+pub(crate) fn lower_prepared(
+    flat: &FlatView<'_>,
+    sizes: &[Size],
+    limits: Limits,
+) -> Result<Lowered, Error> {
+    if sizes.len() != flat.nodes.len() {
+        return Err(Error::InvalidProgram(
+            "resolved size count differs from authored nodes".into(),
+        ));
+    }
+    crate::text::validate_budget(
+        flat.nodes
+            .iter()
+            .zip(sizes)
+            .filter_map(|(node, &size)| node.element.text.as_deref().map(|text| (text, size))),
         limits.text(),
     )?;
     let n = flat.nodes.len();
@@ -64,7 +85,7 @@ pub(crate) fn lower(view: &View, limits: Limits) -> Result<Lowered, Error> {
     let spatial_depth = flat.depth.checked_add(1).ok_or(Error::CapacityOverflow)?;
     u32::try_from(spatial_nodes).map_err(|_| Error::CapacityOverflow)?;
 
-    let style = construction::build(&flat, property_slots)?;
+    let style = construction::build(flat, sizes, property_slots)?;
     let nodes = flat
         .nodes
         .iter()
@@ -124,7 +145,16 @@ pub(crate) fn lower(view: &View, limits: Limits) -> Result<Lowered, Error> {
             .map(|node| node.element.name.clone())
             .collect(),
         spatial_limits,
-        capacity: RuntimeCapacity::new(16, 0, n, 0, property_slots, 2),
+        capacity: RuntimeCapacity::new(
+            property_slots
+                .checked_add(1)
+                .ok_or(Error::CapacityOverflow)?,
+            0,
+            n,
+            0,
+            property_slots,
+            2,
+        ),
     })
 }
 
@@ -170,7 +200,7 @@ fn flatten(root: &Element, limits: Limits) -> Result<FlatView<'_>, Error> {
             element.text_style.unwrap_or_default().validate()?;
         }
         if let Some(parent) = parent {
-            result.nodes[parent].children.push(id);
+            result.nodes[parent].children.push(id as usize);
         }
         let index = result.nodes.len();
         result.depth = result.depth.max(depth);

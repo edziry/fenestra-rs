@@ -1,6 +1,6 @@
 use fenestra_ui_runtime::prototype::UiRuntime;
 
-use super::{Application, NamedNode, TextState, text, validate_size, viewport};
+use super::{Application, NamedNode, TextState, layout, text, validate_size, viewport};
 use crate::{Error, Limits, Size, TextEngine, View, lower};
 
 impl Application {
@@ -40,7 +40,28 @@ impl Application {
         mut text_engine: Option<Box<dyn TextEngine>>,
     ) -> Result<Self, Error> {
         validate_size(size, limits)?;
-        let lowered = lower::lower(&view, limits)?;
+        let flat = lower::prepare(&view, limits)?;
+        let mut texts = flat
+            .nodes
+            .iter()
+            .map(|node| {
+                node.element.text.as_deref().map(|content| {
+                    TextState::new(content, node.element.text_style.unwrap_or_default())
+                })
+            })
+            .collect::<Vec<_>>();
+        let descriptions = flat
+            .nodes
+            .iter()
+            .map(|node| crate::layout::LayoutNode {
+                name: &node.element.name,
+                kind: node.element.kind,
+                style: node.element.style,
+                children: &node.children,
+            })
+            .collect::<Vec<_>>();
+        let sizes = layout::resolve(&descriptions, &mut texts, &mut text_engine, size, limits)?;
+        let lowered = lower::lower_prepared(&flat, &sizes, limits)?;
         let runtime = UiRuntime::new_spatial_ir(
             lowered.program,
             viewport(size),
@@ -61,10 +82,11 @@ impl Application {
             *slot = Some(node);
             logical.extend(committed.children(node).unwrap_or(&[]).iter().copied());
         }
-        let mut elements = vec![&view.root];
         let mut nodes = Vec::with_capacity(lowered.names.len());
-        while let Some(element) = elements.pop() {
-            let index = nodes.len();
+        for (index, ((flat_node, text), resolved)) in
+            flat.nodes.iter().zip(texts).zip(sizes).enumerate()
+        {
+            let element = flat_node.element;
             let id = by_template[index]
                 .ok_or_else(|| Error::InvalidProgram("missing logical element".into()))?;
             let mut node = NamedNode {
@@ -72,14 +94,12 @@ impl Application {
                 id,
                 kind: element.kind,
                 style: element.style,
-                text: element
-                    .text
-                    .as_deref()
-                    .map(|content| TextState::new(content, element.text_style.unwrap_or_default())),
+                resolved,
+                children: flat_node.children.clone(),
+                text,
             };
             text::prepare_node(&mut node, &mut text_engine, limits.text())?;
             nodes.push(node);
-            elements.extend(element.children.iter().rev());
         }
         let text_frame = text::prepare_frame(&committed, &nodes, lowered.spatial_limits, limits)?;
         Ok(Self {
@@ -87,6 +107,7 @@ impl Application {
             nodes,
             size,
             limits,
+            revision: 0,
             spatial_limits: lowered.spatial_limits,
             text_engine,
             text_frame,

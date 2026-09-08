@@ -4,7 +4,7 @@ use fenestra_ui_ir::prototype::{
 };
 
 use super::*;
-use crate::{Color, Style};
+use crate::{Color, Dimension, Style};
 
 #[test]
 fn generated_identity_preserves_preorder_and_construction_ownership() {
@@ -126,4 +126,21 @@ fn schema_records_downstream_work_for_each_typed_property() {
             .collect::<Vec<_>>(),
         [InvalidationClass::HitTest]
     );
+}
+
+fn lower(view: &View, limits: Limits) -> Result<Lowered, Error> {
+    let flat = prepare(view, limits)?;
+    let sizes = flat
+        .nodes
+        .iter()
+        .map(|node| {
+            let (Dimension::Px(width), Dimension::Px(height)) =
+                (node.element.style.width, node.element.style.height)
+            else {
+                panic!("fixed lowering fixture");
+            };
+            Size::new(width as u32, height as u32)
+        })
+        .collect::<Vec<_>>();
+    lower_prepared(&flat, &sizes, limits)
 }

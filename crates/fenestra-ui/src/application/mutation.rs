@@ -3,7 +3,7 @@ use std::sync::Arc;
 use fenestra_ui_ir::prototype::PropertyValue;
 use fenestra_ui_runtime::prototype::CommitWithError;
 
-use super::{Application, NamedNode, TextState, text, validate_size, viewport};
+use super::{Application, NamedNode, TextState, layout, text, validate_size, viewport};
 use crate::{Color, Error, Size, Style, TextMetrics, TextStyle, lower};
 
 impl Application {
@@ -43,7 +43,7 @@ impl Application {
                         } else {
                             &text.content
                         },
-                        node.style,
+                        Size::new(0, 0),
                     )
                 })
             }),
@@ -55,8 +55,7 @@ impl Application {
             .as_mut()
             .expect("text element was checked");
         text.content = Arc::from(content);
-        text.revision = text.revision.wrapping_add(1);
-        text::prepare_node(&mut nodes[index], &mut self.text_engine, self.limits.text())?;
+        text.invalidate();
         self.commit_state(nodes, self.size)
     }
 
@@ -74,8 +73,7 @@ impl Application {
             .as_mut()
             .expect("text element was checked");
         text.style = style;
-        text.revision = text.revision.wrapping_add(1);
-        text::prepare_node(&mut nodes[index], &mut self.text_engine, self.limits.text())?;
+        text.invalidate();
         self.commit_state(nodes, self.size)
     }
 
@@ -87,20 +85,8 @@ impl Application {
         if node.style == style {
             return Ok(());
         }
-        let reshape = node.style.width != style.width || node.style.height != style.height;
         let mut nodes = self.nodes.clone();
         nodes[index].style = style;
-        crate::text::validate_budget(
-            nodes.iter().filter_map(|node| {
-                node.text
-                    .as_ref()
-                    .map(|text| (text.content.as_ref(), node.style))
-            }),
-            self.limits.text(),
-        )?;
-        if reshape {
-            text::prepare_node(&mut nodes[index], &mut self.text_engine, self.limits.text())?;
-        }
         self.commit_state(nodes, self.size)
     }
 
@@ -133,28 +119,31 @@ impl Application {
             })
     }
 
-    fn commit_state(&mut self, nodes: Vec<NamedNode>, size: Size) -> Result<(), Error> {
+    fn commit_state(&mut self, mut nodes: Vec<NamedNode>, size: Size) -> Result<(), Error> {
+        layout::prepare_nodes(&mut nodes, &mut self.text_engine, size, self.limits)?;
         let mut transaction = self.runtime.begin_transaction();
         for (old, new) in self.nodes.iter().zip(&nodes) {
-            if old.style != new.style {
-                for (property, value) in new.style.values() {
+            for ((_, before), (property, after)) in old
+                .style
+                .values(old.resolved)
+                .into_iter()
+                .zip(new.style.values(new.resolved))
+            {
+                if before != after {
                     transaction
-                        .set_property(new.id, property, value)
+                        .set_property(new.id, property, after)
                         .map_err(|error| Error::Runtime(format!("{:?}", error.kind())))?;
                 }
             }
-            if let (Some(old), Some(text)) = (&old.text, &new.text)
-                && old.revision != text.revision
-            {
-                transaction
-                    .set_property(
-                        new.id,
-                        lower::TEXT_REVISION,
-                        PropertyValue::ScalarI32(text.revision),
-                    )
-                    .map_err(|error| Error::Runtime(format!("{:?}", error.kind())))?;
-            }
         }
+        let revision = self.revision.wrapping_add(1);
+        transaction
+            .set_property(
+                nodes[0].id,
+                lower::VIEW_REVISION,
+                PropertyValue::ScalarI32(revision),
+            )
+            .map_err(|error| Error::Runtime(format!("{:?}", error.kind())))?;
         if size != self.size {
             transaction
                 .resize_spatial(viewport(size))
@@ -170,6 +159,7 @@ impl Application {
                 CommitWithError::Preparation(error) => error,
             })?;
         self.nodes = nodes;
+        self.revision = revision;
         self.size = size;
         self.text_frame = frame;
         Ok(())

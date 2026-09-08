@@ -9,7 +9,8 @@ use fenestra_ui_spatial::prototype::{
 
 use super::NamedNode;
 use crate::{
-    Error, Limits, Size, TextEngine, TextError, TextLayout, TextLimits, TextRequest, TextStyle,
+    Error, Limits, TextEngine, TextError, TextLayout, TextLimits, TextMetrics, TextRequest,
+    TextStyle,
 };
 
 #[derive(Clone)]
@@ -17,7 +18,8 @@ pub(super) struct TextState {
     pub(super) content: Arc<str>,
     pub(super) style: TextStyle,
     pub(super) layout: Option<Arc<TextLayout>>,
-    pub(super) revision: i32,
+    pub(super) natural: Option<TextMetrics>,
+    pub(super) wrapped: Option<(u32, TextMetrics)>,
 }
 
 impl TextState {
@@ -26,8 +28,15 @@ impl TextState {
             content: Arc::from(content),
             style,
             layout: None,
-            revision: 0,
+            natural: None,
+            wrapped: None,
         }
+    }
+
+    pub(super) fn invalidate(&mut self) {
+        self.layout = None;
+        self.natural = None;
+        self.wrapped = None;
     }
 }
 
@@ -40,15 +49,31 @@ pub(super) fn prepare_node(
         return Ok(());
     };
     let engine = engine.as_mut().ok_or(TextError::EngineUnavailable)?;
-    if node.style.width == 0 || node.style.height == 0 {
+    let size = node.resolved;
+    if size.width() == 0 || size.height() == 0 {
         text.layout = None;
         return Ok(());
     }
-    let size = Size::new(node.style.width as u32, node.style.height as u32);
+    if let Some(layout) = &text.layout
+        && layout.raster().size() == size
+    {
+        return check_measurement(text, layout);
+    }
     let request = TextRequest::new(&text.content, text.style, size, limits)?;
     let layout = engine.layout(request)?;
     layout.validate_request(request)?;
+    check_measurement(text, &layout)?;
     text.layout = Some(Arc::new(layout));
+    Ok(())
+}
+
+fn check_measurement(text: &TextState, layout: &TextLayout) -> Result<(), Error> {
+    if let Some((width, metrics)) = text.wrapped
+        && width == layout.raster().size().width()
+        && metrics != layout.metrics()
+    {
+        return Err(TextError::InconsistentMeasurement.into());
+    }
     Ok(())
 }
 

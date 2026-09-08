@@ -7,24 +7,25 @@ use fenestra_ui_ir::prototype::{
 };
 
 use super::{
-    BACKGROUND, FlatView, INPUT, NAMESPACE, REVISION, SPAN, TEXT_REVISION, invalid_program,
+    BACKGROUND, FlatView, INPUT, NAMESPACE, REVISION, SPAN, VIEW_REVISION, invalid_program,
 };
-use crate::{Error, Style};
+use crate::{Error, Size, Style};
 
 const COMPONENT: ComponentTypeId = ComponentTypeId::new(0);
 
 pub(super) fn build(
     flat: &FlatView<'_>,
+    sizes: &[Size],
     property_slots: usize,
 ) -> Result<ValidatedStyleProgram, Error> {
     let n = flat.nodes.len();
     let limits = ValidationLimits::new(1, 7, n, 0, n - 1, property_slots, 0, flat.depth, n);
     let properties = Style::new()
-        .values()
+        .values(Size::new(64, 64))
         .into_iter()
-        .chain([(TEXT_REVISION, PropertyValue::ScalarI32(0))])
+        .chain([(VIEW_REVISION, PropertyValue::ScalarI32(0))])
         .map(|(property, default)| {
-            let invalidation = if property == BACKGROUND || property == TEXT_REVISION {
+            let invalidation = if property == BACKGROUND || property == VIEW_REVISION {
                 InvalidationSet::from_class(InvalidationClass::Paint)
             } else if property == INPUT {
                 InvalidationSet::from_class(InvalidationClass::HitTest)
@@ -52,15 +53,15 @@ pub(super) fn build(
             let properties = node
                 .element
                 .style
-                .values()
+                .values(sizes[index])
                 .into_iter()
-                .chain([(TEXT_REVISION, PropertyValue::ScalarI32(0))])
+                .chain([(VIEW_REVISION, PropertyValue::ScalarI32(0))])
                 .map(|(property, value)| InitialProperty::new(property, value, SPAN))
                 .collect();
             let children = node
                 .children
                 .iter()
-                .map(|&id| ChildSlot::static_node(TemplateNodeId::new(id), SPAN))
+                .map(|&id| ChildSlot::static_node(TemplateNodeId::new(id as u32), SPAN))
                 .collect();
             TemplateNode::new(
                 TemplateNodeId::new(index as u32),

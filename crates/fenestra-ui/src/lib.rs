@@ -6,9 +6,11 @@
 //! with named elements; internal schema and spatial identities stay private.
 
 mod application;
+mod dimension;
 mod editing;
 mod error;
 mod frame;
+mod layout;
 mod limits;
 mod lower;
 mod model;
@@ -16,6 +18,7 @@ mod style;
 mod text;
 
 pub use application::Application;
+pub use dimension::Dimension;
 pub use editing::{EditingError, Selection, TextBuffer};
 pub use error::Error;
 pub use frame::{Bounds, Raster, Size};

@@ -34,8 +34,8 @@ impl View {
 ///
 /// Names use ASCII letters, digits, and underscores, cannot begin with a digit,
 /// and must be unique across the view. Child order determines layout and paint
-/// order. Each element has fixed viewport pixel dimensions; containers do not resize
-/// themselves to fit their children.
+/// order. Dimensions use fixed pixels, intrinsic content size, or weighted
+/// available space, as selected by [`Style`] and [`crate::Dimension`].
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Element {
     pub(crate) name: String,
@@ -73,7 +73,7 @@ impl Element {
         Self::new(name, ElementKind::Rect)
     }
 
-    /// Creates a text leaf. Its fixed-size raster wraps and clips its content.
+    /// Creates a text leaf that wraps and clips content to its resolved dimensions.
     #[must_use]
     pub fn text(name: impl Into<String>, content: impl Into<String>) -> Self {
         let mut element = Self::new(name, ElementKind::Text);
