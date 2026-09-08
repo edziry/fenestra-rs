@@ -7,7 +7,7 @@ use super::surface_support::{
     public_methods,
 };
 
-const EXPECTED_EXPORTS: [&str; 121] = [
+const EXPECTED_EXPORTS: [&str; 123] = [
     "Affine2V2",
     "REGISTERED_SPATIAL_LIMITS_V2",
     "SpatialAabbV2",
@@ -40,6 +40,8 @@ const EXPECTED_EXPORTS: [&str; 121] = [
     "SpatialImageKeyV2",
     "SpatialImageSourceRectV2",
     "SpatialImageV2",
+    "SpatialImageAttachmentErrorV2",
+    "SpatialImagePaintAttachmentV2",
     "SpatialInputErrorKindV2",
     "SpatialInputPolicyV2",
     "SpatialItemInputV2",
@@ -131,7 +133,7 @@ const EXPECTED_EXPORTS: [&str; 121] = [
     "validate_spatial_output_v2",
 ];
 
-const EXPECTED_STRUCTS: [&str; 52] = [
+const EXPECTED_STRUCTS: [&str; 53] = [
     "Affine2V2",
     "SpatialAabbV2",
     "SpatialAnchorV2",
@@ -148,6 +150,7 @@ const EXPECTED_STRUCTS: [&str; 52] = [
     "SpatialImageKeyV2",
     "SpatialImageSourceRectV2",
     "SpatialImageV2",
+    "SpatialImagePaintAttachmentV2",
     "SpatialItemInputV2",
     "SpatialLayoutPlacementV2",
     "SpatialLimitsV2",
