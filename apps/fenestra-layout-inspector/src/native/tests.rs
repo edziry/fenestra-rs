@@ -1,50 +1,11 @@
-use winit::dpi::{PhysicalPosition, PhysicalSize};
-use winit::event::{DeviceId, ElementState, MouseButton, WindowEvent};
+use fenestra_ui::native::{WindowContent, WindowEvent};
 
-use super::{EvidenceMilestone, InspectorAction, NativeApplication, input::requests_redraw};
+use super::{EvidenceMilestone, InspectorAction, NativeApplication};
 use crate::evidence::{EvidenceResult, verify_artifact};
 
 #[test]
-fn presenting_a_frame_does_not_schedule_another_frame() {
-    assert!(!requests_redraw(&WindowEvent::RedrawRequested));
-}
-
-#[test]
-fn unrelated_window_events_do_not_schedule_frames() {
-    for event in [
-        WindowEvent::Focused(true),
-        WindowEvent::Occluded(false),
-        WindowEvent::CloseRequested,
-    ] {
-        assert!(!requests_redraw(&event), "unexpected redraw for {event:?}");
-    }
-}
-
-#[test]
-fn pointer_interactions_schedule_frames() {
-    assert!(requests_redraw(&WindowEvent::CursorMoved {
-        device_id: DeviceId::dummy(),
-        position: PhysicalPosition::new(4.0, 3.0),
-    }));
-    for (state, button, redraw) in [
-        (ElementState::Pressed, MouseButton::Left, true),
-        (ElementState::Released, MouseButton::Left, false),
-        (ElementState::Pressed, MouseButton::Right, false),
-    ] {
-        assert_eq!(
-            requests_redraw(&WindowEvent::MouseInput {
-                device_id: DeviceId::dummy(),
-                state,
-                button,
-            }),
-            redraw
-        );
-    }
-}
-
-#[test]
 fn repeated_insertions_preserve_unique_keys() {
-    let mut application = NativeApplication::new(false, false).expect("application initializes");
+    let mut application = NativeApplication::new(false).expect("application initializes");
     for _ in 0..3 {
         application
             .insert_tile()
@@ -58,61 +19,20 @@ fn repeated_insertions_preserve_unique_keys() {
 }
 
 #[test]
-fn minimized_window_skips_presentation_until_restored() {
-    let mut application = NativeApplication::new(false, false).expect("application initializes");
-    application
-        .resize_application(192, 128)
-        .expect("initial size");
-    for size in [(0, 128), (192, 0), (0, 0)] {
-        application
-            .resize_application(size.0, size.1)
-            .expect("minimize");
-        application
-            .redraw()
-            .expect("zero size does not access the presenter");
-        assert!(!application.presented);
-        assert!(!requests_redraw(&WindowEvent::Resized(PhysicalSize::new(
-            size.0, size.1
-        ))));
-    }
-    application.resize_application(224, 160).expect("restore");
-    assert!(application.drawable);
-    let frame = application.inspector.observe().expect("restored frame");
-    assert_eq!(frame.viewport().width(), 224);
-    assert_eq!(frame.viewport().height(), 160);
-    assert!(requests_redraw(&WindowEvent::Resized(PhysicalSize::new(
-        224, 160
-    ))));
-}
-
-#[test]
 fn native_insertion_and_resize_preserve_evidence_sequence() {
-    let mut application = NativeApplication::new(false, true).expect("application initializes");
+    let mut application = NativeApplication::new(true).expect("application initializes");
+    application.presented().expect("initial presentation");
     application
-        .record_presentation()
-        .expect("initial presentation");
-    application
-        .inspector
-        .dispatch(InspectorAction::PointerMove { x: 4, y: 3 })
+        .event(WindowEvent::PointerMoved { x: 4, y: 3 })
         .expect("pointer move");
-    let moved = application.inspector.observe().expect("hover frame");
+    assert!(application.inspector.hovered().is_some());
     application
-        .evidence
-        .as_mut()
-        .expect("evidence enabled")
-        .record_pointer_move(4, 3, &moved)
-        .expect("pointer move evidence");
-    application
-        .inspector
-        .dispatch(InspectorAction::PointerPress)
+        .event(WindowEvent::PointerPressed)
         .expect("pointer press");
-    let selected = application.inspector.observe().expect("selected frame");
-    application
-        .evidence
-        .as_mut()
-        .expect("evidence enabled")
-        .record_pointer_press(&selected)
-        .expect("pointer press evidence");
+    assert_eq!(
+        application.inspector.selected(),
+        application.inspector.hovered()
+    );
 
     application.insert_tile().expect("native insertion");
     assert_eq!(
@@ -123,15 +43,8 @@ fn native_insertion_and_resize_preserve_evidence_sequence() {
             .keyed_keys(),
         [10, 20, 30]
     );
-    application
-        .record_presentation()
-        .expect("mutation presentation");
-    application
-        .resize_window(0, 0)
-        .expect("minimize during evidence");
-    application
-        .redraw()
-        .expect("skip presentation while minimized");
+    application.presented().expect("mutation presentation");
+    application.resize(0, 0).expect("minimize during evidence");
     assert_eq!(
         application
             .evidence
@@ -141,14 +54,13 @@ fn native_insertion_and_resize_preserve_evidence_sequence() {
         Some(EvidenceMilestone::Resize)
     );
     application
-        .resize_window(224, 160)
+        .resize(224, 160)
         .expect("restore during evidence");
+    application.presented().expect("resize presentation");
     application
-        .record_presentation()
-        .expect("resize presentation");
-    let mut evidence = application.evidence.take().expect("evidence enabled");
-    evidence.record_close().expect("close evidence");
-    let bytes = evidence.finish().expect("complete evidence");
+        .event(WindowEvent::CloseRequested)
+        .expect("close evidence");
+    let bytes = application.output.take().expect("complete evidence");
     let verified = verify_artifact(&bytes).expect("independent verification");
     assert_eq!(verified.result(), EvidenceResult::Pass);
     assert_eq!(verified.final_generation(), Some(3));
@@ -168,7 +80,7 @@ fn native_construction_preserves_the_supplied_inspector() {
         .expect("custom content");
     let expected = inspector.observe().expect("custom frame");
 
-    let mut application = NativeApplication::from_inspector(inspector, false, false);
+    let mut application = NativeApplication::from_inspector(inspector, false);
 
     assert_eq!(
         application.inspector.observe().expect("native frame"),
@@ -185,4 +97,36 @@ fn native_construction_preserves_the_supplied_inspector() {
             .keyed_keys(),
         [10, 20, 30, 40]
     );
+}
+
+#[test]
+fn adapter_frames_preserve_the_inspector_pixels_and_dimensions() {
+    let application = NativeApplication::new(false).expect("application initializes");
+    let expected = application
+        .inspector
+        .reference_raster()
+        .expect("inspector frame");
+    let actual = application.frame().expect("native frame");
+    assert_eq!(actual.size().width(), expected.viewport().width() as u32);
+    assert_eq!(actual.size().height(), expected.viewport().height() as u32);
+    assert_eq!(actual.bytes(), expected.bytes());
+}
+
+#[test]
+fn adapter_space_events_keep_successive_keys_and_close_without_evidence() {
+    let mut application = NativeApplication::new(false).expect("application initializes");
+    application
+        .event(WindowEvent::SpacePressed)
+        .expect("space inserts");
+    application
+        .event(WindowEvent::SpacePressed)
+        .expect("space inserts again");
+    assert_eq!(
+        application.inspector.observe().expect("frame").keyed_keys(),
+        [10, 20, 30, 40]
+    );
+    application
+        .event(WindowEvent::CloseRequested)
+        .expect("normal close");
+    assert!(application.output.is_none());
 }

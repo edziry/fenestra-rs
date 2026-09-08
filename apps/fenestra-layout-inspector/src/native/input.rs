@@ -1,32 +1,5 @@
-use winit::event::{ElementState, KeyEvent, MouseButton, WindowEvent};
-use winit::keyboard::{KeyCode, PhysicalKey};
-
-use super::{
-    EvidenceMilestone, InspectorAction, InspectorErrorKind, NativeApplication, NativeInspectorError,
-};
-
-pub(super) fn requests_redraw(event: &WindowEvent) -> bool {
-    match event {
-        WindowEvent::CursorMoved { .. }
-        | WindowEvent::MouseInput {
-            state: ElementState::Pressed,
-            button: MouseButton::Left,
-            ..
-        }
-        | WindowEvent::KeyboardInput {
-            event:
-                KeyEvent {
-                    physical_key: PhysicalKey::Code(KeyCode::Space),
-                    state: ElementState::Pressed,
-                    repeat: false,
-                    ..
-                },
-            ..
-        } => true,
-        WindowEvent::Resized(size) => size.width > 0 && size.height > 0,
-        _ => false,
-    }
-}
+use super::{EvidenceMilestone, InspectorAction, NativeApplication, NativeInspectorError};
+use crate::InspectorErrorKind;
 
 impl NativeApplication {
     pub(super) fn resize_window(
@@ -34,33 +7,7 @@ impl NativeApplication {
         width: u32,
         height: u32,
     ) -> Result<(), NativeInspectorError> {
-        self.resize_application(width, height)?;
-        if self.drawable
-            && self
-                .evidence
-                .as_ref()
-                .is_some_and(|evidence| evidence.next_required() == Some(EvidenceMilestone::Resize))
-        {
-            let frame = self
-                .inspector
-                .observe()
-                .map_err(NativeInspectorError::Application)?;
-            self.evidence
-                .as_mut()
-                .expect("evidence was checked above")
-                .record_resize(&frame)
-                .map_err(NativeInspectorError::Evidence)?;
-        }
-        Ok(())
-    }
-
-    pub(super) fn resize_application(
-        &mut self,
-        width: u32,
-        height: u32,
-    ) -> Result<(), NativeInspectorError> {
         if width == 0 || height == 0 {
-            self.drawable = false;
             return Ok(());
         }
         let width = i32::try_from(width).map_err(|_| NativeInspectorError::Presenter)?;
@@ -68,7 +15,53 @@ impl NativeApplication {
         self.inspector
             .dispatch(InspectorAction::Resize { width, height })
             .map_err(NativeInspectorError::Application)?;
-        self.drawable = true;
+        if let Some(evidence) = &mut self.evidence
+            && evidence.next_required() == Some(EvidenceMilestone::Resize)
+        {
+            let frame = self
+                .inspector
+                .observe()
+                .map_err(NativeInspectorError::Application)?;
+            evidence
+                .record_resize(&frame)
+                .map_err(NativeInspectorError::Evidence)?;
+        }
+        Ok(())
+    }
+
+    pub(super) fn pointer_move(&mut self, x: i32, y: i32) -> Result<(), NativeInspectorError> {
+        self.inspector
+            .dispatch(InspectorAction::PointerMove { x, y })
+            .map_err(NativeInspectorError::Application)?;
+        if let Some(evidence) = &mut self.evidence
+            && evidence.next_required() == Some(EvidenceMilestone::PointerMove)
+        {
+            let frame = self
+                .inspector
+                .observe()
+                .map_err(NativeInspectorError::Application)?;
+            evidence
+                .record_pointer_move(x, y, &frame)
+                .map_err(NativeInspectorError::Evidence)?;
+        }
+        Ok(())
+    }
+
+    pub(super) fn pointer_press(&mut self) -> Result<(), NativeInspectorError> {
+        self.inspector
+            .dispatch(InspectorAction::PointerPress)
+            .map_err(NativeInspectorError::Application)?;
+        if let Some(evidence) = &mut self.evidence
+            && evidence.next_required() == Some(EvidenceMilestone::PointerPress)
+        {
+            let frame = self
+                .inspector
+                .observe()
+                .map_err(NativeInspectorError::Application)?;
+            evidence
+                .record_pointer_press(&frame)
+                .map_err(NativeInspectorError::Evidence)?;
+        }
         Ok(())
     }
 
