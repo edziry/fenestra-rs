@@ -13,6 +13,7 @@ mod limits;
 mod lower;
 mod model;
 mod style;
+mod text;
 
 pub use application::Application;
 pub use editing::{EditingError, Selection, TextBuffer};
@@ -21,6 +22,9 @@ pub use frame::{Bounds, Raster, Size};
 pub use limits::Limits;
 pub use model::{Element, View};
 pub use style::{Color, Style};
+pub use text::{
+    TextEngine, TextError, TextLayout, TextLimits, TextMetrics, TextRequest, TextStyle,
+};
 
 /// Compiles an authored view into the public application constructors.
 pub use fenestra_ui_macros::ui;

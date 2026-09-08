@@ -1,16 +1,25 @@
 use fenestra_ui_runtime::prototype::{NodeId, UiRuntime};
 use fenestra_ui_spatial::prototype::{
-    ReferenceRasterLimitsV2, SpatialPointV2, SpatialScalarV2, SpatialViewportV2,
+    ReferenceRasterLimitsV2, SpatialLimitsV2, SpatialPointV2, SpatialResolvedSnapshotV2,
+    SpatialScalarV2, SpatialViewportV2,
 };
 
 use crate::model::ElementKind;
-use crate::{Bounds, Color, Error, Limits, Raster, Size, Style, View, lower};
+use crate::{Bounds, Error, Limits, Raster, Size, Style, TextEngine};
 
+mod construction;
+mod mutation;
+mod text;
+
+use text::TextState;
+
+#[derive(Clone)]
 struct NamedNode {
     name: String,
     id: NodeId,
     kind: ElementKind,
     style: Style,
+    text: Option<TextState>,
 }
 
 /// A named, typed application backed by the deterministic Fenestra runtime.
@@ -19,60 +28,12 @@ pub struct Application {
     nodes: Vec<NamedNode>,
     size: Size,
     limits: Limits,
+    spatial_limits: SpatialLimitsV2,
+    text_engine: Option<Box<dyn TextEngine>>,
+    text_frame: Option<SpatialResolvedSnapshotV2>,
 }
 
 impl Application {
-    /// Constructs a view with default resource limits.
-    pub fn new(view: View, size: Size) -> Result<Self, Error> {
-        Self::with_limits(view, size, Limits::default())
-    }
-
-    /// Constructs a view within explicit resource limits.
-    pub fn with_limits(view: View, size: Size, limits: Limits) -> Result<Self, Error> {
-        validate_size(size, limits)?;
-        let lowered = lower::lower(&view, limits)?;
-        let runtime = UiRuntime::new_spatial_ir(
-            lowered.program,
-            viewport(size),
-            lowered.spatial_limits,
-            lowered.capacity,
-        )
-        .map_err(|error| Error::Runtime(format!("{:?}", error.kind())))?;
-        let committed = runtime.committed();
-        let mut logical = vec![committed.root()];
-        let mut by_template = vec![None; lowered.names.len()];
-        while let Some(node) = logical.pop() {
-            let template = committed
-                .template(node)
-                .ok_or_else(|| Error::InvalidProgram("missing node template".into()))?;
-            let slot = by_template
-                .get_mut(template.get() as usize)
-                .ok_or_else(|| Error::InvalidProgram("unknown node template".into()))?;
-            *slot = Some(node);
-            logical.extend(committed.children(node).unwrap_or(&[]).iter().copied());
-        }
-        let mut elements = vec![&view.root];
-        let mut nodes = Vec::with_capacity(lowered.names.len());
-        while let Some(element) = elements.pop() {
-            let index = nodes.len();
-            let id = by_template[index]
-                .ok_or_else(|| Error::InvalidProgram("missing logical element".into()))?;
-            nodes.push(NamedNode {
-                name: element.name.clone(),
-                id,
-                kind: element.kind,
-                style: element.style,
-            });
-            elements.extend(element.children.iter().rev());
-        }
-        Ok(Self {
-            runtime,
-            nodes,
-            size,
-            limits,
-        })
-    }
-
     /// Returns the committed generation; no-op updates keep this value.
     #[must_use]
     pub fn generation(&self) -> u64 {
@@ -134,48 +95,6 @@ impl Application {
         })
     }
 
-    /// Applies all typed style properties in one atomic runtime transaction.
-    pub fn set_style(&mut self, name: &str, style: Style) -> Result<(), Error> {
-        let index = self.node_index(name)?;
-        let node = &self.nodes[index];
-        style.validate(name, node.kind)?;
-        let mut transaction = self.runtime.begin_transaction();
-        for (property, value) in style.values() {
-            transaction
-                .set_property(node.id, property, value)
-                .map_err(|error| Error::Runtime(format!("{:?}", error.kind())))?;
-        }
-        self.runtime
-            .commit(transaction)
-            .map_err(|error| Error::Runtime(format!("{:?}", error.kind())))?;
-        self.nodes[index].style = style;
-        Ok(())
-    }
-
-    /// Updates one element's background without changing its other properties.
-    pub fn set_background(&mut self, name: &str, color: Color) -> Result<(), Error> {
-        self.set_style(name, self.style(name)?.background(color))
-    }
-
-    /// Updates width and height together, including layout, paint and hit geometry.
-    pub fn set_size(&mut self, name: &str, width: i32, height: i32) -> Result<(), Error> {
-        self.set_style(name, self.style(name)?.width(width).height(height))
-    }
-
-    /// Resizes the viewport after validating its pixel budget.
-    pub fn resize(&mut self, size: Size) -> Result<(), Error> {
-        validate_size(size, self.limits)?;
-        let mut transaction = self.runtime.begin_transaction();
-        transaction
-            .resize_spatial(viewport(size))
-            .map_err(|error| Error::Runtime(format!("{:?}", error.kind())))?;
-        self.runtime
-            .commit(transaction)
-            .map_err(|error| Error::Runtime(format!("{:?}", error.kind())))?;
-        self.size = size;
-        Ok(())
-    }
-
     /// Returns the topmost input-enabled element at physical pixel coordinates.
     #[must_use]
     pub fn hit_test(&self, x: i32, y: i32) -> Option<&str> {
@@ -202,8 +121,11 @@ impl Application {
         let spatial = committed
             .spatial()
             .ok_or_else(|| Error::InvalidProgram("missing spatial frame".into()))?;
-        let raster = spatial
-            .snapshot()
+        let snapshot = self
+            .text_frame
+            .as_ref()
+            .unwrap_or_else(|| spatial.snapshot());
+        let raster = snapshot
             .paint_frame()
             .rasterize_reference(ReferenceRasterLimitsV2::new(self.limits.max_pixels()))
             .map_err(|error| Error::Runtime(format!("{:?}", error.kind())))?;

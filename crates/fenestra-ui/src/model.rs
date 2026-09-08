@@ -1,4 +1,4 @@
-use crate::Style;
+use crate::{Style, TextStyle};
 
 /// A named, static tree of native UI elements.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -30,7 +30,7 @@ impl View {
     }
 }
 
-/// A rectangle or ordered row or column of child elements.
+/// A rectangle, text leaf, or ordered row or column of child elements.
 ///
 /// Names use ASCII letters, digits, and underscores, cannot begin with a digit,
 /// and must be unique across the view. Child order determines layout and paint
@@ -42,6 +42,8 @@ pub struct Element {
     pub(crate) kind: ElementKind,
     pub(crate) style: Style,
     pub(crate) children: Vec<Element>,
+    pub(crate) text: Option<String>,
+    pub(crate) text_style: Option<TextStyle>,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -49,6 +51,7 @@ pub(crate) enum ElementKind {
     Row,
     Column,
     Rect,
+    Text,
 }
 
 impl Element {
@@ -68,6 +71,21 @@ impl Element {
     #[must_use]
     pub fn rect(name: impl Into<String>) -> Self {
         Self::new(name, ElementKind::Rect)
+    }
+
+    /// Creates a text leaf. Its fixed-size raster wraps and clips its content.
+    #[must_use]
+    pub fn text(name: impl Into<String>, content: impl Into<String>) -> Self {
+        let mut element = Self::new(name, ElementKind::Text);
+        element.text = Some(content.into());
+        element
+    }
+
+    /// Sets typography on a text leaf; other element kinds reject this property.
+    #[must_use]
+    pub const fn text_style(mut self, style: TextStyle) -> Self {
+        self.text_style = Some(style);
+        self
     }
 
     /// Replaces the element's style.
@@ -96,6 +114,8 @@ impl Element {
             kind,
             style: Style::new(),
             children: Vec::new(),
+            text: None,
+            text_style: None,
         }
     }
 }

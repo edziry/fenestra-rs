@@ -23,7 +23,7 @@ pub(super) fn node(id: u32, node: &FlatElement<'_>) -> SpatialNodeDeclarationV2 
     });
     let axis = match node.element.kind {
         ElementKind::Row => SpatialAxisV2::Row,
-        ElementKind::Column | ElementKind::Rect => SpatialAxisV2::Column,
+        ElementKind::Column | ElementKind::Rect | ElementKind::Text => SpatialAxisV2::Column,
     };
     SpatialNodeDeclarationV2::new(
         field(SpatialNodeSymbolV2::new(id)),

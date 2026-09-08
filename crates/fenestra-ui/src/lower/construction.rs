@@ -1,12 +1,14 @@
 use fenestra_ui_ir::prototype::{
     ChildSlot, ComponentSchema, ComponentTypeId, ConstructionProgram, InitialProperty,
-    InvalidationClass, InvalidationSet, PropertySchema, SUPPORTED_CONSTRUCTION_FORMAT,
-    SUPPORTED_SCHEMA_FORMAT, SUPPORTED_STYLE_FORMAT, SchemaManifest, StyleProgram,
-    StyleValidationLimits, TemplateNode, TemplateNodeId, ValidatedStyleProgram, ValidationLimits,
-    validate_construction, validate_schema, validate_style,
+    InvalidationClass, InvalidationSet, PropertySchema, PropertyValue,
+    SUPPORTED_CONSTRUCTION_FORMAT, SUPPORTED_SCHEMA_FORMAT, SUPPORTED_STYLE_FORMAT, SchemaManifest,
+    StyleProgram, StyleValidationLimits, TemplateNode, TemplateNodeId, ValidatedStyleProgram,
+    ValidationLimits, validate_construction, validate_schema, validate_style,
 };
 
-use super::{BACKGROUND, FlatView, INPUT, NAMESPACE, REVISION, SPAN, invalid_program};
+use super::{
+    BACKGROUND, FlatView, INPUT, NAMESPACE, REVISION, SPAN, TEXT_REVISION, invalid_program,
+};
 use crate::{Error, Style};
 
 const COMPONENT: ComponentTypeId = ComponentTypeId::new(0);
@@ -16,12 +18,13 @@ pub(super) fn build(
     property_slots: usize,
 ) -> Result<ValidatedStyleProgram, Error> {
     let n = flat.nodes.len();
-    let limits = ValidationLimits::new(1, 6, n, 0, n - 1, property_slots, 0, flat.depth, n);
+    let limits = ValidationLimits::new(1, 7, n, 0, n - 1, property_slots, 0, flat.depth, n);
     let properties = Style::new()
         .values()
         .into_iter()
+        .chain([(TEXT_REVISION, PropertyValue::ScalarI32(0))])
         .map(|(property, default)| {
-            let invalidation = if property == BACKGROUND {
+            let invalidation = if property == BACKGROUND || property == TEXT_REVISION {
                 InvalidationSet::from_class(InvalidationClass::Paint)
             } else if property == INPUT {
                 InvalidationSet::from_class(InvalidationClass::HitTest)
@@ -51,6 +54,7 @@ pub(super) fn build(
                 .style
                 .values()
                 .into_iter()
+                .chain([(TEXT_REVISION, PropertyValue::ScalarI32(0))])
                 .map(|(property, value)| InitialProperty::new(property, value, SPAN))
                 .collect();
             let children = node

@@ -4,6 +4,7 @@ pub struct Limits {
     pub(crate) max_nodes: usize,
     pub(crate) max_depth: usize,
     pub(crate) max_pixels: usize,
+    pub(crate) text: crate::TextLimits,
 }
 
 impl Limits {
@@ -14,6 +15,7 @@ impl Limits {
             max_nodes,
             max_depth,
             max_pixels,
+            text: crate::TextLimits::defaults(),
         }
     }
 
@@ -33,6 +35,19 @@ impl Limits {
     #[must_use]
     pub const fn max_pixels(self) -> usize {
         self.max_pixels
+    }
+
+    /// Sets aggregate text byte/pixel bounds and glyphs allowed per request.
+    #[must_use]
+    pub const fn text_limits(mut self, limits: crate::TextLimits) -> Self {
+        self.text = limits;
+        self
+    }
+
+    /// Returns the current text preparation bounds.
+    #[must_use]
+    pub const fn text(self) -> crate::TextLimits {
+        self.text
     }
 }
 

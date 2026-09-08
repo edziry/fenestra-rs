@@ -20,6 +20,9 @@ pub(crate) const PADDING: PropertyId = PropertyId::new(2);
 pub(crate) const GAP: PropertyId = PropertyId::new(3);
 pub(crate) const BACKGROUND: PropertyId = PropertyId::new(4);
 pub(crate) const INPUT: PropertyId = PropertyId::new(5);
+// This ordinary paint property publishes text and typography changes through
+// the existing runtime generation without adding font data to the frozen IR.
+pub(crate) const TEXT_REVISION: PropertyId = PropertyId::new(6);
 const NAMESPACE: SchemaNamespace = SchemaNamespace::new(1);
 const REVISION: SchemaRevision = SchemaRevision::new(1);
 const SPAN: SourceSpan = SourceSpan::Synthetic;
@@ -46,9 +49,18 @@ struct FlatView<'a> {
 pub(crate) fn lower(view: &View, limits: Limits) -> Result<Lowered, Error> {
     validate_name(&view.name)?;
     let flat = flatten(&view.root, limits)?;
+    crate::text::validate_budget(
+        flat.nodes.iter().filter_map(|node| {
+            node.element
+                .text
+                .as_deref()
+                .map(|text| (text, node.element.style))
+        }),
+        limits.text(),
+    )?;
     let n = flat.nodes.len();
     let spatial_nodes = n.checked_add(1).ok_or(Error::CapacityOverflow)?;
-    let property_slots = n.checked_mul(6).ok_or(Error::CapacityOverflow)?;
+    let property_slots = n.checked_mul(7).ok_or(Error::CapacityOverflow)?;
     let spatial_depth = flat.depth.checked_add(1).ok_or(Error::CapacityOverflow)?;
     u32::try_from(spatial_nodes).map_err(|_| Error::CapacityOverflow)?;
 
@@ -140,11 +152,22 @@ fn flatten(root: &Element, limits: Limits) -> Result<FlatView<'_>, Error> {
             });
         }
         element.style.validate(&element.name, element.kind)?;
-        if element.kind == ElementKind::Rect && !element.children.is_empty() {
+        if matches!(element.kind, ElementKind::Rect | ElementKind::Text)
+            && !element.children.is_empty()
+        {
             return Err(Error::InvalidElement {
                 node: element.name.clone(),
-                reason: "rectangles cannot contain children",
+                reason: "leaf elements cannot contain children",
             });
+        }
+        if element.kind != ElementKind::Text && element.text_style.is_some() {
+            return Err(Error::InvalidElement {
+                node: element.name.clone(),
+                reason: "typography requires a text element",
+            });
+        }
+        if element.kind == ElementKind::Text {
+            element.text_style.unwrap_or_default().validate()?;
         }
         if let Some(parent) = parent {
             result.nodes[parent].children.push(id);

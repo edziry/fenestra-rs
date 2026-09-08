@@ -58,6 +58,8 @@ pub enum Error {
     },
     /// Raster data does not contain one RGBA8 value for every pixel.
     InvalidRaster,
+    /// Text shaping, raster validation or text resource preparation failed.
+    Text(crate::TextError),
 }
 
 impl fmt::Display for Error {
@@ -91,8 +93,23 @@ impl fmt::Display for Error {
                 write!(f, "invalid viewport {width}x{height}")
             }
             Self::InvalidRaster => f.write_str("raster byte count does not match its size"),
+            Self::Text(error) => error.fmt(f),
         }
     }
 }
 
-impl std::error::Error for Error {}
+impl std::error::Error for Error {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        if let Self::Text(error) = self {
+            Some(error)
+        } else {
+            None
+        }
+    }
+}
+
+impl From<crate::TextError> for Error {
+    fn from(error: crate::TextError) -> Self {
+        Self::Text(error)
+    }
+}

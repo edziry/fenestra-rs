@@ -107,10 +107,12 @@ impl Style {
                 });
             }
         }
-        if kind == ElementKind::Rect && (self.padding != 0 || self.gap != 0) {
+        if matches!(kind, ElementKind::Rect | ElementKind::Text)
+            && (self.padding != 0 || self.gap != 0)
+        {
             return Err(Error::InvalidElement {
                 node: node.into(),
-                reason: "rectangles cannot use padding or gap",
+                reason: "leaf elements cannot use padding or gap",
             });
         }
         Ok(())
