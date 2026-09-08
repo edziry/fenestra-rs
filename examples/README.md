@@ -1,5 +1,9 @@
 # Authoring examples
 
+Start with the [standalone typed application](typed-app/README.md) for the
+public API and format-3 named component syntax. The format-2 example below
+remains a reference for the earlier experimental IR authoring contract.
+
 `hello-panel.fen` describes a dark panel containing two blue cards. Its matching
 `hello-panel.ui` contains the same program inside `ui! { ... }`. Both use the
 existing experimental format-2 grammar and compile into the same schema,

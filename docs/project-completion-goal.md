@@ -17,7 +17,7 @@ The governing scope and research remain those of the
 are sufficient for the development-loop repairs below. New language, platform,
 text, and release decisions require their own versioned design and evidence.
 
-## Audited state
+## Audited baseline before WU-0016 and WU-0017
 
 | Area | Evidence available | Remaining gap |
 | --- | --- | --- |
@@ -64,17 +64,24 @@ completion goal.
 
 ### 2. Practical authoring and application API
 
+[WU-0017](design/typed-application-api.md) adds a public facade, named nested
+views, format 3, host-only compilation, Rust event handlers and shared native
+hosting. Its fixed-size row/column/rectangle vocabulary is an implemented
+foundation; general reusable authored components, imports, bound expressions
+and the inspector's property UX remain open.
+
 - [ ] Design and ratify ergonomic component/property/style syntax using the
   example and inspector as the user scenario; remove author-facing numeric
   schema bookkeeping from the normal application path.
 - [ ] Define roles for `.fen` and `ui!`, Rust state/event bindings, component
   composition, source maps and build integration.
-- [ ] Define resource budgets that permit real applications. Format 2 currently
-  fixes depth 4 and 8 initial instances independently of caller limits; the
-  reference compiler also permits only 8,192 source bytes.
-- [ ] Implement and test the new syntax/version without silently changing the
+- [ ] Define resource budgets that permit real applications. Format 2 retains
+  its depth-4/eight-instance fixture contract. WU-0017 introduces independent
+  node, depth and pixel budgets, with tests covering 301 nodes and 40 levels;
+  these still need validation with the normal UI and performance scenarios.
+- [x] Implement and test the new syntax/version without silently changing the
   frozen experiment fixtures or their diagnostic contracts.
-- [ ] Provide an application-facing facade and compile examples as consumers
+- [x] Provide an application-facing facade and compile examples as consumers
   of it, without importing internal `prototype` APIs.
 - [ ] Add inspector node navigation, property display/editing and visible
   diagnostics; keep authored input, compiled state and UI feedback traceable.

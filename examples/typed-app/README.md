@@ -24,7 +24,11 @@ generation=3 nodes=5 viewport=360x220 rgba_bytes=316800 hit(100,16)=Some("primar
 
 The tests check literal pixel colors and named hit targets before and after
 those updates. They also exercise both authoring entry points in a consumer
-outside the framework workspace. No application code assigns numeric schema,
+outside the framework workspace. Generated Rust currently expects the canonical crate name `fenestra_ui`. If
+the Cargo dependency is renamed, add `extern crate <alias> as fenestra_ui;`
+at the consuming crate root.
+
+No application code assigns numeric schema,
 property, template, or spatial identities.
 
 ## Native window
@@ -78,7 +82,7 @@ view example {
 }
 ```
 
-Every element defaults to 64x64 logical pixels, zero padding and gap, a
+Every element defaults to 64x64 viewport pixels, zero padding and gap, a
 transparent background, and `input: ignore`. Width, height, padding, and gap
 are nonnegative integers. Colors use four RGBA8 channels from 0 through 255.
 Names are unique ASCII identifiers beginning with a letter or underscore.

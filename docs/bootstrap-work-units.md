@@ -320,3 +320,26 @@ Verification: [inspector and authoring loop verification](verification/WU-0016-i
 Exit: the inspector has a reusable compiled-content seam and the application
 dogfoods both typed authoring frontends without selecting a final authoring
 syntax or public API.
+
+## WU-0017: Typed application API and component authoring
+
+Branch: `feat/typed-application-api`
+Design: [typed application API](design/typed-application-api.md)
+Verification: [typed application API verification](verification/WU-0017-typed-application-api.md)
+
+- Research: reuse the typed runtime, spatial bindings and CPU native shell;
+  identify numeric schema bookkeeping and fixture capacities as application
+  adoption barriers.
+- Planning: define named row/column/rectangle elements, typed styles, atomic
+  named updates, explicit capacities and an additive compiled format 3.
+- Implementation: expose the public facade, compile `.fen` and `ui!` to its
+  constructors, extract optional shared native hosting and add a standalone
+  application consumer.
+- Verification: prove public source parity, pixels, hits, coherent mutation,
+  wider/deeper trees, limits, diagnostics, preserved earlier fixtures, native
+  Wayland presentation and Windows cross-compilation.
+
+Exit: an application can author, build, mutate and present named views through
+the public API without internal IDs or a runtime compiler dependency. General
+controls, text, flexible layout, authored component reuse and the remaining
+product gates stay open.

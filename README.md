@@ -12,10 +12,10 @@ Workspace packages follow the ratified [pre-1.0 versioning policy](docs/versioni
 
 ## Current status
 
-This is an unpublished `0.2.0` prototype. The deterministic runtime, typed
-authoring compiler, spatial graphics and layout inspector are executable.
-The `fenestra-ui` facade does not yet expose an application API. Text, IME,
-accessible controls, general component syntax and release packaging remain
+This is an unpublished `0.2.0` prototype. The `fenestra-ui` facade now exposes
+named views, typed styles, application updates, hit testing and optional native
+windows. Format 3 compiles nested `.fen` and `ui!` views into that public API.
+Text, IME, accessible controls, flexible layout and release packaging remain
 unfinished. See the [completion goal](docs/project-completion-goal.md) for
 acceptance gates and the [work units](docs/bootstrap-work-units.md) for evidence.
 
@@ -26,7 +26,27 @@ uses the exact Rust toolchain pinned in [rust-toolchain.toml](rust-toolchain.tom
 (`1.97.1`), including rustfmt and Clippy. Package downloads require network
 access on the first build.
 
-Check a small authored panel, then run its deterministic interaction sequence:
+Check a small named view, then run the standalone public API consumer:
+
+```sh
+cargo run -p fenestra-ui-authoring --bin fenestra-check --locked -- examples/typed-app/src/panel.fen
+cargo run --manifest-path examples/typed-app/Cargo.toml --locked
+```
+
+This consumer compiles `.fen` at build time, compares it with the real `ui!`
+macro in its tests, and depends only on `fenestra-ui` at runtime. It changes
+one card's color and width, then resizes the viewport. To interact with it:
+
+```sh
+cargo run --manifest-path examples/typed-app/Cargo.toml --locked --features native -- --native
+```
+
+Click either card to toggle its highlight. Its handler keeps ordinary Rust
+state and updates elements by name. The [typed example guide](examples/typed-app/README.md)
+explains the syntax, build helper, API and current fixed-size layout behavior.
+Native window dependencies are optional; headless applications need no desktop.
+
+The earlier format-2 example remains available as a conformance reference:
 
 ```sh
 cargo run -p fenestra-ui-authoring --bin fenestra-check --locked -- examples/hello-panel.fen
@@ -66,8 +86,10 @@ cargo run -p fenestra-layout-inspector --bin fenestra-layout-inspector-native --
 ## Check authored syntax
 
 `fenestra-check` reports errors as `file:line:byte-column`, followed by the
-diagnostic category, exact byte range and typed cause. It supports format 2
-under the registered experimental limits; it does not execute a source file.
+diagnostic and exact byte range. It detects format 2 or 3 and applies each
+format's bounds. Format 3 supports ordinary comments and named elements;
+format 2 retains its original typed IR and diagnostic contracts. The checker
+does not execute a source file.
 
 ```sh
 cargo run -p fenestra-ui-authoring --bin fenestra-check --locked -- --help
