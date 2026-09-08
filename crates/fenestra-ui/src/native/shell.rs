@@ -1,17 +1,19 @@
 use std::num::NonZeroU32;
 use std::sync::Arc;
 
+use accesskit_winit::{Event as AccessibilityEvent, WindowEvent as AccessibilityEventKind};
 use softbuffer::{Context, Surface};
 use winit::application::ApplicationHandler;
 use winit::dpi::LogicalSize;
 use winit::event::WindowEvent as PlatformEvent;
-use winit::event_loop::{ActiveEventLoop, OwnedDisplayHandle};
+use winit::event_loop::{ActiveEventLoop, EventLoopProxy, OwnedDisplayHandle};
 use winit::window::{Window, WindowId};
 
+use super::accessibility::{Accessibility, action_kind, action_request};
 use super::input::{InputState, requests_redraw};
 use super::presentation::copy_pixels;
 use super::{NativeError, WindowContent, WindowOptions};
-use crate::Size;
+use crate::{AccessibilityAction, Size};
 
 type NativeContext = Context<OwnedDisplayHandle>;
 type NativeSurface = Surface<OwnedDisplayHandle, Arc<Window>>;
@@ -28,6 +30,8 @@ pub(super) struct NativeApplication<'a, C: WindowContent> {
     pub(super) presented: bool,
     pub(super) drawable: bool,
     pub(super) size: Option<Size>,
+    accessibility: Option<Accessibility>,
+    pub(super) event_loop_proxy: Option<EventLoopProxy<AccessibilityEvent>>,
     window: Option<Arc<Window>>,
     _context: Option<NativeContext>,
     surface: Option<NativeSurface>,
@@ -43,6 +47,8 @@ impl<'a, C: WindowContent> NativeApplication<'a, C> {
             presented: false,
             drawable: false,
             size: None,
+            accessibility: None,
+            event_loop_proxy: None,
             window: None,
             _context: None,
             surface: None,
@@ -60,6 +66,7 @@ impl<'a, C: WindowContent> NativeApplication<'a, C> {
                 .create_window(
                     Window::default_attributes()
                         .with_title(&self.options.title)
+                        .with_visible(false)
                         .with_inner_size(LogicalSize::new(
                             self.options.size.width(),
                             self.options.size.height(),
@@ -71,13 +78,33 @@ impl<'a, C: WindowContent> NativeApplication<'a, C> {
         window.set_ime_allowed(self.options.ime_allowed);
         let physical = window.inner_size();
         self.resize_content(physical.width, physical.height)?;
+        let tree = self
+            .content
+            .accessibility()
+            .map_err(NativeError::Application)?;
         let context =
             Context::new(event_loop.owned_display_handle()).map_err(|_| NativeError::Presenter)?;
         let surface =
             Surface::new(&context, Arc::clone(&window)).map_err(|_| NativeError::Presenter)?;
+        if tree.is_some() {
+            let proxy = self
+                .event_loop_proxy
+                .as_ref()
+                .ok_or(NativeError::EventLoop)?;
+            let mut accessibility = Accessibility::new(event_loop, &window, proxy.clone());
+            accessibility.update(
+                tree,
+                &self.options.title,
+                Size::new(physical.width, physical.height),
+            );
+            self.accessibility = Some(accessibility);
+        }
         self._context = Some(context);
         self.surface = Some(surface);
         self.window = Some(window);
+        if let Some(window) = &self.window {
+            window.set_visible(true);
+        }
         self.request_redraw();
         Ok(())
     }
@@ -151,16 +178,80 @@ impl<'a, C: WindowContent> NativeApplication<'a, C> {
                 }
             }
         }
+        self.refresh_accessibility(false)?;
         Ok(EventOutcome { redraw, close })
+    }
+
+    fn refresh_accessibility(&mut self, force: bool) -> Result<(), NativeError<C::Error>> {
+        let Some(accessibility) = &mut self.accessibility else {
+            return Ok(());
+        };
+        let tree = self
+            .content
+            .accessibility()
+            .map_err(NativeError::Application)?;
+        if force {
+            accessibility.invalidate();
+        }
+        accessibility.update(
+            tree,
+            &self.options.title,
+            self.size.unwrap_or(self.options.size),
+        );
+        Ok(())
+    }
+
+    pub(super) fn accessibility_event(
+        &mut self,
+        event: AccessibilityEventKind,
+    ) -> Result<bool, NativeError<C::Error>> {
+        match event {
+            AccessibilityEventKind::InitialTreeRequested => self.refresh_accessibility(true)?,
+            AccessibilityEventKind::AccessibilityDeactivated => {
+                if let Some(accessibility) = &mut self.accessibility {
+                    accessibility.invalidate();
+                }
+            }
+            AccessibilityEventKind::ActionRequested(request) => {
+                if action_kind(&request).is_none() {
+                    return Ok(false);
+                }
+                let tree = self
+                    .content
+                    .accessibility()
+                    .map_err(NativeError::Application)?;
+                let Some(request) = tree
+                    .as_ref()
+                    .and_then(|tree| action_request(tree, &request))
+                else {
+                    return Ok(false);
+                };
+                self.content
+                    .accessibility_action(request)
+                    .map_err(NativeError::Application)?;
+                if request.action == AccessibilityAction::Focus
+                    && let Some(window) = &self.window
+                {
+                    window.focus_window();
+                }
+                self.refresh_accessibility(false)?;
+                return Ok(true);
+            }
+        }
+        Ok(false)
     }
 
     fn abort(&mut self, event_loop: &ActiveEventLoop, error: NativeError<C::Error>) {
         self.failure.get_or_insert(error);
         event_loop.exit();
     }
+
+    pub(super) fn should_exit(&self) -> bool {
+        self.content.should_close() || (self.options.smoke && self.presented)
+    }
 }
 
-impl<C: WindowContent> ApplicationHandler for NativeApplication<'_, C> {
+impl<C: WindowContent> ApplicationHandler<AccessibilityEvent> for NativeApplication<'_, C> {
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
         if let Err(error) = self.initialize(event_loop) {
             self.abort(event_loop, error);
@@ -180,6 +271,9 @@ impl<C: WindowContent> ApplicationHandler for NativeApplication<'_, C> {
         {
             return;
         }
+        if let (Some(accessibility), Some(window)) = (&mut self.accessibility, &self.window) {
+            accessibility.process_event(window, &event);
+        }
         match self.process_event(event) {
             Ok(outcome) => {
                 if outcome.close {
@@ -192,8 +286,23 @@ impl<C: WindowContent> ApplicationHandler for NativeApplication<'_, C> {
         }
     }
 
+    fn user_event(&mut self, event_loop: &ActiveEventLoop, event: AccessibilityEvent) {
+        if self
+            .window
+            .as_ref()
+            .is_none_or(|window| window.id() != event.window_id)
+        {
+            return;
+        }
+        match self.accessibility_event(event.window_event) {
+            Ok(true) => self.request_redraw(),
+            Ok(false) => (),
+            Err(error) => self.abort(event_loop, error),
+        }
+    }
+
     fn about_to_wait(&mut self, event_loop: &ActiveEventLoop) {
-        if self.options.smoke && self.presented {
+        if self.should_exit() {
             event_loop.exit();
         }
     }

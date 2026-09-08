@@ -8,8 +8,11 @@ use std::fmt;
 
 use winit::event_loop::EventLoop;
 
-use crate::{Raster, Size};
+use crate::{AccessibilityActionRequest, AccessibilityTree, Raster, Size};
 
+mod accessibility;
+#[cfg(test)]
+mod action_tests;
 mod input;
 mod presentation;
 mod shell;
@@ -35,6 +38,32 @@ pub trait WindowContent {
     /// Observes a frame only after native presentation succeeds.
     fn presented(&mut self) -> Result<(), Self::Error> {
         Ok(())
+    }
+
+    /// Returns owned semantics from the currently accepted application state.
+    ///
+    /// Returning `None` on the first call after initial resize opts out for this
+    /// window's lifetime. Once opted in, `None` withdraws all semantic children.
+    fn accessibility(&self) -> Result<Option<AccessibilityTree>, Self::Error> {
+        Ok(None)
+    }
+
+    /// Handles a supported accessibility request on the native event-loop thread.
+    ///
+    /// The host validates the target against the current semantic tree first.
+    fn accessibility_action(
+        &mut self,
+        _request: AccessibilityActionRequest,
+    ) -> Result<(), Self::Error> {
+        Ok(())
+    }
+
+    /// Requests application-controlled closure at the next event-loop idle point.
+    ///
+    /// This does not synthesize a device or close-request event. Applications
+    /// that need a final frame can wait for `presented` before returning `true`.
+    fn should_close(&self) -> bool {
+        false
     }
 }
 
@@ -129,8 +158,11 @@ pub fn run<C: WindowContent>(
     if options.size.width() == 0 || options.size.height() == 0 {
         return Err(NativeError::Window);
     }
-    let event_loop = EventLoop::new().map_err(|_| NativeError::EventLoop)?;
+    let event_loop = EventLoop::<accesskit_winit::Event>::with_user_event()
+        .build()
+        .map_err(|_| NativeError::EventLoop)?;
     let mut application = shell::NativeApplication::new(content, options);
+    application.event_loop_proxy = Some(event_loop.create_proxy());
     let result = event_loop.run_app(&mut application);
     if let Some(error) = application.failure {
         return Err(error);

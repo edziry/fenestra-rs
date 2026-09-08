@@ -78,6 +78,20 @@ impl WindowContent for Content {
 }
 
 #[test]
+fn legacy_content_can_omit_accessibility_callbacks() {
+    let mut content = Content::default();
+    assert!(!content.should_close());
+    assert_eq!(content.accessibility().unwrap(), None);
+    content
+        .accessibility_action(crate::AccessibilityActionRequest {
+            target: crate::AccessibilityId::new(123),
+            action: crate::AccessibilityAction::Activate,
+        })
+        .unwrap();
+    assert!(content.events.is_empty());
+}
+
+#[test]
 fn ime_is_opt_in_without_changing_other_window_options() {
     let options = WindowOptions::new("Example");
     assert!(!options.ime_allowed);
