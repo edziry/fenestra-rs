@@ -375,7 +375,7 @@ impl NodeWrapper<'_> {
 
         if state.is_read_only_supported() && state.is_read_only_or_disabled() {
             atspi_state.insert(State::ReadOnly);
-        } else {
+        } else if !state.is_disabled() {
             atspi_state.insert(State::Enabled | State::Sensitive);
         }
 
