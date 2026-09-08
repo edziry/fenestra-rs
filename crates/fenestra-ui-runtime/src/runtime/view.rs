@@ -13,14 +13,18 @@ use super::headless::HeadlessProjectionView;
 use super::spatial::RuntimeSpatialViewV2;
 use super::state::{RuntimeGeneration, RuntimeState};
 
-/// Immutable handle to one exact committed logical runtime generation.
+/// Immutable handle to one exact logical runtime state.
+///
+/// Normally retains a committed generation. `UiRuntime::preview` can also return
+/// an unpublished candidate whose generation and newly created identities are
+/// provisional and do not reserve a future publication.
 #[derive(Clone)]
 pub struct CommittedRuntimeSnapshot {
     pub(crate) state: Arc<RuntimeState>,
 }
 
 impl CommittedRuntimeSnapshot {
-    /// Returns the committed runtime generation.
+    /// Returns the committed or provisional candidate generation.
     #[must_use]
     pub fn generation(&self) -> RuntimeGeneration {
         self.state.generation

@@ -28,6 +28,8 @@ const VIEWPORT: SpatialViewportV2 = SpatialViewportV2::new(80, 60);
 const NAMESPACE: SchemaNamespace = SchemaNamespace::new(99);
 const REVISION: SchemaRevision = SchemaRevision::new(1);
 
+mod preview;
+
 #[derive(Default)]
 struct ProgramState {
     calls: AtomicUsize,

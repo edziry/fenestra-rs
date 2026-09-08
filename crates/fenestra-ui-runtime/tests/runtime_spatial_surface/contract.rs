@@ -62,6 +62,7 @@ fn runtime_spatial_cut_preserves_current_owner_method_sets() {
             "new_spatial_ir",
             "new_spatial_ir_with_layout_engine",
             "new_spatial_with_layout_engine",
+            "preview",
         ])
     );
     assert_eq!(

@@ -9,6 +9,7 @@ use crate::runtime::commit_control::{CommitCheckpoint, CommitControl};
 use crate::runtime::error::{CapacityKind, TransactionError, TransactionErrorKind};
 use crate::runtime::headless::HeadlessProjectionErrorKind;
 use crate::runtime::mutation::MutationRecord;
+use crate::runtime::state::RuntimeState;
 use crate::runtime::view::CommittedRuntimeSnapshot;
 
 /// Rejection before publishing a transaction and its prepared sidecar.
@@ -55,6 +56,12 @@ impl CommitWithError<Infallible> {
     }
 }
 
+struct PreparedTransaction {
+    draft: RuntimeState,
+    records: Vec<MutationRecord>,
+    invalidation: InvalidationSet,
+}
+
 impl UiRuntime {
     pub(super) fn commit_inner<T, E>(
         &mut self,
@@ -62,11 +69,61 @@ impl UiRuntime {
         control: CommitControl,
         prepare: impl FnOnce(&CommittedRuntimeSnapshot) -> Result<T, E>,
     ) -> Result<(CommitReceipt, T), CommitWithError<E>> {
+        let PreparedTransaction {
+            draft,
+            records,
+            invalidation,
+        } = self.prepare_transaction(transaction, control)?;
+        let effective = !records.is_empty();
+        if effective {
+            self.retired.retain(|state| state.strong_count() != 0);
+        }
+        let candidate = self.candidate_snapshot(draft, effective, self.retired.len())?;
+        let sidecar = prepare(&candidate).map_err(CommitWithError::Preparation)?;
+        let generation = candidate.generation();
+        let previous = if effective {
+            self.retired.reserve(1);
+            control.panic_if(CommitCheckpoint::Preparation);
+            let previous = std::mem::replace(&mut self.state, candidate.state);
+            self.retired.push(Arc::downgrade(&previous));
+            Some(previous)
+        } else {
+            None
+        };
+        Ok((
+            CommitReceipt {
+                generation,
+                records,
+                invalidation,
+                _retired_generation: previous,
+            },
+            sidecar,
+        ))
+    }
+
+    pub(super) fn preview_inner(
+        &self,
+        transaction: UiTransaction,
+    ) -> Result<CommittedRuntimeSnapshot, TransactionError> {
+        let prepared = self.prepare_transaction(transaction, CommitControl::NONE)?;
+        let retained = self
+            .retired
+            .iter()
+            .filter(|state| state.strong_count() != 0)
+            .count();
+        self.candidate_snapshot(prepared.draft, !prepared.records.is_empty(), retained)
+    }
+
+    fn prepare_transaction(
+        &self,
+        transaction: UiTransaction,
+        control: CommitControl,
+    ) -> Result<PreparedTransaction, TransactionError> {
         if let Some(error) = transaction.poison {
-            return Err(error.into());
+            return Err(error);
         }
         if !Arc::ptr_eq(&self.state, &transaction.base) {
-            return Err(TransactionError::new(TransactionErrorKind::StaleBase, None).into());
+            return Err(TransactionError::new(TransactionErrorKind::StaleBase, None));
         }
 
         let mut draft = transaction.base.fork_for_transaction();
@@ -88,16 +145,11 @@ impl UiRuntime {
         #[cfg(test)]
         let invalidation = control.override_invalidation(invalidation);
         if applied.records.is_empty() {
-            let sidecar = prepare(&self.committed()).map_err(CommitWithError::Preparation)?;
-            return Ok((
-                CommitReceipt {
-                    generation: self.state.generation,
-                    records: applied.records,
-                    invalidation,
-                    _retired_generation: None,
-                },
-                sidecar,
-            ));
+            return Ok(PreparedTransaction {
+                draft,
+                records: applied.records,
+                invalidation,
+            });
         }
 
         if let Some(headless) = &self.headless {
@@ -131,8 +183,23 @@ impl UiRuntime {
             })?);
         }
 
-        self.retired.retain(|state| state.strong_count() != 0);
-        let retained = self.retired.len().checked_add(1).ok_or_else(|| {
+        Ok(PreparedTransaction {
+            draft,
+            records: applied.records,
+            invalidation,
+        })
+    }
+
+    fn candidate_snapshot(
+        &self,
+        mut draft: RuntimeState,
+        effective: bool,
+        retained: usize,
+    ) -> Result<CommittedRuntimeSnapshot, TransactionError> {
+        if !effective {
+            return Ok(self.committed());
+        }
+        let retained = retained.checked_add(1).ok_or_else(|| {
             TransactionError::new(
                 TransactionErrorKind::CapacityExceeded(CapacityKind::RetainedGenerations),
                 None,
@@ -142,31 +209,13 @@ impl UiRuntime {
             return Err(TransactionError::new(
                 TransactionErrorKind::CapacityExceeded(CapacityKind::RetainedGenerations),
                 None,
-            )
-            .into());
+            ));
         }
-        let generation = self.state.generation.next().ok_or_else(|| {
+        draft.generation = self.state.generation.next().ok_or_else(|| {
             TransactionError::new(TransactionErrorKind::GenerationExhausted, None)
         })?;
-        draft.generation = generation;
-        let prepared = Arc::new(draft);
-        let candidate = CommittedRuntimeSnapshot {
-            state: Arc::clone(&prepared),
-        };
-        let sidecar = prepare(&candidate).map_err(CommitWithError::Preparation)?;
-        self.retired.reserve(1);
-        control.panic_if(CommitCheckpoint::Preparation);
-
-        let previous = std::mem::replace(&mut self.state, prepared);
-        self.retired.push(Arc::downgrade(&previous));
-        Ok((
-            CommitReceipt {
-                generation,
-                records: applied.records,
-                invalidation,
-                _retired_generation: Some(previous),
-            },
-            sidecar,
-        ))
+        Ok(CommittedRuntimeSnapshot {
+            state: Arc::new(draft),
+        })
     }
 }

@@ -170,4 +170,5 @@ fn retained_generation_capacity_precedes_generation_exhaustion() {
 }
 
 mod prepublication;
+mod preview;
 mod spatial;

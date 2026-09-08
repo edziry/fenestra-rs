@@ -193,6 +193,25 @@ impl UiRuntime {
         }
     }
 
+    /// Resolves an immutable candidate without publishing or reserving identities.
+    ///
+    /// Uses the same validation, projection work, and publication guards as
+    /// `commit`. A no-op shares the current snapshot; an effective transaction
+    /// yields a separate snapshot with the next generation. Its generation and
+    /// newly created identities are provisional and reserve no future publication.
+    /// Reconstruct a transaction against the current base to commit afterward.
+    ///
+    /// Leaves accepted state, identity allocators, and retention bookkeeping
+    /// unchanged. Effective previews are independent of retired-generation
+    /// accounting; a no-op retains the current state exactly as `committed()`.
+    /// Projection implementations may still update their own caches.
+    pub fn preview(
+        &self,
+        transaction: UiTransaction,
+    ) -> Result<CommittedRuntimeSnapshot, TransactionError> {
+        self.preview_inner(transaction)
+    }
+
     /// Atomically commits all staged operations or preserves the prior state.
     pub fn commit(
         &mut self,
