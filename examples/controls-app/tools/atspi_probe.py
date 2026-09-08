@@ -13,7 +13,7 @@ import time
 
 from dbus import DBusException
 
-from atspi_client import Client, host_bus, ppm_checksum, verify_controls
+from atspi_client import Client, host_bus, ppm_checksum, verify_controls, verify_label
 
 
 def eventually(description, operation, timeout=15):
@@ -71,6 +71,7 @@ class Probe:
             if not predicate(state):
                 return None
             verify_controls(nodes, state["controls"])
+            verify_label(nodes, "readout", state["readout"])
             identities = {
                 item["name"]: selected(nodes, item["name"])["path"]
                 for item in state["controls"]

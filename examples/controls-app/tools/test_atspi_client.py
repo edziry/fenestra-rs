@@ -1,7 +1,10 @@
 import unittest
 from types import SimpleNamespace
 
-from atspi_client import ACTION, COMPONENT, Client, decode_states, inspect_tree, verify_controls, ppm_checksum
+from atspi_client import (
+    ACTION, COMPONENT, Client, decode_states, inspect_tree, ppm_checksum,
+    verify_controls, verify_label,
+)
 
 
 class ProbeTests(unittest.TestCase):
@@ -125,6 +128,12 @@ class ProbeTests(unittest.TestCase):
     def test_checks_duplicate_or_missing_control_identity(self):
         with self.assertRaisesRegex(ValueError, "unique"):
             verify_controls([], [{"name": "compact"}])
+
+    def test_readout_checks_standalone_text_after_content_updates(self):
+        node = {"accessible_id": "readout", "role_id": 29, "name": "Changes pending."}
+        verify_label([node], "readout", "Changes pending.")
+        with self.assertRaisesRegex(ValueError, "readout: label"):
+            verify_label([node], "readout", "Preferences applied (1).")
 
     def test_ppm_checksum_reconstructs_opaque_rgba_and_rejects_truncation(self):
         # FNV-1a of RGBA [0, 0, 0, 255].

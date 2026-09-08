@@ -65,6 +65,14 @@ def verify_controls(nodes, expected):
                 raise ValueError(f"{name}: {field} OS={actual!r}, Rust={wanted!r}")
 
 
+def verify_label(nodes, name, text):
+    matches = [node for node in nodes if node["accessible_id"] == name]
+    if len(matches) != 1:
+        raise ValueError(f"{name}: expected one unique label")
+    if matches[0]["role_id"] != 29 or matches[0]["name"] != text:
+        raise ValueError(f"{name}: label does not match current Rust text {text!r}")
+
+
 def ppm_checksum(data):
     magic, dimensions, maximum, pixels = data.split(b"\n", 3)
     if magic != b"P6" or maximum != b"255":
