@@ -116,6 +116,9 @@ jobs:
       - name: Run authored text application headlessly
         run: cargo run --manifest-path examples/text-app/Cargo.toml --locked
 
+      - name: Exercise public text geometry and viewports
+        run: cargo run --manifest-path examples/text-app/Cargo.toml --locked --example geometry-gallery
+
       - name: Test responsive public API consumer
         run: cargo test --manifest-path examples/responsive-app/Cargo.toml --all-targets --all-features --locked
 

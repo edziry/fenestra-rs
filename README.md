@@ -159,6 +159,19 @@ unsupported glyphs. The default `fenestra-ui` dependency graph has no font
 backend. See the [text view design](docs/design/authored-text-views.md) and
 [adapter decision](docs/decisions/0001-provisional-text-adapter.md) for scope.
 
+A separate [text geometry gallery](examples/text-app/README.md#selection-geometry-and-text-viewports)
+shows grapheme-safe carets, bidirectional highlights, original CRLF offsets and
+a horizontally scrolled viewport. Run it headlessly or present one native frame:
+
+```sh
+cargo run --manifest-path examples/text-app/Cargo.toml --locked --example geometry-gallery
+cargo run --manifest-path examples/text-app/Cargo.toml --release --locked --features native --example geometry-gallery -- --native-smoke
+```
+
+These public operations and the native IME caret-context hook are prerequisites
+for an integrated editable control. The gallery is static; authored text fields,
+clipboard, text accessibility and actual platform IME qualification remain open.
+
 The [text candidate screen](probes/text-candidate-screen/README.md) compares
 Parley and cosmic-text against the same bundled font and multilingual corpus.
 Its native text pad uses Fenestra's public editing and window APIs with a

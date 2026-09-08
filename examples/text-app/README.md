@@ -112,3 +112,31 @@ window does not stretch this fixed view.
 Generated expressions use the canonical `fenestra_ui` crate name. A renamed
 dependency needs a crate-root alias, as described in the
 [typed application design](../../docs/design/typed-application-api.md).
+
+## Selection geometry and text viewports
+
+The separate [geometry gallery](examples/geometry-gallery.rs) exercises the
+public text engine operations needed by an editable control. It displays a
+combining sequence, disjoint bidirectional selection, CRLF with an empty final
+line, and a horizontally scrolled text viewport. Highlight and caret positions
+come from the same shaping pipeline as the glyphs. Text offsets remain original
+UTF-8 byte offsets at extended grapheme boundaries.
+
+```sh
+cargo run --manifest-path examples/text-app/Cargo.toml --locked --example geometry-gallery -- --ppm /tmp/geometry.ppm
+cargo run --manifest-path examples/text-app/Cargo.toml --release --locked --features native --example geometry-gallery -- --native-smoke --ppm /tmp/geometry-presented.ppm
+```
+
+The first command is headless. The second presents one native frame and exits.
+Both print source selections, full line counts, highlight counts, text-space
+caret rectangles, scroll extents and a requested physical IME caret area. The
+native preview supplies this area through `WindowContent::ime_context`; the
+host applies managed contexts only while focused and drawable. A one-frame
+smoke may close before receiving focus, so it does not establish candidate UI
+placement or an actual IME composition session.
+
+This gallery is a static API diagnostic. The main application's append-only
+input behavior above is unchanged. An authored editable field, drag selection,
+clipboard, text accessibility and platform IME qualification remain open; the
+[geometry design](../../docs/design/text-editing-geometry.md) defines this
+increment's boundary.
