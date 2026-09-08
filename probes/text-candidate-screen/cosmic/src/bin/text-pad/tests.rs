@@ -228,27 +228,31 @@ fn pointer_focus_and_caret_placement_use_committed_editor_bounds() {
 }
 
 #[test]
-fn focus_loss_discards_pointer_position_until_a_fresh_move() {
-    let mut pad = pad("abc", 40);
-    let bounds = pad.app.bounds("editor").unwrap();
-    pad.event(WindowEvent::PointerMoved {
-        x: bounds.x() as i32,
-        y: bounds.y() as i32 + 4,
-    })
-    .unwrap();
-    pad.event(WindowEvent::Focused(false)).unwrap();
-    pad.event(WindowEvent::Focused(true)).unwrap();
-    pad.event(WindowEvent::PointerPressed).unwrap();
-    assert_eq!(pad.text.selection(), Selection::caret(3));
-    assert!(!pad.editor_focused);
-    pad.event(WindowEvent::PointerMoved {
-        x: bounds.x() as i32,
-        y: bounds.y() as i32 + 4,
-    })
-    .unwrap();
-    pad.event(WindowEvent::PointerPressed).unwrap();
-    assert_eq!(pad.text.selection(), Selection::caret(0));
-    assert!(pad.editor_focused);
+fn focus_loss_and_pointer_leave_discard_position_until_a_fresh_move() {
+    for interruption in [WindowEvent::Focused(false), WindowEvent::PointerLeft] {
+        let mut pad = pad("abc", 40);
+        let bounds = pad.app.bounds("editor").unwrap();
+        pad.event(WindowEvent::PointerMoved {
+            x: bounds.x() as i32,
+            y: bounds.y() as i32 + 4,
+        })
+        .unwrap();
+        pad.event(WindowEvent::PointerReleased).unwrap();
+        assert_eq!(pad.text.selection(), Selection::caret(3));
+        pad.event(interruption).unwrap();
+        pad.event(WindowEvent::Focused(true)).unwrap();
+        pad.event(WindowEvent::PointerPressed).unwrap();
+        assert_eq!(pad.text.selection(), Selection::caret(3));
+        assert!(!pad.editor_focused);
+        pad.event(WindowEvent::PointerMoved {
+            x: bounds.x() as i32,
+            y: bounds.y() as i32 + 4,
+        })
+        .unwrap();
+        pad.event(WindowEvent::PointerPressed).unwrap();
+        assert_eq!(pad.text.selection(), Selection::caret(0));
+        assert!(pad.editor_focused);
+    }
 }
 
 #[test]

@@ -19,6 +19,11 @@ fn owned_input_and_application_events_are_available_without_native() {
     };
     assert_eq!(InputEvent::Ime(ime.clone()), InputEvent::Ime(ime.clone()));
     assert_eq!(Event::Ime(ime.clone()), Event::Ime(ime));
+    assert_eq!(
+        InputEvent::PointerReleased.clone(),
+        InputEvent::PointerReleased
+    );
+    assert_eq!(Event::PointerLeft.clone(), Event::PointerLeft);
 }
 
 #[cfg(all(feature = "native", any(target_os = "linux", target_os = "windows")))]

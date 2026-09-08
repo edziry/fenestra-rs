@@ -10,6 +10,7 @@ impl TextPad {
         match event {
             WindowEvent::PointerMoved { x, y } => self.pointer = (x, y),
             WindowEvent::PointerPressed => self.pointer_pressed()?,
+            WindowEvent::PointerLeft => self.pointer = (-1, -1),
             WindowEvent::ModifiersChanged(value) => self.modifiers = value,
             WindowEvent::Focused(focused) => {
                 self.window_focused = focused;
@@ -23,7 +24,9 @@ impl TextPad {
             }
             WindowEvent::KeyboardInput(input) => self.keyboard(input),
             WindowEvent::Ime(event) => self.ime(event),
-            WindowEvent::SpacePressed | WindowEvent::CloseRequested => {}
+            WindowEvent::PointerReleased
+            | WindowEvent::SpacePressed
+            | WindowEvent::CloseRequested => {}
         }
         Ok(())
     }

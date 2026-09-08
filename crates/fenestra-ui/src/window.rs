@@ -27,6 +27,14 @@ struct ApplicationWindow<F> {
     pointer: Option<(i32, i32)>,
 }
 
+impl<F> ApplicationWindow<F> {
+    fn pointer_target(&self) -> Option<String> {
+        self.pointer
+            .and_then(|(x, y)| self.app.hit_test(x, y))
+            .map(str::to_owned)
+    }
+}
+
 impl<F> WindowContent for ApplicationWindow<F>
 where
     F: FnMut(&mut Application, Event) -> Result<(), Error>,
@@ -46,11 +54,15 @@ where
                 Event::PointerMoved { x, y }
             }
             WindowEvent::PointerPressed => Event::Click {
-                target: self
-                    .pointer
-                    .and_then(|(x, y)| self.app.hit_test(x, y))
-                    .map(str::to_owned),
+                target: self.pointer_target(),
             },
+            WindowEvent::PointerReleased => Event::PointerReleased {
+                target: self.pointer_target(),
+            },
+            WindowEvent::PointerLeft => {
+                self.pointer = None;
+                Event::PointerLeft
+            }
             WindowEvent::SpacePressed => Event::SpacePressed,
             WindowEvent::KeyboardInput(input) => Event::KeyboardInput(input),
             WindowEvent::ModifiersChanged(modifiers) => Event::ModifiersChanged(modifiers),

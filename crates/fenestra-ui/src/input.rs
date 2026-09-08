@@ -10,6 +10,10 @@ pub enum InputEvent {
     },
     /// The primary mouse button was pressed.
     PointerPressed,
+    /// The primary mouse button was released.
+    PointerReleased,
+    /// The pointer left the window. Discard its last position and held press.
+    PointerLeft,
     /// Compatibility notification after a fresh physical Space press.
     ///
     /// Excludes repeats, synthetic input, and active IME composition. Text

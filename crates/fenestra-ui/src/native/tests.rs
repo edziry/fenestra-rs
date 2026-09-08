@@ -153,8 +153,9 @@ fn pointer_interactions_schedule_frames_and_reach_the_application() {
     );
     for (state, button, redraw) in [
         (ElementState::Pressed, MouseButton::Left, true),
-        (ElementState::Released, MouseButton::Left, false),
+        (ElementState::Released, MouseButton::Left, true),
         (ElementState::Pressed, MouseButton::Right, false),
+        (ElementState::Released, MouseButton::Right, false),
     ] {
         let event = PlatformEvent::MouseInput {
             device_id: DeviceId::dummy(),
@@ -170,11 +171,18 @@ fn pointer_interactions_schedule_frames_and_reach_the_application() {
             redraw
         );
     }
+    let left = PlatformEvent::CursorLeft {
+        device_id: DeviceId::dummy(),
+    };
+    assert!(requests_redraw(&left));
+    assert!(application.process_event(left).unwrap().redraw);
     assert_eq!(
         application.content.events,
         [
             WindowEvent::PointerMoved { x: 4, y: 3 },
             WindowEvent::PointerPressed,
+            WindowEvent::PointerReleased,
+            WindowEvent::PointerLeft,
         ]
     );
 }
@@ -252,6 +260,28 @@ fn failed_resize_does_not_publish_a_new_drawable_size() {
 }
 
 #[test]
+fn pointer_coordinates_use_the_containing_pixel_on_both_sides_of_zero() {
+    let mut content = Content::default();
+    let mut application = NativeApplication::new(&mut content, WindowOptions::new("Example"));
+    for (x, y) in [(-0.5, -1.1), (0.5, 1.9), (-1.0, 0.0)] {
+        application
+            .process_event(PlatformEvent::CursorMoved {
+                device_id: DeviceId::dummy(),
+                position: PhysicalPosition::new(x, y),
+            })
+            .unwrap();
+    }
+    assert_eq!(
+        application.content.events,
+        [
+            WindowEvent::PointerMoved { x: -1, y: -2 },
+            WindowEvent::PointerMoved { x: 0, y: 1 },
+            WindowEvent::PointerMoved { x: -1, y: 0 },
+        ]
+    );
+}
+
+#[test]
 fn invalid_pointer_coordinates_never_invoke_application_callbacks() {
     let mut content = Content::default();
     let mut application = NativeApplication::new(&mut content, WindowOptions::new("Example"));
@@ -259,6 +289,7 @@ fn invalid_pointer_coordinates_never_invoke_application_callbacks() {
         f64::NAN,
         f64::INFINITY,
         f64::NEG_INFINITY,
+        f64::from(i32::MIN) - 0.5,
         f64::from(i32::MAX) + 1.0,
     ] {
         let event = PlatformEvent::CursorMoved {

@@ -9,12 +9,12 @@ mod tests;
 pub(super) fn requests_redraw(event: &PlatformEvent) -> bool {
     match event {
         PlatformEvent::CursorMoved { .. }
+        | PlatformEvent::CursorLeft { .. }
         | PlatformEvent::KeyboardInput { .. }
         | PlatformEvent::ModifiersChanged(_)
         | PlatformEvent::Focused(_)
         | PlatformEvent::Ime(_)
         | PlatformEvent::MouseInput {
-            state: ElementState::Pressed,
             button: MouseButton::Left,
             ..
         } => true,
@@ -56,6 +56,12 @@ impl InputState {
                 button: MouseButton::Left,
                 ..
             } => WindowEvent::PointerPressed,
+            PlatformEvent::MouseInput {
+                state: ElementState::Released,
+                button: MouseButton::Left,
+                ..
+            } => WindowEvent::PointerReleased,
+            PlatformEvent::CursorLeft { .. } => WindowEvent::PointerLeft,
             PlatformEvent::KeyboardInput {
                 event,
                 is_synthetic,
@@ -193,5 +199,6 @@ fn pixel_coordinate(value: f64) -> Result<i32, ()> {
     if !value.is_finite() || value < f64::from(i32::MIN) || value > f64::from(i32::MAX) {
         return Err(());
     }
-    Ok(value as i32)
+    // The containing pixel keeps negative fractional positions outside the window.
+    Ok(value.floor() as i32)
 }

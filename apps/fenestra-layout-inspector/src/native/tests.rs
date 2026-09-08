@@ -161,15 +161,20 @@ fn owned_keyboard_and_ime_do_not_duplicate_legacy_inspector_actions() {
 }
 
 #[test]
-fn focus_loss_discards_hover_before_a_later_pointer_press() {
-    let mut application = NativeApplication::new(false).unwrap();
-    application
-        .event(WindowEvent::PointerMoved { x: 4, y: 3 })
-        .unwrap();
-    assert!(application.inspector.hovered().is_some());
-    application.event(WindowEvent::Focused(false)).unwrap();
-    assert!(application.inspector.hovered().is_none());
-    application.event(WindowEvent::Focused(true)).unwrap();
-    application.event(WindowEvent::PointerPressed).unwrap();
-    assert!(application.inspector.selected().is_none());
+fn focus_loss_and_pointer_leave_discard_hover_before_a_later_press() {
+    for interruption in [WindowEvent::Focused(false), WindowEvent::PointerLeft] {
+        let mut application = NativeApplication::new(false).unwrap();
+        application
+            .event(WindowEvent::PointerMoved { x: 4, y: 3 })
+            .unwrap();
+        assert!(application.inspector.hovered().is_some());
+        application.event(WindowEvent::PointerReleased).unwrap();
+        assert!(application.inspector.selected().is_none());
+        assert!(application.inspector.hovered().is_some());
+        application.event(interruption).unwrap();
+        assert!(application.inspector.hovered().is_none());
+        application.event(WindowEvent::Focused(true)).unwrap();
+        application.event(WindowEvent::PointerPressed).unwrap();
+        assert!(application.inspector.selected().is_none());
+    }
 }
