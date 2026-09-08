@@ -3,13 +3,13 @@ use std::error::Error;
 use std::fmt;
 
 use winit::dpi::{PhysicalPosition, PhysicalSize};
-use winit::event::{DeviceId, ElementState, MouseButton, WindowEvent as PlatformEvent};
-use winit::keyboard::{KeyCode, PhysicalKey};
+use winit::event::{DeviceId, ElementState, Ime, MouseButton, WindowEvent as PlatformEvent};
+use winit::keyboard::ModifiersState;
 
-use super::input::{keyboard_event, requests_redraw};
+use super::input::requests_redraw;
 use super::presentation::copy_pixels;
 use super::shell::NativeApplication;
-use super::{NativeError, WindowContent, WindowEvent, WindowOptions};
+use super::{ImeEvent, Modifiers, NativeError, WindowContent, WindowEvent, WindowOptions};
 use crate::{Raster, Size};
 
 #[derive(Debug, Eq, PartialEq)]
@@ -78,6 +78,50 @@ impl WindowContent for Content {
 }
 
 #[test]
+fn ime_is_opt_in_without_changing_other_window_options() {
+    let options = WindowOptions::new("Example");
+    assert!(!options.ime_allowed);
+    let enabled = options.clone().ime_allowed(true);
+    assert!(enabled.ime_allowed);
+    assert_eq!(enabled.title, options.title);
+    assert_eq!(enabled.size, options.size);
+    assert_eq!(enabled.smoke, options.smoke);
+    assert_eq!(enabled.ime_allowed(false), options);
+}
+
+#[test]
+fn composition_and_focus_resets_reach_content_and_schedule_frames() {
+    let mut content = Content::default();
+    let mut application = NativeApplication::new(&mut content, WindowOptions::new("Example"));
+    for event in [
+        PlatformEvent::ModifiersChanged(ModifiersState::SHIFT.into()),
+        PlatformEvent::Ime(Ime::Enabled),
+        PlatformEvent::Ime(Ime::Preedit("a".into(), Some((1, 1)))),
+        PlatformEvent::Focused(false),
+        PlatformEvent::Ime(Ime::Disabled),
+    ] {
+        assert!(application.process_event(event).unwrap().redraw);
+    }
+    assert_eq!(
+        application.content.events,
+        [
+            WindowEvent::ModifiersChanged(Modifiers {
+                shift: true,
+                ..Modifiers::default()
+            }),
+            WindowEvent::Ime(ImeEvent::Enabled),
+            WindowEvent::Ime(ImeEvent::Preedit {
+                text: "a".into(),
+                cursor: Some((1, 1))
+            }),
+            WindowEvent::ModifiersChanged(Modifiers::default()),
+            WindowEvent::Focused(false),
+            WindowEvent::Ime(ImeEvent::Disabled),
+        ]
+    );
+}
+
+#[test]
 fn presenting_a_frame_does_not_schedule_another_frame() {
     assert!(!requests_redraw(&PlatformEvent::RedrawRequested));
 }
@@ -85,7 +129,6 @@ fn presenting_a_frame_does_not_schedule_another_frame() {
 #[test]
 fn unrelated_window_events_do_not_schedule_frames() {
     for event in [
-        PlatformEvent::Focused(true),
         PlatformEvent::Occluded(false),
         PlatformEvent::CloseRequested,
     ] {
@@ -133,32 +176,6 @@ fn pointer_interactions_schedule_frames_and_reach_the_application() {
             WindowEvent::PointerMoved { x: 4, y: 3 },
             WindowEvent::PointerPressed,
         ]
-    );
-}
-
-#[test]
-fn key_repetition_and_release_do_not_insert_again() {
-    for (state, repeat, expected) in [
-        (
-            ElementState::Pressed,
-            false,
-            Some(WindowEvent::SpacePressed),
-        ),
-        (ElementState::Pressed, true, None),
-        (ElementState::Released, false, None),
-    ] {
-        assert_eq!(
-            keyboard_event(PhysicalKey::Code(KeyCode::Space), state, repeat),
-            expected
-        );
-    }
-    assert_eq!(
-        keyboard_event(
-            PhysicalKey::Code(KeyCode::Enter),
-            ElementState::Pressed,
-            false
-        ),
-        None
     );
 }
 

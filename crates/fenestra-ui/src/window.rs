@@ -1,4 +1,7 @@
-use crate::native::{self, NativeError, WindowContent, WindowEvent, WindowOptions};
+use crate::native::{
+    self, ImeEvent, KeyboardInput, Modifiers, NativeError, WindowContent, WindowEvent,
+    WindowOptions,
+};
 use crate::{Application, Error, Raster, Size};
 
 /// Application events delivered by the optional native window host.
@@ -16,8 +19,18 @@ pub enum Event {
         /// The topmost input-enabled element name, if any.
         target: Option<String>,
     },
-    /// Space was pressed, excluding keyboard auto-repeat.
+    /// Compatibility notification after a fresh Space press; excludes repeats.
+    ///
+    /// Text consumers use `KeyboardInput` and must not also insert from this event.
     SpacePressed,
+    /// An owned logical key event, including releases and automatic repeats.
+    KeyboardInput(KeyboardInput),
+    /// The active keyboard modifiers changed.
+    ModifiersChanged(Modifiers),
+    /// Window focus changed. Discard held keys and preedit on focus loss.
+    Focused(bool),
+    /// A native input method changed composition state or committed text.
+    Ime(ImeEvent),
     /// A valid nonzero viewport size was committed.
     Resized {
         /// The current pixel size.
@@ -78,6 +91,15 @@ where
                     .map(str::to_owned),
             },
             WindowEvent::SpacePressed => Event::SpacePressed,
+            WindowEvent::KeyboardInput(input) => Event::KeyboardInput(input),
+            WindowEvent::ModifiersChanged(modifiers) => Event::ModifiersChanged(modifiers),
+            WindowEvent::Focused(focused) => {
+                if !focused {
+                    self.pointer = None;
+                }
+                Event::Focused(focused)
+            }
+            WindowEvent::Ime(ime) => Event::Ime(ime),
             WindowEvent::CloseRequested => Event::CloseRequested,
         };
         (self.handler)(&mut self.app, event)
@@ -91,7 +113,93 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::native::{Key, KeyState};
     use crate::{Color, Element, Style, View};
+
+    #[test]
+    fn owned_keyboard_focus_and_ime_events_reach_the_application_handler() {
+        let app =
+            Application::new(View::new("test", Element::row("root")), Size::new(80, 80)).unwrap();
+        let mut received = Vec::new();
+        let mut content = ApplicationWindow {
+            app,
+            pointer: None,
+            handler: |_: &mut Application, event| {
+                received.push(event);
+                Ok(())
+            },
+        };
+        let key = KeyboardInput {
+            key: Key::Character("a".into()),
+            state: KeyState::Pressed,
+            modifiers: Modifiers {
+                shift: true,
+                ..Modifiers::default()
+            },
+            repeat: true,
+            text: Some("A".into()),
+            is_synthetic: false,
+        };
+        let preedit = ImeEvent::Preedit {
+            text: "\u{e9}".into(),
+            cursor: Some((0, 2)),
+        };
+        for event in [
+            WindowEvent::KeyboardInput(key.clone()),
+            WindowEvent::ModifiersChanged(key.modifiers),
+            WindowEvent::Ime(ImeEvent::Enabled),
+            WindowEvent::Ime(preedit.clone()),
+            WindowEvent::Ime(ImeEvent::Commit("\u{e9}".into())),
+            WindowEvent::Ime(ImeEvent::Disabled),
+            WindowEvent::Focused(false),
+            WindowEvent::SpacePressed,
+        ] {
+            content.event(event).unwrap();
+        }
+        assert_eq!(
+            received,
+            [
+                Event::KeyboardInput(key.clone()),
+                Event::ModifiersChanged(key.modifiers),
+                Event::Ime(ImeEvent::Enabled),
+                Event::Ime(preedit),
+                Event::Ime(ImeEvent::Commit("\u{e9}".into())),
+                Event::Ime(ImeEvent::Disabled),
+                Event::Focused(false),
+                Event::SpacePressed,
+            ]
+        );
+    }
+
+    #[test]
+    fn focus_loss_discards_the_cached_click_target() {
+        let view = View::new(
+            "test",
+            Element::row("root")
+                .child(Element::rect("card").style(Style::new().width(20).height(20).input(true))),
+        );
+        let mut targets = Vec::new();
+        let mut content = ApplicationWindow {
+            app: Application::new(view, Size::new(80, 80)).unwrap(),
+            pointer: None,
+            handler: |_: &mut Application, event| {
+                if let Event::Click { target } = event {
+                    targets.push(target);
+                }
+                Ok(())
+            },
+        };
+        for event in [
+            WindowEvent::PointerMoved { x: 2, y: 2 },
+            WindowEvent::PointerPressed,
+            WindowEvent::Focused(false),
+            WindowEvent::Focused(true),
+            WindowEvent::PointerPressed,
+        ] {
+            content.event(event).unwrap();
+        }
+        assert_eq!(targets, [Some("card".into()), None]);
+    }
 
     #[test]
     fn native_clicks_resolve_against_current_layout_and_mutate_named_content() {

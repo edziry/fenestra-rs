@@ -8,7 +8,7 @@ use winit::event::WindowEvent as PlatformEvent;
 use winit::event_loop::{ActiveEventLoop, OwnedDisplayHandle};
 use winit::window::{Window, WindowId};
 
-use super::input::{application_event, requests_redraw};
+use super::input::{InputState, requests_redraw};
 use super::presentation::copy_pixels;
 use super::{NativeError, WindowContent, WindowOptions};
 use crate::Size;
@@ -31,6 +31,7 @@ pub(super) struct NativeApplication<'a, C: WindowContent> {
     window: Option<Arc<Window>>,
     _context: Option<NativeContext>,
     surface: Option<NativeSurface>,
+    input: InputState,
     pub(super) failure: Option<NativeError<C::Error>>,
 }
 
@@ -45,6 +46,7 @@ impl<'a, C: WindowContent> NativeApplication<'a, C> {
             window: None,
             _context: None,
             surface: None,
+            input: InputState::default(),
             failure: None,
         }
     }
@@ -66,6 +68,7 @@ impl<'a, C: WindowContent> NativeApplication<'a, C> {
                 )
                 .map_err(|_| NativeError::Window)?,
         );
+        window.set_ime_allowed(self.options.ime_allowed);
         let physical = window.inner_size();
         self.resize_content(physical.width, physical.height)?;
         let context =
@@ -137,9 +140,11 @@ impl<'a, C: WindowContent> NativeApplication<'a, C> {
             PlatformEvent::RedrawRequested => self.redraw()?,
             PlatformEvent::Resized(size) => self.resize_content(size.width, size.height)?,
             _ => {
-                if let Some(event) =
-                    application_event(&event).map_err(|_| NativeError::Presenter)?
-                {
+                let events = self
+                    .input
+                    .application_events(&event)
+                    .map_err(|_| NativeError::Presenter)?;
+                for event in events {
                     self.content
                         .event(event)
                         .map_err(NativeError::Application)?;
