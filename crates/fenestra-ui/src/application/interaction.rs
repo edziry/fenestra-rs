@@ -203,7 +203,7 @@ impl Interaction {
             return None;
         }
         if input.key == Key::Escape {
-            self.clear_key_arms();
+            self.clear_arms();
             return None;
         }
         let held = if space {

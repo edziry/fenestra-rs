@@ -1,6 +1,23 @@
 use super::*;
 
 #[test]
+fn escape_cancels_pointer_activation_until_a_fresh_press() {
+    let mut state = focused(2);
+    send(&mut state, InputEvent::PointerMoved { x: 5, y: 6 }, Some(2));
+    send(&mut state, InputEvent::PointerPressed, Some(2));
+    assert!(state.state(2, false, None).pressed());
+    key(&mut state, Key::Escape, true);
+    assert!(!state.state(2, false, None).pressed());
+    send(&mut state, InputEvent::PointerPressed, Some(2));
+    assert_eq!(send(&mut state, InputEvent::PointerReleased, Some(2)), None);
+    send(&mut state, InputEvent::PointerPressed, Some(2));
+    assert_eq!(
+        send(&mut state, InputEvent::PointerReleased, Some(2)),
+        Some(2)
+    );
+}
+
+#[test]
 fn key_cancellation_preserves_holds_until_up() {
     for cancellation in [
         InputEvent::KeyboardInput(keyboard(Key::Escape, KeyState::Pressed)),
