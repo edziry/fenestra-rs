@@ -4,11 +4,10 @@ mod support;
 use std::collections::BTreeSet;
 
 use crate::source_v2::PhysicalOriginV2;
-use crate::token::{AbstractToken, AbstractTokenKind, Punctuation};
+use crate::token::Punctuation;
 
+use super::token::{Kind as AbstractTokenKind, Token};
 use super::{Diagnostic, Limits};
-
-type Token = AbstractToken<PhysicalOriginV2>;
 
 pub(super) struct Document {
     pub(super) name: Box<str>,
@@ -28,6 +27,7 @@ pub(super) enum Kind {
     Row,
     Column,
     Rect,
+    Text,
 }
 
 impl Kind {
@@ -36,6 +36,7 @@ impl Kind {
             Self::Row => "row",
             Self::Column => "column",
             Self::Rect => "rect",
+            Self::Text => "text",
         }
     }
 }
@@ -48,7 +49,11 @@ pub(super) struct Properties {
     pub(super) gap: Option<i32>,
     pub(super) background: Option<[u8; 4]>,
     pub(super) input: Option<bool>,
-    seen: u8,
+    pub(super) content: Option<Box<str>>,
+    pub(super) font_size: Option<u32>,
+    pub(super) line_height: Option<u32>,
+    pub(super) color: Option<[u8; 4]>,
+    seen: u16,
 }
 
 pub(super) fn parse(
@@ -92,11 +97,19 @@ impl Parser {
         let mut pending = vec![0];
         while let Some(&current) = pending.last() {
             if self.matches(Punctuation::CloseBrace) {
+                if elements[current].kind == Kind::Text
+                    && elements[current].properties.content.is_none()
+                {
+                    return Err(self.error("text element requires content"));
+                }
                 self.take()?;
                 pending.pop();
             } else if self.starts_element() {
-                if elements[current].kind == Kind::Rect {
-                    return Err(self.error("rect cannot contain children; use row or column"));
+                if matches!(elements[current].kind, Kind::Rect | Kind::Text) {
+                    return Err(self.error(&format!(
+                        "{} cannot contain children; use row or column",
+                        elements[current].kind.name()
+                    )));
                 }
                 let index = elements.len();
                 let child = self.element(index)?;
@@ -127,9 +140,10 @@ impl Parser {
             "row" => Kind::Row,
             "column" => Kind::Column,
             "rect" => Kind::Rect,
+            "text" => Kind::Text,
             _ => {
                 return Err(Diagnostic::new(
-                    "unknown element; expected row, column, or rect",
+                    "unknown element; expected row, column, rect, or text",
                     token.physical,
                 ));
             }
@@ -153,7 +167,16 @@ impl Parser {
         };
         if matches!(
             token.label(),
-            "width" | "height" | "padding" | "gap" | "background" | "input"
+            "width"
+                | "height"
+                | "padding"
+                | "gap"
+                | "background"
+                | "input"
+                | "content"
+                | "font_size"
+                | "line_height"
+                | "color"
         ) {
             return false;
         }

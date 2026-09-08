@@ -1,5 +1,6 @@
+use super::super::token::Kind as AbstractTokenKind;
 use crate::source_v2::PhysicalOriginV2;
-use crate::token::{AbstractTokenKind, Punctuation};
+use crate::token::Punctuation;
 
 use super::{Diagnostic, Parser, Token};
 

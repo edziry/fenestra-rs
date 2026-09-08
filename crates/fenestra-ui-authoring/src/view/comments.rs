@@ -1,12 +1,17 @@
 use std::borrow::Cow;
 
-use super::{Diagnostic, origin};
+use super::{Diagnostic, origin, strings};
 
 pub(super) fn normalize(text: &str) -> Result<Cow<'_, str>, Diagnostic> {
     let bytes = text.as_bytes();
     let mut output = None;
     let mut offset = 0;
     while offset + 1 < bytes.len() {
+        if strings::starts(bytes, offset) {
+            offset = strings::end(text, offset)
+                .map_err(|message| Diagnostic::new(message, origin(offset, bytes.len())))?;
+            continue;
+        }
         let Some(end) = comment_end(bytes, offset)? else {
             offset += 1;
             continue;

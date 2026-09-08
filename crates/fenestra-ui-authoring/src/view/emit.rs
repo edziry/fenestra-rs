@@ -1,4 +1,4 @@
-use proc_macro2::TokenStream;
+use proc_macro2::{Literal, TokenStream};
 
 use super::parser::{Document, Element};
 use super::{CompiledView, Diagnostic, Limits};
@@ -53,11 +53,32 @@ struct Output<'a> {
 impl Output<'_> {
     fn element(&mut self, element: &Element) -> Result<(), Diagnostic> {
         self.push(&format!(
-            "::fenestra_ui::Element::{}(\"{}\").style(::fenestra_ui::Style::new()",
+            "::fenestra_ui::Element::{}(\"{}\"",
             element.kind.name(),
             element.name,
         ))?;
         let props = &element.properties;
+        if let Some(content) = &props.content {
+            self.push(&format!(",{})", Literal::string(content)))?;
+            self.push(".text_style(::fenestra_ui::TextStyle::new()")?;
+            for (name, value) in [
+                ("font_size", props.font_size),
+                ("line_height", props.line_height),
+            ] {
+                if let Some(value) = value {
+                    self.push(&format!(".{name}({value}u32)"))?;
+                }
+            }
+            if let Some([red, green, blue, alpha]) = props.color {
+                self.push(&format!(
+                    ".color(::fenestra_ui::Color::rgba8({red}u8,{green}u8,{blue}u8,{alpha}u8))"
+                ))?;
+            }
+            self.push(")")?;
+        } else {
+            self.push(")")?;
+        }
+        self.push(".style(::fenestra_ui::Style::new()")?;
         for (name, value) in [
             ("width", props.width),
             ("height", props.height),

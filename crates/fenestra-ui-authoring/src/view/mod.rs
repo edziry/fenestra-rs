@@ -7,17 +7,18 @@ mod build;
 mod comments;
 mod diagnostic;
 mod emit;
+mod lex;
 mod limits;
 mod parser;
+mod strings;
+mod token;
 
 use std::fmt;
 
 use fenestra_ui_ir::prototype::SourceId;
 use proc_macro2::TokenStream;
 
-use crate::fen_v2::lex_fen_v2;
 use crate::source_v2::PhysicalOriginV2;
-use crate::ui_v2::adapt_ui_tokens_v2;
 
 pub use build::{BuildError, build_file};
 pub use diagnostic::Diagnostic;
@@ -78,8 +79,7 @@ pub fn compile_fen_with_limits(bytes: &[u8], limits: Limits) -> Result<CompiledV
         let width = error.error_len().unwrap_or(bytes.len() - start);
         Diagnostic::new("source is not valid UTF-8", origin(start, start + width))
     })?;
-    let text = comments::normalize(text)?;
-    let tokens = lex_fen_v2(SourceId::new(0), &text, limits.frontend())?;
+    let tokens = lex::fen(text, limits)?;
     let document = parser::parse(tokens, origin(bytes.len(), bytes.len()), limits)?;
     emit::emit(&document, limits)
 }
@@ -101,7 +101,7 @@ pub fn compile_ui_with_limits(
     input: TokenStream,
     limits: Limits,
 ) -> Result<CompiledView, Diagnostic> {
-    let (tokens, eof) = adapt_ui_tokens_v2(input, limits.frontend())?;
+    let (tokens, eof) = lex::ui(input, limits)?;
     let document = parser::parse(tokens, eof, limits)?;
     emit::emit(&document, limits)
 }
