@@ -1,7 +1,7 @@
 use super::super::token::Kind as AbstractTokenKind;
 use crate::token::Punctuation;
 
-use super::{Diagnostic, Element, Kind, Parser};
+use super::{Diagnostic, Dimension, Element, Kind, Parser};
 
 impl Parser {
     pub(super) fn property(&mut self, element: &mut Element) -> Result<(), Diagnostic> {
@@ -18,6 +18,10 @@ impl Parser {
             "font_size" => 128,
             "line_height" => 256,
             "color" => 512,
+            "min_width" => 1024,
+            "max_width" => 2048,
+            "min_height" => 4096,
+            "max_height" => 8192,
             _ => {
                 return Err(Diagnostic::new(
                     "unknown property; expected width, height, padding, gap, background, or input",
@@ -46,8 +50,12 @@ impl Parser {
         self.punctuation(Punctuation::Colon)?;
         let props = &mut element.properties;
         match property {
-            "width" => props.width = Some(self.dimension()?),
-            "height" => props.height = Some(self.dimension()?),
+            "width" => props.width = Some(self.extent()?),
+            "height" => props.height = Some(self.extent()?),
+            "min_width" => props.min_width = Some(self.dimension()?),
+            "max_width" => props.max_width = Some(self.dimension()?),
+            "min_height" => props.min_height = Some(self.dimension()?),
+            "max_height" => props.max_height = Some(self.dimension()?),
             "padding" => props.padding = Some(self.dimension()?),
             "gap" => props.gap = Some(self.dimension()?),
             "background" => props.background = Some(self.color()?),
@@ -58,9 +66,44 @@ impl Parser {
             "color" => props.color = Some(self.color()?),
             _ => unreachable!("property name was validated"),
         }
+        for (axis, minimum, maximum) in [
+            ("width", props.min_width, props.max_width),
+            ("height", props.min_height, props.max_height),
+        ] {
+            if let (Some(minimum), Some(maximum)) = (minimum, maximum)
+                && minimum > maximum
+            {
+                return Err(Diagnostic::new(
+                    format!("minimum {axis} exceeds maximum {axis}"),
+                    token.physical,
+                ));
+            }
+        }
         props.seen |= bit;
         self.punctuation(Punctuation::Semicolon)?;
         Ok(())
+    }
+
+    fn extent(&mut self) -> Result<Dimension, Diagnostic> {
+        match self.tokens.get(self.next).map(|token| token.label()) {
+            Some("auto") => {
+                self.take()?;
+                Ok(Dimension::Auto)
+            }
+            Some("fill") => {
+                self.take()?;
+                let weight = if self.matches(Punctuation::OpenParenthesis) {
+                    self.take()?;
+                    let weight = self.positive(65535)?;
+                    self.punctuation(Punctuation::CloseParenthesis)?;
+                    weight
+                } else {
+                    1
+                };
+                Ok(Dimension::Fill(weight))
+            }
+            _ => self.dimension().map(Dimension::Px),
+        }
     }
 
     fn content(&mut self) -> Result<Box<str>, Diagnostic> {

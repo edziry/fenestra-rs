@@ -1,6 +1,6 @@
 use proc_macro2::{Literal, TokenStream};
 
-use super::parser::{Document, Element};
+use super::parser::{Dimension, Document, Element};
 use super::{CompiledView, Diagnostic, Limits};
 
 pub(super) fn emit(document: &Document, limits: Limits) -> Result<CompiledView, Diagnostic> {
@@ -79,9 +79,16 @@ impl Output<'_> {
             self.push(")")?;
         }
         self.push(".style(::fenestra_ui::Style::new()")?;
+        for (name, value) in [("width", props.width), ("height", props.height)] {
+            if let Some(value) = value {
+                self.dimension(name, value)?;
+            }
+        }
         for (name, value) in [
-            ("width", props.width),
-            ("height", props.height),
+            ("min_width", props.min_width),
+            ("max_width", props.max_width),
+            ("min_height", props.min_height),
+            ("max_height", props.max_height),
             ("padding", props.padding),
             ("gap", props.gap),
         ] {
@@ -98,6 +105,16 @@ impl Output<'_> {
             self.push(&format!(".input({value})"))?;
         }
         self.push(")")
+    }
+
+    fn dimension(&mut self, name: &str, dimension: Dimension) -> Result<(), Diagnostic> {
+        match dimension {
+            Dimension::Px(value) => self.push(&format!(".{name}({value}i32)")),
+            Dimension::Auto => self.push(&format!(".{name}_mode(::fenestra_ui::Dimension::Auto)")),
+            Dimension::Fill(weight) => self.push(&format!(
+                ".{name}_mode(::fenestra_ui::Dimension::Fill({weight}u32))"
+            )),
+        }
     }
 
     fn push(&mut self, value: &str) -> Result<(), Diagnostic> {

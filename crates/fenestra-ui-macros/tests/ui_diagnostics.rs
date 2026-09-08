@@ -14,4 +14,5 @@ fn format_3_errors_point_to_the_offending_property_name_or_value() {
     cases.compile_fail("tests/ui/view_duplicate_name.rs");
     cases.compile_fail("tests/ui/view_bad_color.rs");
     cases.compile_fail("tests/ui/view_text_diagnostics.rs");
+    cases.compile_fail("tests/ui/view_dimension_diagnostics.rs");
 }

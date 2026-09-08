@@ -43,8 +43,12 @@ impl Kind {
 
 #[derive(Default)]
 pub(super) struct Properties {
-    pub(super) width: Option<i32>,
-    pub(super) height: Option<i32>,
+    pub(super) width: Option<Dimension>,
+    pub(super) height: Option<Dimension>,
+    pub(super) min_width: Option<i32>,
+    pub(super) max_width: Option<i32>,
+    pub(super) min_height: Option<i32>,
+    pub(super) max_height: Option<i32>,
     pub(super) padding: Option<i32>,
     pub(super) gap: Option<i32>,
     pub(super) background: Option<[u8; 4]>,
@@ -54,6 +58,13 @@ pub(super) struct Properties {
     pub(super) line_height: Option<u32>,
     pub(super) color: Option<[u8; 4]>,
     seen: u16,
+}
+
+#[derive(Clone, Copy)]
+pub(super) enum Dimension {
+    Px(i32),
+    Auto,
+    Fill(u32),
 }
 
 pub(super) fn parse(
@@ -177,6 +188,10 @@ impl Parser {
                 | "font_size"
                 | "line_height"
                 | "color"
+                | "min_width"
+                | "max_width"
+                | "min_height"
+                | "max_height"
         ) {
             return false;
         }
