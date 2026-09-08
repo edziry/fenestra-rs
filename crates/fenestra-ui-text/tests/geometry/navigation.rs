@@ -202,3 +202,29 @@ fn long_combining_graphemes_move_as_one_boundary_in_both_directions() {
         .unwrap();
     assert_eq!(backward.selection().focus().byte(), 0);
 }
+
+#[test]
+fn emergency_wrapping_never_splits_an_arabic_combining_grapheme() {
+    let mut renderer = TextRenderer::new([FONT]).unwrap();
+    let text = "\u{0628}\u{0651}\u{062a}";
+    let base = request(text, Some(1), text.len());
+    let current = renderer.geometry(base).unwrap();
+    assert_eq!(current.metrics().lines(), 2);
+    assert_eq!(current.metrics().height(), 56.0);
+    assert_eq!(renderer.measure(base.measurement()).unwrap(), current.metrics());
+    let pixels = renderer.layout(fenestra_ui::TextRequest::new(
+        text,
+        base.measurement().style(),
+        fenestra_ui::Size::new(1, 56),
+        TextLimits::default(),
+    ).unwrap()).unwrap();
+    assert_eq!(pixels.metrics(), current.metrics());
+    for byte in [0, 4, 6] {
+        for affinity in [TextAffinity::Upstream, TextAffinity::Downstream] {
+            let selection = TextSelection::caret(TextPosition::new(byte, affinity));
+            let geometry = renderer.geometry(query(text, Some(1), selection, TextGeometryQuery::Current)).unwrap();
+            assert!(geometry.focus_caret().y0() < 56.0);
+            assert_eq!(geometry.focus_caret().height(), 28.0);
+        }
+    }
+}
