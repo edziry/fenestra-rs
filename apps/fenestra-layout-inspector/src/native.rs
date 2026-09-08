@@ -136,6 +136,10 @@ impl WindowContent for NativeApplication {
             WindowEvent::PointerMoved { x, y } => self.pointer_move(x, y),
             WindowEvent::PointerPressed => self.pointer_press(),
             WindowEvent::SpacePressed => self.insert_tile(),
+            WindowEvent::KeyboardInput(_)
+            | WindowEvent::ModifiersChanged(_)
+            | WindowEvent::Focused(_)
+            | WindowEvent::Ime(_) => Ok(()),
             WindowEvent::CloseRequested => {
                 if let Some(evidence) = &mut self.evidence {
                     evidence

@@ -1,4 +1,6 @@
-use fenestra_ui::native::{WindowContent, WindowEvent};
+use fenestra_ui::native::{
+    ImeEvent, Key, KeyState, KeyboardInput, Modifiers, WindowContent, WindowEvent,
+};
 
 use super::{EvidenceMilestone, InspectorAction, NativeApplication};
 use crate::evidence::{EvidenceResult, verify_artifact};
@@ -129,4 +131,31 @@ fn adapter_space_events_keep_successive_keys_and_close_without_evidence() {
         .event(WindowEvent::CloseRequested)
         .expect("normal close");
     assert!(application.output.is_none());
+}
+
+#[test]
+fn owned_keyboard_and_ime_do_not_duplicate_legacy_inspector_actions() {
+    let mut application = NativeApplication::new(false).unwrap();
+    let initial = application.inspector.observe().unwrap();
+    for event in [
+        WindowEvent::KeyboardInput(KeyboardInput {
+            key: Key::Space,
+            state: KeyState::Pressed,
+            modifiers: Modifiers::default(),
+            repeat: false,
+            text: Some(" ".into()),
+            is_synthetic: false,
+        }),
+        WindowEvent::Ime(ImeEvent::Commit(" ".into())),
+        WindowEvent::Focused(false),
+        WindowEvent::ModifiersChanged(Modifiers::default()),
+    ] {
+        application.event(event).unwrap();
+    }
+    assert_eq!(application.inspector.observe().unwrap(), initial);
+    application.event(WindowEvent::SpacePressed).unwrap();
+    assert_eq!(
+        application.inspector.observe().unwrap().keyed_keys(),
+        [10, 20, 30]
+    );
 }
