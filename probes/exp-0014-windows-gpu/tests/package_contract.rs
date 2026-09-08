@@ -50,10 +50,12 @@ fn native_candidate_dependencies_are_exact_feature_minimal_and_target_scoped() {
             );
         }
         if manifest_path == root.join("crates/fenestra-ui/Cargo.toml") {
-            // WU-0017 moves the CPU window shell behind an optional facade
-            // feature. The core and GPU experiment boundary stays independent.
+            // The CPU window shell and its accessibility adapters are optional.
+            // The core and GPU experiment boundary stays independent.
             assert!(source.contains("default = []"));
-            assert!(source.contains("native = [\"dep:winit\", \"dep:softbuffer\"]"));
+            assert!(source.contains(
+                "native = [\"dep:winit\", \"dep:softbuffer\", \"dep:accesskit\", \"dep:accesskit_winit\"]"
+            ));
             for line in source.lines().filter(|line| line.starts_with("winit = ")) {
                 assert!(line.contains("optional = true"));
                 assert!(line.contains("version = \"=0.30.13\""));
