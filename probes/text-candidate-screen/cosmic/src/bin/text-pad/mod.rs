@@ -37,8 +37,10 @@ pub struct TextPad {
     pointer: (i32, i32),
     modifiers: Modifiers,
     message: Option<String>,
+    background: RefCell<Option<Raster>>,
     cached: RefCell<Option<Raster>>,
     render_count: Cell<usize>,
+    background_render_count: Cell<usize>,
     presentations: usize,
 }
 
@@ -54,8 +56,10 @@ impl TextPad {
             pointer: (-1, -1),
             modifiers: Modifiers::default(),
             message: None,
+            background: RefCell::new(None),
             cached: RefCell::new(None),
             render_count: Cell::new(0),
+            background_render_count: Cell::new(0),
             presentations: 0,
         })
     }
@@ -148,6 +152,7 @@ impl WindowContent for TextPad {
         if self.app.size() != size {
             let app = layout::application(size)?;
             self.app = app;
+            self.background.borrow_mut().take();
             self.dirty();
         }
         Ok(())

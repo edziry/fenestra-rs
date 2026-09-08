@@ -5,6 +5,9 @@ use fenestra_ui::{Selection, Size, TextBuffer};
 
 use super::TextPad;
 
+#[path = "tests/background.rs"]
+mod background;
+
 fn pad(text: &str, limit: usize) -> TextPad {
     TextPad::new(TextBuffer::new(text, limit).unwrap(), Size::new(720, 520)).unwrap()
 }

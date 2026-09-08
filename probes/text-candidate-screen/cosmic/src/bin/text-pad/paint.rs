@@ -4,9 +4,8 @@ use fenestra_ui::{Bounds, Error, Raster};
 use super::{FONT_SIZE, LINE_HEIGHT, TextPad};
 
 pub(super) fn frame(pad: &TextPad) -> Result<Raster, Error> {
-    let base = pad.app.raster()?;
-    let mut bytes = base.bytes().to_vec();
-    let size = base.size();
+    let mut bytes = background_bytes(pad)?;
+    let size = pad.app.size();
     let mut canvas = Canvas {
         bytes: &mut bytes,
         width: size.width(),
@@ -56,6 +55,18 @@ pub(super) fn frame(pad: &TextPad) -> Result<Raster, Error> {
         },
     );
     Raster::new(size, bytes)
+}
+
+fn background_bytes(pad: &TextPad) -> Result<Vec<u8>, Error> {
+    if let Some(background) = pad.background.borrow().as_ref() {
+        return Ok(background.bytes().to_vec());
+    }
+    let background = pad.app.raster()?;
+    let bytes = background.bytes().to_vec();
+    *pad.background.borrow_mut() = Some(background);
+    pad.background_render_count
+        .set(pad.background_render_count.get() + 1);
+    Ok(bytes)
 }
 
 struct Canvas<'a> {
