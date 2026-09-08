@@ -1,7 +1,7 @@
 # ADR 0001: Provisional owned-font text adapter
 
-Status: provisional, scoped to authored read-only text views.
-Record version: 1. Checked: 2026-09-08 UTC.
+Status: provisional, scoped to authored text views and owned editing geometry.
+Record version: 2. Checked: 2026-09-08 UTC.
 
 ## Decision and boundary
 
@@ -212,8 +212,21 @@ Further admission needs fuzzing or equivalent malformed-font evidence,
 worst-case resource measurements, an executed MSRV lane, broader script/font
 fixtures with provenance, broader multiple-font/script fallback evidence, native platform and
 scale evidence, and review of the full distributable dependency graph.
-Read-only text evidence does not admit IME geometry, selection/caret behavior,
-visual bidi navigation, editable text, rich text or accessibility semantics.
+The original read-only evidence does not admit editing behavior. WU-0024 adds
+an independently validated, bounded
+[editing geometry and viewport contract](../design/text-editing-geometry.md)
+over the same explicit font inputs and pinned dependencies. Its source-byte
+mapping, extended grapheme queries, selection fragments and scrolled raster
+tests extend this provisional adapter boundary. The adapter retains Parley's
+component interpolation for ligature carets and does not inspect GDEF tables.
+Its [licensed local Parley delta](../../third-party/parley/FENESTRA-PATCH.md)
+corrects RTL line-break group traversal and hard-break caret geometry. The
+version and transitive resolutions remain fixed. Product lockfiles switch
+Parley's source to this retained path; the historical screen keeps its registry
+source. The earlier audit snapshots remain evidence of their recorded lockfiles
+and are not presented as fresh audits of this local source delta.
+This extension does not admit arbitrary fonts, integrated editable controls,
+rich text, text accessibility or qualified platform IME composition.
 Refresh the advisory check against the actual product lockfile before release.
 
 ## Reproduce the focused tests

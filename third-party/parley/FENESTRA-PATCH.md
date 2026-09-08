@@ -31,11 +31,34 @@ Both behaviors fail with the unmodified registry source. These are layout
 corrections over the existing font inputs and shaper; no font engine upgrade,
 system-font discovery or native text service is introduced.
 
-The exact local source delta and final verification are recorded after the
-regressions pass. Retain those regressions when upgrading and remove a patch
-only when the replacement package passes them. Distribution remains a release
-gate: a published package must not silently substitute the unpatched registry
-version for this local implementation.
+## Local source delta
+
+- `src/layout/line_break.rs` groups ligature components before considering
+  their width. Logical RTL traversal encounters continuation components before
+  the group's start, so it consumes that complete group and uses the start's
+  metadata. Lookahead is relative to the current run and bounded by its end.
+  Break opportunities remain before the whole group, preserving ordinary word
+  breaks without separating an Arabic combining mark from its base.
+- `src/editing/cursor.rs` chooses caret edges from logical neighbors and
+  affinity. A hard break attaches to the following line, including an empty
+  final line. Visual neighbors alone could incorrectly move an RTL line's
+  first caret to its second line; the correction also repairs the existing
+  selection highlight and Home/End operations through their shared line lookup.
+- `src/bidi.rs` expects the existing deprecation of ICU's ordinal conversion
+  only at `mask`. The pinned ICU 2.3 API deprecates that conversion without a
+  replacement. Retaining the conversion preserves the existing bidi bitmask
+  representation; an unfulfilled expectation after an upgrade requires review.
+  This annotation changes no text behavior.
+
+All other upstream files remain byte-identical to the archive. No upstream
+test suite is claimed: the registry package omits its external test resources.
+Fenestra's explicit-font public adapter tests exercise the changed paths,
+including 21 geometry and three exact viewport tests.
+
+Retain these regressions when upgrading and remove a patch only when the
+replacement package passes them. Distribution remains a release gate: a
+published package must not silently substitute the unpatched registry version
+for this local implementation.
 
 See the [editing geometry design](../../docs/design/text-editing-geometry.md)
 and [provisional text adapter decision](../../docs/decisions/0001-provisional-text-adapter.md).
