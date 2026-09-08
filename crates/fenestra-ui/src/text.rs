@@ -2,22 +2,34 @@
 
 mod error;
 mod limits;
+mod measurement;
 mod output;
 mod style;
 
-use crate::{Error, Size, Style};
+use crate::{Error, Size};
 
 pub use error::TextError;
 pub use limits::TextLimits;
+pub use measurement::TextMeasureRequest;
 pub use output::{TextLayout, TextMetrics};
 pub use style::TextStyle;
 
 /// An application-owned shaping and raster adapter with private caches.
 ///
-/// Implementations must honor request limits and return owned premultiplied
-/// pixels. Cache changes on failure are allowed; application state is committed
-/// only after output validation and spatial preparation succeed.
+/// Implementations must honor request limits and return validated measurements
+/// or owned premultiplied pixels. Cache changes on failure are allowed;
+/// application state is committed only after output validation and spatial
+/// preparation succeed.
 pub trait TextEngine {
+    /// Measures complete text without allocating a raster.
+    ///
+    /// The default preserves adapters that support only explicitly sized text.
+    /// Implementations must validate their output with
+    /// [`TextMetrics::validate_measurement`] before returning it.
+    fn measure(&mut self, _request: TextMeasureRequest<'_>) -> Result<TextMetrics, TextError> {
+        Err(TextError::MeasurementUnavailable)
+    }
+
     /// Shapes complete text, wraps to the requested width and clips its raster.
     fn layout(&mut self, request: TextRequest<'_>) -> Result<TextLayout, TextError>;
 }
@@ -39,8 +51,7 @@ impl<'a> TextRequest<'a> {
         size: Size,
         limits: TextLimits,
     ) -> Result<Self, TextError> {
-        style.validate()?;
-        limits.check("text bytes", text.len(), limits.max_bytes())?;
+        validate_content(text, style, limits)?;
         let pixels = size.pixel_count().map_err(|_| TextError::InvalidRaster)?;
         limits.check("text pixels", pixels, limits.max_pixels())?;
         Ok(Self {
@@ -76,18 +87,23 @@ impl<'a> TextRequest<'a> {
     }
 }
 
+fn validate_content(text: &str, style: TextStyle, limits: TextLimits) -> Result<(), TextError> {
+    style.validate()?;
+    limits.check("text bytes", text.len(), limits.max_bytes())
+}
+
 pub(crate) fn validate_budget<'a>(
-    elements: impl Iterator<Item = (&'a str, Style)>,
+    elements: impl Iterator<Item = (&'a str, Size)>,
     limits: TextLimits,
 ) -> Result<(), Error> {
     let mut bytes = 0usize;
     let mut pixels = 0usize;
-    for (text, style) in elements {
+    for (text, size) in elements {
         bytes = bytes
             .checked_add(text.len())
             .ok_or(Error::CapacityOverflow)?;
-        let area = (style.width as usize)
-            .checked_mul(style.height as usize)
+        let area = (size.width() as usize)
+            .checked_mul(size.height() as usize)
             .ok_or(Error::CapacityOverflow)?;
         pixels = pixels.checked_add(area).ok_or(Error::CapacityOverflow)?;
         limits.check("text bytes", bytes, limits.max_bytes())?;

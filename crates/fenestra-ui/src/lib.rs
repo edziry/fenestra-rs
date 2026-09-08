@@ -23,7 +23,8 @@ pub use limits::Limits;
 pub use model::{Element, View};
 pub use style::{Color, Style};
 pub use text::{
-    TextEngine, TextError, TextLayout, TextLimits, TextMetrics, TextRequest, TextStyle,
+    TextEngine, TextError, TextLayout, TextLimits, TextMeasureRequest, TextMetrics, TextRequest,
+    TextStyle,
 };
 
 /// Compiles an authored view into the public application constructors.

@@ -5,6 +5,15 @@ use std::fmt;
 pub enum TextError {
     /// A view contains text but no adapter was supplied.
     EngineUnavailable,
+    /// The supplied adapter does not implement intrinsic measurement.
+    MeasurementUnavailable,
+    /// A measurement width exceeds the signed pixel coordinate domain.
+    InvalidMeasurementWidth {
+        /// Rejected wrap width.
+        width: u32,
+    },
+    /// Measurement and raster layout disagree for the same content and width.
+    InconsistentMeasurement,
     /// A typography value exceeds the supported domain.
     InvalidStyle {
         /// Invalid typography property.
@@ -40,6 +49,15 @@ impl fmt::Display for TextError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::EngineUnavailable => f.write_str("text requires an application text engine"),
+            Self::MeasurementUnavailable => {
+                f.write_str("text engine cannot measure intrinsic text")
+            }
+            Self::InvalidMeasurementWidth { width } => {
+                write!(f, "invalid text measurement width: {width}")
+            }
+            Self::InconsistentMeasurement => {
+                f.write_str("text measurement and raster layout disagree")
+            }
             Self::InvalidStyle { property, value } => write!(f, "invalid text {property}: {value}"),
             Self::LimitExceeded {
                 resource,

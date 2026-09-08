@@ -1,4 +1,7 @@
-use fenestra_ui::{Raster, TextEngine, TextError, TextLayout, TextMetrics, TextRequest};
+use fenestra_ui::{
+    Raster, TextEngine, TextError, TextLayout, TextLimits, TextMeasureRequest, TextMetrics,
+    TextRequest, TextStyle,
+};
 use parley::{
     Alignment, AlignmentOptions, Layout, LayoutContext, LineHeight, PositionedLayoutItem,
     StyleProperty,
@@ -31,27 +34,40 @@ impl TextRenderer {
             raster_context: raster::Context::default(),
         })
     }
-}
-
-impl TextEngine for TextRenderer {
-    fn layout(&mut self, request: TextRequest<'_>) -> Result<TextLayout, TextError> {
+    fn shape(&mut self, text: &str, style: TextStyle, width: Option<u32>) -> Layout<()> {
         let mut builder =
             self.layout_context
-                .ranged_builder(&mut self.fonts.context, request.text(), 1.0, false);
+                .ranged_builder(&mut self.fonts.context, text, 1.0, false);
         builder.push_default(StyleProperty::FontFamily(
             self.fonts.families.as_slice().into(),
         ));
-        builder.push_default(StyleProperty::FontSize(
-            request.style().font_size_value() as f32
-        ));
+        builder.push_default(StyleProperty::FontSize(style.font_size_value() as f32));
         builder.push_default(StyleProperty::LineHeight(LineHeight::Absolute(
-            request.style().line_height_value() as f32,
+            style.line_height_value() as f32,
         )));
         builder.push_default(StyleProperty::OverflowWrap(parley::OverflowWrap::BreakWord));
-        let mut layout: Layout<()> = builder.build(request.text());
-        layout.break_all_lines(Some(request.size().width() as f32));
+        let mut layout: Layout<()> = builder.build(text);
+        layout.break_all_lines(width.map(|width| width as f32));
         layout.align(Alignment::Start, AlignmentOptions::default());
-        let metrics = preflight(&layout, request)?;
+        layout
+    }
+}
+
+impl TextEngine for TextRenderer {
+    fn measure(&mut self, request: TextMeasureRequest<'_>) -> Result<TextMetrics, TextError> {
+        let layout = self.shape(request.text(), request.style(), request.width());
+        let metrics = preflight(&layout, request.limits())?;
+        metrics.validate_measurement(request)?;
+        Ok(metrics)
+    }
+
+    fn layout(&mut self, request: TextRequest<'_>) -> Result<TextLayout, TextError> {
+        let layout = self.shape(
+            request.text(),
+            request.style(),
+            Some(request.size().width()),
+        );
+        let metrics = preflight(&layout, request.limits())?;
         let size = request.size();
         let length = (size.width() as usize)
             .checked_mul(size.height() as usize)
@@ -78,7 +94,7 @@ impl TextEngine for TextRenderer {
     }
 }
 
-fn preflight(layout: &Layout<()>, request: TextRequest<'_>) -> Result<TextMetrics, TextError> {
+fn preflight(layout: &Layout<()>, limits: TextLimits) -> Result<TextMetrics, TextError> {
     if !layout.width().is_finite()
         || layout.width() < 0.0
         || !layout.height().is_finite()
@@ -97,11 +113,11 @@ fn preflight(layout: &Layout<()>, request: TextRequest<'_>) -> Result<TextMetric
             };
             for glyph in run.positioned_glyphs() {
                 glyphs += 1;
-                if glyphs > request.limits().max_glyphs() {
+                if glyphs > limits.max_glyphs() {
                     return Err(TextError::LimitExceeded {
                         resource: "text glyphs",
                         actual: glyphs,
-                        limit: request.limits().max_glyphs(),
+                        limit: limits.max_glyphs(),
                     });
                 }
                 if !glyph.x.is_finite() || !glyph.y.is_finite() || glyph.id > u32::from(u16::MAX) {
