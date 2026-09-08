@@ -19,12 +19,35 @@ const SAMPLE_OFFSETS: [i64; 4] = [
     7 * SpatialScalarV2::SCALE / 8,
 ];
 
+mod pixel_constant;
+
 impl SpatialResolvedSnapshotV2 {
     /// Renders one deterministic packed premultiplied RGBA8 reference raster.
     #[must_use = "reference raster errors must be handled"]
     pub fn rasterize_reference(
         &self,
         limits: ReferenceRasterLimitsV2,
+    ) -> Result<ReferenceRasterV2, ReferenceRasterErrorV2> {
+        self.rasterize_reference_inner(limits, false)
+    }
+
+    #[cfg(test)]
+    pub(crate) fn pixel_samples_are_constant_for_test(&self) -> bool {
+        pixel_constant::pixel_samples_are_constant(self)
+    }
+
+    #[cfg(test)]
+    pub(crate) fn rasterize_reference_full_sampling_for_test(
+        &self,
+        limits: ReferenceRasterLimitsV2,
+    ) -> Result<ReferenceRasterV2, ReferenceRasterErrorV2> {
+        self.rasterize_reference_inner(limits, true)
+    }
+
+    fn rasterize_reference_inner(
+        &self,
+        limits: ReferenceRasterLimitsV2,
+        force_full_sampling: bool,
     ) -> Result<ReferenceRasterV2, ReferenceRasterErrorV2> {
         let viewport = self.viewport();
         let width =
@@ -49,10 +72,23 @@ impl SpatialResolvedSnapshotV2 {
         if width == 0 || height == 0 {
             return Ok(ReferenceRasterV2::from_bytes(width, height, bytes));
         }
+        let constant_samples =
+            !force_full_sampling && pixel_constant::pixel_samples_are_constant(self);
         let mut byte_index = 0_usize;
         for y in 0..height {
             for x in 0..width {
-                let color = self.rasterize_pixel(x, y);
+                let color = if constant_samples {
+                    self.rasterize_sample(SpatialPointV2::new(
+                        SpatialScalarV2::new(
+                            i64::from(x) * SpatialScalarV2::SCALE + SpatialScalarV2::SCALE / 2,
+                        ),
+                        SpatialScalarV2::new(
+                            i64::from(y) * SpatialScalarV2::SCALE + SpatialScalarV2::SCALE / 2,
+                        ),
+                    ))
+                } else {
+                    self.rasterize_pixel(x, y)
+                };
                 bytes[byte_index] = color.r();
                 bytes[byte_index + 1] = color.g();
                 bytes[byte_index + 2] = color.b();
