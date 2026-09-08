@@ -9,6 +9,8 @@ use crate::model::SpatialAnchorTargetV2;
 use crate::owned_input::SpatialOwnedInputV2;
 use crate::prototype::{ReferenceRasterV2, SpatialResolvedSnapshotV2};
 
+mod solid_images;
+
 pub(super) const RULE: SpatialFillRuleV2 = SpatialFillRuleV2::NonZero;
 
 pub(super) fn assert_sampling(

@@ -7,10 +7,11 @@ use crate::model::{Affine2V2, SpatialScalarV2};
 use crate::output_aabb::SpatialOutputAabbV2;
 
 /// Every coverage edge and image texel boundary lies on the integer pixel grid.
-/// A solid rectangle or one-to-one image therefore supplies the same color at
-/// all sixteen registered samples. Integer clip boundaries, accepted bounds,
-/// and translations preserve that property through ordered source-over and
-/// scalar-domain rejection. Averaging sixteen equal byte colors is exact.
+/// A solid rectangle, one-to-one image, or full single-texel image supplies the
+/// same color at all sixteen registered samples. The single texel maps to every
+/// point within its half-open destination, including when enlarged. Integer clip
+/// boundaries, accepted bounds, and translations preserve that property through
+/// ordered source-over and scalar-domain rejection. Averaging is then exact.
 pub(super) fn pixel_samples_are_constant(snapshot: &SpatialResolvedSnapshotV2) -> bool {
     let state = &snapshot.prepared.state;
     snapshot
@@ -33,16 +34,31 @@ pub(super) fn pixel_samples_are_constant(snapshot: &SpatialResolvedSnapshotV2) -
                             )
                     }
                     PreparedPaintContent::Image {
+                        image,
                         source,
                         destination,
                         ..
                     } => {
-                        integer(destination.x())
-                            && integer(destination.y())
-                            && destination.width().raw()
-                                == i64::from(source.width()) * SpatialScalarV2::SCALE
+                        let plan = &state.images[*image as usize];
+                        let single_texel = plan.width == 1
+                            && plan.height == 1
+                            && source.x() == 0
+                            && source.y() == 0
+                            && source.width() == 1
+                            && source.height() == 1;
+                        let one_to_one = destination.width().raw()
+                            == i64::from(source.width()) * SpatialScalarV2::SCALE
                             && destination.height().raw()
-                                == i64::from(source.height()) * SpatialScalarV2::SCALE
+                                == i64::from(source.height()) * SpatialScalarV2::SCALE;
+                        [
+                            destination.x(),
+                            destination.y(),
+                            destination.width(),
+                            destination.height(),
+                        ]
+                        .into_iter()
+                        .all(integer)
+                            && (one_to_one || single_texel)
                     }
                     PreparedPaintContent::Coverage { .. } => false,
                 }
