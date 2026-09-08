@@ -9,6 +9,8 @@ use fenestra_ui::{
 
 #[path = "control_atomicity/accessibility.rs"]
 mod accessibility;
+#[path = "control_atomicity/raster_cache.rs"]
+mod raster_cache;
 #[path = "control_atomicity/semantics.rs"]
 mod semantics;
 
