@@ -1,0 +1,203 @@
+format 3;
+view preferences {
+  column root {
+    width: fill;
+    height: fill;
+    min_width: 48;
+    min_height: 48;
+    padding: 24;
+    gap: 16;
+    background: rgba8(18,24,36,255);
+    text title {
+      content: "Workspace preferences";
+      width: fill;
+      height: auto;
+      font_size: 26;
+      line_height: 34;
+      color: rgba8(235,241,246,255);
+    }
+    text instructions {
+      content: "Tab to move. Space toggles an option. Enter or Space activates a button.";
+      width: fill;
+      height: auto;
+      font_size: 14;
+      line_height: 20;
+      color: rgba8(176,191,211,255);
+    }
+    column options {
+      width: fill;
+      height: auto;
+      gap: 10;
+      checkbox notifications {
+        label: "Show notifications";
+        checked: true;
+        width: fill;
+        height: auto;
+        padding: 12;
+        gap: 10;
+        background: rgba8(30,40,56,255);
+        hover_background: rgba8(44,60,80,255);
+        pressed_background: rgba8(24,34,48,255);
+        disabled_background: rgba8(28,34,44,255);
+        focus_color: rgba8(96,208,192,255);
+        column notifications_indicator {
+          width: 22;
+          height: 22;
+          background: rgba8(44,56,72,255);
+          checked_background: rgba8(48,128,192,255);
+          text notifications_mark {
+            content: "X";
+            width: 22;
+            height: 22;
+            font_size: 16;
+            line_height: 22;
+            color: rgba8(0,0,0,0);
+            checked_color: rgba8(255,255,255,255);
+          }
+        }
+        text notifications_label {
+          content: "Show notifications";
+          width: fill;
+          height: auto;
+          font_size: 16;
+          line_height: 22;
+          color: rgba8(235,241,246,255);
+          disabled_color: rgba8(109,123,140,255);
+        }
+      }
+      checkbox compact {
+        label: "Use compact spacing";
+        checked: false;
+        width: fill;
+        height: auto;
+        padding: 12;
+        gap: 10;
+        background: rgba8(30,40,56,255);
+        hover_background: rgba8(44,60,80,255);
+        pressed_background: rgba8(24,34,48,255);
+        disabled_background: rgba8(28,34,44,255);
+        focus_color: rgba8(96,208,192,255);
+        column compact_indicator {
+          width: 22;
+          height: 22;
+          background: rgba8(44,56,72,255);
+          checked_background: rgba8(48,128,192,255);
+          text compact_mark {
+            content: "X";
+            width: 22;
+            height: 22;
+            font_size: 16;
+            line_height: 22;
+            color: rgba8(0,0,0,0);
+            checked_color: rgba8(255,255,255,255);
+          }
+        }
+        text compact_label {
+          content: "Use compact spacing";
+          width: fill;
+          height: auto;
+          font_size: 16;
+          line_height: 22;
+          color: rgba8(235,241,246,255);
+          disabled_color: rgba8(109,123,140,255);
+        }
+      }
+      checkbox autosave {
+        label: "Save changes automatically";
+        checked: true;
+        width: fill;
+        height: auto;
+        padding: 12;
+        gap: 10;
+        background: rgba8(30,40,56,255);
+        hover_background: rgba8(44,60,80,255);
+        pressed_background: rgba8(24,34,48,255);
+        disabled_background: rgba8(28,34,44,255);
+        focus_color: rgba8(96,208,192,255);
+        column autosave_indicator {
+          width: 22;
+          height: 22;
+          background: rgba8(44,56,72,255);
+          checked_background: rgba8(48,128,192,255);
+          text autosave_mark {
+            content: "X";
+            width: 22;
+            height: 22;
+            font_size: 16;
+            line_height: 22;
+            color: rgba8(0,0,0,0);
+            checked_color: rgba8(255,255,255,255);
+          }
+        }
+        text autosave_label {
+          content: "Save changes automatically";
+          width: fill;
+          height: auto;
+          font_size: 16;
+          line_height: 22;
+          color: rgba8(235,241,246,255);
+          disabled_color: rgba8(109,123,140,255);
+        }
+      }
+    }
+    row actions {
+      width: fill;
+      height: auto;
+      gap: 12;
+      button apply {
+        label: "Apply preferences";
+        disabled: true;
+        width: fill;
+        min_width: 130;
+        max_width: 280;
+        height: auto;
+        padding: 12;
+        background: rgba8(48,128,192,255);
+        hover_background: rgba8(60,148,212,255);
+        pressed_background: rgba8(36,100,156,255);
+        disabled_background: rgba8(36,44,56,255);
+        focus_color: rgba8(96,208,192,255);
+        text apply_label {
+          content: "Apply preferences";
+          width: fill;
+          height: auto;
+          font_size: 14;
+          line_height: 22;
+          color: rgba8(255,255,255,255);
+          disabled_color: rgba8(109,123,140,255);
+        }
+      }
+      button reset {
+        label: "Reset defaults";
+        disabled: true;
+        width: fill;
+        min_width: 130;
+        max_width: 280;
+        height: auto;
+        padding: 12;
+        background: rgba8(48,128,192,255);
+        hover_background: rgba8(60,148,212,255);
+        pressed_background: rgba8(36,100,156,255);
+        disabled_background: rgba8(36,44,56,255);
+        focus_color: rgba8(96,208,192,255);
+        text reset_label {
+          content: "Reset defaults";
+          width: fill;
+          height: auto;
+          font_size: 14;
+          line_height: 22;
+          color: rgba8(255,255,255,255);
+          disabled_color: rgba8(109,123,140,255);
+        }
+      }
+    }
+    text readout {
+      content: "Preferences are up to date.";
+      width: fill;
+      height: auto;
+      font_size: 14;
+      line_height: 22;
+      color: rgba8(148,210,196,255);
+    }
+  }
+}
