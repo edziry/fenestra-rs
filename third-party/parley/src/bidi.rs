@@ -889,6 +889,10 @@ impl BracketStack {
     }
 }
 
+#[expect(
+    deprecated,
+    reason = "The pinned bidi bitmask uses ICU ordinals; retain its representation"
+)]
 const fn mask(t: BidiClass) -> u32 {
     1 << (t.to_icu4c_value() as u32)
 }
