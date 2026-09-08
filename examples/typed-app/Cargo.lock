@@ -282,6 +282,7 @@ dependencies = [
  "fenestra-ui-runtime",
  "fenestra-ui-spatial",
  "softbuffer",
+ "unicode-segmentation",
  "winit",
 ]
 

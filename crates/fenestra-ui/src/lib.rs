@@ -6,6 +6,7 @@
 //! with named elements; internal schema and spatial identities stay private.
 
 mod application;
+mod editing;
 mod error;
 mod frame;
 mod limits;
@@ -14,8 +15,9 @@ mod model;
 mod style;
 
 pub use application::Application;
+pub use editing::{EditingError, Selection, TextBuffer};
 pub use error::Error;
-pub use frame::{Raster, Size};
+pub use frame::{Bounds, Raster, Size};
 pub use limits::Limits;
 pub use model::{Element, View};
 pub use style::{Color, Style};

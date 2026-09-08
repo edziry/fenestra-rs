@@ -34,7 +34,7 @@ impl View {
 ///
 /// Names use ASCII letters, digits, and underscores, cannot begin with a digit,
 /// and must be unique across the view. Child order determines layout and paint
-/// order. Each element has fixed logical dimensions; containers do not resize
+/// order. Each element has fixed viewport pixel dimensions; containers do not resize
 /// themselves to fit their children.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Element {

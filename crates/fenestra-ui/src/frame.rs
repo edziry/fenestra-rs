@@ -1,5 +1,40 @@
 use crate::Error;
 
+/// Unclipped bounds of a committed element in whole viewport pixels.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct Bounds {
+    pub(crate) x: i64,
+    pub(crate) y: i64,
+    pub(crate) width: u32,
+    pub(crate) height: u32,
+}
+
+impl Bounds {
+    /// Returns the left edge before viewport clipping.
+    #[must_use]
+    pub const fn x(self) -> i64 {
+        self.x
+    }
+
+    /// Returns the top edge before viewport clipping.
+    #[must_use]
+    pub const fn y(self) -> i64 {
+        self.y
+    }
+
+    /// Returns the committed element width.
+    #[must_use]
+    pub const fn width(self) -> u32 {
+        self.width
+    }
+
+    /// Returns the committed element height.
+    #[must_use]
+    pub const fn height(self) -> u32 {
+        self.height
+    }
+}
+
 /// Physical pixel size of an application viewport or raster.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Size {

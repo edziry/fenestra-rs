@@ -4,7 +4,7 @@ use fenestra_ui_spatial::prototype::{
 };
 
 use crate::model::ElementKind;
-use crate::{Color, Error, Limits, Raster, Size, Style, View, lower};
+use crate::{Bounds, Color, Error, Limits, Raster, Size, Style, View, lower};
 
 struct NamedNode {
     name: String,
@@ -99,6 +99,39 @@ impl Application {
     /// Returns the committed style of one named element.
     pub fn style(&self, name: &str) -> Result<Style, Error> {
         Ok(self.nodes[self.node_index(name)?].style)
+    }
+
+    /// Returns geometry from the same committed snapshot as paint and hit testing.
+    ///
+    /// Bounds are not intersected with the viewport. Zero-size elements retain
+    /// their layout origin, and children can extend beyond their containers.
+    pub fn bounds(&self, name: &str) -> Result<Bounds, Error> {
+        let node = &self.nodes[self.node_index(name)?];
+        let committed = self.runtime.committed();
+        let spatial = committed
+            .spatial()
+            .ok_or_else(|| Error::InvalidProgram("missing spatial frame".into()))?;
+        let key = spatial
+            .spatial_key(node.id)
+            .ok_or_else(|| Error::InvalidProgram("missing element geometry".into()))?;
+        let geometry = spatial
+            .snapshot()
+            .output()
+            .geometry()
+            .iter()
+            .find(|geometry| geometry.key() == key)
+            .ok_or_else(|| Error::InvalidProgram("missing element geometry".into()))?;
+        // Public views currently lower to integer dimensions and identity
+        // transforms. Read world translation, including all ancestor placement.
+        let transform = geometry.world_from_local();
+        Ok(Bounds {
+            x: transform.tx().raw() / 65_536,
+            y: transform.ty().raw() / 65_536,
+            width: u32::try_from(geometry.base_width().raw() / 65_536)
+                .map_err(|_| Error::CapacityOverflow)?,
+            height: u32::try_from(geometry.base_height().raw() / 65_536)
+                .map_err(|_| Error::CapacityOverflow)?,
+        })
     }
 
     /// Applies all typed style properties in one atomic runtime transaction.
