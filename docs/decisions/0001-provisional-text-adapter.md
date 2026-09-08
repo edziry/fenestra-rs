@@ -185,8 +185,9 @@ unsafe is needed in the Fenestra adapter.
 
 Parley's `system` and `accesskit` features remain disabled.
 There is no Fontconfig, DirectWrite or CoreText service requirement for this
-configuration. `fontique/std` still enables memmap2 0.9.10, which declares Rust
-1.63 and MIT OR Apache-2.0, and its normal platform support dependencies.
+configuration. `fontique/std` still enables memmap2 (0.9.11 in the lockfiles),
+which declares Rust 1.65 and MIT OR Apache-2.0, and its normal platform support
+dependencies.
 Do not describe the dependency graph as having no native capability. Native
 font discovery, accessibility and system-font distribution require separate
 capability decisions. Enabling `complex-scripts` does not enlarge font coverage.

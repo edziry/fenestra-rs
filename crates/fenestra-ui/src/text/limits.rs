@@ -9,7 +9,10 @@ pub struct TextLimits {
 }
 
 impl TextLimits {
-    /// Bounds UTF-8 bytes, retained text raster pixels, and glyphs per request.
+    /// Bounds UTF-8 bytes, logical text raster pixels, and glyphs per request.
+    ///
+    /// Pixel bounds count one bitmap per text element. Prepared snapshots and
+    /// engine work buffers can retain additional copies; this is not a heap cap.
     #[must_use]
     pub const fn new(max_bytes: usize, max_pixels: usize, max_glyphs: usize) -> Self {
         Self {
@@ -25,7 +28,7 @@ impl TextLimits {
         self.max_bytes
     }
 
-    /// Returns the total retained text raster pixel budget.
+    /// Returns the total logical text raster pixel budget.
     #[must_use]
     pub const fn max_pixels(self) -> usize {
         self.max_pixels

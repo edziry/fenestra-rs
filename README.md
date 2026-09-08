@@ -15,9 +15,10 @@ Workspace packages follow the ratified [pre-1.0 versioning policy](docs/versioni
 This is an unpublished `0.2.0` prototype. The `fenestra-ui` facade now exposes
 named views, typed styles, application updates, hit testing and optional native
 windows. Format 3 compiles nested `.fen` and `ui!` views into that public API.
-The facade also provides bounded Unicode editing and owned keyboard, focus
-and IME events. An isolated text-pad probe exercises shaping and native editing;
-text views, qualified IME, accessible controls, flexible layout and release
+The facade also provides authored text views, bounded Unicode editing and owned
+keyboard, focus and IME events. An explicit-font adapter and a standalone text
+application exercise multilingual shaping, rendering and atomic text updates.
+Qualified IME, accessible controls, flexible layout and release
 packaging remain unfinished. See the [completion goal](docs/project-completion-goal.md) for
 acceptance gates and the [work units](docs/bootstrap-work-units.md) for evidence.
 
@@ -87,6 +88,24 @@ cargo run -p fenestra-layout-inspector --bin fenestra-layout-inspector-native --
 
 ## Try text and keyboard editing
 
+The [authored text application](examples/text-app/README.md) compiles matching
+format-3 `.fen` and `ui!` text elements, supplies a versioned font explicitly,
+and updates content and typography through the public facade:
+
+```sh
+cargo run -p fenestra-ui-authoring --bin fenestra-check --locked -- examples/text-app/src/panel.fen
+cargo run --manifest-path examples/text-app/Cargo.toml --locked
+cargo run --manifest-path examples/text-app/Cargo.toml --release --locked --features native -- --native
+```
+
+The window demonstrates basic append and Backspace editing. Replace `--native`
+with `--native-smoke` for one presentation and automatic exit. Text is wrapped
+and clipped to fixed boxes; full measurements include clipped lines. The
+replaceable `fenestra-ui-text` adapter uses explicit ordered fonts and reports
+unsupported glyphs. The default `fenestra-ui` dependency graph has no font
+backend. See the [text view design](docs/design/authored-text-views.md) and
+[adapter decision](docs/decisions/0001-provisional-text-adapter.md) for scope.
+
 The [text candidate screen](probes/text-candidate-screen/README.md) compares
 Parley and cosmic-text against the same bundled font and multilingual corpus.
 Its native text pad uses Fenestra's public editing and window APIs with a
@@ -99,15 +118,16 @@ cargo run --manifest-path probes/text-candidate-screen/Cargo.toml -p fenestra-te
 Click the editor to place its caret, type, select text with Shift and the arrow
 keys, or use Ctrl+A, Backspace and Delete. Omitting `--native` runs the bounded
 headless exercise. `--native-smoke` presents one frame and exits. The probe
-is CPU rendered; text is not yet a `.fen` element or a permanent renderer
-dependency. See the [text and input design](docs/design/text-input-foundation.md)
+is CPU rendered and retains its separate experimental editor geometry. See
+the [text and input design](docs/design/text-input-foundation.md)
 for the current editing and composition boundaries.
 
 ## Check authored syntax
 
 `fenestra-check` reports errors as `file:line:byte-column`, followed by the
 diagnostic and exact byte range. It detects format 2 or 3 and applies each
-format's bounds. Format 3 supports ordinary comments and named elements;
+format's bounds. Format 3 supports ordinary comments, named elements and text
+content in cooked or raw Rust string literals;
 format 2 retains its original typed IR and diagnostic contracts. The checker
 does not execute a source file.
 

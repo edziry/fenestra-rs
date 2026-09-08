@@ -43,7 +43,7 @@ locked adapter version; it is not a promise across dependency changes.
 The verified headless output for this font and lockfile is:
 
 ```text
-generation=3 nodes=5 text_bytes=117 lines=4 glyphs=94 missing=0 rgba_bytes=921600 checksum=dddfe50366b70bcf
+generation=3 nodes=5 text_bytes=117 lines=4 glyphs=94 missing=0 rgba_bytes=921600 checksum=23758408e9c7bfb6
 ```
 
 The package has its own workspace and lockfile. Its normal application
@@ -59,8 +59,8 @@ cargo tree --manifest-path examples/text-app/Cargo.toml --locked --edges normal,
 On a supported Linux Wayland or Windows desktop:
 
 ```sh
-cargo run --manifest-path examples/text-app/Cargo.toml --locked --features native -- --native
-cargo run --manifest-path examples/text-app/Cargo.toml --locked --features native -- --native-smoke
+cargo run --manifest-path examples/text-app/Cargo.toml --release --locked --features native -- --native
+cargo run --manifest-path examples/text-app/Cargo.toml --release --locked --features native -- --native-smoke
 cargo test --manifest-path examples/text-app/Cargo.toml --locked --features native
 ```
 
@@ -79,6 +79,14 @@ accessibility implementation. The entire window edits one text buffer.
 Synthetic event tests check the event policy; they do not qualify a platform's
 keyboard layout, IME, or assistive technology behavior. Smoke mode exits after
 one successful presentation without injecting input.
+
+The verified Wayland frame below is an RGB export after a successful smoke
+presentation. It is application content, not a desktop screenshot. Debug and
+optimized smoke exports matched exactly; the
+[verification record](../../docs/verification/WU-0019-authored-text-views.md)
+records the environment and checksum.
+
+![Authored text frame exported after Wayland presentation](evidence/wayland-frame.png)
 
 ## Text syntax and sizing
 

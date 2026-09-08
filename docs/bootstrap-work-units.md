@@ -363,3 +363,27 @@ Verification: [text and input verification](verification/WU-0018-text-input-foun
 Exit: an isolated native editor exercises the owned public foundations while
 text-view integration, visual bidi navigation, production caching, font
 fallback, clipboard, undo, accessibility and IME qualification remain open.
+
+## WU-0019: Authored text views
+
+Branch: `feat/authored-text-views`
+Design: [authored text views](design/authored-text-views.md)
+Verification: [authored text verification](verification/WU-0019-authored-text-views.md)
+Decision: [provisional text adapter](decisions/0001-provisional-text-adapter.md)
+
+- Research: compare candidate registration, script support and dependency
+  admission; select a replaceable explicit-font Parley adapter for this slice.
+- Planning: define owned text requests, complete metrics, logical resource
+  bounds, fixed-size authored leaves and publication before/after invariants.
+- Implementation: add `.fen`/`ui!` text strings, atomic public text updates,
+  validated spatial image attachments, a standalone consumer and an exact
+  constant-sample raster optimization.
+- Verification: preserve frozen syntax/runtime/graphics evidence; test rejected
+  fonts and glyph expansion, multilingual fallback, coherent updates, painter
+  order, cache behavior and exact optimized pixels; run available native smoke
+  and export its accepted frame for visual review.
+
+Exit: real authored text is measured, rendered, updated and presented through
+the public API with explicit fonts. Intrinsic layout, normal text controls,
+arbitrary font hardening, clipboard, accessibility, qualified IME, production
+caching and the remaining platform/release gates stay open.
