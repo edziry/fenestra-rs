@@ -343,3 +343,23 @@ Exit: an application can author, build, mutate and present named views through
 the public API without internal IDs or a runtime compiler dependency. General
 controls, text, flexible layout, authored component reuse and the remaining
 product gates stay open.
+
+## WU-0018: Text and input foundation
+
+Branch: `feat/text-input-foundation`
+Design: [text and input foundation](design/text-input-foundation.md)
+Verification: [text and input verification](verification/WU-0018-text-input-foundation.md)
+
+- Research: compare current text candidates with one versioned font and corpus;
+  keep font/layout library types outside the facade.
+- Planning: define owned bounded editing, native events and committed geometry,
+  and distinguish the native probe from a general text-view implementation.
+- Implementation: add grapheme-safe text editing, keyboard/focus/IME event
+  bridging, public element bounds, candidate screen and interactive text pad.
+- Verification: test editing and selection, candidate source geometry, raster
+  clipping, event sequences, preserved workspace fixtures and available native
+  presentation; record platform and font coverage limits.
+
+Exit: an isolated native editor exercises the owned public foundations while
+text-view integration, visual bidi navigation, production caching, font
+fallback, clipboard, undo, accessibility and IME qualification remain open.

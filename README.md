@@ -15,8 +15,10 @@ Workspace packages follow the ratified [pre-1.0 versioning policy](docs/versioni
 This is an unpublished `0.2.0` prototype. The `fenestra-ui` facade now exposes
 named views, typed styles, application updates, hit testing and optional native
 windows. Format 3 compiles nested `.fen` and `ui!` views into that public API.
-Text, IME, accessible controls, flexible layout and release packaging remain
-unfinished. See the [completion goal](docs/project-completion-goal.md) for
+The facade also provides bounded Unicode editing and owned keyboard, focus
+and IME events. An isolated text-pad probe exercises shaping and native editing;
+text views, qualified IME, accessible controls, flexible layout and release
+packaging remain unfinished. See the [completion goal](docs/project-completion-goal.md) for
 acceptance gates and the [work units](docs/bootstrap-work-units.md) for evidence.
 
 ## Run the examples
@@ -82,6 +84,24 @@ Run the more extensive spatial inspector fixture with:
 cargo run -p fenestra-layout-inspector --bin fenestra-layout-inspector --locked
 cargo run -p fenestra-layout-inspector --bin fenestra-layout-inspector-native --locked
 ```
+
+## Try text and keyboard editing
+
+The [text candidate screen](probes/text-candidate-screen/README.md) compares
+Parley and cosmic-text against the same bundled font and multilingual corpus.
+Its native text pad uses Fenestra's public editing and window APIs with a
+disposable cosmic-text adapter:
+
+```sh
+cargo run --manifest-path probes/text-candidate-screen/Cargo.toml -p fenestra-text-screen-cosmic --features native --bin text-pad --release --locked -- --native
+```
+
+Click the editor to place its caret, type, select text with Shift and the arrow
+keys, or use Ctrl+A, Backspace and Delete. Omitting `--native` runs the bounded
+headless exercise. `--native-smoke` presents one frame and exits. The probe
+is CPU rendered; text is not yet a `.fen` element or a permanent renderer
+dependency. See the [text and input design](docs/design/text-input-foundation.md)
+for the current editing and composition boundaries.
 
 ## Check authored syntax
 

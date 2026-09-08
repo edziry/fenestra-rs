@@ -88,6 +88,13 @@ and the inspector's property UX remain open.
 
 ### 3. Normal application interfaces
 
+[WU-0018](design/text-input-foundation.md) adds bounded grapheme editing,
+owned keyboard/focus/composition events, committed bounds and a native text-pad
+probe. Its isolated same-font Parley/cosmic-text screen informs the next text
+view contract. The candidate is not a permanent facade dependency, and text
+views, general font fallback, native IME qualification and accessibility remain
+open.
+
 - [ ] Specify, implement and verify text measurement, shaping, rendering and
   font fallback with multilingual examples.
 - [ ] Add focus, keyboard navigation, editable text, selection, clipboard and
