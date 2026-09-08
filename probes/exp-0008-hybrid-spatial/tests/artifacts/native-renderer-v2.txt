@@ -1,8 +1,8 @@
 spatial-v2|artifact=2|contract=2|corpus=2|kind=lane
 packages|probe=0.2.0|ir=0.2.0|layout=0.2.0|spatial=0.2.0|runtime=0.2.0
 profile|spatial=registered-v2|raster=registered-v2|candidate-count=2
-candidate|ordinal=0|lane=native-renderer|name=vello|versions=0.9.0,29.0.3|features=wgpu,std,parking_lot,wgsl,vulkan,dx12|target=x86_64-unknown-linux-gnu:vulkan-wayland|closure-sha256=c0ed8c9b0434d2faf2ded977d486672d42b3751486fb538055cdbe2ff9dd9178|baseline-sha256=bc71d3f9167808984abf083613ea86a81eced60d8670d9b3133821dbb34d21a1
-candidate|ordinal=1|lane=native-renderer|name=vello|versions=0.9.0,29.0.3|features=wgpu,std,parking_lot,wgsl,vulkan,dx12|target=x86_64-pc-windows-msvc:dx12-win32|closure-sha256=c0ed8c9b0434d2faf2ded977d486672d42b3751486fb538055cdbe2ff9dd9178|baseline-sha256=bc71d3f9167808984abf083613ea86a81eced60d8670d9b3133821dbb34d21a1
+candidate|ordinal=0|lane=native-renderer|name=vello|versions=0.9.0,29.0.3|features=wgpu,std,parking_lot,wgsl,vulkan,dx12|target=x86_64-unknown-linux-gnu:vulkan-wayland|closure-sha256=c102101897f552977728090a73f71ec9cf9d50fb4c1a2a30f9b93e9f1471ab39|baseline-sha256=bc71d3f9167808984abf083613ea86a81eced60d8670d9b3133821dbb34d21a1
+candidate|ordinal=1|lane=native-renderer|name=vello|versions=0.9.0,29.0.3|features=wgpu,std,parking_lot,wgsl,vulkan,dx12|target=x86_64-pc-windows-msvc:dx12-win32|closure-sha256=c102101897f552977728090a73f71ec9cf9d50fb4c1a2a30f9b93e9f1471ab39|baseline-sha256=bc71d3f9167808984abf083613ea86a81eced60d8670d9b3133821dbb34d21a1
 limits|spatial=256,1024,256,512,1024,512,256,256,4096,4096,2048,64,32,64,64,128,192,256,1024,256,32,4096,4194304,32,64,64,4096,65536,192,256|raster-pixels=4194304|records=4096|line-bytes=1024|artifact-bytes=1048576
 case|ordinal=0|name=all-layout|observations=2
 observation|case=0|step=0|generation=-|viewport=192x128
