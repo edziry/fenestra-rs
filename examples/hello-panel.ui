@@ -1,0 +1,86 @@
+ui! {
+  format 2;
+  schema namespace 17017 revision 1 {
+    component panel = 0 {
+      property span_x = 0: scalar_i32 = 56
+        invalidates [layout, semantics, hit_test, paint, composition];
+      property span_y = 1: scalar_i32 = 64
+        invalidates [layout, semantics, hit_test, paint, composition];
+      property tone = 4: rgba8 = rgba8(48, 128, 192, 255)
+        invalidates [paint];
+      property policy = 7: input_policy = accept
+        invalidates [hit_test];
+    }
+  }
+  construction {
+    template root = 0: panel {
+      set span_x = 160;
+      set span_y = 88;
+      set tone = rgba8(24, 32, 48, 255);
+      child region tiles;
+    }
+    template tile = 1: panel {}
+    region tiles = 0 owner root repeat tile
+      keys [10, 20]
+      invalidates [structure, layout, semantics, hit_test, paint, composition];
+  }
+  style {
+    set tile.tone = rgba8(48, 128, 192, 255);
+  }
+  spatial format 2 {
+    viewport container row padding (8, 8, 8, 8) gap 0;
+    resources {}
+    node background : root {
+      container row padding (12, 12, 12, 12) gap 8;
+      placement layout
+        width dimension(0, property span_x, 320)
+        height dimension(0, property span_y, 240);
+      transform identity origin point(fixed(0), fixed(0));
+      shape bounds rect {
+        origin point(fixed(0), fixed(0));
+        width property span_x;
+        height property span_y;
+      }
+      brush fill_color solid {
+        color property tone;
+      }
+      paint coverage {
+        fill bounds rule non_zero;
+        brush fill_color;
+        opacity 255;
+        clip none;
+      }
+      node card : tile {
+        container row padding (0, 0, 0, 0) gap 0;
+        placement layout
+          width dimension(0, property span_x, 80)
+          height dimension(0, property span_y, 80);
+        transform identity origin point(fixed(0), fixed(0));
+        shape bounds rect {
+          origin point(fixed(0), fixed(0));
+          width property span_x;
+          height property span_y;
+        }
+        brush fill_color solid {
+          color property tone;
+        }
+        paint coverage {
+          fill bounds rule non_zero;
+          brush fill_color;
+          opacity 255;
+          clip none;
+        }
+        hit {
+          fill bounds rule non_zero;
+          clip none;
+          input property policy;
+        }
+        semantic {
+          shape bounds;
+          fill_rule non_zero;
+          clip none;
+        }
+      }
+    }
+  }
+}
