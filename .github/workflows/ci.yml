@@ -45,6 +45,12 @@ jobs:
       - name: Lint standalone consumer
         run: cargo clippy --manifest-path examples/typed-app/Cargo.toml --all-targets --all-features --locked -- -D warnings
 
+      - name: Check isolated text screen formatting
+        run: cargo fmt --manifest-path probes/text-candidate-screen/Cargo.toml --all -- --check
+
+      - name: Lint isolated text screen and native editor probe
+        run: cargo clippy --manifest-path probes/text-candidate-screen/Cargo.toml --workspace --all-targets --all-features --locked -- -D warnings
+
       - name: Build documentation
         run: cargo doc --workspace --all-features --no-deps --locked
         env:
@@ -78,6 +84,12 @@ jobs:
 
       - name: Run standalone headless application
         run: cargo run --manifest-path examples/typed-app/Cargo.toml --locked
+
+      - name: Test isolated text candidates and native editor contracts
+        run: cargo test --manifest-path probes/text-candidate-screen/Cargo.toml --workspace --all-targets --all-features --locked
+
+      - name: Exercise headless text editing
+        run: cargo run --manifest-path probes/text-candidate-screen/Cargo.toml -p fenestra-text-screen-cosmic --features native --bin text-pad --locked
 
       - name: Verify typed authoring contract on Windows paths
         if: runner.os == 'Windows'
