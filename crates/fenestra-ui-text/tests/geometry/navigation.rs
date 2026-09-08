@@ -211,18 +211,41 @@ fn emergency_wrapping_never_splits_an_arabic_combining_grapheme() {
     let current = renderer.geometry(base).unwrap();
     assert_eq!(current.metrics().lines(), 2);
     assert_eq!(current.metrics().height(), 56.0);
-    assert_eq!(renderer.measure(base.measurement()).unwrap(), current.metrics());
-    let pixels = renderer.layout(fenestra_ui::TextRequest::new(
-        text,
-        base.measurement().style(),
-        fenestra_ui::Size::new(1, 56),
-        TextLimits::default(),
-    ).unwrap()).unwrap();
+    assert_eq!(
+        renderer.measure(base.measurement()).unwrap(),
+        current.metrics()
+    );
+    let pixels = renderer
+        .layout(
+            fenestra_ui::TextRequest::new(
+                text,
+                base.measurement().style(),
+                fenestra_ui::Size::new(1, 56),
+                TextLimits::default(),
+            )
+            .unwrap(),
+        )
+        .unwrap();
     assert_eq!(pixels.metrics(), current.metrics());
+    for (start, end, y) in [(0, 4, 0.0), (4, 6, 28.0)] {
+        let selection = TextSelection::new(
+            TextPosition::new(start, TextAffinity::Downstream),
+            TextPosition::new(end, TextAffinity::Upstream),
+        );
+        let geometry = renderer
+            .geometry(query(text, Some(1), selection, TextGeometryQuery::Current))
+            .unwrap();
+        assert_eq!(geometry.anchor_caret().y0(), y);
+        assert_eq!(geometry.focus_caret().y0(), y);
+        assert_eq!(geometry.highlights().len(), 1);
+        assert_eq!(geometry.highlights()[0].rect().y0(), y);
+    }
     for byte in [0, 4, 6] {
         for affinity in [TextAffinity::Upstream, TextAffinity::Downstream] {
             let selection = TextSelection::caret(TextPosition::new(byte, affinity));
-            let geometry = renderer.geometry(query(text, Some(1), selection, TextGeometryQuery::Current)).unwrap();
+            let geometry = renderer
+                .geometry(query(text, Some(1), selection, TextGeometryQuery::Current))
+                .unwrap();
             assert!(geometry.focus_caret().y0() < 56.0);
             assert_eq!(geometry.focus_caret().height(), 28.0);
         }

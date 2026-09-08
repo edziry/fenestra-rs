@@ -555,7 +555,33 @@ impl<'a, B: Brush> BreakLines<'a, B> {
 
                     // Iterate over remaining clusters in the Run
                     while self.state.cluster_idx < cluster_end {
-                        let cluster = run.get(self.state.cluster_idx - cluster_start).unwrap();
+                        let relative_index = self.state.cluster_idx - cluster_start;
+                        let mut cluster = run.get(relative_index).unwrap();
+                        let mut advance = cluster.advance();
+                        let mut cluster_count = 1;
+
+                        // Runs are traversed logically, so an RTL ligature's components
+                        // precede its start. Consume the entire group before considering
+                        // its width, but record break opportunities at the group's first
+                        // logical index using the start cluster's boundary metadata.
+                        if (!run.is_rtl() && cluster.is_ligature_start())
+                            || (run.is_rtl() && cluster.is_ligature_continuation())
+                        {
+                            while self.state.cluster_idx + cluster_count < cluster_end {
+                                let next = run.get(relative_index + cluster_count).unwrap();
+                                if next.is_ligature_continuation() {
+                                    advance += next.advance();
+                                    cluster_count += 1;
+                                } else if run.is_rtl() && next.is_ligature_start() {
+                                    advance += next.advance();
+                                    cluster_count += 1;
+                                    cluster = next;
+                                    break;
+                                } else {
+                                    break;
+                                }
+                            }
+                        }
 
                         // Retrieve metadata about the cluster
                         let is_ligature_continuation = cluster.is_ligature_continuation();
@@ -601,19 +627,7 @@ impl<'a, B: Brush> BreakLines<'a, B> {
                             self.state.mark_emergency_break_opportunity();
                         }
 
-                        // If current cluster is the start of a ligature, then advance state to include
-                        // the remaining clusters that make up the ligature
-                        let mut advance = cluster.advance();
-                        if cluster.is_ligature_start() {
-                            while let Some(cluster) = run.get(self.state.cluster_idx + 1) {
-                                if !cluster.is_ligature_continuation() {
-                                    break;
-                                } else {
-                                    advance += cluster.advance();
-                                    self.state.cluster_idx += 1;
-                                }
-                            }
-                        }
+                        self.state.cluster_idx += cluster_count - 1;
 
                         // Compute the x position of the content being currently processed
                         let next_x = self.state.line.x + advance;

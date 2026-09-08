@@ -10,6 +10,7 @@ mod geometry {
     mod caret;
     mod navigation;
     mod selection;
+    mod wrapping;
 }
 
 fn request(text: &str, width: Option<u32>, byte: usize) -> TextGeometryRequest<'_> {
