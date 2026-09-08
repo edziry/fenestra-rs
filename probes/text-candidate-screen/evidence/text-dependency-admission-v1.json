@@ -1,0 +1,175 @@
+{
+  "schema": "fenestra.text-dependency-admission.v1",
+  "checked_at_utc": "2026-09-08T01:41:18.278207+00:00",
+  "tool": "cargo-audit-audit 0.22.2",
+  "source_lockfile": "probes/text-candidate-screen/Cargo.lock",
+  "source_lockfile_sha256": "e156aacbf3689fc1a7780384ef502a6fdecfdaf975703628d2ac745c750dac3f",
+  "screen_audit": {
+    "database": {
+      "advisory-count": 1242,
+      "last-commit": "8a1eb4f933fb5821add5b4e98601ebd90b8b3538",
+      "last-updated": "2026-09-07T11:19:30-07:00"
+    },
+    "lockfile": {
+      "dependency-count": 249
+    },
+    "settings": {
+      "target_arch": [],
+      "target_os": [],
+      "severity": null,
+      "ignore": [],
+      "informational_warnings": [
+        "unmaintained",
+        "unsound",
+        "notice"
+      ]
+    },
+    "vulnerabilities": {
+      "found": false,
+      "count": 0,
+      "list": []
+    },
+    "warnings": {
+      "unmaintained": [
+        {
+          "kind": "unmaintained",
+          "package": {
+            "name": "ttf-parser",
+            "version": "0.25.1",
+            "source": "registry+https://github.com/rust-lang/crates.io-index",
+            "checksum": "d2df906b07856748fa3f6e0ad0cbaa047052d4a7dd609e231c4f72cee8c36f31",
+            "dependencies": [
+              {
+                "name": "core_maths",
+                "version": "0.1.1",
+                "source": "registry+https://github.com/rust-lang/crates.io-index"
+              }
+            ],
+            "replace": null
+          },
+          "advisory": {
+            "id": "RUSTSEC-2026-0192",
+            "package": "ttf-parser",
+            "title": "`ttf-parser` is unmaintained",
+            "description": "The author of `ttf-parser` has stated that the crate is unmaintained and will not receive further fixes (see the referenced issue).\n\n## Alternative(s)\n\n- [`skrifa`](https://crates.io/crates/skrifa), an actively maintained TrueType and OpenType font parsing crate, part of the Google Fonts \"oxidize\" (`fontations`) project.",
+            "date": "2026-06-28",
+            "aliases": [],
+            "related": [],
+            "collection": "crates",
+            "categories": [],
+            "keywords": [],
+            "cvss": null,
+            "informational": "unmaintained",
+            "references": [],
+            "source": null,
+            "url": "https://github.com/harfbuzz/ttf-parser/issues/217",
+            "withdrawn": null,
+            "license": "CC0-1.0",
+            "expect-deleted": false
+          },
+          "affected": null,
+          "versions": {
+            "patched": [],
+            "unaffected": []
+          }
+        }
+      ]
+    }
+  },
+  "parley_subset": {
+    "selection": "Transitive Cargo.lock dependency closure rooted at fenestra-text-screen-parley; preserve selected package blocks verbatim in a temporary lockfile.",
+    "selected_lockfile_sha256": "a844a68bd67bbec8d9ab0eb0aff94e8dcc1676fb366c8dc2004cf6ca101fc2e6",
+    "packages": [
+      "bitflags 2.13.1",
+      "bytemuck 1.25.2",
+      "bytemuck_derive 1.12.0",
+      "displaydoc 0.2.7",
+      "fenestra-text-screen-common 0.1.0",
+      "fenestra-text-screen-parley 0.1.0",
+      "foldhash 0.2.0",
+      "font-types 0.10.1",
+      "font-types 0.12.4",
+      "fontique 0.11.1",
+      "harfrust 0.12.0",
+      "hashbrown 0.17.1",
+      "icu_collections 2.3.0",
+      "icu_locale_core 2.3.0",
+      "icu_locale_fallback 2.3.0",
+      "icu_locale_fallback_data 2.3.0",
+      "icu_normalizer 2.3.0",
+      "icu_normalizer_data 2.3.0",
+      "icu_properties 2.3.0",
+      "icu_properties_data 2.3.0",
+      "icu_provider 2.3.1",
+      "icu_segmenter 2.3.0",
+      "icu_segmenter_data 2.3.0",
+      "libc 0.2.189",
+      "linebender_resource_handle 0.1.1",
+      "litemap 0.8.3",
+      "memmap2 0.9.11",
+      "once_cell 1.21.4",
+      "parlance 0.1.0",
+      "parley 0.11.1",
+      "parley_data 0.11.1",
+      "potential_utf 0.1.6",
+      "proc-macro2 1.0.107",
+      "quote 1.0.47",
+      "read-fonts 0.35.0",
+      "read-fonts 0.41.0",
+      "serde 1.0.229",
+      "serde_core 1.0.229",
+      "serde_derive 1.0.229",
+      "skrifa 0.37.0",
+      "skrifa 0.44.0",
+      "smallvec 1.16.0",
+      "stable_deref_trait 1.2.1",
+      "swash 0.2.6",
+      "syn 2.0.119",
+      "syn 3.0.5",
+      "synstructure 0.13.2",
+      "tinystr 0.8.4",
+      "unicode-ident 1.0.24",
+      "unicode-segmentation 1.13.3",
+      "utf8_iter 1.0.4",
+      "writeable 0.6.4",
+      "yazi 0.2.1",
+      "yoke 0.8.3",
+      "yoke-derive 0.8.2",
+      "zeno 0.3.3",
+      "zerofrom 0.1.8",
+      "zerofrom-derive 0.1.7",
+      "zerotrie 0.2.5",
+      "zerovec 0.11.8",
+      "zerovec-derive 0.11.6"
+    ],
+    "audit": {
+      "database": {
+        "advisory-count": 1242,
+        "last-commit": null,
+        "last-updated": null
+      },
+      "lockfile": {
+        "dependency-count": 61
+      },
+      "settings": {
+        "target_arch": [],
+        "target_os": [],
+        "severity": null,
+        "ignore": [],
+        "informational_warnings": [
+          "unmaintained",
+          "unsound",
+          "notice"
+        ]
+      },
+      "vulnerabilities": {
+        "found": false,
+        "count": 0,
+        "list": []
+      },
+      "warnings": {}
+    },
+    "advisory_database": "Same fetched RustSec snapshot as screen_audit; --no-fetch omits snapshot metadata from cargo-audit JSON.",
+    "deny_warnings_exit_code": 0
+  }
+}
