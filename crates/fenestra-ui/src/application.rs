@@ -16,6 +16,7 @@ mod interaction;
 mod layout;
 mod mutation;
 mod publication;
+mod raster_cache;
 mod text;
 
 use text::TextState;
@@ -46,6 +47,9 @@ pub struct Application {
     spatial_limits: SpatialLimitsV2,
     text_engine: Option<Box<dyn TextEngine>>,
     text_frame: Option<SpatialResolvedSnapshotV2>,
+    raster_cache: raster_cache::RasterCache,
+    #[cfg(test)]
+    rasterizations: std::cell::Cell<usize>,
 }
 
 impl Application {
@@ -98,6 +102,11 @@ impl Application {
 
     /// Renders the committed frame into owned, bounded premultiplied RGBA8 pixels.
     pub fn raster(&self) -> Result<Raster, Error> {
+        self.raster_cache
+            .get_or_render(self.generation(), || self.raster_uncached())
+    }
+
+    fn raster_uncached(&self) -> Result<Raster, Error> {
         let committed = self.runtime.committed();
         let spatial = committed
             .spatial()
@@ -106,6 +115,8 @@ impl Application {
             .text_frame
             .as_ref()
             .unwrap_or_else(|| spatial.snapshot());
+        #[cfg(test)]
+        self.rasterizations.set(self.rasterizations.get() + 1);
         let raster = snapshot
             .paint_frame()
             .rasterize_reference(ReferenceRasterLimitsV2::new(self.limits.max_pixels()))

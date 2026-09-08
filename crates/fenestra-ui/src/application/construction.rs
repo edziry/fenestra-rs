@@ -134,6 +134,9 @@ impl Application {
             spatial_limits: lowered.spatial_limits,
             text_engine,
             text_frame,
+            raster_cache: super::raster_cache::RasterCache::default(),
+            #[cfg(test)]
+            rasterizations: std::cell::Cell::new(0),
         })
     }
 }

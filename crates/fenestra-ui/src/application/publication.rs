@@ -77,6 +77,7 @@ impl Application {
         self.revision = revision;
         self.size = size;
         self.text_frame = frame;
+        self.raster_cache.clear();
         Ok(())
     }
 
